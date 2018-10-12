@@ -90,13 +90,13 @@ namespace PhantasmaExplorer
                 txList.Add(new Transaction() { hash = "0xFFCCAACACCACACA", date = DateTime.Now, chainName = "Main", chainAddress = "fixme" });
 
                 context["transactions"] = txList;
-                return templateEngine.Render(site, context, new string[] { "index", "transactions" });
+                return templateEngine.Render(site, context, new string[] { "layout", "transactions" });
             });
 
             site.Get("/addresses", (request) =>
             {
                 var context = CreateContext();
-                return templateEngine.Render(site, context, new string[] { "index", "addresses" });
+                return templateEngine.Render(site, context, new string[] { "layout", "addresses" });
             });
 
             site.Get("/chains", (request) =>
@@ -111,13 +111,13 @@ namespace PhantasmaExplorer
 
                 context["chains"] = chainList;
 
-                return templateEngine.Render(site, context, new string[] { "index", "chains" });
+                return templateEngine.Render(site, context, new string[] { "layout", "chains" });
             });
 
             site.Get("/tokens", (request) =>
             {
                 var context = CreateContext();
-                return templateEngine.Render(site, context, new string[] { "index", "tokens" });
+                return templateEngine.Render(site, context, new string[] { "layout", "tokens" });
             });
 
             // TODO address.html view 
@@ -127,7 +127,7 @@ namespace PhantasmaExplorer
                 var address = Address.FromText(addressText);
 
                 var context = CreateContext();
-                return templateEngine.Render(site, context, new string[] { "index", "address" });
+                return templateEngine.Render(site, context, new string[] { "layout", "address" });
             });
 
             // TODO chain.html view 
@@ -137,7 +137,7 @@ namespace PhantasmaExplorer
                 var chainAddress = Address.FromText(addressText);
 
                 var context = CreateContext();
-                return templateEngine.Render(site, context, new string[] { "index", "chain" });
+                return templateEngine.Render(site, context, new string[] { "layout", "chain" });
             });
 
             // TODO transaction.html view 
@@ -147,7 +147,7 @@ namespace PhantasmaExplorer
                 var address = Address.FromText(addressText);
 
                 var context = CreateContext();
-                return templateEngine.Render(site, context, new string[] { "index", "transaction" });
+                return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
             });
 
             server.Run();
