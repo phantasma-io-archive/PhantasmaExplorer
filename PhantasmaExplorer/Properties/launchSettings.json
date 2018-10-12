@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Phantasma.Explorer": {
+      "commandName": "Project",
+      "commandLineArgs": "--path=.",
+      "workingDirectory": "www"
+    }
+  }
+}
