@@ -1,13 +1,12 @@
 <div class="row">
 	<div class="col-lg-12">
 		<h1>Latest Transactions</h1>
-		<p>something something</p>
 		
 		<table class="table table-striped">
 			<thead>
 			  <tr>
 				<th>Date</th>
-				<th>Something</th>
+				<th>Chain</th>
 				<th>Hash</th>
 			  </tr>
 			</thead>
@@ -15,7 +14,7 @@
 				{{#each transactions}}
 				  <tr>
 					<td>{{#date date}}</td>
-					<td>Something</td>
+					<td><a href="/chain/{{chainAddress}}">{{chainName}}</a></td>
 					<td><a href="/tx/{{hash}}">{{hash}}</a></td>
 				  </tr>
 				{{/each}}
