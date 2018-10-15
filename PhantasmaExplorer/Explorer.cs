@@ -26,18 +26,24 @@ namespace PhantasmaExplorer
     public struct TransactionContext
     {
         public string hash;
+        public Block block;
         public DateTime date;
         public string chainName;
         public string chainAddress;
+        public string fromName;
+        public string fromAddress;
 
         public static TransactionContext FromTransaction(Nexus nexus, Block block, Transaction tx)
         {
             return new TransactionContext()
             {
+                block = block,
                 chainAddress = block.Chain.Address.Text,
                 chainName = block.Chain.Name,
                 date = block.Timestamp,
                 hash = tx.Hash.ToString(),
+                fromAddress = "????",
+                fromName = "Anonymous",
             };
         }
     }
@@ -269,20 +275,14 @@ namespace PhantasmaExplorer
             // TODO transaction.html view 
             site.Get("/tx/{input}", (request) =>
             {
-                //var addressText = request.GetVariable("input");
-                //var address = Phantasma.Cryptography.Address.FromText(addressText);
+                var addressText = request.GetVariable("input");
+                var hash = Hash.Parse(addressText);
 
-                //placeholder
-                var tx = new TransactionContext
-                {
-                    chainAddress = "test",
-                    chainName = "test",
-                    date = DateTime.Now,
-                    hash = "test"
-                };
+                var tx = nexus.RootChain.FindTransaction(hash);
+                var block = nexus.RootChain.FindTransactionBlock(tx);
 
                 var context = CreateContext();
-                context["transaction"] = tx;
+                context["transaction"] = TransactionContext.FromTransaction(nexus, block, tx);
                 return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
             });
 
