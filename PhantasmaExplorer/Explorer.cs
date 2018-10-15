@@ -175,30 +175,17 @@ namespace PhantasmaExplorer
                 // todo move this
                 var soulRate = CoinUtils.GetCoinRate(2827);
 
-                var mockTransactionList = new List<Transaction>
+                var mockTransactionList = new List<Transaction>();
+                foreach (var nexusChain in nexus.Chains)
                 {
-                    new Transaction
+                    mockTransactionList.Add(new Transaction()
                     {
-                        chainAddress = "test",
-                        chainName = "test",
+                        chainAddress = nexusChain.Address.Text,
                         date = DateTime.Now,
-                        hash = "test"
-                    },
-                    new Transaction
-                    {
-                        chainAddress = "test2",
-                        chainName = "test2",
-                        date = DateTime.Now,
-                        hash = "test2"
-                    },
-                    new Transaction
-                    {
-                        chainAddress = "test3",
-                        chainName = "test3",
-                        date = DateTime.Now,
-                        hash = "test3"
-                    },
-                };
+                        chainName = nexusChain.Name,
+                        hash = "todo"
+                    });
+                }
 
                 var addressDto = new Address
                 {
@@ -218,12 +205,17 @@ namespace PhantasmaExplorer
             });
 
             // TODO chain.html view 
-            site.Get("/chain/{input}", (request) =>
+            site.Get("/chain/{input}", (request) => //todo this could be the name of the chain rather then the address?
             {
                 var addressText = request.GetVariable("input");
                 var chainAddress = Phantasma.Cryptography.Address.FromText(addressText);
+                var chain = nexus.Chains.SingleOrDefault(c => c.Address == chainAddress);
+
+                var blocks = chain.Blocks.ToList().TakeLast(10);
 
                 var context = CreateContext();
+                context["chain"] = chain;
+                context["blocks"] = chain.Blocks;
                 return templateEngine.Render(site, context, new string[] { "layout", "chain" });
             });
 
