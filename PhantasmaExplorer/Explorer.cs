@@ -12,6 +12,7 @@ using Phantasma.Cryptography;
 using Phantasma.Explorer;
 using Phantasma.Numerics;
 using Phantasma.VM.Utils;
+using Phantasma.VM.Contracts;
 
 namespace PhantasmaExplorer
 {
@@ -28,6 +29,17 @@ namespace PhantasmaExplorer
         public DateTime date;
         public string chainName;
         public string chainAddress;
+
+        public static TransactionContext FromTransaction(Nexus nexus, Block block, Transaction tx)
+        {
+            return new TransactionContext()
+            {
+                chainAddress = block.Chain.Address.Text,
+                chainName = block.Chain.Name,
+                date = block.Timestamp,
+                hash = tx.Hash.ToString(),
+            };
+        }
     }
 
     public struct TokenContext
@@ -100,16 +112,18 @@ namespace PhantasmaExplorer
             var nexus = new Nexus(ownerKey);
 
             var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB");
-            var transactions = new List<Transaction>();
-            var script = ScriptUtils.CallContractScript(nexus.RootChain, "TransferTokens", ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, TokenUtils.ToBigInteger(5));
-            var tx = new Transaction(script, 0, 0);
-            tx.Sign(ownerKey);
-            transactions.Add(tx);
-
-            var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
-            if (!nexus.RootChain.AddBlock(block))
             {
-                throw new Exception("test block failed");
+                var transactions = new List<Transaction>();
+                var script = ScriptUtils.CallContractScript(nexus.RootChain, "TransferTokens", ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, TokenUtils.ToBigInteger(5));
+                var tx = new Transaction(script, 0, 0);
+                tx.Sign(ownerKey);
+                transactions.Add(tx);
+
+                var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
+                if (!nexus.RootChain.AddBlock(block))
+                {
+                    throw new Exception("test block failed");
+                }
             }
 
             // TODO this should be updated every 5 minutes or so
@@ -140,11 +154,15 @@ namespace PhantasmaExplorer
             {
                 var context = CreateContext();
 
-                // placeholders
                 var txList = new List<TransactionContext>();
-                txList.Add(new TransactionContext() { hash = "0xFFABABCACAACAFF", date = DateTime.Now - TimeSpan.FromMinutes(12), chainName = "Main", chainAddress = "fixme" });
-                txList.Add(new TransactionContext() { hash = "0xABABCACAACAFFAA", date = DateTime.Now - TimeSpan.FromMinutes(5), chainName = "Main", chainAddress = "fixme" });
-                txList.Add(new TransactionContext() { hash = "0xFFCCAACACCACACA", date = DateTime.Now, chainName = "Main", chainAddress = "fixme" });
+
+                foreach (var block in nexus.RootChain.Blocks)
+                {
+                    foreach (var tx in block.Transactions)
+                    {
+                        txList.Add(TransactionContext.FromTransaction(nexus, block, (Transaction)tx));
+                    }
+                }
 
                 context["transactions"] = txList;
                 return templateEngine.Render(site, context, new string[] { "layout", "transactions" });
@@ -255,7 +273,7 @@ namespace PhantasmaExplorer
                 //var address = Phantasma.Cryptography.Address.FromText(addressText);
 
                 //placeholder
-                var txc = new TransactionContext
+                var tx = new TransactionContext
                 {
                     chainAddress = "test",
                     chainName = "test",
@@ -264,7 +282,7 @@ namespace PhantasmaExplorer
                 };
 
                 var context = CreateContext();
-                context["transaction"] = txc;
+                context["transaction"] = tx;
                 return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
             });
 
