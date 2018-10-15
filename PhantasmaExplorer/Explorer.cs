@@ -10,17 +10,19 @@ using Phantasma.Blockchain;
 using Phantasma.Cryptography;
 using Phantasma.Explorer;
 using Phantasma.Numerics;
+using Phantasma.VM.Utils;
+using Phantasma.Core.Types;
 
 namespace PhantasmaExplorer
 {
-    public struct Menu
+    public struct MenuContext
     {
         public string text;
         public string url;
         public bool active;
     }
 
-    public struct Transaction
+    public struct TransactionContext
     {
         public string hash;
         public DateTime date;
@@ -28,7 +30,7 @@ namespace PhantasmaExplorer
         public string chainAddress;
     }
 
-    public struct Token
+    public struct TokenContext
     {
         public string symbol;
         public string name;
@@ -40,23 +42,23 @@ namespace PhantasmaExplorer
         public decimal currentSupply;
     }
 
-    public struct Address
+    public struct AddressContext
     {
         public string address;//todo change var name
         public decimal soulBalance;
         public decimal soulValue;
         public int numberOfTransactions;
-        public List<Transaction> transactions;
+        public List<TransactionContext> transactions;
     }
 
-    public struct Chain
+    public struct ChainContext
     {
         public string address;
         public string name;
         public int transactions;
     }
 
-    class Explorer
+    public class Explorer
     {
 
         private static Dictionary<string, object> CreateContext()
@@ -64,11 +66,11 @@ namespace PhantasmaExplorer
             var context = new Dictionary<string, object>();
 
             // TODO this should not be created at each request...
-            var menus = new List<Menu>();
-            menus.Add(new Menu() { text = "Transactions", url = "/transactions", active = true });
-            menus.Add(new Menu() { text = "Chains", url = "/chains", active = false });
-            menus.Add(new Menu() { text = "Tokens", url = "/tokens", active = false });
-            menus.Add(new Menu() { text = "Addresses", url = "/addresses", active = false });
+            var menus = new List<MenuContext>();
+            menus.Add(new MenuContext() { text = "Transactions", url = "/transactions", active = true });
+            menus.Add(new MenuContext() { text = "Chains", url = "/chains", active = false });
+            menus.Add(new MenuContext() { text = "Tokens", url = "/tokens", active = false });
+            menus.Add(new MenuContext() { text = "Addresses", url = "/addresses", active = false });
 
             context["menu"] = menus;
 
@@ -81,6 +83,19 @@ namespace PhantasmaExplorer
 
             var ownerKey = KeyPair.Generate();
             var nexus = new Nexus(ownerKey);
+
+            var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB");
+            var transactions = new List<Transaction>();
+            var script = ScriptUtils.CallContractScript(nexus.RootChain, "TransferTokens", ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, new BigInteger(500000));
+            var tx = new Transaction(script, 0, 0);
+            tx.Sign(ownerKey);
+            transactions.Add(tx);
+
+            var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
+            if (!nexus.RootChain.AddBlock(block))
+            {
+                throw new Exception("test block failed");
+            }
 
             var curPath = Directory.GetCurrentDirectory();
             Console.WriteLine("Current path: " + curPath);
@@ -108,10 +123,10 @@ namespace PhantasmaExplorer
                 var context = CreateContext();
 
                 // placeholders
-                var txList = new List<Transaction>();
-                txList.Add(new Transaction() { hash = "0xFFABABCACAACAFF", date = DateTime.Now - TimeSpan.FromMinutes(12), chainName = "Main", chainAddress = "fixme" });
-                txList.Add(new Transaction() { hash = "0xABABCACAACAFFAA", date = DateTime.Now - TimeSpan.FromMinutes(5), chainName = "Main", chainAddress = "fixme" });
-                txList.Add(new Transaction() { hash = "0xFFCCAACACCACACA", date = DateTime.Now, chainName = "Main", chainAddress = "fixme" });
+                var txList = new List<TransactionContext>();
+                txList.Add(new TransactionContext() { hash = "0xFFABABCACAACAFF", date = DateTime.Now - TimeSpan.FromMinutes(12), chainName = "Main", chainAddress = "fixme" });
+                txList.Add(new TransactionContext() { hash = "0xABABCACAACAFFAA", date = DateTime.Now - TimeSpan.FromMinutes(5), chainName = "Main", chainAddress = "fixme" });
+                txList.Add(new TransactionContext() { hash = "0xFFCCAACACCACACA", date = DateTime.Now, chainName = "Main", chainAddress = "fixme" });
 
                 context["transactions"] = txList;
                 return templateEngine.Render(site, context, new string[] { "layout", "transactions" });
@@ -131,10 +146,10 @@ namespace PhantasmaExplorer
             {
                 var context = CreateContext();
 
-                var chainList = new List<Chain>();
+                var chainList = new List<ChainContext>();
                 foreach (var chain in nexus.Chains)
                 {
-                    chainList.Add(new Chain() { address = chain.Address.Text, name = chain.Name.ToTitleCase(), transactions = 0 });
+                    chainList.Add(new ChainContext() { address = chain.Address.Text, name = chain.Name.ToTitleCase(), transactions = 0 });
                 }
 
                 context["chains"] = chainList;
@@ -147,10 +162,10 @@ namespace PhantasmaExplorer
                 var context = CreateContext();
                 var nexusTokens = nexus.Tokens.ToList();
                 //Placeholders todo move this
-                var tokensList = new List<Token>();
+                var tokensList = new List<TokenContext>();
                 foreach (var token in nexusTokens)
                 {
-                    tokensList.Add(new Token
+                    tokensList.Add(new TokenContext
                     {
                         name = token.Name,
                         symbol = token.Symbol,
@@ -175,23 +190,23 @@ namespace PhantasmaExplorer
                 // todo move this
                 var soulRate = CoinUtils.GetCoinRate(2827);
 
-                var mockTransactionList = new List<Transaction>
+                var mockTransactionList = new List<TransactionContext>
                 {
-                    new Transaction
+                    new TransactionContext
                     {
                         chainAddress = "test",
                         chainName = "test",
                         date = DateTime.Now,
                         hash = "test"
                     },
-                    new Transaction
+                    new TransactionContext
                     {
                         chainAddress = "test2",
                         chainName = "test2",
                         date = DateTime.Now,
                         hash = "test2"
                     },
-                    new Transaction
+                    new TransactionContext
                     {
                         chainAddress = "test3",
                         chainName = "test3",
@@ -200,7 +215,7 @@ namespace PhantasmaExplorer
                     },
                 };
 
-                var addressDto = new Address
+                var addressDto = new AddressContext
                 {
                     address = address.Text,
                     numberOfTransactions = 10,
