@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using LunarLabs.WebServer.Core;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
 using Phantasma.Core.Utils;
 using Phantasma.Blockchain;
 using Phantasma.Cryptography;
+using Phantasma.Numerics;
 
 namespace PhantasmaExplorer
 {
@@ -23,6 +25,18 @@ namespace PhantasmaExplorer
         public DateTime date;
         public string chainName;
         public string chainAddress;
+    }
+
+    public struct Token
+    {
+        public string symbol;
+        public string name;
+        public string logoUrl;
+        public string description;
+        public string contractHash;
+        public int decimals;
+        public decimal maxSupply;
+        public decimal currentSupply;
     }
 
     public struct Chain
@@ -117,6 +131,24 @@ namespace PhantasmaExplorer
             site.Get("/tokens", (request) =>
             {
                 var context = CreateContext();
+                var nexusTokens = nexus.Tokens.ToList();
+                //Placeholders todo move this
+                var tokensList = new List<Token>();
+                foreach (var token in nexusTokens)
+                {
+                    tokensList.Add(new Token
+                    {
+                        name = token.Name,
+                        symbol = token.Symbol,
+                        decimals = (int)token.GetDecimals(),
+                        description = "Soul is the native asset of Phantasma blockchain",
+                        logoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
+                        contractHash = "hash here",
+                        currentSupply = (decimal)token.CurrentSupply,
+                        maxSupply = (decimal)token.MaxSupply,
+                    });
+                }
+                context["tokens"] = tokensList;
                 return templateEngine.Render(site, context, new string[] { "layout", "tokens" });
             });
 
