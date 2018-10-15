@@ -4,9 +4,10 @@
 		<table class="table table-striped">
 			<thead>
 			  <tr>
-				<th>Block number</th>
+				<th>Height</th>
+				<th>Age</th>
 				<th>Hash</th>
-				<th>Number of Txs</th>
+				<th>txn</th>
 				<th>Miner Address</th>
 			  </tr>
 			</thead>
@@ -14,6 +15,7 @@
 				{{#each blocks}}
 				  <tr>
 					<td>{{Height}}</td>
+					<td>{{Timestamp.Value}}</td>
 					<td>{{Hash}}</td>
 					<td>{{Transactions.count}}</td>
 					<td>{{MinerAddress}}</td>
