@@ -167,9 +167,9 @@ namespace PhantasmaExplorer
             });
 
             // TODO address.html view 
-            site.Get("/address/{x}", (request) =>
+            site.Get("/address/{input}", (request) =>
             {
-                var addressText = request.GetVariable("x");
+                var addressText = request.GetVariable("input");
                 var address = Phantasma.Cryptography.Address.FromText(addressText);
 
                 // todo move this
@@ -218,9 +218,9 @@ namespace PhantasmaExplorer
             });
 
             // TODO chain.html view 
-            site.Get("/chain/{x}", (request) =>
+            site.Get("/chain/{input}", (request) =>
             {
-                var addressText = request.GetVariable("x");
+                var addressText = request.GetVariable("input");
                 var chainAddress = Phantasma.Cryptography.Address.FromText(addressText);
 
                 var context = CreateContext();
@@ -228,9 +228,9 @@ namespace PhantasmaExplorer
             });
 
             // TODO transaction.html view 
-            site.Get("/tx/{x}", (request) =>
+            site.Get("/tx/{input}", (request) =>
             {
-                var addressText = request.GetVariable("x");
+                var addressText = request.GetVariable("input");
                 var address = Phantasma.Cryptography.Address.FromText(addressText);
 
                 var context = CreateContext();
