@@ -8,6 +8,7 @@ using LunarLabs.WebServer.Templates;
 using Phantasma.Core.Utils;
 using Phantasma.Blockchain;
 using Phantasma.Cryptography;
+using Phantasma.Explorer;
 using Phantasma.Numerics;
 
 namespace PhantasmaExplorer
@@ -37,6 +38,15 @@ namespace PhantasmaExplorer
         public int decimals;
         public decimal maxSupply;
         public decimal currentSupply;
+    }
+
+    public struct Address
+    {
+        public string address;//todo change var name
+        public decimal soulBalance;
+        public decimal soulValue;
+        public int numberOfTransactions;
+        public List<Transaction> transactions;
     }
 
     public struct Chain
@@ -109,6 +119,10 @@ namespace PhantasmaExplorer
 
             site.Get("/addresses", (request) =>
             {
+                //foreach (var nexusChain in nexus.Chains)
+                //{
+                //    nexusChain.Address;
+                //}
                 var context = CreateContext();
                 return templateEngine.Render(site, context, new string[] { "layout", "addresses" });
             });
@@ -143,7 +157,7 @@ namespace PhantasmaExplorer
                         decimals = (int)token.GetDecimals(),
                         description = "Soul is the native asset of Phantasma blockchain",
                         logoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
-                        contractHash = "hash here",
+                        contractHash = "hash here?",
                         currentSupply = (decimal)token.CurrentSupply,
                         maxSupply = (decimal)token.MaxSupply,
                     });
@@ -156,9 +170,50 @@ namespace PhantasmaExplorer
             site.Get("/address/{x}", (request) =>
             {
                 var addressText = request.GetVariable("x");
-                var address = Address.FromText(addressText);
+                var address = Phantasma.Cryptography.Address.FromText(addressText);
+
+                // todo move this
+                var soulRate = CoinUtils.GetCoinRate(2827);
+
+                var mockTransactionList = new List<Transaction>
+                {
+                    new Transaction
+                    {
+                        chainAddress = "test",
+                        chainName = "test",
+                        date = DateTime.Now,
+                        hash = "test"
+                    },
+                    new Transaction
+                    {
+                        chainAddress = "test2",
+                        chainName = "test2",
+                        date = DateTime.Now,
+                        hash = "test2"
+                    },
+                    new Transaction
+                    {
+                        chainAddress = "test3",
+                        chainName = "test3",
+                        date = DateTime.Now,
+                        hash = "test3"
+                    },
+                };
+
+                var addressDto = new Address
+                {
+                    address = address.Text,
+                    numberOfTransactions = 10,
+                    soulBalance = 13.32m,
+                    transactions = mockTransactionList
+                };
+                addressDto.soulValue = addressDto.soulBalance * soulRate;
 
                 var context = CreateContext();
+
+                context["address"] = addressDto;
+                context["transactions"] = addressDto.transactions;
+
                 return templateEngine.Render(site, context, new string[] { "layout", "address" });
             });
 
@@ -166,7 +221,7 @@ namespace PhantasmaExplorer
             site.Get("/chain/{x}", (request) =>
             {
                 var addressText = request.GetVariable("x");
-                var chainAddress = Address.FromText(addressText);
+                var chainAddress = Phantasma.Cryptography.Address.FromText(addressText);
 
                 var context = CreateContext();
                 return templateEngine.Render(site, context, new string[] { "layout", "chain" });
@@ -176,7 +231,7 @@ namespace PhantasmaExplorer
             site.Get("/tx/{x}", (request) =>
             {
                 var addressText = request.GetVariable("x");
-                var address = Address.FromText(addressText);
+                var address = Phantasma.Cryptography.Address.FromText(addressText);
 
                 var context = CreateContext();
                 return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
