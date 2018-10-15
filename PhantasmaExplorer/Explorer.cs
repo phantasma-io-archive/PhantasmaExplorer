@@ -12,7 +12,6 @@ using Phantasma.Cryptography;
 using Phantasma.Explorer;
 using Phantasma.Numerics;
 using Phantasma.VM.Utils;
-using Phantasma.Core.Types;
 
 namespace PhantasmaExplorer
 {
@@ -46,10 +45,24 @@ namespace PhantasmaExplorer
     public struct AddressContext
     {
         public string address;//todo change var name
-        public decimal soulBalance;
-        public decimal soulValue;
-        public int numberOfTransactions;
+        public string name;
+        public decimal balance;
+        public decimal value;
         public List<TransactionContext> transactions;
+
+        public static AddressContext FromAddress(Nexus nexus, Address address)
+        {
+            var balance = TokenUtils.ToDecimal(nexus.RootChain.GetTokenBalance(nexus.NativeToken, address));
+
+            return new AddressContext()
+            {
+                address = address.Text,
+                name = "Anonymous",
+                balance = balance,
+                value = balance * Explorer.soulRate,
+                transactions = new List<TransactionContext>(),
+            };
+        }
     }
 
     public struct ChainContext
@@ -61,6 +74,7 @@ namespace PhantasmaExplorer
 
     public class Explorer
     {
+        public static decimal soulRate { get; private set; }
 
         private static Dictionary<string, object> CreateContext()
         {
@@ -87,7 +101,7 @@ namespace PhantasmaExplorer
 
             var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB");
             var transactions = new List<Transaction>();
-            var script = ScriptUtils.CallContractScript(nexus.RootChain, "TransferTokens", ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, new BigInteger(500000));
+            var script = ScriptUtils.CallContractScript(nexus.RootChain, "TransferTokens", ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, TokenUtils.ToBigInteger(5));
             var tx = new Transaction(script, 0, 0);
             tx.Sign(ownerKey);
             transactions.Add(tx);
@@ -97,6 +111,9 @@ namespace PhantasmaExplorer
             {
                 throw new Exception("test block failed");
             }
+
+            // TODO this should be updated every 5 minutes or so
+            soulRate = CoinUtils.GetCoinRate(2827);
 
             var curPath = Directory.GetCurrentDirectory();
             Console.WriteLine("Current path: " + curPath);
@@ -135,11 +152,14 @@ namespace PhantasmaExplorer
 
             site.Get("/addresses", (request) =>
             {
-                //foreach (var nexusChain in nexus.Chains)
-                //{
-                //    nexusChain.Address;
-                //}
+                var addressList = new List<AddressContext>();
+
+                addressList.Add(AddressContext.FromAddress(nexus, ownerKey.Address));
+                addressList.Add(AddressContext.FromAddress(nexus, targetAddress));
+
                 var context = CreateContext();
+                context["addresses"] = addressList;
+
                 return templateEngine.Render(site, context, new string[] { "layout", "addresses" });
             });
 
@@ -188,9 +208,6 @@ namespace PhantasmaExplorer
                 var addressText = request.GetVariable("input");
                 var address = Phantasma.Cryptography.Address.FromText(addressText);
 
-                // todo move this
-                var soulRate = CoinUtils.GetCoinRate(2827);
-
                 var mockTransactionList = new List<TransactionContext>();
                 foreach (var nexusChain in nexus.Chains)
                 {
@@ -203,14 +220,7 @@ namespace PhantasmaExplorer
                     });
                 }
 
-                var addressDto = new AddressContext
-                {
-                    address = address.Text,
-                    numberOfTransactions = 10,
-                    soulBalance = 13.32m,
-                    transactions = mockTransactionList
-                };
-                addressDto.soulValue = addressDto.soulBalance * soulRate;
+                var addressDto = AddressContext.FromAddress(nexus, address);
 
                 var context = CreateContext();
 
