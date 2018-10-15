@@ -1,19 +1,19 @@
 <div class="row">
 	<div class="col-lg-12">
-		<h1>Address {{address}}</h1>
+		<h1>Address {{address.address}}</h1>
 		<table class="table table-striped">
 			<thead>
 				<tr>
 					<th>Balance</th>
-					<th>Soul Value</th>
+					<th>SOUL Value</th>
 					<th>Transactions</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr>
-					<td>{{soulBalance}} SOUL</td>
-					<td>$ {{soulValue}}</td>
-					<td>{{numberOfTransactions}} txns</td>
+					<td>{{address.soulBalance}} SOUL</td>
+					<td>$ {{address.soulValue}}</td>
+					<td>{{address.numberOfTransactions}} txns</td>
 				</tr>
 			</tbody>
 		</table>		

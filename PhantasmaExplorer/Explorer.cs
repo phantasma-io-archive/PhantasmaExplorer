@@ -7,6 +7,7 @@ using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
 using Phantasma.Core.Utils;
 using Phantasma.Blockchain;
+using Phantasma.Core.Types;
 using Phantasma.Cryptography;
 using Phantasma.Explorer;
 using Phantasma.Numerics;
@@ -190,30 +191,17 @@ namespace PhantasmaExplorer
                 // todo move this
                 var soulRate = CoinUtils.GetCoinRate(2827);
 
-                var mockTransactionList = new List<TransactionContext>
+                var mockTransactionList = new List<TransactionContext>();
+                foreach (var nexusChain in nexus.Chains)
                 {
-                    new TransactionContext
+                    mockTransactionList.Add(new TransactionContext()
                     {
-                        chainAddress = "test",
-                        chainName = "test",
+                        chainAddress = nexusChain.Address.Text,
                         date = DateTime.Now,
-                        hash = "test"
-                    },
-                    new TransactionContext
-                    {
-                        chainAddress = "test2",
-                        chainName = "test2",
-                        date = DateTime.Now,
-                        hash = "test2"
-                    },
-                    new TransactionContext
-                    {
-                        chainAddress = "test3",
-                        chainName = "test3",
-                        date = DateTime.Now,
-                        hash = "test3"
-                    },
-                };
+                        hash = "test",
+                        chainName = nexusChain.Name,
+                    });
+                }
 
                 var addressDto = new AddressContext
                 {
@@ -233,26 +221,92 @@ namespace PhantasmaExplorer
             });
 
             // TODO chain.html view 
-            site.Get("/chain/{input}", (request) =>
+            site.Get("/chain/{input}", (request) => //todo this could be the name of the chain rather then the address?
             {
                 var addressText = request.GetVariable("input");
                 var chainAddress = Phantasma.Cryptography.Address.FromText(addressText);
+                var chain = nexus.Chains.SingleOrDefault(c => c.Address == chainAddress);
 
                 var context = CreateContext();
+                if (chain != null)
+                {
+                    var blocks = chain.Blocks.ToList().TakeLast(20);
+                    context["blocks"] = blocks;
+                }
+                context["chain"] = chain;
+               
                 return templateEngine.Render(site, context, new string[] { "layout", "chain" });
             });
 
             // TODO transaction.html view 
             site.Get("/tx/{input}", (request) =>
             {
-                var addressText = request.GetVariable("input");
-                var address = Phantasma.Cryptography.Address.FromText(addressText);
+                //var addressText = request.GetVariable("input");
+                //var address = Phantasma.Cryptography.Address.FromText(addressText);
+
+                //placeholder
+                var txc = new TransactionContext
+                {
+                    chainAddress = "test",
+                    chainName = "test",
+                    date = DateTime.Now,
+                    hash = "test"
+                };
 
                 var context = CreateContext();
+                context["transaction"] = txc;
                 return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
             });
 
             server.Run();
+        }
+
+
+
+
+        //todo move this
+        private string RelativeTime(Timestamp stamp)
+        {
+            const int SECOND = 1;
+            const int MINUTE = 60 * SECOND;
+            const int HOUR = 60 * MINUTE;
+            const int DAY = 24 * HOUR;
+            const int MONTH = 30 * DAY;
+            var dt = (DateTime) stamp;
+            var ts = new TimeSpan(DateTime.UtcNow.Ticks - dt.Ticks);
+            double delta = Math.Abs(ts.TotalSeconds);
+
+            if (delta < 1 * MINUTE)
+                return ts.Seconds == 1 ? "one second ago" : ts.Seconds + " seconds ago";
+
+            if (delta < 2 * MINUTE)
+                return "a minute ago";
+
+            if (delta < 45 * MINUTE)
+                return ts.Minutes + " minutes ago";
+
+            if (delta < 90 * MINUTE)
+                return "an hour ago";
+
+            if (delta < 24 * HOUR)
+                return ts.Hours + " hours ago";
+
+            if (delta < 48 * HOUR)
+                return "yesterday";
+
+            if (delta < 30 * DAY)
+                return ts.Days + " days ago";
+
+            if (delta < 12 * MONTH)
+            {
+                int months = Convert.ToInt32(Math.Floor((double)ts.Days / 30));
+                return months <= 1 ? "one month ago" : months + " months ago";
+            }
+            else
+            {
+                int years = Convert.ToInt32(Math.Floor((double)ts.Days / 365));
+                return years <= 1 ? "one year ago" : years + " years ago";
+            }
         }
     }
 }
