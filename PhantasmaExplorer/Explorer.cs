@@ -68,6 +68,7 @@ namespace PhantasmaExplorer
         public string hash;
         public string parentHash;
         public string miningAddress;
+        public string chainName;
 
         public static BlockContext FromBlock(Block block)
         {
@@ -78,7 +79,8 @@ namespace PhantasmaExplorer
                 transactions = block.Transactions.Count(),
                 hash = block.Hash.ToString(),
                 parentHash = block.PreviousHash?.ToString(),
-                miningAddress = block.MinerAddress.Text
+                miningAddress = block.MinerAddress.Text,
+                chainName = block.Chain.Name.ToTitleCase()
             };
         }
     }
@@ -285,7 +287,6 @@ namespace PhantasmaExplorer
                 return templateEngine.Render(site, context, new string[] { "layout", "address" });
             });
 
-            // TODO chain.html view 
             site.Get("/chain/{input}", (request) => //todo this could be the name of the chain rather then the address?
             {
                 var addressText = request.GetVariable("input");
@@ -303,7 +304,6 @@ namespace PhantasmaExplorer
                 return templateEngine.Render(site, context, new string[] { "layout", "chain" });
             });
 
-            // TODO transaction.html view 
             site.Get("/tx/{input}", (request) =>
             {
                 var addressText = request.GetVariable("input");
@@ -338,6 +338,32 @@ namespace PhantasmaExplorer
                 }
 
                 return templateEngine.Render(site, context, new string[] { "layout", "block" });
+            });
+
+            site.Get("/blocks", (request) => //input can be height or hash
+            {
+                List<Block> tempList = new List<Block>();
+                 
+                var blocksTemp = new List<BlockContext>();
+
+                foreach (var chain in nexus.Chains)
+                {
+                    if (chain.Blocks.Any())
+                    {
+                        tempList.AddRange(chain.Blocks.TakeLast(20));
+                    }
+                }
+
+                tempList = tempList.OrderBy(block=>block.Timestamp.Value).ToList();
+                foreach (var block in tempList)
+                {
+                    blocksTemp.Add(BlockContext.FromBlock(block));
+                }
+
+                var context = CreateContext();
+                context["blocks"] = blocksTemp;
+
+                return templateEngine.Render(site, context, new string[] { "layout", "blocks" });
             });
 
             server.Run();

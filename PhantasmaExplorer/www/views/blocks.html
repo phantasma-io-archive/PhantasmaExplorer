@@ -1,26 +1,26 @@
 <div class="row">
 	<div class="col-lg-12">
-		<h1>Block #{{block.height}}</h1>
+		<h1>Last Blocks</h1>
 		<table class="table table-striped">
 			<thead>
 			  <tr>
-				<th>Height</th>
 				<th>TimeStamp</th>
-				<th>Transactions</th>
+				<th>Chain</th>
 				<th>Hash</th>
 				<th>Parent Hash</th>
 				<th>Mined By</th>
 			  </tr>
 			</thead>
 			<tbody>
+				{{#each blocks}}
 				  <tr>
-					<td>{{block.height}}</td>
-					<td>{{block.timestamp.Value}}</td>
-					<td>{{block.transactions}}</td>
-					<td>{{block.hash}}</td>
-					<td>{{block.parentHash}}</td>
-					<td>{{block.miningAddress}}</td>
+					<td>{{#date timestamp}}</td>
+					<td>{{chainName}}</td>
+					<td><a href="/block/{{hash}}">{{hash}}</a></td>
+					<td>{{parentHash}}</td>
+					<td>{{miningAddress}}</td>
 				  </tr>
+				{{/each}}
 			</tbody>
 		</table>		
 	</div>
