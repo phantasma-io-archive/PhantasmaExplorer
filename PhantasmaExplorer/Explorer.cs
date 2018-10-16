@@ -57,7 +57,7 @@ namespace PhantasmaExplorer
         }
 
         // TODO exception and error handling
-        private static string GetEventContent(Nexus nexus, Event evt)
+        private static string GetEventContent(Nexus nexus, Block block, Event evt)
         {
             switch (evt.Kind)
             {
@@ -93,7 +93,25 @@ namespace PhantasmaExplorer
                             default: action = "???"; break;
                         }
 
-                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at <a href=\"/chain/{data.chainAddress}\">{GetChainName(nexus, data.chainAddress)} chain</a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a>.";
+                        string adverb;
+
+                        if (data.chainAddress != block.Chain.Address)
+                        {
+                            if (evt.Kind == EventKind.TokenReceive)
+                            {
+                                adverb = "from";
+                            }
+                            else
+                            {
+                                adverb = "to";
+                            }
+                        }
+                        else
+                        {
+                            adverb = "in";
+                        }
+
+                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {adverb} <a href=\"/chain/{data.chainAddress}\">{GetChainName(nexus, data.chainAddress)} chain.";
                     }
 
                 default: return "Nothing.";
@@ -108,7 +126,7 @@ namespace PhantasmaExplorer
                 evts.Add(new EventContext()
                 {
                     kind = evt.Kind,
-                    content = GetEventContent(nexus, evt),
+                    content = GetEventContent(nexus, block, evt),
                 });
             }
 
