@@ -93,25 +93,31 @@ namespace PhantasmaExplorer
                             default: action = "???"; break;
                         }
 
-                        string adverb;
+                        string chainText;
 
                         if (data.chainAddress != block.Chain.Address)
                         {
+                            Address srcAddress, dstAddress;
+
                             if (evt.Kind == EventKind.TokenReceive)
                             {
-                                adverb = "from";
+                                srcAddress = data.chainAddress;
+                                dstAddress = block.Chain.Address;
                             }
                             else
                             {
-                                adverb = "to";
+                                srcAddress = block.Chain.Address;
+                                dstAddress = data.chainAddress;
                             }
+
+                            chainText = $"from <a href=\"/chain/{srcAddress}\">{GetChainName(nexus, srcAddress)} chain</a> to <a href=\"/chain/{dstAddress}\">{GetChainName(nexus, dstAddress)} chain";
                         }
                         else
                         {
-                            adverb = "in";
+                            chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(nexus, data.chainAddress)} chain";
                         }
 
-                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {adverb} <a href=\"/chain/{data.chainAddress}\">{GetChainName(nexus, data.chainAddress)} chain.";
+                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
                     }
 
                 default: return "Nothing.";
@@ -247,9 +253,10 @@ namespace PhantasmaExplorer
             var bankChain = nexus.FindChainByName("bank");
 
             #region TESTING TXs
-            // TODO move this to a separate method...
+            // TODO move this to a separate method...            
             var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB");
 
+            // mainchain transfer
             {
                 var transactions = new List<Transaction>();
                 var script = ScriptUtils.CallContractScript(nexus.RootChain, "TransferTokens", ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, TokenUtils.ToBigInteger(5));
@@ -258,12 +265,14 @@ namespace PhantasmaExplorer
                 transactions.Add(tx);
 
                 var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
-                if (!nexus.RootChain.AddBlock(block))
+                if (!block.Chain.AddBlock(block))
                 {
                     throw new Exception("test block failed");
                 }
             }
 
+            // side chain send
+            Hash sideSendHash;
             {
                 var transactions = new List<Transaction>();
                 var script = ScriptUtils.CallContractScript(nexus.RootChain, "SendTokens", bankChain.Address, ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, TokenUtils.ToBigInteger(7));
@@ -272,7 +281,24 @@ namespace PhantasmaExplorer
                 transactions.Add(tx);
 
                 var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
-                if (!nexus.RootChain.AddBlock(block))
+                if (!block.Chain.AddBlock(block))
+                {
+                    throw new Exception("test block failed");
+                }
+
+                sideSendHash = tx.Hash;
+            }
+
+            // side chain receive
+            {
+                var transactions = new List<Transaction>();
+                var script = ScriptUtils.CallContractScript(bankChain, "ReceiveTokens", nexus.RootChain.Address, targetAddress, sideSendHash);
+                var tx = new Transaction(script, 0, 0);
+                tx.Sign(ownerKey);
+                transactions.Add(tx);
+
+                var block = new Block(bankChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
+                if (!block.Chain.AddBlock(block))
                 {
                     throw new Exception("test block failed");
                 }
@@ -429,8 +455,20 @@ namespace PhantasmaExplorer
                 var txHash = request.GetVariable("input");
                 var hash = Hash.Parse(txHash);
 
-                var tx = nexus.RootChain.FindTransaction(hash);
-                var block = nexus.RootChain.FindTransactionBlock(tx);
+
+                Transaction tx = null;
+                Chain targetChain = null;
+                foreach (var chain in nexus.Chains)
+                {
+                    tx = chain.FindTransaction(hash);
+                    if (tx != null)
+                    {
+                        targetChain = chain;
+                        break;
+                    }
+                }
+
+                var block = targetChain.FindTransactionBlock(tx);
 
                 var context = CreateContext();
                 context["transaction"] = TransactionContext.FromTransaction(nexus, block, tx);
