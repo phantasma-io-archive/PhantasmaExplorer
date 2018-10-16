@@ -6,6 +6,9 @@
 			<a class="nav-link" id="overview-tab" data-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="true">Overview</a>
 		</li>
 		<li class="nav-item">
+			<a class="nav-link" id="script-tab" data-toggle="tab" href="#script" role="tab" aria-controls="events" aria-selected="false">Script</a>
+		</li>
+		<li class="nav-item">
 			<a class="nav-link" id="events-tab" data-toggle="tab" href="#events" role="tab" aria-controls="events" aria-selected="false">Events</a>
 		</li>
 	</ul>
@@ -54,11 +57,30 @@
 			</div>		 		  
 		  </div>
 		  
+		  <div class="tab-pane fade" id="script" role="tabpanel" aria-labelledby="script-tab">
+				<div class="panel panel-default">
+					<div class="panel-heading">Transaction Script</div>
+					<div class="panel-body">
+					{{#if transaction.instructions}}			
+						<table class="monospace">
+						{{#each transaction.instructions}}
+						<tr>
+						  <td>{{this}}</td>
+						</tr>					
+						{{/each}}						
+						</table>
+					{{#else}}
+					Nothing here...
+					{{/if}}
+				</div>
+			</div>
+		  </div>
+
 		  <div class="tab-pane fade" id="events" role="tabpanel" aria-labelledby="events-tab">
-			<div class="panel panel-default">
-			  <div class="panel-heading">Transaction Events</div>
-			  <div class="panel-body">
-				{{#if transaction.events}}			
+				<div class="panel panel-default">
+					<div class="panel-heading">Transaction Events</div>
+					<div class="panel-body">
+					{{#if transaction.events}}			
 					<table class="table table-striped">
 						<thead>
 						  <tr>
@@ -74,15 +96,12 @@
 							  </tr>
 							{{/each}}
 						</tbody>
-					</table>		
-				
-					
-				{{#else}}
-				Nothing here...
-				{{/if}}
-			  </div>
-		  </div>
-
+					</table>										
+					{{#else}}
+					Nothing here...
+					{{/if}}
+				</div>
+			</div>
 		  </div>
 		  
 		</div>

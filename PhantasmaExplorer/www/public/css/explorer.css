@@ -63,3 +63,7 @@ footer .footer-below {
 .no-border>tbody>tr>th { 
 	border:none !important;
 }
+
+.monospace {
+	font-family: "Courier New", Courier, monospace;
+}

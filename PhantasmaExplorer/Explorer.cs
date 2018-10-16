@@ -16,6 +16,7 @@ using Phantasma.VM.Contracts;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.IO;
 using Phantasma.Blockchain.Contracts.Native;
+using Phantasma.VM;
 
 namespace PhantasmaExplorer
 {
@@ -42,6 +43,18 @@ namespace PhantasmaExplorer
         public string fromName;
         public string fromAddress;
         public IEnumerable<EventContext> events;
+        public IEnumerable<Instruction> instructions;
+
+        private static string GetChainName(Nexus nexus, Address chainAddress)
+        {
+            var chain = nexus.FindChainByAddress(chainAddress);
+            if (chain != null)
+            {
+                return chain.Name;
+            }
+
+            return "???";
+        }
 
         // TODO exception and error handling
         private static string GetEventContent(Nexus nexus, Event evt)
@@ -80,7 +93,7 @@ namespace PhantasmaExplorer
                             default: action = "???"; break;
                         }
 
-                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at address <a href=\"/address/{evt.Address}\">{evt.Address}</a>.";
+                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at <a href=\"/chain/{data.chainAddress}\">{GetChainName(nexus, data.chainAddress)} chain</a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a>.";
                     }
 
                 default: return "Nothing.";
@@ -99,6 +112,8 @@ namespace PhantasmaExplorer
                 });
             }
 
+            var disasm = new Disassembler(tx.Script);
+
             return new TransactionContext()
             {
                 block = block,
@@ -109,6 +124,7 @@ namespace PhantasmaExplorer
                 fromAddress = "????",
                 fromName = "Anonymous",
                 events = evts,
+                instructions = disasm.GetInstructions(),
             };
         }
     }
@@ -210,7 +226,12 @@ namespace PhantasmaExplorer
             var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
             var nexus = new Nexus(ownerKey);
 
+            var bankChain = nexus.FindChainByName("bank");
+
+            #region TESTING TXs
+            // TODO move this to a separate method...
             var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB");
+
             {
                 var transactions = new List<Transaction>();
                 var script = ScriptUtils.CallContractScript(nexus.RootChain, "TransferTokens", ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, TokenUtils.ToBigInteger(5));
@@ -224,6 +245,21 @@ namespace PhantasmaExplorer
                     throw new Exception("test block failed");
                 }
             }
+
+            {
+                var transactions = new List<Transaction>();
+                var script = ScriptUtils.CallContractScript(nexus.RootChain, "SendTokens", bankChain.Address, ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, TokenUtils.ToBigInteger(7));
+                var tx = new Transaction(script, 0, 0);
+                tx.Sign(ownerKey);
+                transactions.Add(tx);
+
+                var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
+                if (!nexus.RootChain.AddBlock(block))
+                {
+                    throw new Exception("test block failed");
+                }
+            }
+            #endregion
 
             // TODO this should be updated every 5 minutes or so
             soulRate = CoinUtils.GetCoinRate(2827);
