@@ -138,7 +138,7 @@ namespace PhantasmaExplorer
         {
             Console.WriteLine("Initializing Phantasma Block Explorer....");
 
-            var ownerKey = KeyPair.Generate();
+            var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
             var nexus = new Nexus(ownerKey);
 
             var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB");
