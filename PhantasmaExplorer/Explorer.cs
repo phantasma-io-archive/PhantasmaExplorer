@@ -126,6 +126,7 @@ namespace PhantasmaExplorer
             var menus = new List<MenuContext>();
             menus.Add(new MenuContext() { text = "Transactions", url = "/transactions", active = true });
             menus.Add(new MenuContext() { text = "Chains", url = "/chains", active = false });
+            menus.Add(new MenuContext() { text = "Blocks", url = "/blocks", active = false });
             menus.Add(new MenuContext() { text = "Tokens", url = "/tokens", active = false });
             menus.Add(new MenuContext() { text = "Addresses", url = "/addresses", active = false });
 
@@ -222,7 +223,7 @@ namespace PhantasmaExplorer
                     {
                         address = chain.Address.Text,
                         name = chain.Name.ToTitleCase(),
-                        transactions = 0,
+                        transactions = chain.TransactionCount,
                         height = chain.Blocks.Count()
                     });
                 }
