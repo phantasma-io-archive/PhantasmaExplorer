@@ -15,10 +15,10 @@
 				{{#each blocks}}
 				  <tr>
 					<td>{{#date timestamp}}</td>
-					<td>{{chainName}}</td>
+					<td><a href="/chain/{{chainAddress}}">{{chainName}}</a></td>
 					<td><a href="/block/{{hash}}">{{hash}}</a></td>
-					<td>{{parentHash}}</td>
-					<td>{{miningAddress}}</td>
+					<td><a href="/block/{{parentHash}}">{{parentHash}}</a></td>
+					<td><a href="/address/{{miningAddress}}">{{miningAddress}}</a></td>
 				  </tr>
 				{{/each}}
 			</tbody>

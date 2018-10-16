@@ -15,11 +15,11 @@
 			<tbody>
 				  <tr>
 					<td>{{block.height}}</td>
-					<td>{{block.timestamp.Value}}</td>
+					<td>{{#date block.timestamp}}</td>
 					<td>{{block.transactions}}</td>
 					<td>{{block.hash}}</td>
 					<td>{{block.parentHash}}</td>
-					<td>{{block.miningAddress}}</td>
+					<td><a href="/address/{{block.miningAddress}}">{{block.miningAddress}}</a></td>
 				  </tr>
 			</tbody>
 		</table>		

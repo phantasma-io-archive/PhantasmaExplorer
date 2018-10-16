@@ -6,7 +6,7 @@
 			  <tr>
 				<th>Height</th>
 				<th>Age</th>
-				<th>Hash</th>
+				<th>Block Hash</th>
 				<th>txn</th>
 				<th>Miner Address</th>
 			  </tr>
@@ -18,7 +18,7 @@
 					<td>{{Timestamp.Value}}</td>
 					<td><a href="/block/{{Hash}}">{{Hash}}</a></td>
 					<td>{{Transactions.count}}</td>
-					<td>{{MinerAddress}}</td>
+					<td><a href="/address/{{MinerAddress}}">{{MinerAddress}}</a></td>
 				  </tr>
 				{{/each}}
 			</tbody>

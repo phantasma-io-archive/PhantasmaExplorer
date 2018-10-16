@@ -69,6 +69,7 @@ namespace PhantasmaExplorer
         public string parentHash;
         public string miningAddress;
         public string chainName;
+        public string chainAddress;
 
         public static BlockContext FromBlock(Block block)
         {
@@ -80,7 +81,8 @@ namespace PhantasmaExplorer
                 hash = block.Hash.ToString(),
                 parentHash = block.PreviousHash?.ToString(),
                 miningAddress = block.MinerAddress.Text,
-                chainName = block.Chain.Name.ToTitleCase()
+                chainName = block.Chain.Name.ToTitleCase(),
+                chainAddress = block.Chain.Address.Text
             };
         }
     }
@@ -265,7 +267,7 @@ namespace PhantasmaExplorer
             site.Get("/address/{input}", (request) =>
             {
                 var addressText = request.GetVariable("input");
-                var address = Phantasma.Cryptography.Address.FromText(addressText);
+                var address = Address.FromText(addressText);
 
                 var mockTransactionList = new List<TransactionContext>();
                 foreach (var nexusChain in nexus.Chains)
