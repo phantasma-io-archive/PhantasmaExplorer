@@ -77,7 +77,7 @@ namespace PhantasmaExplorer
                 timestamp = block.Timestamp,
                 transactions = block.Transactions.Count(),
                 hash = block.Hash.ToString(),
-                parentHash = block.PreviousHash.ToString(),
+                parentHash = block.PreviousHash?.ToString(),
                 miningAddress = block.MinerAddress.Text
             };
         }
