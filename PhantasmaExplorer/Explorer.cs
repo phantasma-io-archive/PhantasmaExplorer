@@ -13,6 +13,9 @@ using Phantasma.Explorer;
 using Phantasma.Numerics;
 using Phantasma.VM.Utils;
 using Phantasma.VM.Contracts;
+using Phantasma.Blockchain.Contracts;
+using Phantasma.IO;
+using Phantasma.Blockchain.Contracts.Native;
 
 namespace PhantasmaExplorer
 {
@@ -21,6 +24,12 @@ namespace PhantasmaExplorer
         public string text;
         public string url;
         public bool active;
+    }
+
+    public struct EventContext
+    {
+        public EventKind kind;
+        public string content;
     }
 
     public struct TransactionContext
@@ -32,9 +41,64 @@ namespace PhantasmaExplorer
         public string chainAddress;
         public string fromName;
         public string fromAddress;
+        public IEnumerable<EventContext> events;
+
+        // TODO exception and error handling
+        private static string GetEventContent(Nexus nexus, Event evt)
+        {
+            switch (evt.Kind)
+            {
+                case EventKind.ChainCreate:
+                    {
+                        var chainAddress = Serialization.Unserialize<Address>(evt.Data);
+                        var chain = nexus.FindChainByAddress(chainAddress);
+                        return $"{chain.Name} chain created at address <a href=\"/chain/{chainAddress}\">{chainAddress}</a>.";
+                    }
+
+                case EventKind.TokenCreate:
+                    {
+                        var symbol = Serialization.Unserialize<string>(evt.Data);
+                        var token = nexus.FindTokenBySymbol(symbol);
+                        return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
+                    }
+
+                case EventKind.TokenMint:
+                case EventKind.TokenBurn:
+                case EventKind.TokenSend:
+                case EventKind.TokenReceive:
+                    {
+                        var data = Serialization.Unserialize<TokenEventData>(evt.Data);
+                        var token = nexus.FindTokenBySymbol(data.symbol);
+                        string action;
+
+                        switch (evt.Kind)
+                        {
+                            case EventKind.TokenMint: action = "minted"; break;
+                            case EventKind.TokenBurn: action = "burned"; break;
+                            case EventKind.TokenSend: action = "sent"; break;
+                            case EventKind.TokenReceive: action = "received"; break;
+                            default: action = "???"; break;
+                        }
+
+                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at address <a href=\"/address/{evt.Address}\">{evt.Address}</a>.";
+                    }
+
+                default: return "Nothing.";
+            }
+        }
 
         public static TransactionContext FromTransaction(Nexus nexus, Block block, Transaction tx)
         {
+            var evts = new List<EventContext>();
+            foreach (var evt in tx.Events)
+            {
+                evts.Add(new EventContext()
+                {
+                    kind = evt.Kind,
+                    content = GetEventContent(nexus, evt),
+                });
+            }
+
             return new TransactionContext()
             {
                 block = block,
@@ -44,6 +108,7 @@ namespace PhantasmaExplorer
                 hash = tx.Hash.ToString(),
                 fromAddress = "????",
                 fromName = "Anonymous",
+                events = evts,
             };
         }
     }
@@ -318,7 +383,8 @@ namespace PhantasmaExplorer
                 return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
             });
 
-            site.Get("/tx/block={input}", (request) =>
+            // TODO change url
+            site.Get("/txx/{input}", (request) =>
             {
                 var input = request.GetVariable("input").Substring(6);// todo ask why input = "block=xxxx"
                 var blockHash = Hash.Parse(input);

@@ -58,3 +58,8 @@ footer .footer-below {
 #main {
 	min-height: 670px;
 }
+
+.no-border>tbody>tr>td,
+.no-border>tbody>tr>th { 
+	border:none !important;
+}
