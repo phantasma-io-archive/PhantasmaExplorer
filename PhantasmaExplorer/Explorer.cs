@@ -188,12 +188,14 @@ namespace PhantasmaExplorer
                 var context = CreateContext();
 
                 var txList = new List<TransactionContext>();
-
-                foreach (var block in nexus.RootChain.Blocks)
+                foreach (var chain in nexus.Chains)
                 {
-                    foreach (var tx in block.Transactions)
+                    foreach (var block in chain.Blocks.TakeLast(20))
                     {
-                        txList.Add(TransactionContext.FromTransaction(nexus, block, (Transaction)tx));
+                        foreach (var tx in block.Transactions)
+                        {
+                            txList.Add(TransactionContext.FromTransaction(nexus, block, (Transaction)tx));
+                        }
                     }
                 }
 
