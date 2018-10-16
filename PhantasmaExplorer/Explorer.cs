@@ -75,7 +75,7 @@ namespace PhantasmaExplorer
         {
             return new BlockContext
             {
-                height = (int) block.Height,
+                height = (int)block.Height,
                 timestamp = block.Timestamp,
                 transactions = block.Transactions.Count(),
                 hash = block.Hash.ToString(),
@@ -95,17 +95,16 @@ namespace PhantasmaExplorer
         public decimal value;
         public List<TransactionContext> transactions;
 
-        public static AddressContext FromAddress(Nexus nexus, Address address)
+        public static AddressContext FromAddress(Nexus nexus, Address address, List<TransactionContext> txList)
         {
             var balance = TokenUtils.ToDecimal(nexus.RootChain.GetTokenBalance(nexus.NativeToken, address));
-
             return new AddressContext()
             {
                 address = address.Text,
                 name = "Anonymous",
                 balance = balance,
                 value = balance * Explorer.soulRate,
-                transactions = new List<TransactionContext>(),
+                transactions = txList
             };
         }
     }
@@ -209,8 +208,8 @@ namespace PhantasmaExplorer
             {
                 var addressList = new List<AddressContext>();
 
-                addressList.Add(AddressContext.FromAddress(nexus, ownerKey.Address));
-                addressList.Add(AddressContext.FromAddress(nexus, targetAddress));
+                addressList.Add(AddressContext.FromAddress(nexus, ownerKey.Address, null));
+                addressList.Add(AddressContext.FromAddress(nexus, targetAddress, null));
 
                 var context = CreateContext();
                 context["addresses"] = addressList;
@@ -263,7 +262,6 @@ namespace PhantasmaExplorer
                 return templateEngine.Render(site, context, new string[] { "layout", "tokens" });
             });
 
-            // TODO address.html view 
             site.Get("/address/{input}", (request) =>
             {
                 var addressText = request.GetVariable("input");
@@ -276,17 +274,16 @@ namespace PhantasmaExplorer
                     {
                         chainAddress = nexusChain.Address.Text,
                         date = DateTime.Now,
-                        hash = "test",
+                        hash = "mock",
                         chainName = nexusChain.Name,
                     });
                 }
 
-                var addressDto = AddressContext.FromAddress(nexus, address);
+                var addressDto = AddressContext.FromAddress(nexus, address, mockTransactionList);
 
                 var context = CreateContext();
 
                 context["address"] = addressDto;
-                context["transactions"] = addressDto.transactions;
 
                 return templateEngine.Render(site, context, new string[] { "layout", "address" });
             });
@@ -310,8 +307,8 @@ namespace PhantasmaExplorer
 
             site.Get("/tx/{input}", (request) =>
             {
-                var addressText = request.GetVariable("input");
-                var hash = Hash.Parse(addressText);
+                var txHash = request.GetVariable("input");
+                var hash = Hash.Parse(txHash);
 
                 var tx = nexus.RootChain.FindTransaction(hash);
                 var block = nexus.RootChain.FindTransactionBlock(tx);
@@ -321,11 +318,43 @@ namespace PhantasmaExplorer
                 return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
             });
 
+            site.Get("/tx/block={input}", (request) =>
+            {
+                var input = request.GetVariable("input").Substring(6);// todo ask why input = "block=xxxx"
+                var blockHash = Hash.Parse(input);
+                Block block = null;
+                var txList = new List<TransactionContext>();
+
+                foreach (var chain in nexus.Chains)
+                {
+                    var x = chain.FindBlock(blockHash);
+                    if (x != null)
+                    {
+                        block = x;
+                        break;
+                    }
+                }
+
+                if (block != null)
+                {
+                    foreach (var transaction in block.Transactions)
+                    {
+                        var tx = (Transaction)transaction;
+                        txList.Add(TransactionContext.FromTransaction(nexus, block, tx));
+                    }
+                }
+
+                var context = CreateContext();
+                context["transactions"] = txList;
+                context["blockheight"] = (int)block?.Height;
+                return templateEngine.Render(site, context, new string[] { "layout", "transactionsBlock" });
+            });
+
             site.Get("/block/{input}", (request) => //input can be height or hash
             {
                 var input = request.GetVariable("input");
                 Block block;
-                if(int.TryParse(input, out var height))
+                if (int.TryParse(input, out var height))
                 {
                     block = nexus.RootChain.FindBlock(height);
                 }
@@ -334,7 +363,7 @@ namespace PhantasmaExplorer
                     // todo validate hash
                     block = nexus.RootChain.FindBlock(Hash.Parse(input));
                 }
-               
+
                 var context = CreateContext();
                 if (block != null)
                 {
@@ -347,7 +376,7 @@ namespace PhantasmaExplorer
             site.Get("/blocks", (request) => //input can be height or hash
             {
                 List<Block> tempList = new List<Block>();
-                 
+
                 var blocksTemp = new List<BlockContext>();
 
                 foreach (var chain in nexus.Chains)
@@ -358,7 +387,7 @@ namespace PhantasmaExplorer
                     }
                 }
 
-                tempList = tempList.OrderBy(block=>block.Timestamp.Value).ToList();
+                tempList = tempList.OrderBy(block => block.Timestamp.Value).ToList();
                 foreach (var block in tempList)
                 {
                     blocksTemp.Add(BlockContext.FromBlock(block));
@@ -375,6 +404,18 @@ namespace PhantasmaExplorer
 
 
 
+        //public List<TransactionContext> GetAddressTransactions(Nexus nexus, Address address, int size)
+        //{
+        //    var txList= new List<TransactionContext>();
+        //    foreach (var chain in nexus.Chains)
+        //    {
+        //        foreach (var chainBlock in chain.Blocks)
+        //        {
+        //            var tx = chainBlock.Transactions.Where(t=>t.)
+        //            txList.Add(TransactionContext.FromTransaction(nexus, chainBlock,));
+        //        }
+        //    }
+        //}
 
         //todo move this
         private string RelativeTime(Timestamp stamp)

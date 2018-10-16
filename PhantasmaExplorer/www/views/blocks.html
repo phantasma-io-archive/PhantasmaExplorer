@@ -6,6 +6,7 @@
 			  <tr>
 				<th>TimeStamp</th>
 				<th>Chain</th>
+				<th>txn</th>
 				<th>Hash</th>
 				<th>Parent Hash</th>
 				<th>Mined By</th>
@@ -16,6 +17,7 @@
 				  <tr>
 					<td>{{#date timestamp}}</td>
 					<td><a href="/chain/{{chainAddress}}">{{chainName}}</a></td>
+					<td><a href="/tx/block={{hash}}">{{transactions}}</a></td>
 					<td><a href="/block/{{hash}}">{{hash}}</a></td>
 					<td><a href="/block/{{parentHash}}">{{parentHash}}</a></td>
 					<td><a href="/address/{{miningAddress}}">{{miningAddress}}</a></td>
