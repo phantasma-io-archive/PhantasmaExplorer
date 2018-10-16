@@ -60,6 +60,29 @@ namespace PhantasmaExplorer
         public decimal currentSupply;
     }
 
+    public struct BlockContext
+    {
+        public int height;
+        public DateTime timestamp;
+        public int transactions;
+        public string hash;
+        public string parentHash;
+        public string miningAddress;
+
+        public static BlockContext FromBlock(Block block)
+        {
+            return new BlockContext
+            {
+                height = (int) block.Height,
+                timestamp = block.Timestamp,
+                transactions = block.Transactions.Count(),
+                hash = block.Hash.ToString(),
+                parentHash = block.PreviousHash.ToString(),
+                miningAddress = block.MinerAddress.Text
+            };
+        }
+    }
+
     public struct AddressContext
     {
         public string address;//todo change var name
@@ -88,6 +111,7 @@ namespace PhantasmaExplorer
         public string address;
         public string name;
         public int transactions;
+        public int height;
     }
 
     public class Explorer
@@ -194,7 +218,13 @@ namespace PhantasmaExplorer
                 var chainList = new List<ChainContext>();
                 foreach (var chain in nexus.Chains)
                 {
-                    chainList.Add(new ChainContext() { address = chain.Address.Text, name = chain.Name.ToTitleCase(), transactions = 0 });
+                    chainList.Add(new ChainContext()
+                    {
+                        address = chain.Address.Text,
+                        name = chain.Name.ToTitleCase(),
+                        transactions = 0,
+                        height = chain.Blocks.Count()
+                    });
                 }
 
                 context["chains"] = chainList;
@@ -268,7 +298,7 @@ namespace PhantasmaExplorer
                     context["blocks"] = blocks;
                 }
                 context["chain"] = chain;
-               
+
                 return templateEngine.Render(site, context, new string[] { "layout", "chain" });
             });
 
@@ -286,6 +316,29 @@ namespace PhantasmaExplorer
                 return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
             });
 
+            site.Get("/block/{input}", (request) => //input can be height or hash
+            {
+                var input = request.GetVariable("input");
+                Block block;
+                if(int.TryParse(input, out var height))
+                {
+                    block = nexus.RootChain.FindBlock(height);
+                }
+                else
+                {
+                    // todo validate hash
+                    block = nexus.RootChain.FindBlock(Hash.Parse(input));
+                }
+               
+                var context = CreateContext();
+                if (block != null)
+                {
+                    context["block"] = BlockContext.FromBlock(block);
+                }
+
+                return templateEngine.Render(site, context, new string[] { "layout", "block" });
+            });
+
             server.Run();
         }
 
@@ -300,7 +353,7 @@ namespace PhantasmaExplorer
             const int HOUR = 60 * MINUTE;
             const int DAY = 24 * HOUR;
             const int MONTH = 30 * DAY;
-            var dt = (DateTime) stamp;
+            var dt = (DateTime)stamp;
             var ts = new TimeSpan(DateTime.UtcNow.Ticks - dt.Ticks);
             double delta = Math.Abs(ts.TotalSeconds);
 
