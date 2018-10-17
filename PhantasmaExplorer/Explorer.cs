@@ -478,7 +478,7 @@ namespace PhantasmaExplorer
             // TODO change url
             site.Get("/txx/{input}", (request) =>
             {
-                var input = request.GetVariable("input").Substring(6);// todo ask why input = "block=xxxx"
+                var input = request.GetVariable("input");// todo ask why input = "block=xxxx"
                 var blockHash = Hash.Parse(input);
                 Block block = null;
                 var txList = new List<TransactionContext>();
@@ -511,15 +511,23 @@ namespace PhantasmaExplorer
             site.Get("/block/{input}", (request) => //input can be height or hash
             {
                 var input = request.GetVariable("input");
-                Block block;
+                Block block = null;
                 if (int.TryParse(input, out var height))
                 {
                     block = nexus.RootChain.FindBlock(height);
                 }
                 else
                 {
-                    // todo validate hash
-                    block = nexus.RootChain.FindBlock(Hash.Parse(input));
+                    var blockHash = (Hash.Parse(input));
+                    foreach (var chain in nexus.Chains)
+                    {
+                        var x = chain.FindBlock(blockHash);
+                        if (x != null)
+                        {
+                            block = x;
+                            break;
+                        }
+                    }
                 }
 
                 var context = CreateContext();

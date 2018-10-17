@@ -16,9 +16,9 @@
 				  <tr>
 					<td>{{block.height}}</td>
 					<td>{{#date block.timestamp}}</td>
-					<td>{{block.transactions}}</td>
-					<td>{{block.hash}}</td>
-					<td>{{block.parentHash}}</td>
+					<td><a href="/txx/{{block.hash}}">{{block.transactions}}</a></td>
+					<td><a href="/block/{{block.hash}}">{{block.hash}}</a></td>
+					<td><a href="/block/{{block.parentHash}}">{{block.parentHash}}</a></td>
 					<td><a href="/address/{{block.miningAddress}}">{{block.miningAddress}}</a></td>
 				  </tr>
 			</tbody>

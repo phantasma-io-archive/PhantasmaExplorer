@@ -16,7 +16,7 @@
 			<tbody>
 				{{#each transactions}}
 				  <tr>
-					<td>{{hash}}</td>
+					<td><a href="/tx/{{hash}}">{{hash}}</a></td>
 					<td><a href="/block/{{block.Height}}">{{block.Height}}</a></td>
 					<td>{{#date date}}</td>
 					<td>{{fromAddress}}</td>
