@@ -10,13 +10,8 @@ using Phantasma.Blockchain;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
 using Phantasma.Explorer;
-using Phantasma.Numerics;
 using Phantasma.VM.Utils;
-using Phantasma.VM.Contracts;
-using Phantasma.Blockchain.Contracts;
-using Phantasma.IO;
-using Phantasma.Blockchain.Contracts.Native;
-using Phantasma.VM;
+using Phantasma.Explorer.ViewModels;
 
 namespace PhantasmaExplorer
 {
@@ -25,201 +20,6 @@ namespace PhantasmaExplorer
         public string text;
         public string url;
         public bool active;
-    }
-
-    public struct EventContext
-    {
-        public EventKind kind;
-        public string content;
-    }
-
-    public struct TransactionContext
-    {
-        public string hash;
-        public Block block;
-        public DateTime date;
-        public string chainName;
-        public string chainAddress;
-        public string fromName;
-        public string fromAddress;
-        public IEnumerable<EventContext> events;
-        public IEnumerable<Instruction> instructions;
-
-        private static string GetChainName(Nexus nexus, Address chainAddress)
-        {
-            var chain = nexus.FindChainByAddress(chainAddress);
-            if (chain != null)
-            {
-                return chain.Name;
-            }
-
-            return "???";
-        }
-
-        // TODO exception and error handling
-        private static string GetEventContent(Nexus nexus, Block block, Event evt)
-        {
-            switch (evt.Kind)
-            {
-                case EventKind.ChainCreate:
-                    {
-                        var chainAddress = Serialization.Unserialize<Address>(evt.Data);
-                        var chain = nexus.FindChainByAddress(chainAddress);
-                        return $"{chain.Name} chain created at address <a href=\"/chain/{chainAddress}\">{chainAddress}</a>.";
-                    }
-
-                case EventKind.TokenCreate:
-                    {
-                        var symbol = Serialization.Unserialize<string>(evt.Data);
-                        var token = nexus.FindTokenBySymbol(symbol);
-                        return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
-                    }
-
-                case EventKind.TokenMint:
-                case EventKind.TokenBurn:
-                case EventKind.TokenSend:
-                case EventKind.TokenReceive:
-                    {
-                        var data = Serialization.Unserialize<TokenEventData>(evt.Data);
-                        var token = nexus.FindTokenBySymbol(data.symbol);
-                        string action;
-
-                        switch (evt.Kind)
-                        {
-                            case EventKind.TokenMint: action = "minted"; break;
-                            case EventKind.TokenBurn: action = "burned"; break;
-                            case EventKind.TokenSend: action = "sent"; break;
-                            case EventKind.TokenReceive: action = "received"; break;
-                            default: action = "???"; break;
-                        }
-
-                        string chainText;
-
-                        if (data.chainAddress != block.Chain.Address)
-                        {
-                            Address srcAddress, dstAddress;
-
-                            if (evt.Kind == EventKind.TokenReceive)
-                            {
-                                srcAddress = data.chainAddress;
-                                dstAddress = block.Chain.Address;
-                            }
-                            else
-                            {
-                                srcAddress = block.Chain.Address;
-                                dstAddress = data.chainAddress;
-                            }
-
-                            chainText = $"from <a href=\"/chain/{srcAddress}\">{GetChainName(nexus, srcAddress)} chain</a> to <a href=\"/chain/{dstAddress}\">{GetChainName(nexus, dstAddress)} chain";
-                        }
-                        else
-                        {
-                            chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(nexus, data.chainAddress)} chain";
-                        }
-
-                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
-                    }
-
-                default: return "Nothing.";
-            }
-        }
-
-        public static TransactionContext FromTransaction(Nexus nexus, Block block, Transaction tx)
-        {
-            var evts = new List<EventContext>();
-            foreach (var evt in tx.Events)
-            {
-                evts.Add(new EventContext()
-                {
-                    kind = evt.Kind,
-                    content = GetEventContent(nexus, block, evt),
-                });
-            }
-
-            var disasm = new Disassembler(tx.Script);
-
-            return new TransactionContext()
-            {
-                block = block,
-                chainAddress = block.Chain.Address.Text,
-                chainName = block.Chain.Name,
-                date = block.Timestamp,
-                hash = tx.Hash.ToString(),
-                fromAddress = "????",
-                fromName = "Anonymous",
-                events = evts,
-                instructions = disasm.GetInstructions(),
-            };
-        }
-    }
-
-    public struct TokenContext
-    {
-        public string symbol;
-        public string name;
-        public string logoUrl;
-        public string description;
-        public string contractHash;
-        public int decimals;
-        public decimal maxSupply;
-        public decimal currentSupply;
-    }
-
-    public struct BlockContext
-    {
-        public int height;
-        public DateTime timestamp;
-        public int transactions;
-        public string hash;
-        public string parentHash;
-        public string miningAddress;
-        public string chainName;
-        public string chainAddress;
-
-        public static BlockContext FromBlock(Block block)
-        {
-            return new BlockContext
-            {
-                height = (int)block.Height,
-                timestamp = block.Timestamp,
-                transactions = block.Transactions.Count(),
-                hash = block.Hash.ToString(),
-                parentHash = block.PreviousHash?.ToString(),
-                miningAddress = block.MinerAddress.Text,
-                chainName = block.Chain.Name.ToTitleCase(),
-                chainAddress = block.Chain.Address.Text
-            };
-        }
-    }
-
-    public struct AddressContext
-    {
-        public string address;//todo change var name
-        public string name;
-        public decimal balance;
-        public decimal value;
-        public List<TransactionContext> transactions;
-
-        public static AddressContext FromAddress(Nexus nexus, Address address, List<TransactionContext> txList)
-        {
-            var balance = TokenUtils.ToDecimal(nexus.RootChain.GetTokenBalance(nexus.NativeToken, address));
-            return new AddressContext()
-            {
-                address = address.Text,
-                name = "Anonymous",
-                balance = balance,
-                value = balance * Explorer.soulRate,
-                transactions = txList
-            };
-        }
-    }
-
-    public struct ChainContext
-    {
-        public string address;
-        public string name;
-        public int transactions;
-        public int height;
     }
 
     public class Explorer
@@ -333,14 +133,14 @@ namespace PhantasmaExplorer
             {
                 var context = CreateContext();
 
-                var txList = new List<TransactionContext>();
+                var txList = new List<TransactionViewModel>();
                 foreach (var chain in nexus.Chains)
                 {
                     foreach (var block in chain.Blocks.TakeLast(20))
                     {
                         foreach (var tx in block.Transactions)
                         {
-                            txList.Add(TransactionContext.FromTransaction(nexus, block, (Transaction)tx));
+                            txList.Add(TransactionViewModel.FromTransaction(nexus, block, (Transaction)tx));
                         }
                     }
                 }
@@ -351,10 +151,10 @@ namespace PhantasmaExplorer
 
             site.Get("/addresses", (request) =>
             {
-                var addressList = new List<AddressContext>();
+                var addressList = new List<AddressViewModel>();
 
-                addressList.Add(AddressContext.FromAddress(nexus, ownerKey.Address, null));
-                addressList.Add(AddressContext.FromAddress(nexus, targetAddress, null));
+                addressList.Add(AddressViewModel.FromAddress(nexus, ownerKey.Address, null, soulRate));
+                addressList.Add(AddressViewModel.FromAddress(nexus, targetAddress, null, soulRate));
 
                 var context = CreateContext();
                 context["addresses"] = addressList;
@@ -366,15 +166,15 @@ namespace PhantasmaExplorer
             {
                 var context = CreateContext();
 
-                var chainList = new List<ChainContext>();
+                var chainList = new List<ChainViewModel>();
                 foreach (var chain in nexus.Chains)
                 {
-                    chainList.Add(new ChainContext()
+                    chainList.Add(new ChainViewModel()
                     {
-                        address = chain.Address.Text,
-                        name = chain.Name.ToTitleCase(),
-                        transactions = chain.TransactionCount,
-                        height = chain.Blocks.Count()
+                        Address = chain.Address.Text,
+                        Name = chain.Name.ToTitleCase(),
+                        Transactions = chain.TransactionCount,
+                        Height = chain.Blocks.Count()
                     });
                 }
 
@@ -388,19 +188,19 @@ namespace PhantasmaExplorer
                 var context = CreateContext();
                 var nexusTokens = nexus.Tokens.ToList();
                 //Placeholders todo move this
-                var tokensList = new List<TokenContext>();
+                var tokensList = new List<TokenViewModel>();
                 foreach (var token in nexusTokens)
                 {
-                    tokensList.Add(new TokenContext
+                    tokensList.Add(new TokenViewModel
                     {
-                        name = token.Name,
-                        symbol = token.Symbol,
-                        decimals = (int)token.GetDecimals(),
-                        description = "Soul is the native asset of Phantasma blockchain",
-                        logoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
-                        contractHash = "hash here?",
-                        currentSupply = (decimal)token.CurrentSupply,
-                        maxSupply = (decimal)token.MaxSupply,
+                        Name = token.Name,
+                        Symbol = token.Symbol,
+                        Decimals = (int)token.GetDecimals(),
+                        Description = "Soul is the native asset of Phantasma blockchain",
+                        LogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
+                        ContractHash = "hash here?",
+                        CurrentSupply = (decimal)token.CurrentSupply,
+                        MaxSupply = (decimal)token.MaxSupply,
                     });
                 }
                 context["tokens"] = tokensList;
@@ -412,19 +212,19 @@ namespace PhantasmaExplorer
                 var addressText = request.GetVariable("input");
                 var address = Address.FromText(addressText);
 
-                var mockTransactionList = new List<TransactionContext>();
+                var mockTransactionList = new List<TransactionViewModel>();
                 foreach (var nexusChain in nexus.Chains)
                 {
-                    mockTransactionList.Add(new TransactionContext()
+                    mockTransactionList.Add(new TransactionViewModel()
                     {
-                        chainAddress = nexusChain.Address.Text,
-                        date = DateTime.Now,
-                        hash = "mock",
-                        chainName = nexusChain.Name,
+                        ChainAddress = nexusChain.Address.Text,
+                        Date = DateTime.Now,
+                        Hash = "mock",
+                        ChainName = nexusChain.Name,
                     });
                 }
 
-                var addressDto = AddressContext.FromAddress(nexus, address, mockTransactionList);
+                var addressDto = AddressViewModel.FromAddress(nexus, address, mockTransactionList, soulRate);
 
                 var context = CreateContext();
 
@@ -471,7 +271,7 @@ namespace PhantasmaExplorer
                 var block = targetChain.FindTransactionBlock(tx);
 
                 var context = CreateContext();
-                context["transaction"] = TransactionContext.FromTransaction(nexus, block, tx);
+                context["transaction"] = TransactionViewModel.FromTransaction(nexus, block, tx);
                 return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
             });
 
@@ -481,7 +281,7 @@ namespace PhantasmaExplorer
                 var input = request.GetVariable("input");// todo ask why input = "block=xxxx"
                 var blockHash = Hash.Parse(input);
                 Block block = null;
-                var txList = new List<TransactionContext>();
+                var txList = new List<TransactionViewModel>();
 
                 foreach (var chain in nexus.Chains)
                 {
@@ -498,7 +298,7 @@ namespace PhantasmaExplorer
                     foreach (var transaction in block.Transactions)
                     {
                         var tx = (Transaction)transaction;
-                        txList.Add(TransactionContext.FromTransaction(nexus, block, tx));
+                        txList.Add(TransactionViewModel.FromTransaction(nexus, block, tx));
                     }
                 }
 
@@ -533,7 +333,7 @@ namespace PhantasmaExplorer
                 var context = CreateContext();
                 if (block != null)
                 {
-                    context["block"] = BlockContext.FromBlock(block);
+                    context["block"] = BlockViewModel.FromBlock(block);
                 }
 
                 return templateEngine.Render(site, context, new string[] { "layout", "block" });
@@ -543,7 +343,7 @@ namespace PhantasmaExplorer
             {
                 List<Block> tempList = new List<Block>();
 
-                var blocksTemp = new List<BlockContext>();
+                var blocksTemp = new List<BlockViewModel>();
 
                 foreach (var chain in nexus.Chains)
                 {
@@ -556,7 +356,7 @@ namespace PhantasmaExplorer
                 tempList = tempList.OrderBy(block => block.Timestamp.Value).ToList();
                 foreach (var block in tempList)
                 {
-                    blocksTemp.Add(BlockContext.FromBlock(block));
+                    blocksTemp.Add(BlockViewModel.FromBlock(block));
                 }
 
                 var context = CreateContext();
@@ -570,15 +370,15 @@ namespace PhantasmaExplorer
 
 
 
-        //public List<TransactionContext> GetAddressTransactions(Nexus nexus, Address address, int size)
+        //public List<TransactionViewModel> GetAddressTransactions(Nexus nexus, Address address, int size)
         //{
-        //    var txList= new List<TransactionContext>();
+        //    var txList= new List<TransactionViewModel>();
         //    foreach (var chain in nexus.Chains)
         //    {
         //        foreach (var chainBlock in chain.Blocks)
         //        {
         //            var tx = chainBlock.Transactions.Where(t=>t.)
-        //            txList.Add(TransactionContext.FromTransaction(nexus, chainBlock,));
+        //            txList.Add(TransactionViewModel.FromTransaction(nexus, chainBlock,));
         //        }
         //    }
         //}

@@ -10,6 +10,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="www\netcoreapp2.1\Phantasma.Explorer.deps.json" />
+    <Content Include="www\netcoreapp2.1\Phantasma.Explorer.runtimeconfig.dev.json" />
+    <Content Include="www\netcoreapp2.1\Phantasma.Explorer.runtimeconfig.json" />
+    <Content Include="www\public\css\bootstrap.min.css" />
+    <Content Include="www\public\css\explorer.css" />
+    <Content Include="www\public\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="www\public\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="www\public\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="www\public\img\phantasma_logo.png" />
+    <Content Include="www\views\address.html" />
+    <Content Include="www\views\addresses.html" />
+    <Content Include="www\views\block.html" />
+    <Content Include="www\views\blocks.html" />
+    <Content Include="www\views\chain.html" />
+    <Content Include="www\views\chains.html" />
+    <Content Include="www\views\layout.html" />
+    <Content Include="www\views\tokens.html" />
+    <Content Include="www\views\transaction.html" />
+    <Content Include="www\views\transactions.html" />
+    <Content Include="www\views\transactionsBlock.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LunarLabs.Server" Version="0.1.9.6" />
     <PackageReference Include="LunarParser" Version="1.1.2" />
   </ItemGroup>
@@ -17,6 +40,32 @@
   <ItemGroup>
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj" />
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="www\netcoreapp2.1\Phantasma.Blockchain.dll" />
+    <None Include="www\netcoreapp2.1\Phantasma.Blockchain.pdb" />
+    <None Include="www\netcoreapp2.1\Phantasma.Core.dll" />
+    <None Include="www\netcoreapp2.1\Phantasma.Core.pdb" />
+    <None Include="www\netcoreapp2.1\Phantasma.Cryptography.dll" />
+    <None Include="www\netcoreapp2.1\Phantasma.Cryptography.pdb" />
+    <None Include="www\netcoreapp2.1\Phantasma.Explorer.dll" />
+    <None Include="www\netcoreapp2.1\Phantasma.Explorer.pdb" />
+    <None Include="www\netcoreapp2.1\Phantasma.IO.dll" />
+    <None Include="www\netcoreapp2.1\Phantasma.IO.pdb" />
+    <None Include="www\netcoreapp2.1\Phantasma.Numerics.dll" />
+    <None Include="www\netcoreapp2.1\Phantasma.Numerics.pdb" />
+    <None Include="www\netcoreapp2.1\Phantasma.VM.dll" />
+    <None Include="www\netcoreapp2.1\Phantasma.VM.pdb" />
+    <None Include="www\public\fonts\glyphicons-halflings-regular.svg" />
+    <None Include="www\public\fonts\glyphicons-halflings-regular.woff2" />
+    <None Include="www\public\js\bootstrap.min.js" />
+    <None Include="www\public\js\explorer.js" />
+    <None Include="www\public\js\jquery.min.js" />
   </ItemGroup>
 
 </Project>

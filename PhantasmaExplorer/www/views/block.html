@@ -1,27 +1,27 @@
 <div class="row">
-	<div class="col-lg-12">
-		<h1>Block #{{block.height}}</h1>
-		<table class="table table-striped">
-			<thead>
-			  <tr>
-				<th>Height</th>
-				<th>TimeStamp</th>
-				<th>Transactions</th>
-				<th>Hash</th>
-				<th>Parent Hash</th>
-				<th>Mined By</th>
-			  </tr>
-			</thead>
-			<tbody>
-				  <tr>
-					<td>{{block.height}}</td>
-					<td>{{#date block.timestamp}}</td>
-					<td><a href="/txx/{{block.hash}}">{{block.transactions}}</a></td>
-					<td><a href="/block/{{block.hash}}">{{block.hash}}</a></td>
-					<td><a href="/block/{{block.parentHash}}">{{block.parentHash}}</a></td>
-					<td><a href="/address/{{block.miningAddress}}">{{block.miningAddress}}</a></td>
-				  </tr>
-			</tbody>
-		</table>		
-	</div>
+    <div class="col-lg-12">
+        <h1>Block #{{block.Height}}</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Height</th>
+                    <th>TimeStamp</th>
+                    <th>Transactions</th>
+                    <th>Hash</th>
+                    <th>Parent Hash</th>
+                    <th>Mined By</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{block.Height}}</td>
+                    <td>{{#date block.Timestamp}}</td>
+                    <td><a href="/txx/{{block.Hash}}">{{block.Transactions}}</a></td>
+                    <td><a href="/block/{{block.Hash}}">{{block.Hash}}</a></td>
+                    <td><a href="/block/{{block.ParentHash}}">{{block.ParentHash}}</a></td>
+                    <td><a href="/address/{{block.MiningAddress}}">{{block.MiningAddress}}</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>

@@ -1,27 +1,27 @@
 <div class="row">
-	<div class="col-lg-12">
-		<h1>{{chain.Name}} chain</h1>
-		<table class="table table-striped">
-			<thead>
-			  <tr>
-				<th>Height</th>
-				<th>Age</th>
-				<th>Block Hash</th>
-				<th>txn</th>
-				<th>Miner Address</th>
-			  </tr>
-			</thead>
-			<tbody>
-				{{#each blocks}}
-				  <tr>
-					<td>{{Height}}</td>
-					<td>{{Timestamp.Value}}</td>
-					<td><a href="/block/{{Hash}}">{{Hash}}</a></td>
-					<td><a href="/txx/{{Hash}}">{{Transactions.count}}</a></td>
-					<td><a href="/address/{{MinerAddress}}">{{MinerAddress}}</a></td>
-				  </tr>
-				{{/each}}
-			</tbody>
-		</table>		
-	</div>
+    <div class="col-lg-12">
+        <h1>{{chain.Name}} chain</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Height</th>
+                    <th>Age</th>
+                    <th>Block Hash</th>
+                    <th>txn</th>
+                    <th>Miner Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each blocks}}
+                <tr>
+                    <td>{{Height}}</td>
+                    <td>{{Timestamp.Value}}</td>
+                    <td><a href="/block/{{Hash}}">{{Hash}}</a></td>
+                    <td><a href="/txx/{{Hash}}">{{Transactions.count}}</a></td>
+                    <td><a href="/address/{{MinerAddress}}">{{MinerAddress}}</a></td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
 </div>

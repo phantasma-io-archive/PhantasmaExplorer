@@ -16,11 +16,11 @@
 			<tbody>
 				{{#each transactions}}
 				  <tr>
-					<td><a href="/tx/{{hash}}">{{hash}}</a></td>
-					<td><a href="/block/{{block.Height}}">{{block.Height}}</a></td>
-					<td>{{#date date}}</td>
-					<td>{{fromAddress}}</td>
-					<td>{{fromName}}</td>
+					<td><a href="/tx/{{Hash}}">{{Hash}}</a></td>
+					<td><a href="/block/{{Block.Height}}">{{Block.Height}}</a></td>
+					<td>{{#date Date}}</td>
+					<td>{{FromAddress}}</td>
+					<td>{{FromName}}</td>
 				  </tr>
 				  {{/each}}
 			</tbody>
