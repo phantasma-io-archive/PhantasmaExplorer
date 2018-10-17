@@ -2,18 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using LunarLabs.WebServer.Core;
-using LunarLabs.WebServer.HTTP;
-using LunarLabs.WebServer.Templates;
-using Phantasma.Core.Utils;
 using Phantasma.Blockchain;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
-using Phantasma.Explorer;
+using Phantasma.Explorer.Site;
 using Phantasma.VM.Utils;
-using Phantasma.Explorer.ViewModels;
 
-namespace PhantasmaExplorer
+namespace Phantasma.Explorer
 {
     public struct MenuContext
     {
@@ -24,28 +19,10 @@ namespace PhantasmaExplorer
 
     public class Explorer
     {
-        public static decimal soulRate { get; private set; }
-
-        private static Dictionary<string, object> CreateContext()
-        {
-            var context = new Dictionary<string, object>();
-
-            // TODO this should not be created at each request...
-            var menus = new List<MenuContext>();
-            menus.Add(new MenuContext() { text = "Transactions", url = "/transactions", active = true });
-            menus.Add(new MenuContext() { text = "Chains", url = "/chains", active = false });
-            menus.Add(new MenuContext() { text = "Blocks", url = "/blocks", active = false });
-            menus.Add(new MenuContext() { text = "Tokens", url = "/tokens", active = false });
-            menus.Add(new MenuContext() { text = "Addresses", url = "/addresses", active = false });
-
-            context["menu"] = menus;
-
-            return context;
-        }
-
         static void Main(string[] args)
         {
             Console.WriteLine("Initializing Phantasma Block Explorer....");
+            //InitTestTx();
 
             var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
             var nexus = new Nexus(ownerKey);
@@ -105,327 +82,15 @@ namespace PhantasmaExplorer
             }
             #endregion
 
-            // TODO this should be updated every 5 minutes or so
-            soulRate = CoinUtils.GetCoinRate(2827);
-
             var curPath = Directory.GetCurrentDirectory();
             Console.WriteLine("Current path: " + curPath);
 
-            // initialize a logger
-            var log = new ConsoleLogger();
-
-            // either parse the settings from the program args or initialize them manually
-            var settings = ServerSettings.Parse(args);
-
-            var server = new HTTPServer(log, settings);
-
-            // instantiate a new site, the second argument is the relative file path where the public site contents will be found
-            var site = new Site(server, "public");
-
-            var templateEngine = new TemplateEngine(site, "views");
-
-            site.Get("/", (request) =>
-            {
-                return HTTPResponse.Redirect("/transactions");
-            });
-
-            site.Get("/transactions", (request) =>
-            {
-                var context = CreateContext();
-
-                var txList = new List<TransactionViewModel>();
-                foreach (var chain in nexus.Chains)
-                {
-                    foreach (var block in chain.Blocks.TakeLast(20))
-                    {
-                        foreach (var tx in block.Transactions)
-                        {
-                            txList.Add(TransactionViewModel.FromTransaction(nexus, block, (Transaction)tx));
-                        }
-                    }
-                }
-
-                context["transactions"] = txList;
-                return templateEngine.Render(site, context, new string[] { "layout", "transactions" });
-            });
-
-            site.Get("/addresses", (request) =>
-            {
-                var addressList = new List<AddressViewModel>();
-
-                addressList.Add(AddressViewModel.FromAddress(nexus, ownerKey.Address, null, soulRate));
-                addressList.Add(AddressViewModel.FromAddress(nexus, targetAddress, null, soulRate));
-
-                var context = CreateContext();
-                context["addresses"] = addressList;
-
-                return templateEngine.Render(site, context, new string[] { "layout", "addresses" });
-            });
-
-            site.Get("/chains", (request) =>
-            {
-                var context = CreateContext();
-
-                var chainList = new List<ChainViewModel>();
-                foreach (var chain in nexus.Chains)
-                {
-                    chainList.Add(new ChainViewModel()
-                    {
-                        Address = chain.Address.Text,
-                        Name = chain.Name.ToTitleCase(),
-                        Transactions = chain.TransactionCount,
-                        Height = chain.Blocks.Count()
-                    });
-                }
-
-                context["chains"] = chainList;
-
-                return templateEngine.Render(site, context, new string[] { "layout", "chains" });
-            });
-
-            site.Get("/tokens", (request) =>
-            {
-                var context = CreateContext();
-                var nexusTokens = nexus.Tokens.ToList();
-                //Placeholders todo move this
-                var tokensList = new List<TokenViewModel>();
-                foreach (var token in nexusTokens)
-                {
-                    tokensList.Add(new TokenViewModel
-                    {
-                        Name = token.Name,
-                        Symbol = token.Symbol,
-                        Decimals = (int)token.GetDecimals(),
-                        Description = "Soul is the native asset of Phantasma blockchain",
-                        LogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
-                        ContractHash = "hash here?",
-                        CurrentSupply = (decimal)token.CurrentSupply,
-                        MaxSupply = (decimal)token.MaxSupply,
-                    });
-                }
-                context["tokens"] = tokensList;
-                return templateEngine.Render(site, context, new string[] { "layout", "tokens" });
-            });
-
-            site.Get("/address/{input}", (request) =>
-            {
-                var addressText = request.GetVariable("input");
-                var address = Address.FromText(addressText);
-
-                var mockTransactionList = new List<TransactionViewModel>();
-                foreach (var nexusChain in nexus.Chains)
-                {
-                    mockTransactionList.Add(new TransactionViewModel()
-                    {
-                        ChainAddress = nexusChain.Address.Text,
-                        Date = DateTime.Now,
-                        Hash = "mock",
-                        ChainName = nexusChain.Name,
-                    });
-                }
-
-                var addressDto = AddressViewModel.FromAddress(nexus, address, mockTransactionList, soulRate);
-
-                var context = CreateContext();
-
-                context["address"] = addressDto;
-
-                return templateEngine.Render(site, context, new string[] { "layout", "address" });
-            });
-
-            site.Get("/chain/{input}", (request) => //todo this could be the name of the chain rather then the address?
-            {
-                var addressText = request.GetVariable("input");
-                var chainAddress = Phantasma.Cryptography.Address.FromText(addressText);
-                var chain = nexus.Chains.SingleOrDefault(c => c.Address == chainAddress);
-
-                var context = CreateContext();
-                if (chain != null)
-                {
-                    var blocks = chain.Blocks.ToList().TakeLast(20);
-                    context["blocks"] = blocks;
-                }
-                context["chain"] = chain;
-
-                return templateEngine.Render(site, context, new string[] { "layout", "chain" });
-            });
-
-            site.Get("/tx/{input}", (request) =>
-            {
-                var txHash = request.GetVariable("input");
-                var hash = Hash.Parse(txHash);
-
-
-                Transaction tx = null;
-                Chain targetChain = null;
-                foreach (var chain in nexus.Chains)
-                {
-                    tx = chain.FindTransaction(hash);
-                    if (tx != null)
-                    {
-                        targetChain = chain;
-                        break;
-                    }
-                }
-
-                var block = targetChain.FindTransactionBlock(tx);
-
-                var context = CreateContext();
-                context["transaction"] = TransactionViewModel.FromTransaction(nexus, block, tx);
-                return templateEngine.Render(site, context, new string[] { "layout", "transaction" });
-            });
-
-            // TODO change url
-            site.Get("/txx/{input}", (request) =>
-            {
-                var input = request.GetVariable("input");// todo ask why input = "block=xxxx"
-                var blockHash = Hash.Parse(input);
-                Block block = null;
-                var txList = new List<TransactionViewModel>();
-
-                foreach (var chain in nexus.Chains)
-                {
-                    var x = chain.FindBlock(blockHash);
-                    if (x != null)
-                    {
-                        block = x;
-                        break;
-                    }
-                }
-
-                if (block != null)
-                {
-                    foreach (var transaction in block.Transactions)
-                    {
-                        var tx = (Transaction)transaction;
-                        txList.Add(TransactionViewModel.FromTransaction(nexus, block, tx));
-                    }
-                }
-
-                var context = CreateContext();
-                context["transactions"] = txList;
-                context["blockheight"] = (int)block?.Height;
-                return templateEngine.Render(site, context, new string[] { "layout", "transactionsBlock" });
-            });
-
-            site.Get("/block/{input}", (request) => //input can be height or hash
-            {
-                var input = request.GetVariable("input");
-                Block block = null;
-                if (int.TryParse(input, out var height))
-                {
-                    block = nexus.RootChain.FindBlock(height);
-                }
-                else
-                {
-                    var blockHash = (Hash.Parse(input));
-                    foreach (var chain in nexus.Chains)
-                    {
-                        var x = chain.FindBlock(blockHash);
-                        if (x != null)
-                        {
-                            block = x;
-                            break;
-                        }
-                    }
-                }
-
-                var context = CreateContext();
-                if (block != null)
-                {
-                    context["block"] = BlockViewModel.FromBlock(block);
-                }
-
-                return templateEngine.Render(site, context, new string[] { "layout", "block" });
-            });
-
-            site.Get("/blocks", (request) => //input can be height or hash
-            {
-                List<Block> tempList = new List<Block>();
-
-                var blocksTemp = new List<BlockViewModel>();
-
-                foreach (var chain in nexus.Chains)
-                {
-                    if (chain.Blocks.Any())
-                    {
-                        tempList.AddRange(chain.Blocks.TakeLast(20));
-                    }
-                }
-
-                tempList = tempList.OrderBy(block => block.Timestamp.Value).ToList();
-                foreach (var block in tempList)
-                {
-                    blocksTemp.Add(BlockViewModel.FromBlock(block));
-                }
-
-                var context = CreateContext();
-                context["blocks"] = blocksTemp;
-
-                return templateEngine.Render(site, context, new string[] { "layout", "blocks" });
-            });
-
-            server.Run();
-        }
-
-
-
-        //public List<TransactionViewModel> GetAddressTransactions(Nexus nexus, Address address, int size)
-        //{
-        //    var txList= new List<TransactionViewModel>();
-        //    foreach (var chain in nexus.Chains)
-        //    {
-        //        foreach (var chainBlock in chain.Blocks)
-        //        {
-        //            var tx = chainBlock.Transactions.Where(t=>t.)
-        //            txList.Add(TransactionViewModel.FromTransaction(nexus, chainBlock,));
-        //        }
-        //    }
-        //}
-
-        //todo move this
-        private string RelativeTime(Timestamp stamp)
-        {
-            const int SECOND = 1;
-            const int MINUTE = 60 * SECOND;
-            const int HOUR = 60 * MINUTE;
-            const int DAY = 24 * HOUR;
-            const int MONTH = 30 * DAY;
-            var dt = (DateTime)stamp;
-            var ts = new TimeSpan(DateTime.UtcNow.Ticks - dt.Ticks);
-            double delta = Math.Abs(ts.TotalSeconds);
-
-            if (delta < 1 * MINUTE)
-                return ts.Seconds == 1 ? "one second ago" : ts.Seconds + " seconds ago";
-
-            if (delta < 2 * MINUTE)
-                return "a minute ago";
-
-            if (delta < 45 * MINUTE)
-                return ts.Minutes + " minutes ago";
-
-            if (delta < 90 * MINUTE)
-                return "an hour ago";
-
-            if (delta < 24 * HOUR)
-                return ts.Hours + " hours ago";
-
-            if (delta < 48 * HOUR)
-                return "yesterday";
-
-            if (delta < 30 * DAY)
-                return ts.Days + " days ago";
-
-            if (delta < 12 * MONTH)
-            {
-                int months = Convert.ToInt32(Math.Floor((double)ts.Days / 30));
-                return months <= 1 ? "one month ago" : months + " months ago";
-            }
-            else
-            {
-                int years = Convert.ToInt32(Math.Floor((double)ts.Days / 365));
-                return years <= 1 ? "one year ago" : years + " years ago";
-            }
+            var site = HostBuilder.CreateSite(args, "public");
+            var viewsRenderer = new ViewsRenderer(site, "views");
+            viewsRenderer.SetupControllers(nexus);
+            viewsRenderer.InitMenus();
+            viewsRenderer.SetupHandlers();
+            viewsRenderer.RunServer();
         }
     }
 }

@@ -12,13 +12,13 @@
                 </tr>
             </thead>
             <tbody>
-                {{#each blocks}}
+                {{#each chain.Blocks}}
                 <tr>
                     <td>{{Height}}</td>
-                    <td>{{Timestamp.Value}}</td>
+                    <td>{{Timestamp}}</td>
                     <td><a href="/block/{{Hash}}">{{Hash}}</a></td>
-                    <td><a href="/txx/{{Hash}}">{{Transactions.count}}</a></td>
-                    <td><a href="/address/{{MinerAddress}}">{{MinerAddress}}</a></td>
+                    <td><a href="/txx/{{Hash}}">{{Transactions}}</a></td>
+                    <td><a href="/address/{{MiningAddress}}">{{MiningAddress}}</a></td>
                 </tr>
                 {{/each}}
             </tbody>

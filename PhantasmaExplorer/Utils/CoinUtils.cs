@@ -1,6 +1,7 @@
-﻿using LunarLabs.Parser.JSON;
+﻿using System.Net;
+using LunarLabs.Parser.JSON;
 
-namespace Phantasma.Explorer
+namespace Phantasma.Explorer.Utils
 {
     public static class CoinUtils
     {
@@ -12,7 +13,7 @@ namespace Phantasma.Explorer
 
             try
             {
-                using (var wc = new System.Net.WebClient())
+                using (var wc = new WebClient())
                 {
                     json = wc.DownloadString(url);
                 }

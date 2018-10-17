@@ -33,17 +33,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LunarLabs.Server" Version="0.1.9.6" />
+    <PackageReference Include="LunarLabs.Server" Version="0.1.9.7" />
     <PackageReference Include="LunarParser" Version="1.1.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj" />
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
   <ItemGroup>
