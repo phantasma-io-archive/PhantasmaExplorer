@@ -8,8 +8,6 @@
                     <th>Chain</th>
                     <th>txn</th>
                     <th>Hash</th>
-                    <th>Parent Hash</th>
-                    <th>Mined By</th>
                 </tr>
             </thead>
             <tbody>
@@ -19,8 +17,6 @@
                     <td><a href="/chain/{{ChainAddress}}">{{ChainName}}</a></td>
                     <td><a href="/txx/{{Hash}}">{{Transactions}}</a></td>
                     <td><a href="/block/{{Hash}}">{{Hash}}</a></td>
-                    <td><a href="/block/{{ParentHash}}">{{ParentHash}}</a></td>
-                    <td><a href="/address/{{MiningAddress}}">{{MiningAddress}}</a></td>
                 </tr>
                 {{/each}}
             </tbody>

@@ -1,27 +1,87 @@
 <div class="row">
     <div class="col-lg-12">
-        <h1>Block #{{block.Height}}</h1>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Height</th>
-                    <th>TimeStamp</th>
-                    <th>Transactions</th>
-                    <th>Hash</th>
-                    <th>Parent Hash</th>
-                    <th>Mined By</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{block.Height}}</td>
-                    <td>{{#date block.Timestamp}}</td>
-                    <td><a href="/txx/{{block.Hash}}">{{block.Transactions}}</a></td>
-                    <td><a href="/block/{{block.Hash}}">{{block.Hash}}</a></td>
-                    <td><a href="/block/{{block.ParentHash}}">{{block.ParentHash}}</a></td>
-                    <td><a href="/address/{{block.MiningAddress}}">{{block.MiningAddress}}</a></td>
-                </tr>
-            </tbody>
-        </table>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item active">
+                <a class="nav-link" id="overview-tab" data-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="true">Overview</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="transactions-tab" data-toggle="tab" href="#transactions" role="tab" aria-controls="transactions" aria-selected="false">Transactions</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Block Information</div>
+                    <div class="panel-body">
+
+                        <table class="table no-border">
+                            <tbody>
+                                <tr>
+                                    <td>Date</td>
+                                    <td>{{#date block.Timestamp}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Block Hash</td>
+                                    <td>{{block.Hash}}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Chain</td>
+                                    <td><a href="/chain/{{block.ChainAddress}}">{{block.ChainName}}</a></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Parent Hash</td>
+                                    <td><a href="/block/{{block.ParentHash}}">{{block.ParentHash}}</a></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Block Height</td>
+                                    <td><a href="/block/{{block.Height}}">{{block.Height}}</a></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Mining Address</td>
+                                    <td><a href="/address/{{block.MiningAddress}}">{{block.MiningAddress}}</a></td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Block Transactions</div>
+                    <div class="panel-body">
+                        {{#if block.transactions}}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Hash</th>
+                                    <th>Something more??</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each block.transactions}}
+                                <tr>
+									<td><a href="/tx/{{Hash}}">{{Hash}}</a></td>
+                                    <td>TODO</td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                        {{#else}}
+                        Nothing here...
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+			
+        </div>
     </div>
 </div>
