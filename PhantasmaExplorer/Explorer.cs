@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
+using Phantasma.Explorer.Infrastructure.Data;
 using Phantasma.Explorer.Site;
 using Phantasma.VM.Utils;
 
@@ -22,14 +22,29 @@ namespace Phantasma.Explorer
         static void Main(string[] args)
         {
             Console.WriteLine("Initializing Phantasma Block Explorer....");
-            //InitTestTx();
+            var nexus = InitMockData();
 
+            var curPath = Directory.GetCurrentDirectory();
+            Console.WriteLine("Current path: " + curPath);
+
+            var site = HostBuilder.CreateSite(args, "public");
+            var viewsRenderer = new ViewsRenderer(site, "views");
+
+            var mockRepo = new MockRepository { NexusChain = nexus };
+
+            viewsRenderer.SetupControllers(mockRepo);
+            viewsRenderer.InitMenus();
+            viewsRenderer.SetupHandlers();
+            site.server.Run();
+        }
+
+        private static Nexus InitMockData()
+        {
             var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
             var nexus = new Nexus(ownerKey);
 
             var bankChain = nexus.FindChainByName("bank");
 
-            #region TESTING TXs
             // TODO move this to a separate method...            
             var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB");
 
@@ -80,17 +95,7 @@ namespace Phantasma.Explorer
                     throw new Exception("test block failed");
                 }
             }
-            #endregion
-
-            var curPath = Directory.GetCurrentDirectory();
-            Console.WriteLine("Current path: " + curPath);
-
-            var site = HostBuilder.CreateSite(args, "public");
-            var viewsRenderer = new ViewsRenderer(site, "views");
-            viewsRenderer.SetupControllers(nexus);
-            viewsRenderer.InitMenus();
-            viewsRenderer.SetupHandlers();
-            viewsRenderer.RunServer();
+            return nexus;
         }
     }
 }

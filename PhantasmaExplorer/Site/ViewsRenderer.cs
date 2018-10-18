@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
-using Phantasma.Blockchain;
 using Phantasma.Explorer.Controllers;
+using Phantasma.Explorer.Infrastructure.Interfaces;
 
 namespace Phantasma.Explorer.Site
 {
@@ -23,11 +23,11 @@ namespace Phantasma.Explorer.Site
         {
             var menus = new List<MenuContext>
             {
-                new MenuContext {text = "Transactions", url = "/transactions", active = true},
-                new MenuContext {text = "Chains", url = "/chains", active = false},
-                new MenuContext {text = "Blocks", url = "/blocks", active = false},
-                new MenuContext {text = "Tokens", url = "/tokens", active = false},
-                new MenuContext {text = "Addresses", url = "/addresses", active = false}
+                new MenuContext {text = "Transactions", url = urlTransactions, active = true},
+                new MenuContext {text = "Chains", url = urlChains, active = false},
+                new MenuContext {text = "Blocks", url = urlBlocks, active = false},
+                new MenuContext {text = "Tokens", url = urlTokens, active = false},
+                new MenuContext {text = "Addresses", url = urlAddresses, active = false}
             };
 
             Context["menu"] = menus;
@@ -43,127 +43,159 @@ namespace Phantasma.Explorer.Site
             Context[key] = value;
         }
 
-        public void SetupControllers(Nexus nexus) //todo this should be done by other class
+        public void SetupControllers(IRepository repo) //todo this should be done by other class
         {
-            AddressesController = new AddressesController(nexus);
-            BlocksController = new BlocksController(nexus);
-            ChainsController = new ChainsController(nexus);
-            TransactionsController = new TransactionsController(nexus);
-            TokensController = new TokensController(nexus);
+            AddressesController = new AddressesController(repo);
+            BlocksController = new BlocksController(repo);
+            ChainsController = new ChainsController(repo);
+            TransactionsController = new TransactionsController(repo);
+            TokensController = new TokensController(repo);
         }
 
         public void SetupHandlers() //todo move magic strings to vars and separate each call
         {
-            TemplateEngine.Site.Get("/", request => HTTPResponse.Redirect("/transactions"));
+            TemplateEngine.Site.Get("/", request => HTTPResponse.Redirect(urlTransactions));
 
             //todo add error/empty view if object from controller call is null or empty
-            TemplateEngine.Site.Get("/tokens", request =>
+            TemplateEngine.Site.Get(urlTokens, request =>
             {
                 var tokensList = TokensController.GetTokens();
 
-                UpdateContext("tokens", tokensList);
-                return RendererView(new[] {"layout", "tokens"});
+                UpdateContext(tokensContext, tokensList);
+                return RendererView(new[] {"layout", tokensContext});
+            });
+
+            TemplateEngine.Site.Get($"{urlToken}/{{input}}", request =>
+            {
+                var tokenSymbol = request.GetVariable("input");
+                var token = TokensController.GetToken(tokenSymbol);
+
+                UpdateContext(tokenContext, token);
+                return RendererView(new[] {"layout", tokenContext});
             });
 
             #region Transactions
 
-            TemplateEngine.Site.Get("/transactions", request =>
+            TemplateEngine.Site.Get(urlTransactions, request =>
             {
-                var txList = TransactionsController.GetTransactions();
+                var txList = TransactionsController.GetLastTransactions();
 
-                UpdateContext("transactions", txList);
-                return RendererView(new[] {"layout", "transactions"});
+                UpdateContext(txsContext, txList);
+                return RendererView(new[] {"layout", txsContext});
             });
 
-            TemplateEngine.Site.Get("/tx/{input}", request =>
+            TemplateEngine.Site.Get($"{urlTransaction}/{{input}}", request =>
             {
                 var txHash = request.GetVariable("input");
                 var tx = TransactionsController.GetTransaction(txHash);
 
-                UpdateContext("transaction", tx);
+                UpdateContext(txContext, tx);
 
-                return RendererView(new[] {"layout", "transaction"});
+                return RendererView(new[] {"layout", txContext});
             });
 
-            TemplateEngine.Site.Get("/txx/{input}", request =>
+            TemplateEngine.Site.Get($"{urlTransactionInBlock}/{{input}}", request =>
             {
-                var input = request.GetVariable("input"); // todo ask why input = "block=xxxx"
+                var input = request.GetVariable("input");
                 var txList = TransactionsController.GetTransactionsByBlock(input);
-                UpdateContext("transactionsBlock", txList);
+                UpdateContext(txInBlockContext, txList);
 
-                return RendererView(new[] {"layout", "transactionsBlock"});
+                return RendererView(new[] {"layout", txInBlockContext});
             });
 
             #endregion
 
             #region Address
 
-            TemplateEngine.Site.Get("/addresses", request =>
+            TemplateEngine.Site.Get($"{urlAddresses}", request =>
             {
                 var addressList = AddressesController.GetAddressList();
 
-                UpdateContext("addresses", addressList);
-                return RendererView(new[] {"layout", "addresses"});
+                UpdateContext(addressesContext, addressList);
+                return RendererView(new[] {"layout", addressesContext});
             });
 
-            TemplateEngine.Site.Get("/address/{input}", request =>
+            TemplateEngine.Site.Get($"{urlAddress}/{{input}}", request =>
             {
                 var addressText = request.GetVariable("input");
                 var address = AddressesController.GetAddress(addressText);
 
-                UpdateContext("address", address);
-                return RendererView(new[] {"layout", "address"});
+                UpdateContext(addressContext, address);
+                return RendererView(new[] {"layout", addressContext});
             });
 
             #endregion
 
             #region Blocks
 
-            TemplateEngine.Site.Get("/blocks", request =>
+            TemplateEngine.Site.Get($"{urlBlocks}", request =>
             {
-                var blocksList = BlocksController.GetLatestBlock();
+                var blocksList = BlocksController.GetLatestBlocks();
 
-                UpdateContext("blocks", blocksList);
-                return RendererView(new[] {"layout", "blocks"});
+                UpdateContext(blocksContext, blocksList);
+                return RendererView(new[] {"layout", blocksContext});
             });
 
-            TemplateEngine.Site.Get("/block/{input}", request => //input can be height or hash
+            TemplateEngine.Site.Get($"{urlBlock}/{{input}}", request => //input can be height or hash
             {
                 var input = request.GetVariable("input");
                 var block = BlocksController.GetBlock(input);
 
-                UpdateContext("block", block);
-                return RendererView(new[] {"layout", "block"});
+                UpdateContext(blockContext, block);
+                return RendererView(new[] {"layout", blockContext});
             });
 
             #endregion
 
             #region Chains
 
-            TemplateEngine.Site.Get("/chains", request =>
+            TemplateEngine.Site.Get($"{urlChains}", request =>
             {
                 var chainList = ChainsController.GetChains();
 
-                UpdateContext("chains", chainList);
-                return RendererView(new[] {"layout", "chains"});
+                UpdateContext(chainsContext, chainList);
+                return RendererView(new[] {"layout", chainsContext});
             });
 
-            TemplateEngine.Site.Get("/chain/{input}",
+            TemplateEngine.Site.Get($"{urlChain}/{{input}}",
                 request => //todo this could be the name of the chain rather then the address?
                 {
                     var addressText = request.GetVariable("input");
                     var chain = ChainsController.GetChain(addressText);
-                    UpdateContext("chain", chain);
-                    return RendererView(new[] {"layout", "chain"});
+                    UpdateContext(chainContext, chain);
+                    return RendererView(new[] {"layout", chainContext});
                 });
 
             #endregion
         }
 
-        public void RunServer()
-        {
-            TemplateEngine.Site.server.Run();
-        }
+        #region URL&CONTEXT
+
+        private readonly string urlTokens = "/tokens";
+        private readonly string urlToken = "/token";
+        private readonly string urlTransactions = "/transactions";
+        private readonly string urlTransactionInBlock = "/txx";
+        private readonly string urlTransaction = "/tx";
+        private readonly string urlChains = "/chains";
+        private readonly string urlChain = "/chain";
+        private readonly string urlBlocks = "/blocks";
+        private readonly string urlBlock = "/block";
+        private readonly string urlAddresses = "/addresses";
+        private readonly string urlAddress = "/address";
+
+        private readonly string tokensContext = "tokens";
+        private readonly string tokenContext = "token";
+        private readonly string txContext = "transaction";
+        private readonly string txsContext = "transactions";
+        private readonly string txInBlockContext = "transactionsBlock";
+        private readonly string addressesContext = "addresses";
+        private readonly string addressContext = "address";
+        private readonly string blocksContext = "blocks";
+        private readonly string blockContext = "block";
+        private readonly string chainsContext = "chains";
+        private readonly string chainContext = "chain";
+
+        #endregion
 
         #region Controllers
 

@@ -4,6 +4,7 @@ using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Cryptography;
+using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.ViewModels;
 using Phantasma.IO;
 
@@ -11,18 +12,18 @@ namespace Phantasma.Explorer.Controllers
 {
     public class TransactionsController
     {
-        public Nexus NexusChain { get; set; } //todo this should be replace with a repository or db instance
+        public IRepository Repository { get; set; } //todo interface
 
-        public TransactionsController(Nexus chain)
+        public TransactionsController(IRepository repo)
         {
-            NexusChain = chain;
+            Repository = repo;
         }
 
-        public List<TransactionViewModel> GetTransactions()
+        public List<TransactionViewModel> GetLastTransactions()
         {
+            var repoChains = Repository.GetAllChains();
             var txList = new List<TransactionViewModel>();
-
-            foreach (var chain in NexusChain.Chains)
+            foreach (var chain in repoChains)
             {
                 foreach (var block in chain.Blocks.TakeLast(20))
                 {
@@ -35,10 +36,11 @@ namespace Phantasma.Explorer.Controllers
                             evts.Add(new EventViewModel()
                             {
                                 Kind = evt.Kind,
-                                Content = GetEventContent(NexusChain, block, evt), //todo fix me
+                                Content = GetEventContent(Repository.NexusChain, block, evt), //todo fix me
                             });
                         }
-                        txList.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), (Transaction)tx, evts));
+
+                        txList.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), tx1, evts));
                     }
                 }
             }
@@ -47,44 +49,29 @@ namespace Phantasma.Explorer.Controllers
 
         public TransactionViewModel GetTransaction(string txHash)
         {
-            var hash = Hash.Parse(txHash);
-            Transaction tx = null;
-            Chain targetChain = null;
-            foreach (var chain in NexusChain.Chains)
-            {
-                tx = chain.FindTransaction(hash);
-                if (tx != null)
-                {
-                    targetChain = chain;
-                    break;
-                }
-            }
+            Transaction transaction = Repository.GetTransaction(txHash);
 
-            if (targetChain != null)
+            Block block = Repository.GetBlockWithTransaction(transaction);
+            var evts = new List<EventViewModel>();
+            foreach (var evt in transaction.Events)
             {
-                var block = targetChain.FindTransactionBlock(tx);
-                var evts = new List<EventViewModel>();
-                foreach (var evt in tx.Events)
+                evts.Add(new EventViewModel()
                 {
-                    evts.Add(new EventViewModel()
-                    {
-                        Kind = evt.Kind,
-                        Content = GetEventContent(NexusChain, block, evt), //todo fix me
-                    });
-                }
-                return TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), tx, evts);
+                    Kind = evt.Kind,
+                    Content = GetEventContent(Repository.NexusChain, block, evt), //todo fix me
+                });
             }
-
-            return null;
+            return TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), transaction, evts);
         }
 
+        // todo tomorrow
         public List<TransactionViewModel> GetTransactionsByBlock(string input)
         {
             var blockHash = Hash.Parse(input);
             Block block = null;
             var txList = new List<TransactionViewModel>();
 
-            foreach (var chain in NexusChain.Chains)
+            foreach (var chain in Repository.NexusChain.Chains)
             {
                 var x = chain.FindBlock(blockHash);
                 if (x != null)
@@ -105,7 +92,7 @@ namespace Phantasma.Explorer.Controllers
                         evts.Add(new EventViewModel()
                         {
                             Kind = evt.Kind,
-                            Content = GetEventContent(NexusChain, block, evt), //todo fix me
+                            Content = GetEventContent(Repository.NexusChain, block, evt), //todo fix me
                         });
                     }
                     txList.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), tx, evts));
@@ -116,7 +103,7 @@ namespace Phantasma.Explorer.Controllers
         }
 
 
-        // TODO exception and error handling and move this
+        // TODO move this, exception and error handling and move this
         public static string GetEventContent(Nexus nexus, Block block, Event evt)
         {
             switch (evt.Kind)

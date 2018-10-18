@@ -1,36 +1,42 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Phantasma.Blockchain;
+using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
 {
     public class TokensController
     {
-        public Nexus NexusChain { get; set; } //todo this should be replace with a repository or db instance
+        public IRepository Repository { get; set; } //todo interface
 
-        public TokensController(Nexus chain)
+        public TokensController(IRepository repo)
         {
-            NexusChain = chain;
+            Repository = repo;
+        }
+
+        public TokenViewModel GetToken(string symbol)
+        {
+            var token = Repository.GetToken(symbol);
+            if (token != null)
+            {
+                return TokenViewModel.FromToken(token, //todo
+                    "Soul is the native asset of Phantasma blockchain",
+                    "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
+                    10);
+            }
+
+            return null;
         }
 
         public List<TokenViewModel> GetTokens()
         {
-            var nexusTokens = NexusChain.Tokens.ToList();
+            var nexusTokens = Repository.GetTokens();
             var tokensList = new List<TokenViewModel>();
             foreach (var token in nexusTokens)
             {
-                tokensList.Add(new TokenViewModel
-                {
-                    Name = token.Name,
-                    Symbol = token.Symbol,
-                    Decimals = (int) token.GetDecimals(),
-                    Description = "Soul is the native asset of Phantasma blockchain",
-                    LogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
-                    ContractHash = "hash here?",
-                    CurrentSupply = (decimal) token.CurrentSupply,
-                    MaxSupply = (decimal) token.MaxSupply,
-                });
+                tokensList.Add(TokenViewModel.FromToken(token, //todo
+                    "Soul is the native asset of Phantasma blockchain", 
+                    "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
+                    10));
             }
 
             return tokensList;

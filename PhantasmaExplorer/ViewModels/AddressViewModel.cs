@@ -12,16 +12,14 @@ namespace Phantasma.Explorer.ViewModels
         public decimal Value { get; set; }
         public List<TransactionViewModel> Transactions { get; set; }
 
-        public static AddressViewModel FromAddress(Nexus nexus, Address address, List<TransactionViewModel> txList, decimal soulRate)
+        public static AddressViewModel FromAddress(Address address, decimal balance)
         {
-            var balance = TokenUtils.ToDecimal(nexus.RootChain.GetTokenBalance(nexus.NativeToken, address));
             return new AddressViewModel()
             {
                 Address = address.Text,
                 Name = "Anonymous",
                 Balance = balance,
-                Value = balance * soulRate,
-                Transactions = txList
+                Value = 0
             };
         }
     }

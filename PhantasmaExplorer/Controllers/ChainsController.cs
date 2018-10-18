@@ -1,26 +1,34 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Phantasma.Blockchain;
-using Phantasma.Cryptography;
+using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
 {
     public class ChainsController
     {
-        public Nexus NexusChain { get; set; } //todo this should be replace with a repository or db instance
+        public IRepository Repository { get; set; } //todo interface
 
-        public ChainsController(Nexus chain)
+        public ChainsController(IRepository repo)
         {
-            NexusChain = chain;
+            Repository = repo;
         }
 
         public List<ChainViewModel> GetChains()
         {
+            var repoChains = Repository.GetAllChains();
             var chainList = new List<ChainViewModel>();
-            foreach (var chain in NexusChain.Chains)
+
+            foreach (var repoChain in repoChains)
             {
-                chainList.Add(ChainViewModel.FromChain(chain, null));
+                var blockList = new List<BlockViewModel>();
+                var lastBlocks = Repository.GetBlocks(repoChain.Address.Text);
+
+                foreach (var block in lastBlocks)
+                {
+                    blockList.Add(BlockViewModel.FromBlock(block));
+                }
+
+                chainList.Add(ChainViewModel.FromChain(repoChain, blockList));
             }
 
             return chainList;
@@ -28,22 +36,16 @@ namespace Phantasma.Explorer.Controllers
 
         public ChainViewModel GetChain(string chainInput)
         {
-            var chainAddress = Address.FromText(chainInput);
-            var chain = NexusChain.Chains.SingleOrDefault(c => c.Address == chainAddress);
+            var repoChain = Repository.GetChain(chainInput);
+            var blockList = new List<BlockViewModel>();
+            var lastBlocks = Repository.GetBlocks(repoChain.Address.Text);
 
-            if (chain != null)
+            foreach (var block in lastBlocks)
             {
-                List<BlockViewModel> lastBlocks = new List<BlockViewModel>();
-                var blocks = chain.Blocks.ToList().TakeLast(20);
-                foreach (var block in blocks)
-                {
-                    lastBlocks.Add(BlockViewModel.FromBlock(block));
-                }
-
-                return ChainViewModel.FromChain(chain, lastBlocks);
+                blockList.Add(BlockViewModel.FromBlock(block));
             }
 
-            return null;
+            return ChainViewModel.FromChain(repoChain, blockList);
         }
     }
 }

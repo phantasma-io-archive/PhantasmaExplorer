@@ -26,6 +26,7 @@
     <Content Include="www\views\chain.html" />
     <Content Include="www\views\chains.html" />
     <Content Include="www\views\layout.html" />
+    <Content Include="www\views\token.html" />
     <Content Include="www\views\tokens.html" />
     <Content Include="www\views\transaction.html" />
     <Content Include="www\views\transactions.html" />

@@ -1,7 +1,7 @@
 ﻿using LunarLabs.WebServer.Core;
 using LunarLabs.WebServer.HTTP;
 
-namespace Phantasma.Explorer
+namespace Phantasma.Explorer.Site
 {
     public static class HostBuilder
     {

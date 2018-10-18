@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Phantasma.Blockchain;
-using Phantasma.Cryptography;
+using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 
@@ -9,36 +8,39 @@ namespace Phantasma.Explorer.Controllers
 {
     public class AddressesController
     {
-        public Nexus NexusChain { get; set; } //todo this should be replace with a repository or db instance
+        public IRepository Repository { get; set; } //todo interface
+        private decimal SoulRate { get; set; }
 
-        public static decimal SoulRate { get; private set; }
-
-
-        public AddressesController(Nexus chain)
+        public AddressesController(IRepository repo)
         {
-            NexusChain = chain;
+            Repository = repo;
         }
 
         public List<AddressViewModel> GetAddressList()
         {
+            var repoAddressList = Repository.GetAddressList();
             var addressList = new List<AddressViewModel>();
-
-            var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB"); //todo remove hack
-            var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
-
-            SoulRate = CoinUtils.GetCoinRate(2827);
-            addressList.Add(AddressViewModel.FromAddress(NexusChain, ownerKey.Address, null, SoulRate));
-            addressList.Add(AddressViewModel.FromAddress(NexusChain, targetAddress, null, SoulRate));
-
+            SoulRate = CoinUtils.GetCoinRate(2827);//todo update
+            foreach (var address in repoAddressList)
+            {
+                var balance = Repository.GetAddressBalance(address);
+                addressList.Add(AddressViewModel.FromAddress(address, balance));
+            }
+            CalculateAddressTokesValue(addressList);
             return addressList;
         }
 
         public AddressViewModel GetAddress(string addressText)
         {
-            var address = Address.FromText(addressText);
-            SoulRate = CoinUtils.GetCoinRate(2827);
+            var repoAddress = Repository.GetAddress(addressText);
+            var balance = Repository.GetAddressBalance(repoAddress);
+            SoulRate = CoinUtils.GetCoinRate(2827);//todo update
+            var address = AddressViewModel.FromAddress(repoAddress, balance);
+            CalculateAddressTokesValue(new List<AddressViewModel> { address });
+
+            //mock tx
             var mockTransactionList = new List<TransactionViewModel>();
-            foreach (var nexusChain in NexusChain.Chains)
+            foreach (var nexusChain in Repository.NexusChain.Chains)
             {
                 mockTransactionList.Add(new TransactionViewModel()
                 {
@@ -49,7 +51,16 @@ namespace Phantasma.Explorer.Controllers
                 });
             }
 
-            return AddressViewModel.FromAddress(NexusChain, address, mockTransactionList, SoulRate);
+            address.Transactions = mockTransactionList;
+            return address;
+        }
+
+        private void CalculateAddressTokesValue(List<AddressViewModel> list)
+        {
+            foreach (var address in list)
+            {
+                address.Value = address.Balance + SoulRate;
+            }
         }
     }
 }

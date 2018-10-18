@@ -1,6 +1,6 @@
 <div class="row">
 	<div class="col-lg-12">
-		<h1>Transactions for block<br><small>{{transactions[0].Block.Height}}</small></h1>		
+		<h1>Transactions for block<br><small>{{transactionsBlock[0].Block.Height}}</small></h1>		
 		<br>
 			
 		<table class="table table-striped">
@@ -13,17 +13,17 @@
 				<th>From Name</th>
 			  </tr>
 			</thead>
-			<tbody>
-				{{#each transactions}}
-				  <tr>
-					<td><a href="/tx/{{Hash}}">{{Hash}}</a></td>
-					<td><a href="/block/{{Block.Height}}">{{Block.Height}}</a></td>
-					<td>{{#date Date}}</td>
-					<td>{{FromAddress}}</td>
-					<td>{{FromName}}</td>
-				  </tr>
-				  {{/each}}
-			</tbody>
+            <tbody>
+                {{#each transactionsBlock}}
+                <tr>
+                    <td><a href="/tx/{{Hash}}">{{Hash}}</a></td>
+                    <td><a href="/block/{{Block.Height}}">{{Block.Height}}</a></td>
+                    <td>{{#date Date}}</td>
+                    <td>{{FromAddress}}</td>
+                    <td>{{FromName}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
 		</table>		
 	</div>
 </div>

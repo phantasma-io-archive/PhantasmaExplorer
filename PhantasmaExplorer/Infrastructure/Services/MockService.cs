@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Phantasma.Explorer.Infrastructure.Interfaces;
 
 namespace Phantasma.Explorer.Infrastructure.Services
 {
     // Service stuff: notifications, ByteToOpCode etc..
-    class MockService
+    public class MockService : IService
     {
     }
 }
