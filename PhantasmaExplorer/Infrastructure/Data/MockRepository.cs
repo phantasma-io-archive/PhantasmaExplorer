@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
+using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
+using Phantasma.IO;
 
 namespace Phantasma.Explorer.Infrastructure.Data
 {
@@ -57,8 +59,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             }
             else //specific chain
             {
-                var chainAddress = Address.FromText(chainInput);
-                var chain = NexusChain.Chains.SingleOrDefault(c => c.Address == chainAddress);
+                var chain = GetChain(chainInput);
                 if (chain != null && chain.Blocks.Any())
                 {
                     blockList.AddRange(chain.Blocks.TakeLast(lastBlocksAmount));
@@ -86,7 +87,18 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public Block GetBlock(int height, string chainAddress = "")
         {
-            var block = NexusChain.RootChain.FindBlockByHeight(height);
+            Block block;
+
+            if (string.IsNullOrEmpty(chainAddress)) // search in main chain
+            {
+                block = NexusChain.RootChain.FindBlockByHeight(height);
+            }
+            else
+            {
+                var chain = GetChain(chainAddress);
+                block = chain.FindBlockByHeight(height);
+            }
+           
             return block;
         }
 
@@ -151,7 +163,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return null;
         }
 
-        public Block GetBlockWithTransaction(Transaction tx)
+        public Block GetBlock(Transaction tx)
         {
             var chains = GetAllChains();
             Chain targetChain = null;
@@ -177,9 +189,82 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return NexusChain.Tokens.SingleOrDefault(t => t.Symbol == symbol);
         }
 
-        public List<Event> GetEventContent(Chain chain, Block block, Transaction tx)
+        public string GetEventContent(Block block, Event evt)
         {
-            throw new NotImplementedException();
+            switch (evt.Kind)
+            {
+                case EventKind.ChainCreate:
+                    {
+                        var chainAddress = Serialization.Unserialize<Address>(evt.Data);
+                        var chain = NexusChain.FindChainByAddress(chainAddress);
+                        return $"{chain.Name} chain created at address <a href=\"/chain/{chainAddress}\">{chainAddress}</a>.";
+                    }
+
+                case EventKind.TokenCreate:
+                    {
+                        var symbol = Serialization.Unserialize<string>(evt.Data);
+                        var token = NexusChain.FindTokenBySymbol(symbol);
+                        return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
+                    }
+
+                case EventKind.TokenMint:
+                case EventKind.TokenBurn:
+                case EventKind.TokenSend:
+                case EventKind.TokenReceive:
+                    {
+                        var data = Serialization.Unserialize<TokenEventData>(evt.Data);
+                        var token = NexusChain.FindTokenBySymbol(data.symbol);
+                        string action;
+
+                        switch (evt.Kind)
+                        {
+                            case EventKind.TokenMint: action = "minted"; break;
+                            case EventKind.TokenBurn: action = "burned"; break;
+                            case EventKind.TokenSend: action = "sent"; break;
+                            case EventKind.TokenReceive: action = "received"; break;
+                            default: action = "???"; break;
+                        }
+
+                        string chainText;
+
+                        if (data.chainAddress != block.Chain.Address)
+                        {
+                            Address srcAddress, dstAddress;
+
+                            if (evt.Kind == EventKind.TokenReceive)
+                            {
+                                srcAddress = data.chainAddress;
+                                dstAddress = block.Chain.Address;
+                            }
+                            else
+                            {
+                                srcAddress = block.Chain.Address;
+                                dstAddress = data.chainAddress;
+                            }
+
+                            chainText = $"from <a href=\"/chain/{srcAddress}\">{GetChainName(NexusChain, srcAddress)} chain</a> to <a href=\"/chain/{dstAddress}\">{GetChainName(NexusChain, dstAddress)} chain";
+                        }
+                        else
+                        {
+                            chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(NexusChain, data.chainAddress)} chain";
+                        }
+
+                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
+                    }
+
+                default: return "Nothing.";
+            }
+        }
+
+        private static string GetChainName(Nexus nexus, Address chainAddress)
+        {
+            var chain = nexus.FindChainByAddress(chainAddress);
+            if (chain != null)
+            {
+                return chain.Name;
+            }
+
+            return "???";
         }
 
     }

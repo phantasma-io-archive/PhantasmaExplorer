@@ -22,7 +22,7 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         Block GetBlock(int height, string chainAddress = "");
 
-        Block GetBlockWithTransaction(Transaction tx);
+        Block GetBlock(Transaction tx);
 
         List<Chain> GetAllChains();
 
@@ -36,6 +36,6 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         Token GetToken(string symbol);
 
-        List<Event> GetEventContent(Chain chain, Block block, Transaction tx);
+        string GetEventContent(Block block, Event evt);
     }
 }

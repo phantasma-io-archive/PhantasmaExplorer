@@ -41,7 +41,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public Block GetBlockWithTransaction(Transaction tx)
+        public Block GetBlock(Transaction tx)
         {
             throw new System.NotImplementedException();
         }
@@ -76,7 +76,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public List<Event> GetEventContent(Chain chain, Block block, Transaction tx)
+        public string GetEventContent(Block block, Event evt)
         {
             throw new System.NotImplementedException();
         }

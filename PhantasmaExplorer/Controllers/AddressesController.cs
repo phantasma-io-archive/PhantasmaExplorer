@@ -59,7 +59,8 @@ namespace Phantasma.Explorer.Controllers
         {
             foreach (var address in list)
             {
-                address.Value = address.Balance + SoulRate;
+                address.Value = address.Balance * SoulRate;
+                var das = address.Value.ToString("F3");
             }
         }
     }

@@ -27,8 +27,9 @@ namespace Phantasma.Explorer.Site
                 new MenuContext {text = "Chains", url = urlChains, active = false},
                 new MenuContext {text = "Blocks", url = urlBlocks, active = false},
                 new MenuContext {text = "Tokens", url = urlTokens, active = false},
-                new MenuContext {text = "Addresses", url = urlAddresses, active = false}
+                //new MenuContext {text = "Addresses", url = urlAddresses, active = false}
             };
+            TemplateEngine.RegisterTag("value", (doc, val) => new PriceTag(doc, val));
 
             Context["menu"] = menus;
         }
@@ -62,7 +63,7 @@ namespace Phantasma.Explorer.Site
                 var tokensList = TokensController.GetTokens();
 
                 UpdateContext(tokensContext, tokensList);
-                return RendererView(new[] {"layout", tokensContext});
+                return RendererView(new[] { "layout", tokensContext });
             });
 
             TemplateEngine.Site.Get($"{urlToken}/{{input}}", request =>
@@ -71,7 +72,7 @@ namespace Phantasma.Explorer.Site
                 var token = TokensController.GetToken(tokenSymbol);
 
                 UpdateContext(tokenContext, token);
-                return RendererView(new[] {"layout", tokenContext});
+                return RendererView(new[] { "layout", tokenContext });
             });
 
             #region Transactions
@@ -81,7 +82,7 @@ namespace Phantasma.Explorer.Site
                 var txList = TransactionsController.GetLastTransactions();
 
                 UpdateContext(txsContext, txList);
-                return RendererView(new[] {"layout", txsContext});
+                return RendererView(new[] { "layout", txsContext });
             });
 
             TemplateEngine.Site.Get($"{urlTransaction}/{{input}}", request =>
@@ -91,7 +92,7 @@ namespace Phantasma.Explorer.Site
 
                 UpdateContext(txContext, tx);
 
-                return RendererView(new[] {"layout", txContext});
+                return RendererView(new[] { "layout", txContext });
             });
 
             TemplateEngine.Site.Get($"{urlTransactionInBlock}/{{input}}", request =>
@@ -100,7 +101,7 @@ namespace Phantasma.Explorer.Site
                 var txList = TransactionsController.GetTransactionsByBlock(input);
                 UpdateContext(txInBlockContext, txList);
 
-                return RendererView(new[] {"layout", txInBlockContext});
+                return RendererView(new[] { "layout", txInBlockContext });
             });
 
             #endregion
@@ -112,7 +113,7 @@ namespace Phantasma.Explorer.Site
                 var addressList = AddressesController.GetAddressList();
 
                 UpdateContext(addressesContext, addressList);
-                return RendererView(new[] {"layout", addressesContext});
+                return RendererView(new[] { "layout", addressesContext });
             });
 
             TemplateEngine.Site.Get($"{urlAddress}/{{input}}", request =>
@@ -121,7 +122,7 @@ namespace Phantasma.Explorer.Site
                 var address = AddressesController.GetAddress(addressText);
 
                 UpdateContext(addressContext, address);
-                return RendererView(new[] {"layout", addressContext});
+                return RendererView(new[] { "layout", addressContext });
             });
 
             #endregion
@@ -133,7 +134,7 @@ namespace Phantasma.Explorer.Site
                 var blocksList = BlocksController.GetLatestBlocks();
 
                 UpdateContext(blocksContext, blocksList);
-                return RendererView(new[] {"layout", blocksContext});
+                return RendererView(new[] { "layout", blocksContext });
             });
 
             TemplateEngine.Site.Get($"{urlBlock}/{{input}}", request => //input can be height or hash
@@ -142,7 +143,7 @@ namespace Phantasma.Explorer.Site
                 var block = BlocksController.GetBlock(input);
 
                 UpdateContext(blockContext, block);
-                return RendererView(new[] {"layout", blockContext});
+                return RendererView(new[] { "layout", blockContext });
             });
 
             #endregion
@@ -154,7 +155,7 @@ namespace Phantasma.Explorer.Site
                 var chainList = ChainsController.GetChains();
 
                 UpdateContext(chainsContext, chainList);
-                return RendererView(new[] {"layout", chainsContext});
+                return RendererView(new[] { "layout", chainsContext });
             });
 
             TemplateEngine.Site.Get($"{urlChain}/{{input}}",
@@ -163,7 +164,7 @@ namespace Phantasma.Explorer.Site
                     var addressText = request.GetVariable("input");
                     var chain = ChainsController.GetChain(addressText);
                     UpdateContext(chainContext, chain);
-                    return RendererView(new[] {"layout", chainContext});
+                    return RendererView(new[] { "layout", chainContext });
                 });
 
             #endregion
@@ -174,7 +175,7 @@ namespace Phantasma.Explorer.Site
         private readonly string urlTokens = "/tokens";
         private readonly string urlToken = "/token";
         private readonly string urlTransactions = "/transactions";
-        private readonly string urlTransactionInBlock = "/txx";
+        private readonly string urlTransactionInBlock = "/txsblock";
         private readonly string urlTransaction = "/tx";
         private readonly string urlChains = "/chains";
         private readonly string urlChain = "/chain";
