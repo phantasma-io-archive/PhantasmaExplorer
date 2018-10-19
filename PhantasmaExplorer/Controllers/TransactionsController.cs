@@ -33,7 +33,7 @@ namespace Phantasma.Explorer.Controllers
                             evts.Add(new EventViewModel()
                             {
                                 Kind = evt.Kind,
-                                Content = Repository.GetEventContent(block, evt), //todo fix me
+                                Content = Repository.GetEventContent(block, evt)
                             });
                         }
 
@@ -55,13 +55,12 @@ namespace Phantasma.Explorer.Controllers
                 evts.Add(new EventViewModel()
                 {
                     Kind = evt.Kind,
-                    Content = Repository.GetEventContent(block, evt), //todo fix me
+                    Content = Repository.GetEventContent(block, evt)
                 });
             }
             return TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), transaction, evts);
         }
 
-        // todo tomorrow
         public List<TransactionViewModel> GetTransactionsByBlock(string input)
         {
             var blockHash = Hash.Parse(input);
@@ -91,7 +90,7 @@ namespace Phantasma.Explorer.Controllers
                         evts.Add(new EventViewModel()
                         {
                             Kind = evt.Kind,
-                            Content = Repository.GetEventContent(block, evt), //todo fix me
+                            Content = Repository.GetEventContent(block, evt)
                         });
                     }
                     txList.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), tx, evts));

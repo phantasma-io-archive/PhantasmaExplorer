@@ -6,7 +6,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class BlocksController
     {
-        public IRepository Repository { get; set; } //todo interface
+        public IRepository Repository { get; set; }
 
         public BlocksController(IRepository repo)
         {
@@ -28,7 +28,8 @@ namespace Phantasma.Explorer.Controllers
         public BlockViewModel GetBlock(string input)
         {
             var block = int.TryParse(input, out var height) ? Repository.GetBlock(height) : Repository.GetBlock(input);
-            return BlockViewModel.FromBlock(block);
+            if(block != null) return BlockViewModel.FromBlock(block);
+            return null;
         }
     }
 }

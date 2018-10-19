@@ -19,7 +19,9 @@ namespace Phantasma.Explorer.Site
 
         public Dictionary<string, object> Context { get; set; } = new Dictionary<string, object>();
 
-        public void InitMenus()
+        private ErrorContext _errorContextInstance;
+
+        public void Init()
         {
             var menus = new List<MenuContext>
             {
@@ -30,7 +32,7 @@ namespace Phantasma.Explorer.Site
                 //new MenuContext {text = "Addresses", url = urlAddresses, active = false}
             };
             TemplateEngine.RegisterTag("value", (doc, val) => new PriceTag(doc, val));
-
+            UpdateContext(errorContext, _errorContextInstance);
             Context["menu"] = menus;
         }
 
@@ -53,9 +55,11 @@ namespace Phantasma.Explorer.Site
             TokensController = new TokensController(repo);
         }
 
-        public void SetupHandlers() //todo move magic strings to vars and separate each call
+        public void SetupHandlers() //todo separate each call
         {
             TemplateEngine.Site.Get("/", request => HTTPResponse.Redirect(urlTransactions));
+
+            TemplateEngine.Site.Get(urlError, request => RendererView(new[] { "layout", errorContext }));
 
             //todo add error/empty view if object from controller call is null or empty
             TemplateEngine.Site.Get(urlTokens, request =>
@@ -70,9 +74,17 @@ namespace Phantasma.Explorer.Site
             {
                 var tokenSymbol = request.GetVariable("input");
                 var token = TokensController.GetToken(tokenSymbol);
+                if (token != null)
+                {
+                    UpdateContext(tokenContext, token);
+                    return RendererView(new[] { "layout", tokenContext });
+                }
 
-                UpdateContext(tokenContext, token);
-                return RendererView(new[] { "layout", tokenContext });
+                _errorContextInstance.errorCode = "token error";
+                _errorContextInstance.errorDescription = "Token not found";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
             });
 
             #region Transactions
@@ -80,28 +92,51 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Site.Get(urlTransactions, request =>
             {
                 var txList = TransactionsController.GetLastTransactions();
+                if (txList.Count > 0)
+                {
+                    UpdateContext(txsContext, txList);
+                    return RendererView(new[] { "layout", txsContext });
+                }
 
-                UpdateContext(txsContext, txList);
-                return RendererView(new[] { "layout", txsContext });
+                _errorContextInstance.errorCode = "txs error";
+                _errorContextInstance.errorDescription = "No transactions found";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
             });
 
             TemplateEngine.Site.Get($"{urlTransaction}/{{input}}", request =>
             {
                 var txHash = request.GetVariable("input");
                 var tx = TransactionsController.GetTransaction(txHash);
+                if (tx != null)
+                {
+                    UpdateContext(txContext, tx);
+                    return RendererView(new[] { "layout", txContext });
+                }
 
-                UpdateContext(txContext, tx);
+                _errorContextInstance.errorCode = "txs error";
+                _errorContextInstance.errorDescription = $"Transaction {txHash} not found";
+                UpdateContext(errorContext, _errorContextInstance);
 
-                return RendererView(new[] { "layout", txContext });
+                return HTTPResponse.Redirect(urlError);
             });
 
             TemplateEngine.Site.Get($"{urlTransactionInBlock}/{{input}}", request =>
             {
                 var input = request.GetVariable("input");
                 var txList = TransactionsController.GetTransactionsByBlock(input);
-                UpdateContext(txInBlockContext, txList);
+                if (txList.Count > 0)
+                {
+                    UpdateContext(txInBlockContext, txList);
 
-                return RendererView(new[] { "layout", txInBlockContext });
+                    return RendererView(new[] { "layout", txInBlockContext });
+                }
+                _errorContextInstance.errorCode = "txs error";
+                _errorContextInstance.errorDescription = $"No transactions found in {input} block";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
             });
 
             #endregion
@@ -132,18 +167,35 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Site.Get($"{urlBlocks}", request =>
             {
                 var blocksList = BlocksController.GetLatestBlocks();
+                if (blocksList.Count > 0)
+                {
+                    UpdateContext(blocksContext, blocksList);
+                    return RendererView(new[] { "layout", blocksContext });
+                }
 
-                UpdateContext(blocksContext, blocksList);
-                return RendererView(new[] { "layout", blocksContext });
+                _errorContextInstance.errorCode = "blocks error";
+                _errorContextInstance.errorDescription = "No blocks found";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
+
             });
 
             TemplateEngine.Site.Get($"{urlBlock}/{{input}}", request => //input can be height or hash
             {
                 var input = request.GetVariable("input");
                 var block = BlocksController.GetBlock(input);
+                if (block != null)
+                {
+                    UpdateContext(blockContext, block);
+                    return RendererView(new[] { "layout", blockContext });
+                }
 
-                UpdateContext(blockContext, block);
-                return RendererView(new[] { "layout", blockContext });
+                _errorContextInstance.errorCode = "blocks error";
+                _errorContextInstance.errorDescription = $"No block found with this {input} input";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
             });
 
             #endregion
@@ -153,9 +205,16 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Site.Get($"{urlChains}", request =>
             {
                 var chainList = ChainsController.GetChains();
+                if (chainList.Count > 0)
+                {
+                    UpdateContext(chainsContext, chainList);
+                    return RendererView(new[] { "layout", chainsContext });
+                }
+                _errorContextInstance.errorCode = "chains error";
+                _errorContextInstance.errorDescription = "No chains found";
+                UpdateContext(errorContext, _errorContextInstance);
 
-                UpdateContext(chainsContext, chainList);
-                return RendererView(new[] { "layout", chainsContext });
+                return HTTPResponse.Redirect(urlError);
             });
 
             TemplateEngine.Site.Get($"{urlChain}/{{input}}",
@@ -163,8 +222,17 @@ namespace Phantasma.Explorer.Site
                 {
                     var addressText = request.GetVariable("input");
                     var chain = ChainsController.GetChain(addressText);
-                    UpdateContext(chainContext, chain);
-                    return RendererView(new[] { "layout", chainContext });
+                    if (chain != null)
+                    {
+                        UpdateContext(chainContext, chain);
+                        return RendererView(new[] { "layout", chainContext });
+                    }
+
+                    _errorContextInstance.errorCode = "chains error";
+                    _errorContextInstance.errorDescription = $"No chain found with this {addressText} address";
+                    UpdateContext(errorContext, _errorContextInstance);
+
+                    return HTTPResponse.Redirect(urlError);
                 });
 
             #endregion
@@ -183,6 +251,7 @@ namespace Phantasma.Explorer.Site
         private readonly string urlBlock = "/block";
         private readonly string urlAddresses = "/addresses";
         private readonly string urlAddress = "/address";
+        private readonly string urlError = "/error";
 
         private readonly string tokensContext = "tokens";
         private readonly string tokenContext = "token";
@@ -195,6 +264,20 @@ namespace Phantasma.Explorer.Site
         private readonly string blockContext = "block";
         private readonly string chainsContext = "chains";
         private readonly string chainContext = "chain";
+        private readonly string errorContext = "error";
+
+        public struct MenuContext
+        {
+            public string text;
+            public string url;
+            public bool active;
+        }
+
+        public struct ErrorContext //todo more info?
+        {
+            public string errorDescription;
+            public string errorCode;
+        }
 
         #endregion
 

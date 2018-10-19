@@ -25,6 +25,7 @@
     <Content Include="www\views\blocks.html" />
     <Content Include="www\views\chain.html" />
     <Content Include="www\views\chains.html" />
+    <Content Include="www\views\error.html" />
     <Content Include="www\views\layout.html" />
     <Content Include="www\views\token.html" />
     <Content Include="www\views\tokens.html" />
@@ -36,6 +37,7 @@
   <ItemGroup>
     <PackageReference Include="LunarLabs.Server" Version="0.1.9.7" />
     <PackageReference Include="LunarParser" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>

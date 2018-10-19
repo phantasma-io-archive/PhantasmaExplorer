@@ -10,13 +10,6 @@ using Phantasma.VM.Utils;
 
 namespace Phantasma.Explorer
 {
-    public struct MenuContext
-    {
-        public string text;
-        public string url;
-        public bool active;
-    }
-
     public class Explorer
     {
         static void Main(string[] args)
@@ -33,7 +26,7 @@ namespace Phantasma.Explorer
             var mockRepo = new MockRepository { NexusChain = nexus };
 
             viewsRenderer.SetupControllers(mockRepo);
-            viewsRenderer.InitMenus();
+            viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
             site.server.Run();
         }

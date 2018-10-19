@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
@@ -40,7 +39,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
             var address = Address.FromText(addressText);
             return address;
         }
-
 
         public List<Block> GetBlocks(string chainInput = "", int lastBlocksAmount = 20)
         {
@@ -176,7 +174,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
                     break;
                 }
             }
-            return targetChain.FindTransactionBlock(tx);
+
+            return targetChain?.FindTransactionBlock(tx);
         }
 
         public List<Token> GetTokens()

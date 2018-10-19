@@ -6,7 +6,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class ChainsController
     {
-        public IRepository Repository { get; set; } //todo interface
+        public IRepository Repository { get; set; }
 
         public ChainsController(IRepository repo)
         {
@@ -37,6 +37,9 @@ namespace Phantasma.Explorer.Controllers
         public ChainViewModel GetChain(string chainInput)
         {
             var repoChain = Repository.GetChain(chainInput);
+
+            if (repoChain == null) return null;
+
             var blockList = new List<BlockViewModel>();
             var lastBlocks = Repository.GetBlocks(repoChain.Address.Text);
 

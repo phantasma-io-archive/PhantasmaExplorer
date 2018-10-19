@@ -8,7 +8,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class AddressesController
     {
-        public IRepository Repository { get; set; } //todo interface
+        public IRepository Repository { get; set; }
         private decimal SoulRate { get; set; }
 
         public AddressesController(IRepository repo)
@@ -20,7 +20,7 @@ namespace Phantasma.Explorer.Controllers
         {
             var repoAddressList = Repository.GetAddressList();
             var addressList = new List<AddressViewModel>();
-            SoulRate = CoinUtils.GetCoinRate(2827);//todo update
+            SoulRate = CoinUtils.GetCoinRate(2827);
             foreach (var address in repoAddressList)
             {
                 var balance = Repository.GetAddressBalance(address);
@@ -34,7 +34,7 @@ namespace Phantasma.Explorer.Controllers
         {
             var repoAddress = Repository.GetAddress(addressText);
             var balance = Repository.GetAddressBalance(repoAddress);
-            SoulRate = CoinUtils.GetCoinRate(2827);//todo update
+            SoulRate = CoinUtils.GetCoinRate(2827);
             var address = AddressViewModel.FromAddress(repoAddress, balance);
             CalculateAddressTokesValue(new List<AddressViewModel> { address });
 
