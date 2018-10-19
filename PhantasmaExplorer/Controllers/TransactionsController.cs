@@ -73,7 +73,7 @@ namespace Phantasma.Explorer.Controllers
 
             foreach (var chain in Repository.NexusChain.Chains)
             {
-                var x = chain.FindBlock(blockHash);
+                var x = chain.FindBlockByHash(blockHash);
                 if (x != null)
                 {
                     block = x;

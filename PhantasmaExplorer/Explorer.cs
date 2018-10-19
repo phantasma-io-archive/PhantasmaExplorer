@@ -56,7 +56,7 @@ namespace Phantasma.Explorer
                 tx.Sign(ownerKey);
                 transactions.Add(tx);
 
-                var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
+                var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.LastBlock);
                 if (!block.Chain.AddBlock(block))
                 {
                     throw new Exception("test block failed");
@@ -72,7 +72,7 @@ namespace Phantasma.Explorer
                 tx.Sign(ownerKey);
                 transactions.Add(tx);
 
-                var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
+                var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.LastBlock);
                 if (!block.Chain.AddBlock(block))
                 {
                     throw new Exception("test block failed");
@@ -89,7 +89,7 @@ namespace Phantasma.Explorer
                 tx.Sign(ownerKey);
                 transactions.Add(tx);
 
-                var block = new Block(bankChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.lastBlock);
+                var block = new Block(bankChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.LastBlock);
                 if (!block.Chain.AddBlock(block))
                 {
                     throw new Exception("test block failed");

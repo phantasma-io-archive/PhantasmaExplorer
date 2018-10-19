@@ -74,7 +74,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             var blockHash = (Hash.Parse(hash));
             foreach (var chain in NexusChain.Chains)
             {
-                var block = chain.FindBlock(blockHash);
+                var block = chain.FindBlockByHash(blockHash);
                 if (block != null)
                 {
                     return block;
@@ -86,7 +86,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public Block GetBlock(int height, string chainAddress = "")
         {
-            var block = NexusChain.RootChain.FindBlock(height);
+            var block = NexusChain.RootChain.FindBlockByHeight(height);
             return block;
         }
 
