@@ -16,6 +16,7 @@ namespace Phantasma.Explorer.ViewModels
         public string FromAddress { get; set; }
         public IEnumerable<EventViewModel> Events { get; set; }
         public IEnumerable<Instruction> Instructions { get; set; }
+        public DateTime Timestamp { get; set; }
 
         public static TransactionViewModel FromTransaction(BlockViewModel block, Transaction tx,
             List<EventViewModel> evts)
@@ -31,6 +32,7 @@ namespace Phantasma.Explorer.ViewModels
                 Hash = tx.Hash.ToString(),
                 FromAddress = "????",
                 FromName = "Anonymous",
+                Timestamp = block.Timestamp,
                 Events = evts,
                 Instructions = disasm.GetInstructions()
             };

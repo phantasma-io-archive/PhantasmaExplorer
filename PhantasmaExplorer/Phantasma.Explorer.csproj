@@ -14,7 +14,10 @@
     <Content Include="www\netcoreapp2.1\Phantasma.Explorer.runtimeconfig.dev.json" />
     <Content Include="www\netcoreapp2.1\Phantasma.Explorer.runtimeconfig.json" />
     <Content Include="www\public\css\bootstrap.min.css" />
+    <Content Include="www\public\css\custom-head-foot-scroll-blue.min.css" />
     <Content Include="www\public\css\explorer.css" />
+    <Content Include="www\public\css\perfect-scrollbar.css" />
+    <Content Include="www\public\css\profile.css" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.woff" />
@@ -26,6 +29,7 @@
     <Content Include="www\views\chain.html" />
     <Content Include="www\views\chains.html" />
     <Content Include="www\views\error.html" />
+    <Content Include="www\views\home.html" />
     <Content Include="www\views\layout.html" />
     <Content Include="www\views\token.html" />
     <Content Include="www\views\tokens.html" />

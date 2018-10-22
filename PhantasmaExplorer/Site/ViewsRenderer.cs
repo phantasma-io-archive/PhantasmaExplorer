@@ -32,6 +32,7 @@ namespace Phantasma.Explorer.Site
                 //new MenuContext {text = "Addresses", url = urlAddresses, active = false}
             };
             TemplateEngine.RegisterTag("value", (doc, val) => new PriceTag(doc, val));
+            TemplateEngine.RegisterTag("timeago", (doc, val) => new TimeAgoTag(doc, val));
             UpdateContext(errorContext, _errorContextInstance);
             Context["menu"] = menus;
         }
@@ -48,6 +49,7 @@ namespace Phantasma.Explorer.Site
 
         public void SetupControllers(IRepository repo) //todo this should be done by other class
         {
+            HomeController = new HomeController(repo);
             AddressesController = new AddressesController(repo);
             BlocksController = new BlocksController(repo);
             ChainsController = new ChainsController(repo);
@@ -57,7 +59,15 @@ namespace Phantasma.Explorer.Site
 
         public void SetupHandlers() //todo separate each call
         {
-            TemplateEngine.Site.Get("/", request => HTTPResponse.Redirect(urlTransactions));
+            TemplateEngine.Site.Get("/", request => HTTPResponse.Redirect(urlHome));
+
+            TemplateEngine.Site.Get(urlHome, request =>
+            {
+                var blocksAndTxs = HomeController.GetLastestInfo();
+
+                UpdateContext(homeContext, blocksAndTxs);
+                return RendererView(new[] { "layout", homeContext });
+            });
 
             TemplateEngine.Site.Get(urlError, request => RendererView(new[] { "layout", errorContext }));
 
@@ -240,6 +250,7 @@ namespace Phantasma.Explorer.Site
 
         #region URL&CONTEXT
 
+        private readonly string urlHome = "/home";
         private readonly string urlTokens = "/tokens";
         private readonly string urlToken = "/token";
         private readonly string urlTransactions = "/transactions";
@@ -253,6 +264,7 @@ namespace Phantasma.Explorer.Site
         private readonly string urlAddress = "/address";
         private readonly string urlError = "/error";
 
+        private readonly string homeContext = "home";
         private readonly string tokensContext = "tokens";
         private readonly string tokenContext = "token";
         private readonly string txContext = "transaction";
@@ -283,6 +295,7 @@ namespace Phantasma.Explorer.Site
 
         #region Controllers
 
+        private HomeController HomeController { get; set; }
         private AddressesController AddressesController { get; set; }
         private BlocksController BlocksController { get; set; }
         private ChainsController ChainsController { get; set; }

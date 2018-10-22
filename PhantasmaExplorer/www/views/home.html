@@ -1,0 +1,85 @@
+﻿<div>
+    <div class="profile-body">
+
+
+        <div class="profile container" style="margin-top: 0px">
+            <div class="row margin-bottom-40">
+                <div class="col-sm-6 sm-margin-bottom-20">
+                    <div class="panel panel-profile no-bg">
+                        <div class="panel-heading overflow-h">
+                            <a href="/blocks" class="btn-u pull-right"
+                               style="background-color: transparent; color: darkslateblue; border-radius: 5px">
+                                View all
+                            </a>
+                            <h2 class="panel-title">Blocks</h2>
+                            <span style="color: #999999; font-size: 11px; margin-bottom: -20px; padding-bottom: 0px;"></span>
+                        </div>
+                        <div class="panel-body no-padding mCustomScrollbar" data-mcs-theme="minimal-dark" style="height: 580px; position: relative; overflow: visible;">
+                            <div class="mCustomScrollBox mCS-minimal-dark mCSB_vertical mCSB_outside" tabindex="0">
+                                <div class="mCSB_container" style="position:relative; top:0; left:0; background-color: steelblue">
+                                    {{#each home.Blocks}}
+                                    <div class="profile-event">
+                                        <div class="date-formats" style="width: 135px; height: 65px; margin-top: 2px">
+                                            <span><a href="/block/{{Hash}}" style="color: white">Block {{Height}}</a></span>
+                                            <div>&gt;{{#timeago Timestamp}}</div>
+                                        </div>
+                                        <div class="overflow-h">
+                                            Mined by
+                                            <a href="/address/{{MiningAddress}}" style="text-overflow: ellipsis;">{{MiningAddress}}</a>
+                                            <p>
+                                                <a href="/txsblock/{{Hash}}">
+                                                    <b>
+                                                        {{Transactions}} Txn
+                                                    </b>
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {{/each}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="panel panel-profile no-bg">
+                        <div class="panel-heading overflow-h">
+                            <a href="/transactions" class="btn-u pull-right"
+                               style="background-color: transparent; color: darkslateblue; border-radius: 5px">
+                                View all
+                            </a>
+                            <h2 class="panel-title">Transactions</h2>
+                            <span style="color: #999999; font-size: 11px; margin-bottom: -20px; padding-bottom: 0px;"></span>
+                        </div>
+                        <div class="panel-body no-padding mCustomScrollbar _mCS_2 mCS-autoHide"
+                             data-mcs-theme="minimal-dark"
+                             style="height: 580px; position: relative;overflow: visible">
+                            <div class="mCustomScrollBox mCS-minimal-dark mCSB_vertical mCSB_outside" tabindex="0">
+                                <div class="mCSB_container" style="position:relative; top:0; left:0;" dir="ltr">
+                                    {{#each home.Transactions}}
+                                    <div class="profile-post color-one">
+                                        <div class="profile-post-in">
+                                            <h4 class="heading-xs" style="padding-left: 5px">
+                                                TX#
+                                                <a class="hash-tag-frontpage" href="/tx/{{Hash}}">
+                                                    <span style="font-size: medium">{{Hash}}</span>
+                                                </a>
+                                                <span class="pull-right" style="font-size: small">
+                                                    {{#timeago Timestamp}}
+                                                </span>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    {{/each}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
