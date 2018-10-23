@@ -1,7 +1,26 @@
-﻿<div>
+﻿
+<div class="row margin-bottom-10">
+
+    <div class="wrap">
+        <form action="/home" method="POST">
+            <div class="search">
+                <input type="text" class="searchTerm" id="searchInput" name="searchInput"
+                       value="{{searchInput}}" placeholder="Search by Address / Txhash / Block / Token">
+                <button type="submit" class="btn btn-default">
+                    <i class="fa fa-search"> Search</i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+<br />
+<br />
+<br />
+<br />
+
+<div>
     <div class="profile-body">
-
-
         <div class="profile container" style="margin-top: 0px">
             <div class="row margin-bottom-40">
                 <div class="col-sm-6 sm-margin-bottom-20">
@@ -16,11 +35,12 @@
                         </div>
                         <div class="panel-body no-padding mCustomScrollbar" data-mcs-theme="minimal-dark" style="height: 580px; position: relative; overflow: visible;">
                             <div class="mCustomScrollBox mCS-minimal-dark mCSB_vertical mCSB_outside" tabindex="0">
-                                <div class="mCSB_container" style="position:relative; top:0; left:0; background-color: steelblue">
+                                <div class="mCSB_container" style="position: relative; top: 0; left: 0; background-color: steelblue">
                                     {{#each home.Blocks}}
                                     <div class="profile-event">
                                         <div class="date-formats" style="width: 135px; height: 65px; margin-top: 2px">
                                             <span><a href="/block/{{Hash}}" style="color: white">Block {{Height}}</a></span>
+                                            <p></p>
                                             <div>&gt;{{#timeago Timestamp}}</div>
                                         </div>
                                         <div class="overflow-h">
@@ -54,9 +74,9 @@
                         </div>
                         <div class="panel-body no-padding mCustomScrollbar _mCS_2 mCS-autoHide"
                              data-mcs-theme="minimal-dark"
-                             style="height: 580px; position: relative;overflow: visible">
+                             style="height: 580px; position: relative; overflow: visible">
                             <div class="mCustomScrollBox mCS-minimal-dark mCSB_vertical mCSB_outside" tabindex="0">
-                                <div class="mCSB_container" style="position:relative; top:0; left:0;" dir="ltr">
+                                <div class="mCSB_container" style="position: relative; top: 0; left: 0;" dir="ltr">
                                     {{#each home.Transactions}}
                                     <div class="profile-post color-one">
                                         <div class="profile-post-in">
@@ -66,7 +86,7 @@
                                                     <span style="font-size: medium">{{Hash}}</span>
                                                 </a>
                                                 <span class="pull-right" style="font-size: small">
-                                                    {{#timeago Timestamp}}
+                                                    {{#timeago Date}}
                                                 </span>
                                             </h4>
                                         </div>

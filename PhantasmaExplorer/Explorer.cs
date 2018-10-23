@@ -38,7 +38,6 @@ namespace Phantasma.Explorer
 
             var bankChain = nexus.FindChainByName("bank");
 
-            // TODO move this to a separate method...            
             var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB");
 
             // mainchain transfer

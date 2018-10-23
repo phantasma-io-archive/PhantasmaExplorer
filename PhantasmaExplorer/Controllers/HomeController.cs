@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.ViewModels;
 
@@ -29,12 +32,58 @@ namespace Phantasma.Explorer.Controllers
                 txs.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(tempBlock), transaction, null));
             }
 
+            var command = new Task(() =>
+             {
+                 var x = 1;
+             });
+
             var vm = new HomeViewModel
             {
                 Blocks = blocks.OrderByDescending(b => b.Timestamp).ToList(),
-                Transactions = txs
+                Transactions = txs,
+                SearchCommand = command
             };
             return vm;
+        }
+
+        public string SearchCommand(string input)
+        {
+            try
+            {
+                var token = Repository.GetToken(input);
+                if (token != null)// token symbol
+                {
+                    return $"token/{input}";
+                }
+                if (input.Length == 45) //maybe is address
+                {
+                    var address = Address.FromText(input);
+                    return $"address/{input}";
+                }
+
+                var hash = Hash.Parse(input);
+                if (hash != null)
+                {
+                    var tx = Repository.GetTransaction(hash.ToString());
+                    if (tx != null)
+                    {
+                        return $"tx/{input}";
+                    }
+
+                    var block = Repository.GetBlock(hash.ToString());
+                    if (block != null)
+                    {
+                        return $"block/{input}";
+                    }
+                }
+
+                return null;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return "/home";
+            }
         }
     }
 }

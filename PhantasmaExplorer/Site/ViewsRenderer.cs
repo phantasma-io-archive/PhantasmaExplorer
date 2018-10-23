@@ -69,9 +69,33 @@ namespace Phantasma.Explorer.Site
                 return RendererView(new[] { "layout", homeContext });
             });
 
+            TemplateEngine.Site.Post(urlHome, request =>
+            {
+                try
+                {
+                    var searchInput = request.GetVariable("searchInput");
+                    if (!string.IsNullOrEmpty(searchInput))
+                    {
+                        var url = HomeController.SearchCommand(searchInput);
+                        if (!string.IsNullOrEmpty(url))
+                        {
+                            return HTTPResponse.Redirect(url);
+                        }
+                    }
+                    return HTTPResponse.Redirect(urlHome);
+                }
+                catch (Exception ex)
+                {
+                    _errorContextInstance.errorCode = ex.Message;
+                    _errorContextInstance.errorDescription = ex.StackTrace;
+                    UpdateContext(errorContext, _errorContextInstance);
+
+                    return HTTPResponse.Redirect(urlError);
+                }
+            });
+
             TemplateEngine.Site.Get(urlError, request => RendererView(new[] { "layout", errorContext }));
 
-            //todo add error/empty view if object from controller call is null or empty
             TemplateEngine.Site.Get(urlTokens, request =>
             {
                 var tokensList = TokensController.GetTokens();
