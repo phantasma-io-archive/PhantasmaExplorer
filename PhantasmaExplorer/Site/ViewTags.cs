@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using LunarLabs.WebServer.Templates;
-using Phantasma.Core.Types;
 using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer.Site
@@ -35,7 +34,6 @@ namespace Phantasma.Explorer.Site
 
     public class TimeAgoTag : TemplateNode
     {
-
         private string key;
 
         public TimeAgoTag(TemplateDocument doc, string key) : base(doc)

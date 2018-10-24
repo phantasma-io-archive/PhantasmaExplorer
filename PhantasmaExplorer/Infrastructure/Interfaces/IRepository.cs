@@ -10,7 +10,7 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
     {
         //todo calls should be async imo
         Nexus NexusChain { get; set; }//todo remove
-        decimal GetAddressBalance(Address address);
+        decimal GetAddressBalance(Address address, string chainName = "");
 
         List<Address> GetAddressList(string chainAddress = "", int lastAddressAmount = 20);
 
@@ -26,7 +26,11 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         List<Chain> GetAllChains();
 
+        List<string> GetChainNames();
+
         Chain GetChain(string chainAddress);
+
+        Chain GetChainByName(string chainName);
 
         List<Transaction> GetTransactions(string chainAddress = "", int txAmount = 20);
 

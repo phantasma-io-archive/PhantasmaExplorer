@@ -11,12 +11,14 @@
                 </tr>
             </thead>
             <tbody>
+                {{#each address.Balances}}
                 <tr>
-                    <td>{{address.Balance}} SOUL</td>
-                    <td>TODO</td>
+                    <td>{{Balance}} SOUL</td>
+                    <td>{{ChainName}}</td>
                     <td>${{#value address.Value}}</td>
                     <td>{{address.Transactions.Count}} txns</td>
                 </tr>
+                {{/each}}
             </tbody>
         </table>
 
