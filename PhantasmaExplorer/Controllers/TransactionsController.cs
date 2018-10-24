@@ -20,25 +20,24 @@ namespace Phantasma.Explorer.Controllers
         {
             var repoChains = Repository.GetAllChains();
             var txList = new List<TransactionViewModel>();
-            foreach (var chain in repoChains)
-            {
-                foreach (var block in chain.Blocks.TakeLast(20))
-                {
-                    foreach (var tx in block.Transactions)
-                    {
-                        var evts = new List<EventViewModel>();
-                        var tx1 = (Transaction)tx;
-                        foreach (var evt in tx1.Events)
-                        {
-                            evts.Add(new EventViewModel()
-                            {
-                                Kind = evt.Kind,
-                                Content = Repository.GetEventContent(block, evt)
-                            });
-                        }
 
-                        txList.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), tx1, evts));
+            var repoTx = Repository.GetTransactions(txAmount: 20);
+            foreach (var transaction in repoTx)
+            {
+                var block = Repository.GetBlock(transaction);
+                if (block != null)
+                {
+                    var evts = new List<EventViewModel>();
+                    var tx1 = (Transaction)transaction;
+                    foreach (var evt in tx1.Events)
+                    {
+                        evts.Add(new EventViewModel()
+                        {
+                            Kind = evt.Kind,
+                            Content = Repository.GetEventContent(block, evt)
+                        });
                     }
+                    txList.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), tx1, evts));
                 }
             }
             return txList;

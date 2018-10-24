@@ -14,9 +14,15 @@ namespace Phantasma.Explorer.Infrastructure.Data
     {
         public Nexus NexusChain { get; set; }
 
-        public decimal GetAddressBalance(Address address) //todo this should not be here
+        public decimal GetAddressBalance(Address address, string chainName = "") //todo this should not be here
         {
-            return TokenUtils.ToDecimal(NexusChain.RootChain.GetTokenBalance(NexusChain.NativeToken, address));
+            if (string.IsNullOrEmpty(chainName))
+            {
+                return TokenUtils.ToDecimal(NexusChain.RootChain.GetTokenBalance(NexusChain.NativeToken, address));
+            }
+
+            var chain = GetChainByName(chainName);
+            return TokenUtils.ToDecimal(chain?.GetTokenBalance(NexusChain.NativeToken, address));
         }
 
         public List<Address> GetAddressList(string chainAddress = "", int count = 20) //todo strategy to get address
@@ -49,11 +55,9 @@ namespace Phantasma.Explorer.Infrastructure.Data
             {
                 foreach (var chain in NexusChain.Chains)
                 {
-                    if (chain.Blocks.Any())
-                    {
-                        blockList.AddRange(chain.Blocks.TakeLast(lastBlocksAmount));
-                    }
+                    blockList.AddRange(chain.Blocks.TakeLast(10));
                 }
+
             }
             else //specific chain
             {
@@ -63,8 +67,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
                     blockList.AddRange(chain.Blocks.TakeLast(lastBlocksAmount));
                 }
             }
-            blockList = blockList.OrderBy(block => block.Timestamp.Value).ToList();
 
+            blockList = blockList.OrderByDescending(b => b.Timestamp.Value).TakeLast(20).ToList();
             return blockList;
         }
 
@@ -96,7 +100,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 var chain = GetChain(chainAddress);
                 block = chain.FindBlockByHeight(height);
             }
-           
+
             return block;
         }
 
@@ -112,20 +116,40 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return NexusChain.Chains.SingleOrDefault(c => c.Address == chainAddress);
         }
 
-        public List<Transaction> GetTransactions(string chainAddress = "", int txAmount = 20) //todo turns out this does not have use yet -.-
+        public Chain GetChainByName(string chainName)
+        {
+            return NexusChain.Chains.SingleOrDefault(c => c.Name == chainName);
+        }
+
+        public List<string> GetChainNames()
+        {
+            var nameList = new List<string>();
+            foreach (var chain in GetAllChains())
+            {
+                nameList.Add(chain.Name);
+            }
+
+            return nameList;
+        }
+
+        public List<Transaction> GetTransactions(string chainAddress = "", int txAmount = 20)
         {
             var txList = new List<Transaction>();
+            var blocksList = new List<Block>();
             if (string.IsNullOrEmpty(chainAddress)) //all chains
             {
                 var chains = GetAllChains();
                 foreach (var chain in chains)
                 {
-                    foreach (var block in chain.Blocks.TakeLast(txAmount))
+                    blocksList.AddRange(chain.Blocks.TakeLast(10));
+                }
+
+                foreach (var block in blocksList.OrderByDescending(b => b.Timestamp.Value))
+                {
+                    foreach (var tx in block.Transactions)
                     {
-                        foreach (var tx in block.Transactions)
-                        {                           
-                            txList.Add((Transaction)tx);
-                        }
+                        txList.Add((Transaction)tx);
+                        if (txList.Count == txAmount) return txList;
                     }
                 }
             }
@@ -134,16 +158,17 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 var chain = GetChain(chainAddress);
                 if (chain != null)
                 {
-                    foreach (var block in chain.Blocks.TakeLast(txAmount))
+                    foreach (var block in chain.Blocks.OrderByDescending(b => b.Timestamp.Value))
                     {
                         foreach (var tx in block.Transactions)
                         {
                             txList.Add((Transaction)tx);
+                            if (txList.Count == txAmount) return txList;
                         }
                     }
                 }
             }
-          
+
             return txList;
         }
 

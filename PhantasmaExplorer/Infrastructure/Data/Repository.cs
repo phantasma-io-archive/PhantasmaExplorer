@@ -11,7 +11,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
     public class Repository : IRepository
     {
         public Nexus NexusChain { get; set; }
-        public decimal GetAddressBalance(Address address)
+
+        public decimal GetAddressBalance(Address address, string chainName = "")
         {
             throw new System.NotImplementedException();
         }
@@ -51,7 +52,17 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
+        public List<string> GetChainNames()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public Chain GetChain(string chainAddress)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Chain GetChainByName(string chainName)
         {
             throw new System.NotImplementedException();
         }

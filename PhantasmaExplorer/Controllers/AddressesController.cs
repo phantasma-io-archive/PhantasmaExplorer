@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
@@ -24,7 +25,9 @@ namespace Phantasma.Explorer.Controllers
             foreach (var address in repoAddressList)
             {
                 var balance = Repository.GetAddressBalance(address);
-                addressList.Add(AddressViewModel.FromAddress(address, balance));
+                var addressVm = AddressViewModel.FromAddress(address);
+                addressVm.Balances.Add(new BalanceViewModel("main", balance));
+                addressList.Add(addressVm);
             }
             CalculateAddressTokesValue(addressList);
             return addressList;
@@ -33,9 +36,17 @@ namespace Phantasma.Explorer.Controllers
         public AddressViewModel GetAddress(string addressText)
         {
             var repoAddress = Repository.GetAddress(addressText);
-            var balance = Repository.GetAddressBalance(repoAddress);
+            var address = AddressViewModel.FromAddress(repoAddress);
+            var chains = Repository.GetChainNames();
+            foreach (var chain in chains)
+            {
+                var balance = Repository.GetAddressBalance(repoAddress, chain);
+                if (balance > 0)
+                {
+                    address.Balances.Add(new BalanceViewModel(chain, balance));
+                }
+            }
             SoulRate = CoinUtils.GetCoinRate(2827);
-            var address = AddressViewModel.FromAddress(repoAddress, balance);
             CalculateAddressTokesValue(new List<AddressViewModel> { address });
 
             //mock tx
@@ -55,12 +66,15 @@ namespace Phantasma.Explorer.Controllers
             return address;
         }
 
-        private void CalculateAddressTokesValue(List<AddressViewModel> list)
+        private void CalculateAddressTokesValue(List<AddressViewModel> list)//todo
         {
             foreach (var address in list)
             {
-                address.Value = address.Balance * SoulRate;
-                var das = address.Value.ToString("F3");
+                var mainBalance = address.Balances.FirstOrDefault(p => p.ChainName == "main");
+                if (mainBalance != null)
+                {
+                    address.Value = mainBalance.Balance * SoulRate;
+                }
             }
         }
     }
