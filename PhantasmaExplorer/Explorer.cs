@@ -34,7 +34,15 @@ namespace Phantasma.Explorer
         private static Nexus InitMockData()
         {
             var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
-            var nexus = new Nexus(ownerKey);
+            var simulator = new ChainSimulator(ownerKey, 12345);
+
+            // generate blocks with mock transactions
+            for (int i=1; i<=500; i++)
+            {
+                simulator.GenerateBlock();
+            }
+
+            var nexus = simulator.Nexus;
 
             var bankChain = nexus.FindChainByName("bank");
 
