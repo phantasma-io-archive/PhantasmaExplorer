@@ -24,7 +24,7 @@ namespace Phantasma.Explorer.ViewModels
                 ContractHash = token.Owner.Text, //todo change this to actual hash
                 MaxSupply = (decimal)token.MaxSupply,
                 CurrentSupply = (decimal)token.CurrentSupply,
-                Decimals = (int)token.GetDecimals(),
+                Decimals = (int)token.Decimals,
                 Price = price,
                 Transfers = 0, //todo
                 Description = description,
