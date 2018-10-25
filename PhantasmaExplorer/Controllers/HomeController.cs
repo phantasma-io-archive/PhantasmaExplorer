@@ -66,7 +66,7 @@ namespace Phantasma.Explorer.Controllers
             var soulUsdChange = info["quotes"]["USD"].GetDecimal("percent_change_24h");
             CoinRateViewModel soulUsdVm = new CoinRateViewModel
             {
-                Coin = "SOUL/USD",
+                Symbol = "SOUL/USD",
                 ChangePercentage = soulUsdChange,
                 Rate = soulUsd
             };
@@ -76,7 +76,7 @@ namespace Phantasma.Explorer.Controllers
             var soulBtcChange = info["quotes"]["USD"].GetDecimal("percent_change_24h");
             CoinRateViewModel soulBtcVm = new CoinRateViewModel
             {
-                Coin = "SOUL/BTC",
+                Symbol = "SOUL/BTC",
                 ChangePercentage = soulBtcChange,
                 Rate = soulBtc
             };
@@ -87,7 +87,7 @@ namespace Phantasma.Explorer.Controllers
             var soulEthChange = info["quotes"]["ETH"].GetDecimal("percent_change_24h");
             CoinRateViewModel soulEthVm = new CoinRateViewModel
             {
-                Coin = "SOUL/ETH",
+                Symbol = "SOUL/ETH",
                 ChangePercentage = soulEthChange,
                 Rate = soulEth
             };
@@ -97,7 +97,7 @@ namespace Phantasma.Explorer.Controllers
             var soulNeoChange = info["quotes"]["NEO"].GetDecimal("percent_change_24h");
             CoinRateViewModel soulNeoVm = new CoinRateViewModel
             {
-                Coin = "SOUL/NEO",
+                Symbol = "SOUL/NEO",
                 ChangePercentage = soulNeoChange,
                 Rate = soulNeo
             };
@@ -111,10 +111,6 @@ namespace Phantasma.Explorer.Controllers
                 TotalChains = totalChains,
                 BlockHeight = height,
                 MarketCap = marketCap,
-                SOULBTC = soulBtcVm,
-                SOULETH = soulEthVm,
-                SOULUSD = soulUsdVm,
-                SOULNEO = soulNeoVm
             };
             return vm;
         }

@@ -17,9 +17,9 @@ namespace Phantasma.Explorer.Site
             this.key = key;
         }
 
-        public override void Execute(Queue<TemplateDocument> queue, object context, object pointer, StringBuilder output)
+        public override void Execute(RenderingContext context)
         {
-            var temp = TemplateEngine.EvaluateObject(context, pointer, key);
+            var temp = context.EvaluateObject(key);
             if (temp == null)
             {
                 return;
@@ -30,7 +30,7 @@ namespace Phantasma.Explorer.Site
                 return;
             }
 
-            output.Append($"{price:F2}");
+            context.output.Append($"{price:F2}");
         }
     }
 
@@ -43,9 +43,9 @@ namespace Phantasma.Explorer.Site
             this.key = key;
         }
 
-        public override void Execute(Queue<TemplateDocument> queue, object context, object pointer, StringBuilder output)
+        public override void Execute(RenderingContext context)
         {
-            var temp = TemplateEngine.EvaluateObject(context, pointer, key);
+            var temp = context.EvaluateObject(key);
             if (temp == null)
             {
                 return;
@@ -55,7 +55,7 @@ namespace Phantasma.Explorer.Site
 
             var timeago = DateUtils.RelativeTime(timestamp);
 
-            output.Append($"{timeago}");
+            context.output.Append($"{timeago}");
         }
     }
 
@@ -69,7 +69,7 @@ namespace Phantasma.Explorer.Site
             this.key = key;
         }
 
-        public override void Execute(Queue<TemplateDocument> queue, object context, object pointer, StringBuilder output)
+        public override void Execute(RenderingContext context)
         {
             /*
             var temp = TemplateEngine.EvaluateObject(context, pointer, key);
@@ -81,7 +81,7 @@ namespace Phantasma.Explorer.Site
             var id = rnd.Next().ToString();
             var url = key.Replace("_", "/");
             var obj = "{url:'"+url+"', id:'"+id+"'}";
-            output.Append($"<script>dynamicContents.push({obj});</script><div style=\"display:inline\" id=\"dynamic_{id}\">...</div>");
+            context.output.Append($"<script>dynamicContents.push({obj});</script><div style=\"display:inline\" id=\"dynamic_{id}\">...</div>");
         }
     }
 
@@ -94,16 +94,16 @@ namespace Phantasma.Explorer.Site
             this.key = key;
         }
 
-        public override void Execute(Queue<TemplateDocument> queue, object context, object pointer, StringBuilder output)
+        public override void Execute(RenderingContext context)
         {
-            var temp = TemplateEngine.EvaluateObject(context, pointer, key);
+            var temp = context.EvaluateObject(key);
             if (temp == null)
             {
                 return;
             }
 
             var chain = (Chain)temp;
-            output.Append($"<a href=\"/chain/{chain.Address.Text}\">{chain.Name}</a>");
+            context.output.Append($"<a href=\"/chain/{chain.Address.Text}\">{chain.Name}</a>");
         }
     }
 
@@ -116,16 +116,16 @@ namespace Phantasma.Explorer.Site
             this.key = key;
         }
 
-        public override void Execute(Queue<TemplateDocument> queue, object context, object pointer, StringBuilder output)
+        public override void Execute(RenderingContext context)
         {
-            var temp = TemplateEngine.EvaluateObject(context, pointer, key);
+            var temp = context.EvaluateObject(key);
             if (temp == null)
             {
                 return;
             }
 
             var tx = (Transaction)temp;
-            output.Append($"<a href=\"/tx/{tx.Hash}\">{tx.Hash}</a>");
+            context.output.Append($"<a href=\"/tx/{tx.Hash}\">{tx.Hash}</a>");
         }
     }
 
@@ -138,16 +138,16 @@ namespace Phantasma.Explorer.Site
             this.key = key;
         }
 
-        public override void Execute(Queue<TemplateDocument> queue, object context, object pointer, StringBuilder output)
+        public override void Execute(RenderingContext context)
         {
-            var temp = TemplateEngine.EvaluateObject(context, pointer, key);
+            var temp = context.EvaluateObject(key);
             if (temp == null)
             {
                 return;
             }
 
             var address = (Address)temp;
-            output.Append($"<a href=\"address/{address.Text}\">{address.Text}</a>");
+            context.output.Append($"<a href=\"address/{address.Text}\">{address.Text}</a>");
         }
     }
 

@@ -108,7 +108,7 @@
 			 url: obj.url,
 			 success: function(data) {
 				console.log("Set ",targetID, " to ",data);
-				  $(targetID).html(data);
+				$(targetID).replaceWith(data);
 			 }
 
 			});			

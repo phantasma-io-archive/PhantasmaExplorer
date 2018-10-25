@@ -19,7 +19,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">Phantasma Overview</div>
             <div class="panel-body">
-                <table class="table table-striped">
+                <table class="table" style="margin-bottom: 0px;">
                     <tbody>
                         <tr>
                             <td>Market Cap</td>
@@ -37,24 +37,9 @@
                             <td>Total Chains</td>
                             <td>{{home.TotalChains}}</td>
                         </tr>
-                        <tr>
-                            <td>{{home.SOULUSD.Coin}}</td>
-                            <td>{{home.SOULUSD.Rate}} BTC {{#if home.SOULUSD.ChangePercentage > 0}}  <span class="label label-success label-as-badge">{{home.SOULUSD.ChangePercentage}}</span> {{#else}}  <span class="label label-danger label-as-badge">{{home.SOULUSD.ChangePercentage}}</span>{{/if}}</td>
-                        </tr>
-                        <tr>
-                            <td>{{home.SOULBTC.Coin}}</td>
-                            <td>{{home.SOULBTC.Rate}} BTC {{#if home.SOULBTC.ChangePercentage > 0}}  <span class="label label-success label-as-badge">{{home.SOULBTC.ChangePercentage}}</span> {{#else}}  <span class="label label-danger label-as-badge">{{home.SOULBTC.ChangePercentage}}</span>{{/if}}</td>
-                        </tr>
-                        <tr>
-                            <td>{{home.SOULETH.Coin}}</td>
-                            <td>{{home.SOULETH.Rate}} BTC {{#if home.SOULETH.ChangePercentage > 0}}  <span class="label label-success label-as-badge">{{home.SOULETH.ChangePercentage}}</span> {{#else}}  <span class="label label-danger label-as-badge">{{home.SOULETH.ChangePercentage}}</span>{{/if}}</td>
-                        </tr>
-                        <tr>
-                            <td>{{home.SOULNEO.Coin}}</td>
-                            <td>{{home.SOULNEO.Rate}} BTC {{#if home.SOULNEO.ChangePercentage > 0}}  <span class="label label-success label-as-badge">{{home.SOULNEO.ChangePercentage}}</span> {{#else}}  <span class="label label-danger label-as-badge">{{home.SOULNEO.ChangePercentage}}</span>{{/if}}</td>
-                        </tr>
                     </tbody>
                 </table>
+				{{#async rates}}
             </div>
         </div>
     </div>

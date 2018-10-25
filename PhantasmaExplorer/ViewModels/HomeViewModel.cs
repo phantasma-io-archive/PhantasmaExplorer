@@ -10,10 +10,6 @@ namespace Phantasma.Explorer.ViewModels
         public int TotalChains { get; set; }
         public int TotalTransactions { get; set; }
         public uint BlockHeight { get; set; }
-        public CoinRateViewModel SOULUSD { get; set; }
-        public CoinRateViewModel SOULBTC { get; set; }
-        public CoinRateViewModel SOULETH { get; set; }
-        public CoinRateViewModel SOULNEO { get; set; }
         public decimal MarketCap { get; set; }
     }
 }

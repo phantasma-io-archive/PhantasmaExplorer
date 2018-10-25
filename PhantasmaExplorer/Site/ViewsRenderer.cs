@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
@@ -46,7 +47,7 @@ namespace Phantasma.Explorer.Site
             Context["menu"] = menus;
         }
 
-        public string RendererView(IEnumerable<string> templateList)
+        public string RendererView(params string[] templateList)
         {
             return TemplateEngine.Render(Context, templateList);
         }
@@ -75,7 +76,7 @@ namespace Phantasma.Explorer.Site
                 var blocksAndTxs = HomeController.GetLastestInfo();
 
                 UpdateContext(homeContext, blocksAndTxs);
-                return RendererView(new[] { "layout", homeContext });
+                return RendererView("layout", homeContext);
             });
 
             TemplateEngine.Site.Post(urlHome, request =>
@@ -110,15 +111,28 @@ namespace Phantasma.Explorer.Site
                 var tokensList = TokensController.GetTokens();
 
                 UpdateContext(tokensContext, tokensList);
-                return RendererView(new[] { "layout", tokensContext });
+                return RendererView("layout", tokensContext);
             });
 
-            TemplateEngine.Site.Get($"/rate/{{token}}", request =>
+            TemplateEngine.Site.Get($"/rates", request =>
             {
-                var tokenSymbol = request.GetVariable("token");
-                // tag dont solve anything...
-                // I should be able to to return await CoinUtils.GetCoinRate(2872, tokenSymbol); 
-                return CoinUtils.GetCoinRate(2872, tokenSymbol); 
+                var symbols = new[] { "USD", "BTC", "ETH", "NEO" };
+
+                var tasks = symbols.Select(symbol => CoinUtils.GetCoinRateAsync(2872, symbol));
+                var rates = Task.WhenAll(tasks).GetAwaiter().GetResult();
+
+                var coins = new List<ViewModels.CoinRateViewModel>();
+                for (int i=0; i<rates.Length; i++)
+                {
+                    var coin = new ViewModels.CoinRateViewModel();
+                    coin.Symbol = symbols[i];
+                    coin.Rate = rates[i];
+                    coin.ChangePercentage = 0; // TODO
+                    coins.Add(coin);
+                }
+
+                var html = TemplateEngine.Render(coins,  new[] { "rates" });
+                return html;
             });
 
             TemplateEngine.Site.Get($"{urlToken}/{{input}}", request =>
@@ -130,7 +144,7 @@ namespace Phantasma.Explorer.Site
                     var holders = TokensController.GetHolders(token.Symbol);
                     UpdateContext(holdersContext, holders);
                     UpdateContext(tokenContext, token);
-                    return RendererView(new[] { "layout", tokenContext, holdersContext });
+                    return RendererView("layout", tokenContext, holdersContext);
                 }
 
                 _errorContextInstance.errorCode = "token error";
@@ -148,7 +162,7 @@ namespace Phantasma.Explorer.Site
                 if (txList.Count > 0)
                 {
                     UpdateContext(txsContext, txList);
-                    return RendererView(new[] { "layout", txsContext });
+                    return RendererView("layout", txsContext);
                 }
 
                 _errorContextInstance.errorCode = "txs error";
@@ -165,7 +179,7 @@ namespace Phantasma.Explorer.Site
                 if (tx != null)
                 {
                     UpdateContext(txContext, tx);
-                    return RendererView(new[] { "layout", txContext });
+                    return RendererView("layout", txContext);
                 }
 
                 _errorContextInstance.errorCode = "txs error";
@@ -183,7 +197,7 @@ namespace Phantasma.Explorer.Site
                 {
                     UpdateContext(txInBlockContext, txList);
 
-                    return RendererView(new[] { "layout", txInBlockContext });
+                    return RendererView("layout", txInBlockContext);
                 }
                 _errorContextInstance.errorCode = "txs error";
                 _errorContextInstance.errorDescription = $"No transactions found in {input} block";
@@ -201,7 +215,7 @@ namespace Phantasma.Explorer.Site
                 var addressList = AddressesController.GetAddressList();
 
                 UpdateContext(addressesContext, addressList);
-                return RendererView(new[] { "layout", addressesContext });
+                return RendererView("layout", addressesContext);
             });
 
             TemplateEngine.Site.Get($"{urlAddress}/{{input}}", request =>
@@ -210,7 +224,7 @@ namespace Phantasma.Explorer.Site
                 var address = AddressesController.GetAddress(addressText);
 
                 UpdateContext(addressContext, address);
-                return RendererView(new[] { "layout", addressContext });
+                return RendererView("layout", addressContext);
             });
 
             #endregion
@@ -223,7 +237,7 @@ namespace Phantasma.Explorer.Site
                 if (blocksList.Count > 0)
                 {
                     UpdateContext(blocksContext, blocksList);
-                    return RendererView(new[] { "layout", blocksContext });
+                    return RendererView("layout", blocksContext);
                 }
 
                 _errorContextInstance.errorCode = "blocks error";
@@ -241,7 +255,7 @@ namespace Phantasma.Explorer.Site
                 if (block != null)
                 {
                     UpdateContext(blockContext, block);
-                    return RendererView(new[] { "layout", blockContext });
+                    return RendererView("layout", blockContext);
                 }
 
                 _errorContextInstance.errorCode = "blocks error";
@@ -261,7 +275,7 @@ namespace Phantasma.Explorer.Site
                 if (chainList.Count > 0)
                 {
                     UpdateContext(chainsContext, chainList);
-                    return RendererView(new[] { "layout", chainsContext });
+                    return RendererView("layout", chainsContext);
                 }
                 _errorContextInstance.errorCode = "chains error";
                 _errorContextInstance.errorDescription = "No chains found";
@@ -278,7 +292,7 @@ namespace Phantasma.Explorer.Site
                     if (chain != null)
                     {
                         UpdateContext(chainContext, chain);
-                        return RendererView(new[] { "layout", chainContext });
+                        return RendererView("layout", chainContext);
                     }
 
                     _errorContextInstance.errorCode = "chains error";
