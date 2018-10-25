@@ -45,5 +45,10 @@ namespace Phantasma.Explorer.Controllers
 
             return tokensList;
         }
+
+        public void GetHolders(string symbol) //todo
+        {
+            var nexusChain = Repository.GetChain("main");
+        }
     }
 }

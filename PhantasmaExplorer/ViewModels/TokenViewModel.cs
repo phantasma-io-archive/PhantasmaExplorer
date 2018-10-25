@@ -1,4 +1,5 @@
-﻿using Phantasma.Blockchain.Tokens;
+﻿using Phantasma.Blockchain;
+using Phantasma.Blockchain.Tokens;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -22,8 +23,8 @@ namespace Phantasma.Explorer.ViewModels
                 Symbol = token.Symbol,
                 Name = token.Name,
                 ContractHash = token.Owner.Text, //todo change this to actual hash
-                MaxSupply = (decimal)token.MaxSupply,
-                CurrentSupply = (decimal)token.CurrentSupply,
+                MaxSupply = TokenUtils.ToDecimal(token.MaxSupply),
+                CurrentSupply = TokenUtils.ToDecimal(token.CurrentSupply),
                 Decimals = (int)token.Decimals,
                 Price = price,
                 Transfers = 0, //todo

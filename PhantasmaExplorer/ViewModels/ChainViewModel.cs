@@ -10,6 +10,7 @@ namespace Phantasma.Explorer.ViewModels
         public string Address { get; set; }
         public string Name { get; set; }
         public int Transactions { get; set; }
+        public string ParentChain { get; set; }
         public int Height { get; set; }
         public List<BlockViewModel> Blocks { get; set; }
 
@@ -21,7 +22,8 @@ namespace Phantasma.Explorer.ViewModels
                 Name = chain.Name.ToTitleCase(),
                 Transactions = chain.TransactionCount,
                 Height = chain.Blocks.Count(),
-                Blocks = lastBlocks
+                Blocks = lastBlocks,
+                ParentChain = chain.ParentChain?.Address.Text ?? ""
             };
         }
     }
