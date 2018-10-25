@@ -31,8 +31,14 @@ namespace Phantasma.Explorer.Site
                 new MenuContext {text = "Tokens", url = urlTokens, active = false},
                 //new MenuContext {text = "Addresses", url = urlAddresses, active = false}
             };
+
             TemplateEngine.RegisterTag("value", (doc, val) => new PriceTag(doc, val));
             TemplateEngine.RegisterTag("timeago", (doc, val) => new TimeAgoTag(doc, val));
+            TemplateEngine.RegisterTag("async", (doc, val) => new AsyncTag(doc, val));
+            TemplateEngine.RegisterTag("link-chain", (doc, val) => new LinkChainTag(doc, val));
+            TemplateEngine.RegisterTag("link-tx", (doc, val) => new LinkTransactionTag(doc, val));
+            TemplateEngine.RegisterTag("link-address", (doc, val) => new LinkAddressTag(doc, val));
+
             UpdateContext(errorContext, _errorContextInstance);
             Context["menu"] = menus;
         }
@@ -103,6 +109,15 @@ namespace Phantasma.Explorer.Site
                 UpdateContext(tokensContext, tokensList);
                 return RendererView(new[] { "layout", tokensContext });
             });
+
+
+            // Example, remove me later
+            TemplateEngine.Site.Get($"/test", request =>
+            {
+                System.Threading.Thread.Sleep(2000);
+                return "Dynamic stuff";
+            });
+
 
             TemplateEngine.Site.Get($"{urlToken}/{{input}}", request =>
             {

@@ -28,6 +28,9 @@
 </head>
 
 <body>
+	<script>
+	var dynamicContents = [];	
+	</script>
 
     <!-- Navigation -->
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -94,7 +97,22 @@
 		let initMethod = "onStart";
 		if (typeof window[initMethod] === "function") {
 			window[initMethod](); 
-		}	
+		}
+
+		for (let i = 0; i < dynamicContents.length; i++) {
+			let  obj = dynamicContents[i];					
+			let targetID = "#dynamic_"+obj.id;
+			console.log("Fetching ",obj);
+			$.ajax({
+			 type: "GET",
+			 url: obj.url,
+			 success: function(data) {
+				console.log("Set ",targetID, " to ",data);
+				  $(targetID).html(data);
+			 }
+
+			});			
+		} 		
 	});
 	</script>
 </body>
