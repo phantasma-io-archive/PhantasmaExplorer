@@ -23,7 +23,7 @@ namespace Phantasma.Explorer.ViewModels
         public IEnumerable<Instruction> Instructions { get; set; }
         public string Description { get; set; }
 
-        public static TransactionViewModel FromTransaction(BlockViewModel block, Transaction tx,
+        public static TransactionViewModel FromTransaction(Nexus nexus, BlockViewModel block, Transaction tx,//todo remove nexus from here
             List<EventViewModel> evts)
         {
             var disasm = new Disassembler(tx.Script); //Todo fix me
@@ -52,7 +52,7 @@ namespace Phantasma.Explorer.ViewModels
                             amount = data.amount;
                             senderAddress = evt.Address;
                             senderChain = data.chainAddress;
-                            //senderToken = nexus.FindTokenBySymbol(data.symbol);
+                            senderToken = nexus?.FindTokenBySymbol(data.symbol);
                         }
                         break;
 
@@ -62,7 +62,7 @@ namespace Phantasma.Explorer.ViewModels
                             amount = data.amount;
                             receiverAddress = evt.Address;
                             receiverChain = data.chainAddress;
-                            //receiverToken = nexus.FindTokenBySymbol(data.symbol);
+                            receiverToken = nexus?.FindTokenBySymbol(data.symbol);
                         }
                         break;
 

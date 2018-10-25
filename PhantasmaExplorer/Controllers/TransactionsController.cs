@@ -37,7 +37,7 @@ namespace Phantasma.Explorer.Controllers
                             Content = Repository.GetEventContent(block, evt)
                         });
                     }
-                    txList.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), tx1, evts));
+                    txList.Add(TransactionViewModel.FromTransaction(Repository.NexusChain,BlockViewModel.FromBlock(block), tx1, evts));
                 }
             }
             return txList;
@@ -57,7 +57,7 @@ namespace Phantasma.Explorer.Controllers
                     Content = Repository.GetEventContent(block, evt)
                 });
             }
-            return TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), transaction, evts);
+            return TransactionViewModel.FromTransaction(Repository.NexusChain, BlockViewModel.FromBlock(block), transaction, evts);
         }
 
         public List<TransactionViewModel> GetTransactionsByBlock(string input)
@@ -92,7 +92,7 @@ namespace Phantasma.Explorer.Controllers
                             Content = Repository.GetEventContent(block, evt)
                         });
                     }
-                    txList.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(block), tx, evts));
+                    txList.Add(TransactionViewModel.FromTransaction(Repository.NexusChain, BlockViewModel.FromBlock(block), tx, evts));
                 }
             }
 

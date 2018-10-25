@@ -31,7 +31,7 @@ namespace Phantasma.Explorer.Controllers
             foreach (var transaction in Repository.GetTransactions())
             {
                 var tempBlock = Repository.GetBlock(transaction);
-                txs.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(tempBlock), transaction, null));
+                txs.Add(TransactionViewModel.FromTransaction(Repository.NexusChain, BlockViewModel.FromBlock(tempBlock), transaction, null));
             }
 
             // tx history chart calculation
@@ -45,7 +45,7 @@ namespace Phantasma.Explorer.Controllers
 
                 if (chart.ContainsKey(chartKey))
                 {
-                    chart[chartKey]+=200;
+                    chart[chartKey] += 200;
                 }
                 else
                 {
