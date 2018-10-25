@@ -137,9 +137,8 @@ function onStart(){
 					<tr>
 						<td>
 							TX# <a href="/tx/{{Hash}}"><small>{{Hash}}</small></a><br>
-							<i>&gt;{{#timeago Block.Timestamp}}</i><br>
-							From BLA To BLE<br> 
-							Chain: <a href="/chain/{{Chain}}"><small>{{Chain}}</small></a><br>
+							<i>&gt;{{#timeago Block.Timestamp}} in <a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain</i><br>
+							{{{Description}}}<br> 						 
 						</td>
 					</tr>
 					{{/each}}
@@ -149,49 +148,4 @@ function onStart(){
 		</div>	
 	</div>
 	
-</div>
-
-<br><br><br><br><br>
-<div class="profile-body">
-	<div class="profile container" style="margin-top: 0px">
-
-			<div class="col-sm-6">
-				<div class="panel panel-profile no-bg">
-					<div class="panel-heading overflow-h">
-						<a href="/transactions" class="btn-u pull-right"
-						   style="background-color: transparent; color: darkslateblue; border-radius: 5px">
-							View all
-						</a>
-						<h2 class="panel-title">Transactions</h2>
-						<span style="color: #999999; font-size: 11px; margin-bottom: -20px; padding-bottom: 0px;"></span>
-					</div>
-					<div class="panel-body no-padding mCustomScrollbar _mCS_2 mCS-autoHide"
-						 data-mcs-theme="minimal-dark"
-						 style="height: 580px; position: relative; overflow: visible">
-						<div class="mCustomScrollBox mCS-minimal-dark mCSB_vertical mCSB_outside" tabindex="0">
-							<div class="mCSB_container" style="position: relative; top: 0; left: 0;" dir="ltr">
-								{{#each home.Transactions}}
-								<div class="profile-post color-one">
-									<div class="profile-post-in">
-										<h4 class="heading-xs" style="padding-left: 5px">
-											TX#
-											<a class="hash-tag-frontpage" href="/tx/{{Hash}}">
-												<span style="font-size: medium">{{Hash}}</span>
-											</a>
-											<span class="pull-right" style="font-size: small">
-												{{#timeago Date}}
-											</span>
-										</h4>
-									</div>
-								</div>
-								{{/each}}
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-
-	</div>
 </div>
