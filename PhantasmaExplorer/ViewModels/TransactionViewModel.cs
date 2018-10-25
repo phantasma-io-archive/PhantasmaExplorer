@@ -65,6 +65,14 @@ namespace Phantasma.Explorer.ViewModels
                             //receiverToken = nexus.FindTokenBySymbol(data.symbol);
                         }
                         break;
+
+                    case EventKind.AddressRegister:
+                        {
+                            var name = evt.GetContent<string>();
+                            description = $"{evt.Address} registered the name '{name}'";
+                        }
+                        break;
+
                 }
             }
 
