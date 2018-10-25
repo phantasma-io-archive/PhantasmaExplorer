@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
+using Phantasma.Blockchain;
 using Phantasma.Explorer.Controllers;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 

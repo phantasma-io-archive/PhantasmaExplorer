@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
+using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
@@ -17,7 +18,7 @@ namespace Phantasma.Explorer.Controllers
             Repository = repo;
         }
 
-        public HomeViewModel GetLastestInfo()
+        public async Task<HomeViewModel> GetLastestInfo()
         {
             var blocks = new List<BlockViewModel>();
             var txs = new List<TransactionViewModel>();
@@ -53,17 +54,20 @@ namespace Phantasma.Explorer.Controllers
                 }
             }
 
-            var command = new Task(() =>
-             {
-                 var x = 1;
-             });
+            int totalChains = Repository.GetAllChains().Count; //todo repo
+            uint height = Repository.GetChainByName("main").BlockHeight; //todo repo
+            int totalTransactions = 0;
+            decimal marketCap = await CoinUtils.GetCoinMarketCap(2827);
 
             var vm = new HomeViewModel
             {
                 Blocks = blocks.OrderByDescending(b => b.Timestamp).ToList(),
                 Transactions = txs,
                 Chart = chart,
-                SearchCommand = command
+                TotalTransactions = totalTransactions,
+                TotalChains = totalChains,
+                BlockHeight = height,
+                MarketCap = marketCap
             };
             return vm;
         }
