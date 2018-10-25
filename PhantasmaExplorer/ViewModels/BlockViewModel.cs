@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Core.Utils;
@@ -15,10 +16,11 @@ namespace Phantasma.Explorer.ViewModels
         public string MiningAddress { get; set; }
         public string ChainName { get; set; }
         public string ChainAddress { get; set; }
+        public List<TransactionViewModel> Txs { get; set; }
 
         public static BlockViewModel FromBlock(Block block)
         {
-            return new BlockViewModel
+            var vm = new BlockViewModel
             {
                 Height = (int)block.Height,
                 Timestamp = block.Timestamp,
@@ -27,8 +29,13 @@ namespace Phantasma.Explorer.ViewModels
                 ParentHash = block.PreviousHash?.ToString(),
                 MiningAddress = block.MinerAddress.Text,
                 ChainName = block.Chain.Name.ToTitleCase(),
-                ChainAddress = block.Chain.Address.Text
+                ChainAddress = block.Chain.Address.Text,
+                Txs = new List<TransactionViewModel>()
             };
+            var txsVm = block.Transactions.Select(transaction => TransactionViewModel.FromTransaction(vm, (Transaction) transaction, null)).ToList();
+
+            vm.Txs = txsVm;
+            return vm;
         }
     }
 }

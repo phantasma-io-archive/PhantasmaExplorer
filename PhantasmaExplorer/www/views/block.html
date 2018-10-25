@@ -58,7 +58,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">Block Transactions</div>
                     <div class="panel-body">
-                        {{#if block.transactions}}
+                        {{#if block.Transactions}}
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -67,7 +67,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {{#each block.transactions}}
+                                {{#each block.Txs}}
                                 <tr>
 									<td><a href="/tx/{{Hash}}">{{Hash}}</a></td>
                                     <!--<td>TODO</td>-->
