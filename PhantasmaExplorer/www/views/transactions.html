@@ -8,6 +8,7 @@
                     <th>Date</th>
                     <th>Chain</th>
                     <th>Hash</th>
+                    <th>Description</th>
                 </tr>
             </thead>
             <tbody>
@@ -16,6 +17,7 @@
                     <td>{{#date Date}}</td>
                     <td><a href="/chain/{{ChainAddress}}">{{ChainName}}</a></td>
                     <td><a href="/tx/{{Hash}}">{{Hash}}</a></td>
+					<td>{{{Description}}}</td>
                 </tr>
                 {{/each}}
             </tbody>
