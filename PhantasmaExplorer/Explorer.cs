@@ -37,65 +37,12 @@ namespace Phantasma.Explorer
             var simulator = new ChainSimulator(ownerKey, 12345);
 
             // generate blocks with mock transactions
-            for (int i=1; i<=500; i++)
+            for (int i=1; i<=1000; i++)
             {
                 simulator.GenerateBlock();
             }
 
-            var nexus = simulator.Nexus;
-
-            var bankChain = nexus.FindChainByName("bank");
-
-            var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB");
-
-            // mainchain transfer
-            {
-                var transactions = new List<Transaction>();
-                var script = ScriptUtils.CallContractScript(nexus.RootChain, "TransferTokens", ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, TokenUtils.ToBigInteger(5));
-                var tx = new Transaction(script, 0, 0);
-                tx.Sign(ownerKey);
-                transactions.Add(tx);
-
-                var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.LastBlock);
-                if (!block.Chain.AddBlock(block))
-                {
-                    throw new Exception("test block failed");
-                }
-            }
-
-            // side chain send
-            Hash sideSendHash;
-            {
-                var transactions = new List<Transaction>();
-                var script = ScriptUtils.CallContractScript(nexus.RootChain, "SendTokens", bankChain.Address, ownerKey.Address, targetAddress, Nexus.NativeTokenSymbol, TokenUtils.ToBigInteger(7));
-                var tx = new Transaction(script, 0, 0);
-                tx.Sign(ownerKey);
-                transactions.Add(tx);
-
-                var block = new Block(nexus.RootChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.LastBlock);
-                if (!block.Chain.AddBlock(block))
-                {
-                    throw new Exception("test block failed");
-                }
-
-                sideSendHash = tx.Hash;
-            }
-
-            // side chain receive
-            {
-                var transactions = new List<Transaction>();
-                var script = ScriptUtils.CallContractScript(bankChain, "ReceiveTokens", nexus.RootChain.Address, targetAddress, sideSendHash);
-                var tx = new Transaction(script, 0, 0);
-                tx.Sign(ownerKey);
-                transactions.Add(tx);
-
-                var block = new Block(bankChain, ownerKey.Address, Timestamp.Now, transactions, nexus.RootChain.LastBlock);
-                if (!block.Chain.AddBlock(block))
-                {
-                    throw new Exception("test block failed");
-                }
-            }
-            return nexus;
+            return simulator.Nexus;
         }
     }
 }

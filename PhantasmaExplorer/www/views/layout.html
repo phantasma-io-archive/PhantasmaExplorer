@@ -10,15 +10,13 @@
 
     <title>Phantasma Explorer</title>
 
-    <!-- Bootstrap Core CSS -->
+    <!-- CSS libs -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/chartist.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <!-- Custom CSS -->
     <link href="/css/explorer.css" rel="stylesheet">
-    <link href="/css/custom-head-foot-scroll-blue.min.css" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.css" rel="stylesheet">
-    <link href="/css/profile.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -86,11 +84,19 @@
         </div>
     </footer>
 		
-    <!-- jQuery -->
+    <!-- JS libs -->
     <script src="/js/jquery.min.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/chartist.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
+	
+	<script>
+	$(function() {
+		let initMethod = "onStart";
+		if (typeof window[initMethod] === "function") {
+			window[initMethod](); 
+		}	
+	});
+	</script>
 </body>
 
 </html>
