@@ -34,7 +34,7 @@ namespace Phantasma.Explorer.ViewModels
                 Reward = TokenUtils.ToDecimal(block.GetReward()),
                 Txs = new List<TransactionViewModel>()
             };
-            var txsVm = block.Transactions.Select(transaction => TransactionViewModel.FromTransaction(vm, (Transaction) transaction, null)).ToList();
+            var txsVm = block.Transactions.Select(transaction => TransactionViewModel.FromTransaction(null, vm, (Transaction)transaction, null)).ToList();
 
             vm.Txs = txsVm;
             return vm;
