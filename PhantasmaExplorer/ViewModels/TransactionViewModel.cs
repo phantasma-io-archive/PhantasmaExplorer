@@ -73,6 +73,19 @@ namespace Phantasma.Explorer.ViewModels
                         }
                         break;
 
+                    case EventKind.FriendAdd:
+                        {
+                            var address = evt.GetContent<Address>();
+                            description = $"{evt.Address} added '{address} to friends.'";
+                        }
+                        break;
+
+                    case EventKind.FriendRemove:
+                        {
+                            var address = evt.GetContent<Address>();
+                            description = $"{evt.Address} removed '{address} from friends.'";
+                        }
+                        break;
                 }
             }
 
