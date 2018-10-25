@@ -6,6 +6,7 @@ using LunarLabs.WebServer.Templates;
 using Phantasma.Blockchain;
 using Phantasma.Explorer.Controllers;
 using Phantasma.Explorer.Infrastructure.Interfaces;
+using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer.Site
 {
@@ -112,14 +113,13 @@ namespace Phantasma.Explorer.Site
                 return RendererView(new[] { "layout", tokensContext });
             });
 
-
-            // Example, remove me later
-            TemplateEngine.Site.Get($"/test", request =>
+            TemplateEngine.Site.Get($"/rate/{{token}}", request =>
             {
-                System.Threading.Thread.Sleep(2000);
-                return "Dynamic stuff";
+                var tokenSymbol = request.GetVariable("token");
+                // tag dont solve anything...
+                // I should be able to to return await CoinUtils.GetCoinRate(2872, tokenSymbol); 
+                return CoinUtils.GetCoinRate(2872, tokenSymbol); 
             });
-
 
             TemplateEngine.Site.Get($"{urlToken}/{{input}}", request =>
             {

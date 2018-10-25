@@ -18,7 +18,7 @@ namespace Phantasma.Explorer.Controllers
             Repository = repo;
         }
 
-        public async Task<HomeViewModel> GetLastestInfo()
+        public HomeViewModel GetLastestInfo()
         {
             var blocks = new List<BlockViewModel>();
             var txs = new List<TransactionViewModel>();
@@ -56,8 +56,41 @@ namespace Phantasma.Explorer.Controllers
 
             int totalChains = Repository.GetAllChains().Count; //todo repo
             uint height = Repository.GetChainByName("main").BlockHeight; //todo repo
-            int totalTransactions = 0;
-            decimal marketCap = await CoinUtils.GetCoinMarketCap(2827);
+            int totalTransactions = 0; //todo
+
+            var info = CoinUtils.GetCoinInfo(2827, "BTC");
+            var marketCap = info["quotes"]["USD"].GetDecimal("market_cap");
+
+            //USD
+            var soulUsd = info["quotes"]["USD"].GetDecimal("price");
+            var soulUsdChange = info["quotes"]["USD"].GetDecimal("percent_change_24h");
+            CoinRateViewModel soulUsdVm = new CoinRateViewModel
+            {
+                Coin = "SOUL/USD",
+                ChangePercentage = soulUsdChange,
+                Rate = soulUsd
+            };
+
+            //USD
+            var soulBtc = info["quotes"]["USD"].GetDecimal("price");
+            var soulBtcChange = info["quotes"]["USD"].GetDecimal("percent_change_24h");
+            CoinRateViewModel soulBtcVm = new CoinRateViewModel
+            {
+                Coin = "SOUL/BTC",
+                ChangePercentage = soulBtcChange,
+                Rate = soulBtc
+            };
+
+            //ETH
+            info = CoinUtils.GetCoinInfo(2827, "ETH");
+            var soulEth = info["quotes"]["ETH"].GetDecimal("price");
+            var soulEthChange = info["quotes"]["ETH"].GetDecimal("percent_change_24h");
+            CoinRateViewModel soulEthdVm = new CoinRateViewModel
+            {
+                Coin = "SOUL/ETH",
+                ChangePercentage = soulEthChange,
+                Rate = soulEth
+            };
 
             var vm = new HomeViewModel
             {
@@ -67,7 +100,10 @@ namespace Phantasma.Explorer.Controllers
                 TotalTransactions = totalTransactions,
                 TotalChains = totalChains,
                 BlockHeight = height,
-                MarketCap = marketCap
+                MarketCap = marketCap,
+                SOULBTC = soulBtcVm,
+                SOULETH = soulEthdVm,
+                SOULUSD = soulUsdVm
             };
             return vm;
         }

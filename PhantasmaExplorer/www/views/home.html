@@ -1,76 +1,72 @@
 ﻿<div class="row">
-Hello I am {{#async _test}}
-<div>
-
-<div class="row">
-   <div id="custom-search-input">
-		<div class="input-group col-md-12">
-			<form action="/home" method="POST">
-				<input type="text" class="search-query form-control" id="searchInput" name="searchInput" value="{{searchInput}}" placeholder="Search by Address / Txhash / Block / Token"/>
-				<span class="input-group-btn">
-					<button class="btn pull-right" type="submit">
-						<span class=" glyphicon glyphicon-search"></span>
-					</button>
-				</span>
-			</form>
-		</div>
-	</div>
+    <div id="custom-search-input">
+        <div class="input-group col-md-12">
+            <form action="/home" method="POST">
+                <input type="text" class="search-query form-control" id="searchInput" name="searchInput" value="{{searchInput}}" placeholder="Search by Address / Txhash / Block / Token" />
+                <span class="input-group-btn">
+                    <button class="btn pull-right" type="submit">
+                        <span class=" glyphicon glyphicon-search"></span>
+                    </button>
+                </span>
+            </form>
+        </div>
+    </div>
 </div>
 
 <div class="row">
 
-	<div class="col-sm-6">
-		<div class="panel panel-default">
-			<div class="panel-heading">Phantasma Overview</div>
-			<div class="panel-body">
-				<table class="table table-striped">
-					<tbody>
-					  <tr>
-						<td>Market Cap</td>
-                        <td>{{home.MarketCap}}</td>
-					  </tr>
-					  <tr>
-						<td>Last Block</td>
-                        <td>{{home.BlockHeight}}</td>
-					  </tr>
-					  <tr>
-						<td>Total Transactions</td>
-                        <td>{{home.TotalTransactions}}</td>
-					  </tr>
-					  <tr>
-						<td>Total Chains</td>
-                        <td>{{home.TotalChains}}</td>
-					  </tr>
-					  <tr>
-						<td>SOUL/USD</td>
-						<td>0.23 USD <span class="label label-success label-as-badge">+10%</span></td>
-					  </tr>
-					  <tr>
-						<td>SOUL/BTC</td>
-						<td>0.23 BTC <span class="label label-success label-as-badge">+10%</span></td>
-					  </tr>
-					  <tr>
-						<td>SOUL/ETH</td>
-						<td>0.23 ETH <span class="label label-success label-as-badge">+10%</span></td>
-					  </tr>
-					  <tr>
-						<td>SOUL/NEO</td>
-						<td>0.23 NEO <span class="label label-success label-as-badge">+10%</span></td>
-					  </tr>
-					</tbody>
-				</table>
-			</div>
-		</div>	
-	</div>	
+    <div class="col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">Phantasma Overview</div>
+            <div class="panel-body">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <td>Market Cap</td>
+                            <td>${{home.MarketCap}}</td>
+                        </tr>
+                        <tr>
+                            <td>Last Block</td>
+                            <td>{{home.BlockHeight}}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Transactions</td>
+                            <td>{{home.TotalTransactions}}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Chains</td>
+                            <td>{{home.TotalChains}}</td>
+                        </tr>
+                        <tr>
+                            <td>SOUL/USD</td>
+                            <td>{{home.SOULUSD.Rate}} BTC {{#if home.SOULUSD.ChangePercentage > 0}}  <span class="label label-success label-as-badge">{{home.SOULUSD.ChangePercentage}}</span> {{#else}}  <span class="label label-danger label-as-badge">{{home.SOULUSD.ChangePercentage}}</span>{{/if}}</td>
+                        </tr>
+                        <tr>
+                            <td>SOUL/BTC</td>
+                            <td>{{home.SOULBTC.Rate}} BTC {{#if home.SOULBTC.ChangePercentage > 0}}  <span class="label label-success label-as-badge">{{home.SOULBTC.ChangePercentage}}</span> {{#else}}  <span class="label label-danger label-as-badge">{{home.SOULBTC.ChangePercentage}}</span>{{/if}}</td>
+                        </tr>
+                        <tr>
+                            <td>SOUL/ETH</td>
+                            <td>{{home.SOULETH.Rate}} BTC {{#if home.SOULETH.ChangePercentage > 0}}  <span class="label label-success label-as-badge">{{home.SOULETH.ChangePercentage}}</span> {{#else}}  <span class="label label-danger label-as-badge">{{home.SOULETH.ChangePercentage}}</span>{{/if}}</td>
+                        </tr>
+                        <tr>
+                            <td>SOUL/NEO</td>
+                            <td>{{home.SOULNEO.Rate}} NEO  <span class="label label-success label-as-badge">+10%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
- 	<div class="col-sm-6">	
-		<div class="panel panel-default">
-			<div class="panel-heading">Phantasma Transactions History <small>(Last 15 days)</small></div>
-			<div class="panel-body">
-				<div id="my-chart"></div>
-			</div>
-		</div>	
-	</div>
+    <div class="col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">Phantasma Transactions History <small>(Last 15 days)</small></div>
+            <div class="panel-body">
+                <div id="my-chart"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -83,7 +79,7 @@ function onStart(){
 		[{{#each home.Chart}}{{Value}}, {{/each}}],
 	  ]
 	};
-	
+
 	let options = {
 		fullWidth: true,
 		height: 300,
@@ -98,58 +94,60 @@ function onStart(){
 </script>
 
 <div class="row">
-	<div class="col-sm-6">
-		<div class="panel panel-default">
-			<div class="panel-heading"><i class="fas fa-cubes"></i> Blocks
-				<div class="btn-group pull-right">
-					<a href="/blocks" class="btn btn-default btn-sm" style="margin-top: -4px;">View All</a>
-			  </div>
-			</div>
-			<div class="panel-body">
-				<table class="table table-striped">
-				<tbody>
-					{{#each home.Blocks}}
-					<tr>
-						<td>
-							<span><a href="/block/{{Hash}}">Block {{Height}}</a></span><br>
-							<i>&gt;{{#timeago Timestamp}}</i>
-						</td>
-						<td>
-							Miner: <a href="/address/{{MiningAddress}}" style="text-overflow: ellipsis;">{{MiningAddress}}</a><br>
-							<a href="/txsblock/{{Hash}}"><strong>{{Transactions}} Txn</strong></a><br>
-							Block reward: {{Reward}} SOUL	
-						</td>
-					</tr>
-					{{/each}}
-				</tbody>
-				</table>
-			</div>
-		</div>	
-	</div>
-	
-	<div class="col-sm-6">
-		<div class="panel panel-default">
-			<div class="panel-heading"><i class="fas fa-database"></i> Transactions
-				<div class="btn-group pull-right">
-					<a href="/transactions" class="btn btn-default btn-sm" style="margin-top: -4px;">View All</a>
-			  </div>
-			</div>
-			<div class="panel-body">
-				<table class="table table-striped">
-				<tbody>
-					{{#each home.Transactions}}
-					<tr>
-						<td>
-							TX# <a href="/tx/{{Hash}}"><small>{{Hash}}</small></a><br>
-							<i>&gt;{{#timeago Block.Timestamp}} in <a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain</i><br>
-							{{{Description}}}<br> 						 
-						</td>
-					</tr>
-					{{/each}}
-				</tbody>
-				</table>
-			</div>
-		</div>	
-	</div>
-	
+    <div class="col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fas fa-cubes"></i> Blocks
+                <div class="btn-group pull-right">
+                    <a href="/blocks" class="btn btn-default btn-sm" style="margin-top: -4px;">View All</a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <table class="table table-striped">
+                    <tbody>
+                        {{#each home.Blocks}}
+                        <tr>
+                            <td>
+                                <span><a href="/block/{{Hash}}">Block {{Height}}</a></span><br>
+                                <i>&gt;{{#timeago Timestamp}}</i>
+                            </td>
+                            <td>
+                                Miner: <a href="/address/{{MiningAddress}}" style="text-overflow: ellipsis;">{{MiningAddress}}</a><br>
+                                <a href="/txsblock/{{Hash}}"><strong>{{Transactions}} Txn</strong></a><br>
+                                Block reward: {{Reward}} SOUL
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fas fa-database"></i> Transactions
+                <div class="btn-group pull-right">
+                    <a href="/transactions" class="btn btn-default btn-sm" style="margin-top: -4px;">View All</a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <table class="table table-striped">
+                    <tbody>
+                        {{#each home.Transactions}}
+                        <tr>
+                            <td>
+                                TX# <a href="/tx/{{Hash}}"><small>{{Hash}}</small></a><br>
+                                <i>&gt;{{#timeago Block.Timestamp}} in <a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain</i><br>
+                                {{{Description}}}<br>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
