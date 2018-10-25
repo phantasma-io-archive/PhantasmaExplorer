@@ -67,7 +67,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public List<Transaction> GetTransactions(string chainAddress = "", int txAmount = 20)
+        public List<Transaction> GetTransactions(string chainAddress, int txAmount)
         {
             throw new System.NotImplementedException();
         }

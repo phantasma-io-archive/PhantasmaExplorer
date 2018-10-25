@@ -26,10 +26,31 @@ namespace Phantasma.Explorer.Controllers
                 blocks.Add(BlockViewModel.FromBlock(block));
             }
 
+            var chart = new Dictionary<string, uint>();
+
             foreach (var transaction in Repository.GetTransactions())
             {
                 var tempBlock = Repository.GetBlock(transaction);
                 txs.Add(TransactionViewModel.FromTransaction(BlockViewModel.FromBlock(tempBlock), transaction, null));
+            }
+
+            // tx history chart calculation
+            var repTxs = Repository.GetTransactions(null, 1000);
+            foreach (var transaction in repTxs)
+            {
+                var tempBlock = Repository.GetBlock(transaction);
+
+                DateTime chartTime = tempBlock.Timestamp;
+                var chartKey = $"{chartTime.Day}/{chartTime.Month}";
+
+                if (chart.ContainsKey(chartKey))
+                {
+                    chart[chartKey]+=200;
+                }
+                else
+                {
+                    chart[chartKey] = 1;
+                }
             }
 
             var command = new Task(() =>
@@ -41,6 +62,7 @@ namespace Phantasma.Explorer.Controllers
             {
                 Blocks = blocks.OrderByDescending(b => b.Timestamp).ToList(),
                 Transactions = txs,
+                Chart = chart,
                 SearchCommand = command
             };
             return vm;

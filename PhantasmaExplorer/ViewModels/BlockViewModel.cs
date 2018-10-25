@@ -16,6 +16,7 @@ namespace Phantasma.Explorer.ViewModels
         public string MiningAddress { get; set; }
         public string ChainName { get; set; }
         public string ChainAddress { get; set; }
+        public decimal Reward { get; set; }
         public List<TransactionViewModel> Txs { get; set; }
 
         public static BlockViewModel FromBlock(Block block)
@@ -30,6 +31,7 @@ namespace Phantasma.Explorer.ViewModels
                 MiningAddress = block.MinerAddress.Text,
                 ChainName = block.Chain.Name.ToTitleCase(),
                 ChainAddress = block.Chain.Address.Text,
+                Reward = TokenUtils.ToDecimal(block.GetReward()),
                 Txs = new List<TransactionViewModel>()
             };
             var txsVm = block.Transactions.Select(transaction => TransactionViewModel.FromTransaction(vm, (Transaction) transaction, null)).ToList();

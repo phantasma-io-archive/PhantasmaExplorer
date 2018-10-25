@@ -27,11 +27,12 @@
 </div>
 
 <script>
+// TODO: add support for https://github.com/tmmdata/chartist-plugin-tooltip
 function onStart(){
 	new Chartist.Line('#my-chart', {
-	  labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+	  labels: [ {{#each home.Chart}}'{{Key}}', {{/each}}],
 	  series: [
-		[12, 9, 7, 8, 5],
+		[{{#each home.Chart}}{{Value}}, {{/each}}],
 	  ]
 	}, {
 	  fullWidth: true,
@@ -43,6 +44,38 @@ function onStart(){
 
 </script>
 
+<div class="row">
+	<div class="col-sm-6">
+		<div class="panel panel-default">
+			<div class="panel-heading"><i class="fas fa-cubes"></i> Blocks
+				<div class="btn-group pull-right">
+					<a href="#" class="btn btn-default btn-sm" style="margin-top: -4px;">View All</a>
+			  </div>
+			</div>
+			<div class="panel-body">
+				<table class="table table-striped">
+				<tbody>
+					{{#each home.Blocks}}
+					<tr>
+						<td>
+							<span><a href="/block/{{Hash}}">Block {{Height}}</a></span>
+							<br>&gt;{{#timeago Timestamp}}
+						</td>
+						<td>
+							Mined by <a href="/address/{{MiningAddress}}" style="text-overflow: ellipsis;">{{MiningAddress}}</a><br>
+							<a href="/txsblock/{{Hash}}"><strong>{{Transactions}} Txn</strong></a><br>
+							Block reward: {{Reward}} SOUL	
+						</td>
+					</tr>
+					{{/each}}
+				</tbody>
+				</table>
+			</div>
+		</div>	
+	</div>
+</div>
+
+<br><br><br><br><br>
 <div class="profile-body">
 	<div class="profile container" style="margin-top: 0px">
 		<div class="row margin-bottom-40">

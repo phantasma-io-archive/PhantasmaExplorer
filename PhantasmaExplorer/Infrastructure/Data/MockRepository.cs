@@ -132,7 +132,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return nameList;
         }
 
-        public List<Transaction> GetTransactions(string chainAddress = "", int txAmount = 20)
+        public List<Transaction> GetTransactions(string chainAddress, int txAmount)
         {
             var txList = new List<Transaction>();
             var blocksList = new List<Block>();
@@ -141,7 +141,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 var chains = GetAllChains();
                 foreach (var chain in chains)
                 {
-                    blocksList.AddRange(chain.Blocks.TakeLast(10));
+                    blocksList.AddRange(chain.Blocks.TakeLast(txAmount * 10));
                 }
 
                 foreach (var block in blocksList.OrderByDescending(b => b.Timestamp.Value))

@@ -32,7 +32,7 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         Chain GetChainByName(string chainName);
 
-        List<Transaction> GetTransactions(string chainAddress = "", int txAmount = 20);
+        List<Transaction> GetTransactions(string chainAddress = null, int txAmount = 20);
 
         Transaction GetTransaction(string txHash);
 
