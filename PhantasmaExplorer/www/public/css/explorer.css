@@ -151,3 +151,11 @@ form {
 .search-query:focus + button {
 	z-index: 3;   
 }
+
+.label-as-badge {
+    border-radius: 1em;
+}
+
+#tx-chart {
+	min-height:800px;
+}
