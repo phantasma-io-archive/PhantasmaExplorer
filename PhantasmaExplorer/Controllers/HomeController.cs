@@ -85,11 +85,21 @@ namespace Phantasma.Explorer.Controllers
             info = CoinUtils.GetCoinInfo(2827, "ETH");
             var soulEth = info["quotes"]["ETH"].GetDecimal("price");
             var soulEthChange = info["quotes"]["ETH"].GetDecimal("percent_change_24h");
-            CoinRateViewModel soulEthdVm = new CoinRateViewModel
+            CoinRateViewModel soulEthVm = new CoinRateViewModel
             {
                 Coin = "SOUL/ETH",
                 ChangePercentage = soulEthChange,
                 Rate = soulEth
+            };
+
+            info = CoinUtils.GetCoinInfo(2827, "NEO");
+            var soulNeo = info["quotes"]["NEO"].GetDecimal("price");
+            var soulNeoChange = info["quotes"]["NEO"].GetDecimal("percent_change_24h");
+            CoinRateViewModel soulNeoVm = new CoinRateViewModel
+            {
+                Coin = "SOUL/NEO",
+                ChangePercentage = soulNeoChange,
+                Rate = soulNeo
             };
 
             var vm = new HomeViewModel
@@ -102,8 +112,9 @@ namespace Phantasma.Explorer.Controllers
                 BlockHeight = height,
                 MarketCap = marketCap,
                 SOULBTC = soulBtcVm,
-                SOULETH = soulEthdVm,
-                SOULUSD = soulUsdVm
+                SOULETH = soulEthVm,
+                SOULUSD = soulUsdVm,
+                SOULNEO = soulNeoVm
             };
             return vm;
         }
