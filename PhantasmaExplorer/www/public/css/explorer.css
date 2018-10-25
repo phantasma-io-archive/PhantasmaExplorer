@@ -123,10 +123,8 @@ form {
 }
  
 #custom-search-input .search-query {
-	padding-right: 3px;
-	padding-right: 4px \9;
-	padding-left: 3px;
-	padding-left: 4px \9;
+	padding-right: 6px;
+	padding-left: 6px;
 	margin-bottom: 0;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
