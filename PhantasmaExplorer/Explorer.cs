@@ -28,7 +28,7 @@ namespace Phantasma.Explorer
             viewsRenderer.SetupControllers(mockRepo);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
-            site.server.Run();
+            site.server.Run(site);
         }
 
         private static Nexus InitMockData()
