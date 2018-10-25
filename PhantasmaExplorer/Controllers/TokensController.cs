@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using Phantasma.Blockchain;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
@@ -38,7 +40,7 @@ namespace Phantasma.Explorer.Controllers
             foreach (var token in nexusTokens)
             {
                 tokensList.Add(TokenViewModel.FromToken(token, //todo
-                    "Soul is the native asset of Phantasma blockchain", 
+                    "Soul is the native asset of Phantasma blockchain",
                     "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
                     SoulRate));
             }
@@ -46,9 +48,25 @@ namespace Phantasma.Explorer.Controllers
             return tokensList;
         }
 
-        public void GetHolders(string symbol) //todo
+        public List<BalanceViewModel> GetHolders(string symbol) //todo
         {
-            var nexusChain = Repository.GetChain("main");
+            var mainChain = Repository.GetChainByName("main");
+            var token = Repository.GetToken(symbol);
+            List<BalanceViewModel> balances = new List<BalanceViewModel>();
+            if (token != null && mainChain != null)
+            {
+                var balanceSheet = mainChain.GetTokenBalances(token);
+                balanceSheet.ForEach((address, integer) =>
+                {
+                    var vm = new BalanceViewModel(mainChain.Name, TokenUtils.ToDecimal(integer))
+                    {
+                        TokenSymbol = token.Symbol,
+                        Address = address.Text
+                    };
+                    balances.Add(vm);
+                });
+            }
+            return balances;
         }
     }
 }
