@@ -58,50 +58,6 @@ namespace Phantasma.Explorer.Controllers
             uint height = Repository.GetChainByName("main").BlockHeight; //todo repo
             int totalTransactions = 0; //todo
 
-            var info = CoinUtils.GetCoinInfo(2827, "BTC");
-            var marketCap = info["quotes"]["USD"].GetDecimal("market_cap");
-
-            //USD
-            var soulUsd = info["quotes"]["USD"].GetDecimal("price");
-            var soulUsdChange = info["quotes"]["USD"].GetDecimal("percent_change_24h");
-            CoinRateViewModel soulUsdVm = new CoinRateViewModel
-            {
-                Symbol = "SOUL/USD",
-                ChangePercentage = soulUsdChange,
-                Rate = soulUsd
-            };
-
-            //USD
-            var soulBtc = info["quotes"]["USD"].GetDecimal("price");
-            var soulBtcChange = info["quotes"]["USD"].GetDecimal("percent_change_24h");
-            CoinRateViewModel soulBtcVm = new CoinRateViewModel
-            {
-                Symbol = "SOUL/BTC",
-                ChangePercentage = soulBtcChange,
-                Rate = soulBtc
-            };
-
-            //ETH
-            info = CoinUtils.GetCoinInfo(2827, "ETH");
-            var soulEth = info["quotes"]["ETH"].GetDecimal("price");
-            var soulEthChange = info["quotes"]["ETH"].GetDecimal("percent_change_24h");
-            CoinRateViewModel soulEthVm = new CoinRateViewModel
-            {
-                Symbol = "SOUL/ETH",
-                ChangePercentage = soulEthChange,
-                Rate = soulEth
-            };
-
-            info = CoinUtils.GetCoinInfo(2827, "NEO");
-            var soulNeo = info["quotes"]["NEO"].GetDecimal("price");
-            var soulNeoChange = info["quotes"]["NEO"].GetDecimal("percent_change_24h");
-            CoinRateViewModel soulNeoVm = new CoinRateViewModel
-            {
-                Symbol = "SOUL/NEO",
-                ChangePercentage = soulNeoChange,
-                Rate = soulNeo
-            };
-
             var vm = new HomeViewModel
             {
                 Blocks = blocks.OrderByDescending(b => b.Timestamp).ToList(),
@@ -110,7 +66,6 @@ namespace Phantasma.Explorer.Controllers
                 TotalTransactions = totalTransactions,
                 TotalChains = totalChains,
                 BlockHeight = height,
-                MarketCap = marketCap,
             };
             return vm;
         }

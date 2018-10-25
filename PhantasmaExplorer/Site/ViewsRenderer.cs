@@ -114,7 +114,14 @@ namespace Phantasma.Explorer.Site
                 return RendererView("layout", tokensContext);
             });
 
-            TemplateEngine.Site.Get($"/rates", request =>
+            TemplateEngine.Site.Get("/marketcap", request =>
+            {
+                var info = CoinUtils.GetCoinInfo(2827, "USD");
+                var marketCap = info["quotes"]["USD"].GetDecimal("market_cap");
+                return $"${marketCap}";
+            });
+
+            TemplateEngine.Site.Get("/rates", request =>
             {
                 var symbols = new[] { "USD", "BTC", "ETH", "NEO" };
 

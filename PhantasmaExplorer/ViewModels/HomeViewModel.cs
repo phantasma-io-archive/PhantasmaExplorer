@@ -10,6 +10,5 @@ namespace Phantasma.Explorer.ViewModels
         public int TotalChains { get; set; }
         public int TotalTransactions { get; set; }
         public uint BlockHeight { get; set; }
-        public decimal MarketCap { get; set; }
     }
 }
