@@ -72,15 +72,21 @@ namespace Phantasma.Explorer.Controllers
         {
             try
             {
-                var token = Repository.GetToken(input);
-                if (token != null)// token symbol
+                if (Address.IsValidAddress(input)) //maybe is address
                 {
-                    return $"token/{input}";
-                }
-                if (input.Length == 45) //maybe is address
-                {
-                    var address = Address.FromText(input);
                     return $"address/{input}";
+                }
+
+                var token = Repository.GetToken(input.ToUpperInvariant());
+                if (token != null)// token
+                {
+                    return $"token/{token.Symbol}";
+                }
+
+                var chain = Repository.GetChainByName(input) ?? Repository.GetChain(input);
+                if (chain != null)
+                {
+                    return $"chain/{chain.Address.Text}";
                 }
 
                 var hash = Hash.Parse(input);
@@ -89,13 +95,13 @@ namespace Phantasma.Explorer.Controllers
                     var tx = Repository.GetTransaction(hash.ToString());
                     if (tx != null)
                     {
-                        return $"tx/{input}";
+                        return $"tx/{tx.Hash}";
                     }
 
                     var block = Repository.GetBlock(hash.ToString());
                     if (block != null)
                     {
-                        return $"block/{input}";
+                        return $"block/{block.Hash}";
                     }
                 }
 

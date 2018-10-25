@@ -111,6 +111,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public Chain GetChain(string chainInput)
         {
+            if (!Address.IsValidAddress(chainInput)) return null;
             var chainAddress = Address.FromText(chainInput);
 
             return NexusChain.Chains.SingleOrDefault(c => c.Address == chainAddress);
@@ -210,7 +211,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public Token GetToken(string symbol)
         {
-            return NexusChain.Tokens.SingleOrDefault(t => t.Symbol == symbol);
+            return NexusChain.Tokens.SingleOrDefault(t => t.Symbol.ToUpperInvariant() == symbol || t.Name.ToUpperInvariant() == symbol);
         }
 
         public string GetEventContent(Block block, Event evt)

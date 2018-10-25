@@ -110,8 +110,10 @@ namespace Phantasma.Explorer.Site
                 var token = TokensController.GetToken(tokenSymbol);
                 if (token != null)
                 {
+                    var holders = TokensController.GetHolders(token.Symbol);
+                    UpdateContext(holdersContext, holders);
                     UpdateContext(tokenContext, token);
-                    return RendererView(new[] { "layout", tokenContext });
+                    return RendererView(new[] { "layout", tokenContext, holdersContext });
                 }
 
                 _errorContextInstance.errorCode = "token error";
@@ -301,6 +303,7 @@ namespace Phantasma.Explorer.Site
         private readonly string chainsContext = "chains";
         private readonly string chainContext = "chain";
         private readonly string errorContext = "error";
+        private readonly string holdersContext = "holders";
 
         public struct MenuContext
         {
