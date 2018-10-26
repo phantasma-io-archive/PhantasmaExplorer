@@ -6,6 +6,7 @@ using Phantasma.Core.Types;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Data;
 using Phantasma.Explorer.Site;
+using Phantasma.Tests;
 using Phantasma.VM.Utils;
 
 namespace Phantasma.Explorer
