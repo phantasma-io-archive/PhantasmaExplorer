@@ -40,7 +40,7 @@ namespace Phantasma.Explorer
             // generate blocks with mock transactions
             for (int i=1; i<=1000; i++)
             {
-                simulator.GenerateBlock();
+                simulator.GenerateRandomBlock();
             }
 
             return simulator.Nexus;
