@@ -30,7 +30,7 @@ namespace Phantasma.Explorer.Site
                 new MenuContext {text = "Chains", url = urlChains, active = false},
                 new MenuContext {text = "Blocks", url = urlBlocks, active = false},
                 new MenuContext {text = "Tokens", url = urlTokens, active = false},
-                //new MenuContext {text = "Addresses", url = urlAddresses, active = false}
+                new MenuContext {text = "Addresses", url = urlAddresses, active = false}
             };
 
             TemplateEngine.RegisterTag("value", (doc, val) => new PriceTag(doc, val));

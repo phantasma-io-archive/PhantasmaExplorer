@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using Phantasma.Blockchain;
-using Phantasma.Core.Types;
+using Phantasma.Blockchain.Plugins;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Data;
 using Phantasma.Explorer.Site;
 using Phantasma.Tests;
-using Phantasma.VM.Utils;
 
 namespace Phantasma.Explorer
 {
@@ -36,6 +34,10 @@ namespace Phantasma.Explorer
         {
             var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
             var simulator = new ChainSimulator(ownerKey, 12345);
+
+            // setup plugins required for explorer
+            simulator.Nexus.AddPlugin(new ChainAddressesPlugin(simulator.Nexus));
+            simulator.Nexus.AddPlugin(new AddressTransactionsPlugin(simulator.Nexus));
 
             // generate blocks with mock transactions
             for (int i=1; i<=1000; i++)

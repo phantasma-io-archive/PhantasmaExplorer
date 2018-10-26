@@ -12,11 +12,11 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
         Nexus NexusChain { get; set; }//todo remove
         decimal GetAddressBalance(Address address, string chainName = "");
 
-        List<Address> GetAddressList(string chainAddress = "", int lastAddressAmount = 20);
+        IEnumerable<Address> GetAddressList(string chainAddress = "", int lastAddressAmount = 20);
 
         Address GetAddress(string address);
 
-        List<Block> GetBlocks(string chainAddress = "", int lastBlocksAmount = 20);
+        IEnumerable<Block> GetBlocks(string chainAddress = "", int lastBlocksAmount = 20);
 
         Block GetBlock(string hash);
 
@@ -24,19 +24,19 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         Block GetBlock(Transaction tx);
 
-        List<Chain> GetAllChains();
+        IEnumerable<Chain> GetAllChains();
 
-        List<string> GetChainNames();
+        IEnumerable<string> GetChainNames();
 
         Chain GetChain(string chainAddress);
 
         Chain GetChainByName(string chainName);
 
-        List<Transaction> GetTransactions(string chainAddress = null, int txAmount = 20);
+        IEnumerable<Transaction> GetTransactions(string chainAddress = null, int txAmount = 20);
 
         Transaction GetTransaction(string txHash);
 
-        List<Token> GetTokens();
+        IEnumerable<Token> GetTokens();
 
         Token GetToken(string symbol);
 

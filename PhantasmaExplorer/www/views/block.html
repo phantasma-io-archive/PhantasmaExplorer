@@ -63,14 +63,14 @@
                             <thead>
                                 <tr>
                                     <th>Hash</th>
-                                    <!--<th>Something more??</th>-->
+                                    <th>Description</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {{#each block.Txs}}
                                 <tr>
                                     <td>{{#link-tx Hash}}</td>
-                                    <!--<td>TODO</td>-->
+									<td>{{Description}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>

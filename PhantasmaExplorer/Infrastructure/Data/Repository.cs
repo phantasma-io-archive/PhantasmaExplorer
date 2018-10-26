@@ -17,7 +17,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public List<Address> GetAddressList(string chainAddress = "", int lastAddressAmount = 20)
+        public IEnumerable<Address> GetAddressList(string chainAddress = "", int lastAddressAmount = 20)
         {
             throw new System.NotImplementedException();
         }
@@ -27,7 +27,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public List<Block> GetBlocks(string chainAddress = "", int lastBlocksAmount = 20)
+        public IEnumerable<Block> GetBlocks(string chainAddress = "", int lastBlocksAmount = 20)
         {
             throw new System.NotImplementedException();
         }
@@ -47,12 +47,12 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public List<Chain> GetAllChains()
+        public IEnumerable<Chain> GetAllChains()
         {
             throw new System.NotImplementedException();
         }
 
-        public List<string> GetChainNames()
+        public IEnumerable<string> GetChainNames()
         {
             throw new System.NotImplementedException();
         }
@@ -67,7 +67,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public List<Transaction> GetTransactions(string chainAddress, int txAmount)
+        public IEnumerable<Transaction> GetTransactions(string chainAddress, int txAmount)
         {
             throw new System.NotImplementedException();
         }
@@ -77,7 +77,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public List<Token> GetTokens()
+        public IEnumerable<Token> GetTokens()
         {
             throw new System.NotImplementedException();
         }

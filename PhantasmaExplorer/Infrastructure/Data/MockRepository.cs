@@ -3,6 +3,7 @@ using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
+using Phantasma.Blockchain.Plugins;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
@@ -25,19 +26,31 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return TokenUtils.ToDecimal(chain?.GetTokenBalance(NexusChain.NativeToken, address));
         }
 
-        public List<Address> GetAddressList(string chainAddress = "", int count = 20) //todo strategy to get address
+        public IEnumerable<Address> GetAddressList(string chainAddress = "", int count = 20) //todo strategy to get address
         {
             // if chainAddress then look only in a certain chain
             // count number of address to return
 
-            var addressList = new List<Address>();
+            var plugin = NexusChain.GetPlugin<ChainAddressesPlugin>();
+            if (plugin == null)
+            {
+                return Enumerable.Empty<Address>();
+            }
 
-            var targetAddress = Address.FromText("PGasVpbFYdu7qERihCsR22nTDQp1JwVAjfuJ38T8NtrCB"); //todo remove hack
-            var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
-            addressList.Add(ownerKey.Address);
-            addressList.Add(targetAddress);
-
-            return addressList;
+            if (string.IsNullOrEmpty(chainAddress))
+            {
+                var addressList = new List<Address>();
+                foreach (var chain in NexusChain.Chains)
+                {
+                    addressList.AddRange(plugin.GetChainAddresses(chain));
+                }
+                return addressList;
+            }
+            else
+            {
+                var chain = NexusChain.FindChainByAddress(Address.FromText(chainAddress));
+                return plugin.GetChainAddresses(chain);
+            }
         }
 
         public Address GetAddress(string addressText) //todo
@@ -46,9 +59,9 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return address;
         }
 
-        public List<Block> GetBlocks(string chainInput = "", int lastBlocksAmount = 20)
+        public IEnumerable<Block> GetBlocks(string chainInput = "", int lastBlocksAmount = 20)
         {
-            List<Block> blockList = new List<Block>();
+            var blockList = new List<Block>();
 
             // all chains
             if (string.IsNullOrEmpty(chainInput))
@@ -102,7 +115,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return block;
         }
 
-        public List<Chain> GetAllChains()
+        public IEnumerable<Chain> GetAllChains()
         {
             return NexusChain.Chains.ToList();
         }
@@ -120,7 +133,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return NexusChain.Chains.SingleOrDefault(c => c.Name == chainName);
         }
 
-        public List<string> GetChainNames()
+        public IEnumerable<string> GetChainNames()
         {
             var nameList = new List<string>();
             foreach (var chain in GetAllChains())
@@ -131,7 +144,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return nameList;
         }
 
-        public List<Transaction> GetTransactions(string chainAddress, int txAmount)
+        public IEnumerable<Transaction> GetTransactions(string chainAddress, int txAmount)
         {
             var txList = new List<Transaction>();
             var blocksList = new List<Block>();
@@ -202,7 +215,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return targetChain?.FindTransactionBlock(tx);
         }
 
-        public List<Token> GetTokens()
+        public IEnumerable<Token> GetTokens()
         {
             return NexusChain.Tokens.ToList();
         }

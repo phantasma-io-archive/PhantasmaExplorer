@@ -23,7 +23,7 @@ namespace Phantasma.Explorer.ViewModels
             return new AddressViewModel
             {
                 Address = address.Text,
-                Name = "Anonymous",
+                Name = repository.NexusChain.LookUpAddress(address),
                 Value = 0,
                 Balances = new List<BalanceViewModel>(),
                 Transactions = txs.Select( tx => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, tx.Block), tx))
