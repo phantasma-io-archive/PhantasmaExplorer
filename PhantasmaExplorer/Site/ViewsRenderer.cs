@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
-using Phantasma.Blockchain;
 using Phantasma.Explorer.Controllers;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
@@ -116,27 +113,14 @@ namespace Phantasma.Explorer.Site
 
             TemplateEngine.Site.Get("/marketcap", request =>
             {
-                var info = CoinUtils.GetCoinInfo(2827, "USD");
+                var info = CoinUtils.GetCoinInfoAsync(CoinUtils.SoulId, "USD").Result;
                 var marketCap = info["quotes"]["USD"].GetDecimal("market_cap");
                 return $"${marketCap}";
             });
 
             TemplateEngine.Site.Get("/rates", request =>
             {
-                var symbols = new[] { "USD", "BTC", "ETH", "NEO" };
-
-                var tasks = symbols.Select(symbol => CoinUtils.GetCoinRateAsync(2872, symbol));
-                var rates = Task.WhenAll(tasks).GetAwaiter().GetResult();
-
-                var coins = new List<ViewModels.CoinRateViewModel>();
-                for (int i=0; i<rates.Length; i++)
-                {
-                    var coin = new ViewModels.CoinRateViewModel();
-                    coin.Symbol = symbols[i];
-                    coin.Rate = rates[i];
-                    coin.ChangePercentage = 0; // TODO
-                    coins.Add(coin);
-                }
+                var coins = HomeController.GetRateInfo();
 
                 var html = TemplateEngine.Render(coins,  new[] { "rates" });
                 return html;

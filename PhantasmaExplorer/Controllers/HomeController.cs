@@ -70,6 +70,28 @@ namespace Phantasma.Explorer.Controllers
             return vm;
         }
 
+        public List<CoinRateViewModel> GetRateInfo()
+        {
+            var symbols = new[] { "USD", "BTC", "ETH", "NEO" };
+
+            var tasks = symbols.Select(symbol => CoinUtils.GetCoinInfoAsync(CoinUtils.SoulId, symbol));
+            var rates = Task.WhenAll(tasks).GetAwaiter().GetResult();
+
+            var coins = new List<CoinRateViewModel>();
+            for (int i = 0; i < rates.Length; i++)
+            {
+                var coin = new CoinRateViewModel
+                {
+                    Symbol = symbols[i],
+                    Rate = rates[i]["quotes"][symbols[i]].GetDecimal("price"),
+                    ChangePercentage = rates[i]["quotes"][symbols[i]].GetDecimal("percent_change_24h")
+                };
+                coins.Add(coin);
+            }
+
+            return coins;
+        }
+
         public string SearchCommand(string input)
         {
             try

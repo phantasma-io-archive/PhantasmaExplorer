@@ -7,6 +7,8 @@ namespace Phantasma.Explorer.Utils
 {
     public static class CoinUtils
     {
+        public const int SoulId = 2827;
+
         public static async Task<decimal> GetCoinRateAsync(uint ticker, string symbol = "USD")
         {
             return await Task.FromResult(GetCoinRate(ticker, symbol));

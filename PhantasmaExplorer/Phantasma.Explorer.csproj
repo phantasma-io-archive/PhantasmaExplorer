@@ -31,6 +31,7 @@
     <Content Include="www\views\error.html" />
     <Content Include="www\views\home.html" />
     <Content Include="www\views\layout.html" />
+    <Content Include="www\views\rates.html" />
     <Content Include="www\views\token.html" />
     <Content Include="www\views\tokens.html" />
     <Content Include="www\views\transaction.html" />

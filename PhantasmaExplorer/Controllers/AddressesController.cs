@@ -21,7 +21,7 @@ namespace Phantasma.Explorer.Controllers
         {
             var repoAddressList = Repository.GetAddressList();
             var addressList = new List<AddressViewModel>();
-            SoulRate = CoinUtils.GetCoinRate(2827);
+            SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
             foreach (var address in repoAddressList)
             {
                 var balance = Repository.GetAddressBalance(address);
@@ -46,7 +46,7 @@ namespace Phantasma.Explorer.Controllers
                     address.Balances.Add(new BalanceViewModel(chain, balance));
                 }
             }
-            SoulRate = CoinUtils.GetCoinRate(2827);
+            SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
             CalculateAddressTokesValue(new List<AddressViewModel> { address });
 
             //mock tx

@@ -24,7 +24,7 @@ namespace Phantasma.Explorer.Controllers
             var token = Repository.GetToken(symbol);
             if (token != null)
             {
-                SoulRate = CoinUtils.GetCoinRate(2827);
+                SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
                 return TokenViewModel.FromToken(token, //todo
                     "Soul is the native asset of Phantasma blockchain",
                     "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
@@ -38,7 +38,7 @@ namespace Phantasma.Explorer.Controllers
         {
             var nexusTokens = Repository.GetTokens();
             var tokensList = new List<TokenViewModel>();
-            SoulRate = CoinUtils.GetCoinRate(2827);
+            SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
             foreach (var token in nexusTokens)
             {
                 tokensList.Add(TokenViewModel.FromToken(token, //todo
