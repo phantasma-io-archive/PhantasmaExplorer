@@ -1,5 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Transactions;
+using Phantasma.Blockchain;
 using Phantasma.Cryptography;
+using Phantasma.Explorer.Infrastructure.Interfaces;
+using Transaction = Phantasma.Blockchain.Transaction;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -9,16 +14,19 @@ namespace Phantasma.Explorer.ViewModels
         public string Name { get; set; }
         public List<BalanceViewModel> Balances { get; set; }
         public decimal Value { get; set; }
-        public List<TransactionViewModel> Transactions { get; set; }
+        public IEnumerable<TransactionViewModel> Transactions { get; set; }
 
-        public static AddressViewModel FromAddress(Address address)
+        public static AddressViewModel FromAddress(IRepository repository, Address address)
         {
+            var txs = new List<Transaction>();
+
             return new AddressViewModel
             {
                 Address = address.Text,
                 Name = "Anonymous",
                 Value = 0,
-                Balances = new List<BalanceViewModel>()
+                Balances = new List<BalanceViewModel>(),
+                Transactions = txs.Select( tx => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, tx.Block), tx))
             };
         }
     }

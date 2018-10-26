@@ -24,7 +24,7 @@ namespace Phantasma.Explorer.Controllers
             var txs = new List<TransactionViewModel>();
             foreach (var block in Repository.GetBlocks())
             {
-                blocks.Add(BlockViewModel.FromBlock(block));
+                blocks.Add(BlockViewModel.FromBlock(Repository, block));
             }
 
             var chart = new Dictionary<string, uint>();
@@ -32,7 +32,7 @@ namespace Phantasma.Explorer.Controllers
             foreach (var transaction in Repository.GetTransactions())
             {
                 var tempBlock = Repository.GetBlock(transaction);
-                txs.Add(TransactionViewModel.FromTransaction(Repository.NexusChain, BlockViewModel.FromBlock(tempBlock), transaction, null));
+                txs.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, tempBlock), transaction));
             }
 
             // tx history chart calculation

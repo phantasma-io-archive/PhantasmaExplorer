@@ -27,17 +27,8 @@ namespace Phantasma.Explorer.Controllers
                 var block = Repository.GetBlock(transaction);
                 if (block != null)
                 {
-                    var evts = new List<EventViewModel>();
                     var tx1 = (Transaction)transaction;
-                    foreach (var evt in tx1.Events)
-                    {
-                        evts.Add(new EventViewModel()
-                        {
-                            Kind = evt.Kind,
-                            Content = Repository.GetEventContent(block, evt)
-                        });
-                    }
-                    txList.Add(TransactionViewModel.FromTransaction(Repository.NexusChain,BlockViewModel.FromBlock(block), tx1, evts));
+                    txList.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx1));
                 }
             }
             return txList;
@@ -46,18 +37,8 @@ namespace Phantasma.Explorer.Controllers
         public TransactionViewModel GetTransaction(string txHash)
         {
             Transaction transaction = Repository.GetTransaction(txHash);
-
             Block block = Repository.GetBlock(transaction);
-            var evts = new List<EventViewModel>();
-            foreach (var evt in transaction.Events)
-            {
-                evts.Add(new EventViewModel()
-                {
-                    Kind = evt.Kind,
-                    Content = Repository.GetEventContent(block, evt)
-                });
-            }
-            return TransactionViewModel.FromTransaction(Repository.NexusChain, BlockViewModel.FromBlock(block), transaction, evts);
+            return TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), transaction);
         }
 
         public List<TransactionViewModel> GetTransactionsByBlock(string input)
@@ -83,16 +64,7 @@ namespace Phantasma.Explorer.Controllers
                 foreach (var transaction in block.Transactions)
                 {
                     var tx = (Transaction)transaction;
-                    var evts = new List<EventViewModel>();
-                    foreach (var evt in tx.Events)
-                    {
-                        evts.Add(new EventViewModel()
-                        {
-                            Kind = evt.Kind,
-                            Content = Repository.GetEventContent(block, evt)
-                        });
-                    }
-                    txList.Add(TransactionViewModel.FromTransaction(Repository.NexusChain, BlockViewModel.FromBlock(block), tx, evts));
+                    txList.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx));
                 }
             }
 

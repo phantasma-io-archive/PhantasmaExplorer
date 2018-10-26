@@ -1,4 +1,6 @@
-﻿using Phantasma.Blockchain.Contracts;
+﻿using Phantasma.Blockchain;
+using Phantasma.Blockchain.Contracts;
+using Phantasma.Explorer.Infrastructure.Interfaces;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -6,5 +8,14 @@ namespace Phantasma.Explorer.ViewModels
     {
         public EventKind Kind { get; set; }
         public string Content { get; set; }
+
+        internal static EventViewModel FromEvent(IRepository repository, Transaction tx, Event evt)
+        {
+            return new EventViewModel()
+            {
+                Kind = evt.Kind,
+                Content = repository.GetEventContent(tx.Block, evt)
+            };
+        }
     }
 }

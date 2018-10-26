@@ -126,6 +126,28 @@ namespace Phantasma.Explorer.Site
         }
     }
 
+    public class LinkBlockTag : TemplateNode
+    {
+        private string key;
+
+        public LinkBlockTag(TemplateDocument doc, string key) : base(doc)
+        {
+            this.key = key;
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(key);
+            if (temp == null)
+            {
+                return;
+            }
+
+            var hash = (string)temp;
+            context.output.Append($"<a href=/block/{hash}><small>{hash}</small></a>");
+        }
+    }
+
     public class LinkAddressTag : TemplateNode
     {
         private string key;

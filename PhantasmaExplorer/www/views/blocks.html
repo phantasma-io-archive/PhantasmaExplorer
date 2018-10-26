@@ -16,7 +16,7 @@
                     <td>{{#date Timestamp}}</td>
                     <td><a href="/chain/{{ChainAddress}}">{{ChainName}}</a></td>
                     <td><a href="/txsblock/{{Hash}}">{{Transactions}}</a></td>
-                    <td><a href="/block/{{Hash}}">{{Hash}}</a></td>
+                    <td>{{#link-block Hash}}</a></td>
                 </tr>
                 {{/each}}
             </tbody>

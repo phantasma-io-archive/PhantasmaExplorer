@@ -19,7 +19,7 @@ namespace Phantasma.Explorer.Controllers
             var blockList = new List<BlockViewModel>();
             foreach (var block in repoBlockList)
             {
-                blockList.Add(BlockViewModel.FromBlock(block));
+                blockList.Add(BlockViewModel.FromBlock(Repository, block));
             }
 
             return blockList;
@@ -28,7 +28,7 @@ namespace Phantasma.Explorer.Controllers
         public BlockViewModel GetBlock(string input)
         {
             var block = int.TryParse(input, out var height) ? Repository.GetBlock(height) : Repository.GetBlock(input);
-            if(block != null) return BlockViewModel.FromBlock(block);
+            if(block != null) return BlockViewModel.FromBlock(Repository, block);
             return null;
         }
     }

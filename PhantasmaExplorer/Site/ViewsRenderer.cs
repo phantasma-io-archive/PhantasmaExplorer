@@ -39,6 +39,7 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.RegisterTag("link-chain", (doc, val) => new LinkChainTag(doc, val));
             TemplateEngine.RegisterTag("link-tx", (doc, val) => new LinkTransactionTag(doc, val));
             TemplateEngine.RegisterTag("link-address", (doc, val) => new LinkAddressTag(doc, val));
+            TemplateEngine.RegisterTag("link-block", (doc, val) => new LinkBlockTag(doc, val));
 
             UpdateContext(errorContext, _errorContextInstance);
             Context["menu"] = menus;

@@ -25,7 +25,7 @@ namespace Phantasma.Explorer.Controllers
             foreach (var address in repoAddressList)
             {
                 var balance = Repository.GetAddressBalance(address);
-                var addressVm = AddressViewModel.FromAddress(address);
+                var addressVm = AddressViewModel.FromAddress(Repository, address);
                 addressVm.Balances.Add(new BalanceViewModel("main", balance));
                 addressList.Add(addressVm);
             }
@@ -36,7 +36,7 @@ namespace Phantasma.Explorer.Controllers
         public AddressViewModel GetAddress(string addressText)
         {
             var repoAddress = Repository.GetAddress(addressText);
-            var address = AddressViewModel.FromAddress(repoAddress);
+            var address = AddressViewModel.FromAddress(Repository, repoAddress);
             var chains = Repository.GetChainNames();
             foreach (var chain in chains)
             {

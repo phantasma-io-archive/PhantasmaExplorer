@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
+using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Numerics;
 using Phantasma.VM;
 
@@ -23,8 +25,7 @@ namespace Phantasma.Explorer.ViewModels
         public IEnumerable<Instruction> Instructions { get; set; }
         public string Description { get; set; }
 
-        public static TransactionViewModel FromTransaction(Nexus nexus, BlockViewModel block, Transaction tx,//todo remove nexus from here
-            List<EventViewModel> evts)
+        public static TransactionViewModel FromTransaction(IRepository repository, BlockViewModel block, Transaction tx)
         {
             var disasm = new Disassembler(tx.Script); //Todo fix me
 
@@ -40,7 +41,7 @@ namespace Phantasma.Explorer.ViewModels
 
             BigInteger amount = 0;
 
-            //Nexus nexus = null;
+            var nexus = repository.NexusChain;
 
             foreach (var evt in tx.Events)
             {
@@ -52,7 +53,7 @@ namespace Phantasma.Explorer.ViewModels
                             amount = data.amount;
                             senderAddress = evt.Address;
                             senderChain = data.chainAddress;
-                            senderToken = nexus?.FindTokenBySymbol(data.symbol);
+                            senderToken = nexus.FindTokenBySymbol(data.symbol);
                         }
                         break;
 
@@ -62,7 +63,7 @@ namespace Phantasma.Explorer.ViewModels
                             amount = data.amount;
                             receiverAddress = evt.Address;
                             receiverChain = data.chainAddress;
-                            receiverToken = nexus?.FindTokenBySymbol(data.symbol);
+                            receiverToken = nexus.FindTokenBySymbol(data.symbol);
                         }
                         break;
 
@@ -108,9 +109,9 @@ namespace Phantasma.Explorer.ViewModels
                 ChainName = block.ChainName,
                 Date = block.Timestamp,
                 Hash = tx.Hash.ToString(),
-                FromAddress = "????",
+                FromAddress = "????", // TODO remove this, in Phantasma a TX does not have a specific single sender, can have 0 to N senders
                 FromName = "Anonymous",
-                Events = evts,
+                Events = tx.Events.Select(evt => EventViewModel.FromEvent(repository, tx, evt)),
                 Description = description,
                 Instructions = disasm.GetInstructions()
             };

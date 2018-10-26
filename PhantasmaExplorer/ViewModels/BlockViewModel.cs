@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Core.Utils;
+using Phantasma.Explorer.Infrastructure.Interfaces;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -19,7 +20,7 @@ namespace Phantasma.Explorer.ViewModels
         public decimal Reward { get; set; }
         public List<TransactionViewModel> Txs { get; set; }
 
-        public static BlockViewModel FromBlock(Block block)
+        public static BlockViewModel FromBlock(IRepository repository, Block block)
         {
             var vm = new BlockViewModel
             {
@@ -34,7 +35,7 @@ namespace Phantasma.Explorer.ViewModels
                 Reward = TokenUtils.ToDecimal(block.GetReward()),
                 Txs = new List<TransactionViewModel>()
             };
-            var txsVm = block.Transactions.Select(transaction => TransactionViewModel.FromTransaction(null, vm, (Transaction)transaction, null)).ToList();
+            var txsVm = block.Transactions.Select(transaction => TransactionViewModel.FromTransaction(repository, vm, (Transaction)transaction)).ToList();
 
             vm.Txs = txsVm;
             return vm;

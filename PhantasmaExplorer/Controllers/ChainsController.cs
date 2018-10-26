@@ -25,7 +25,7 @@ namespace Phantasma.Explorer.Controllers
 
                 foreach (var block in lastBlocks)
                 {
-                    blockList.Add(BlockViewModel.FromBlock(block));
+                    blockList.Add(BlockViewModel.FromBlock(Repository, block));
                 }
 
                 chainList.Add(ChainViewModel.FromChain(repoChain, blockList));
@@ -45,7 +45,7 @@ namespace Phantasma.Explorer.Controllers
 
             foreach (var block in lastBlocks)
             {
-                blockList.Add(BlockViewModel.FromBlock(block));
+                blockList.Add(BlockViewModel.FromBlock(Repository, block));
             }
 
             return ChainViewModel.FromChain(repoChain, blockList);

@@ -176,7 +176,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             var hash = Hash.Parse(txHash);
             foreach (var chain in NexusChain.Chains)
             {
-                var tx = chain.FindTransaction(hash);
+                var tx = chain.FindTransactionByHash(hash);
                 if (tx != null)
                 {
                     return tx;
@@ -191,7 +191,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             Chain targetChain = null;
             foreach (var chain in chains)//todo redo this stupid thing xD
             {
-                var transaction = chain.FindTransaction(tx.Hash);
+                var transaction = chain.FindTransactionByHash(tx.Hash);
                 if (transaction != null)
                 {
                     targetChain = chain;
