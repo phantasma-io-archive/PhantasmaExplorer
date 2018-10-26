@@ -122,7 +122,7 @@ namespace Phantasma.Explorer.Site
             }
 
             var tx = (string)temp;
-            context.output.Append($"<a href=/tx/{tx}>{tx}</a>");
+            context.output.Append($"<a href=/tx/{tx}><small>{tx}</small></a>");
         }
     }
 
