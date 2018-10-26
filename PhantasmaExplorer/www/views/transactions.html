@@ -15,7 +15,7 @@
                 <tr>
                     <td>{{#date Date}}</td>
                     <td><a href="/chain/{{ChainAddress}}">{{ChainName}}</a></td>
-                    <td><a href="/tx/{{Hash}}">{{Hash}}</a><br>{{{Description}}}</td>
+                    <td>{{#link-tx Hash}}<br>{{{Description}}}</td>
                 </tr>
                 {{/each}}
             </tbody>

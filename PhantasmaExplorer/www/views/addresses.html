@@ -14,7 +14,7 @@
             <tbody>
                 {{#each addresses}}
                 <tr>
-                    <td><a href="/address/{{Address}}">{{Address}}</a></td>
+                    <td>{{#link-address Address}}</td>
                     <td>{{Name}}</td>
                     <td>{{Balance}} SOUL</td>
                     <td>${{#value Value}}</td>

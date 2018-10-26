@@ -97,7 +97,7 @@ function onStart(){
                                 <i>&gt;{{#timeago Timestamp}}</i>
                             </td>
                             <td>
-                                Miner: <a href="/address/{{MiningAddress}}" style="text-overflow: ellipsis;">{{MiningAddress}}</a><br>
+                                Miner: {{#link-address MiningAddress}}<br>
                                 <a href="/txsblock/{{Hash}}"><strong>{{Transactions}} Txn</strong></a><br>
                                 Block reward: {{Reward}} SOUL
                             </td>
@@ -123,7 +123,7 @@ function onStart(){
                         {{#each home.Transactions}}
                         <tr>
                             <td>
-                                TX# <a href="/tx/{{Hash}}"><small>{{Hash}}</small></a><br>
+                                TX# {{#link-tx Hash}}<br>
                                 <i>&gt;{{#timeago Block.Timestamp}} in <a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain</i><br>
                                 {{{Description}}}<br>
                             </td>

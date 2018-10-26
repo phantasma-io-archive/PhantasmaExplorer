@@ -28,7 +28,7 @@
 
                                 <tr>
                                     <td>Transaction Hash</td>
-                                    <td><a href="/tx/{{transaction.Hash}}">{{transaction.Hash}}</a></td>
+                                    <td>{{#link-tx transaction.Hash}}</td>
                                 </tr>
 
                                 <tr>
@@ -47,8 +47,8 @@
                                 </tr>
 
                                 <tr>
-                                    <td>From</td>
-                                    <td><a href="/address/{{transaction.FromAddress}}">{{transaction.FromName}}</a></td>
+                                    <td>From</td>{{#link-address transaction.FromAddress}}
+                                    <td>{{#link-address transaction.FromAddress}}</td>
                                 </tr>
 
                             </tbody>

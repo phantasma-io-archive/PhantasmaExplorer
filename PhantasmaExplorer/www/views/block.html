@@ -45,7 +45,7 @@
 
                                 <tr>
                                     <td>Mining Address</td>
-                                    <td><a href="/address/{{block.MiningAddress}}">{{block.MiningAddress}}</a></td>
+                                    <td>{{#link-address block.MiningAddress}}</td>
                                 </tr>
 
                             </tbody>
@@ -69,7 +69,7 @@
                             <tbody>
                                 {{#each block.Txs}}
                                 <tr>
-									<td><a href="/tx/{{Hash}}">{{Hash}}</a></td>
+                                    <td>{{#link-tx Hash}}</td>
                                     <!--<td>TODO</td>-->
                                 </tr>
                                 {{/each}}

@@ -14,7 +14,7 @@
                 {{#each chains}}
                 <tr>
                     <td><a href="/chain/{{Address}}">{{Name}}</a></td>
-                    <td><a href="/address/{{Address}}">{{Address}}</a></td>
+                    <td>{{#link-address Address}}</td>
                     <td>{{Height}}</td>
                     <td>{{Transactions}}</td>
                 </tr>

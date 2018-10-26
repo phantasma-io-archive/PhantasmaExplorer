@@ -24,7 +24,7 @@
 
                                 <tr>
                                     <td>Address</td>
-                                    <td><a href="/address/{{chain.Address}}">{{chain.Address}}</a></td>
+                                    <td>{{#link-address chain.Address}}</td>
                                 </tr>
 
                                 <tr>
@@ -71,7 +71,7 @@
                                     <td>{{#timeago Timestamp}}</td>
                                     <td><a href="/block/{{Hash}}">{{Hash}}</a></td>
                                     <td><a href="/txsblock/{{Hash}}">{{Transactions}}</a></td>
-                                    <td><a href="/address/{{MiningAddress}}">{{MiningAddress}}</a></td>
+                                    <td>{{#link-address MiningAddress}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>

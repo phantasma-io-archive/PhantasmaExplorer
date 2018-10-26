@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using LunarLabs.WebServer.Templates;
 using Phantasma.Blockchain;
-using Phantasma.Cryptography;
 using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer.Site
@@ -124,8 +121,8 @@ namespace Phantasma.Explorer.Site
                 return;
             }
 
-            var tx = (Transaction)temp;
-            context.output.Append($"<a href=\"/tx/{tx.Hash}\">{tx.Hash}</a>");
+            var tx = (string)temp;
+            context.output.Append($"<a href=/tx/{tx}>{tx}</a>");
         }
     }
 
@@ -146,8 +143,8 @@ namespace Phantasma.Explorer.Site
                 return;
             }
 
-            var address = (Address)temp;
-            context.output.Append($"<a href=\"address/{address.Text}\">{address.Text}</a>");
+            var address = (string)temp;
+            context.output.Append($"<a href=/address/{address}>{address}</a>");
         }
     }
 
