@@ -94,7 +94,7 @@ namespace Phantasma.Explorer.ViewModels
             {
                 if (amount > 0 && senderAddress != Address.Null && receiverAddress != Address.Null && senderToken != null && senderToken == receiverToken)
                 {
-                    description = $"{TokenUtils.ToDecimal(amount)} {senderToken.Symbol} sent from {senderAddress.Text} to {receiverAddress.Text}";
+                    description = $"{TokenUtils.ToDecimal(amount, senderToken.Decimals)} {senderToken.Symbol} sent from {senderAddress.Text} to {receiverAddress.Text}";
                 }
                 else
                 {

@@ -32,7 +32,7 @@ namespace Phantasma.Explorer.ViewModels
                 MiningAddress = block.MinerAddress.Text,
                 ChainName = block.Chain.Name.ToTitleCase(),
                 ChainAddress = block.Chain.Address.Text,
-                Reward = TokenUtils.ToDecimal(block.GetReward()),
+                Reward = TokenUtils.ToDecimal(block.GetReward(), Nexus.NativeTokenDecimals),
                 Txs = new List<TransactionViewModel>()
             };
             var txsVm = block.Transactions.Select(transaction => TransactionViewModel.FromTransaction(repository, vm, (Transaction)transaction)).ToList();

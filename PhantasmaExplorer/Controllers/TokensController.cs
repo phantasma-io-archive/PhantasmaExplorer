@@ -60,7 +60,7 @@ namespace Phantasma.Explorer.Controllers
                 var balanceSheet = mainChain.GetTokenBalances(token);
                 balanceSheet.ForEach((address, integer) =>
                 {
-                    var vm = new BalanceViewModel(mainChain.Name, TokenUtils.ToDecimal(integer))
+                    var vm = new BalanceViewModel(mainChain.Name, TokenUtils.ToDecimal(integer, token.Decimals))
                     {
                         TokenSymbol = token.Symbol,
                         Address = address.Text

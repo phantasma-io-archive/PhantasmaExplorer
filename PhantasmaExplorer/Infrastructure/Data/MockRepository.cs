@@ -19,11 +19,11 @@ namespace Phantasma.Explorer.Infrastructure.Data
         {
             if (string.IsNullOrEmpty(chainName))
             {
-                return TokenUtils.ToDecimal(NexusChain.RootChain.GetTokenBalance(NexusChain.NativeToken, address));
+                return TokenUtils.ToDecimal(NexusChain.RootChain.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
             }
 
             var chain = GetChainByName(chainName);
-            return TokenUtils.ToDecimal(chain?.GetTokenBalance(NexusChain.NativeToken, address));
+            return TokenUtils.ToDecimal(chain?.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
         }
 
         public IEnumerable<Address> GetAddressList(string chainAddress = "", int count = 20) //todo strategy to get address
@@ -268,7 +268,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                             chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(NexusChain, data.chainAddress)} chain";
                         }
 
-                        return $"{TokenUtils.ToDecimal(data.amount)} {token.Name} tokens {action} at </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
+                        return $"{TokenUtils.ToDecimal(data.amount, token.Decimals)} {token.Name} tokens {action} at </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
                     }
 
                 default: return "Nothing.";

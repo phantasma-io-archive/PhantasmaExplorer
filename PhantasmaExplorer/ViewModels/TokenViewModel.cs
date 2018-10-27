@@ -9,7 +9,6 @@ namespace Phantasma.Explorer.ViewModels
         public string Name { get; set; }
         public string LogoUrl { get; set; }
         public string Description { get; set; }
-        public string ContractHash { get; set; }
         public int Decimals { get; set; }
         public decimal MaxSupply { get; set; }
         public decimal CurrentSupply { get; set; }
@@ -22,9 +21,8 @@ namespace Phantasma.Explorer.ViewModels
             {
                 Symbol = token.Symbol,
                 Name = token.Name,
-                ContractHash = token.Owner.Text, //todo change this to actual hash
-                MaxSupply = TokenUtils.ToDecimal(token.MaxSupply),
-                CurrentSupply = TokenUtils.ToDecimal(token.CurrentSupply),
+                MaxSupply = TokenUtils.ToDecimal(token.MaxSupply, token.Decimals),
+                CurrentSupply = TokenUtils.ToDecimal(token.CurrentSupply, token.Decimals),
                 Decimals = (int)token.Decimals,
                 Price = price,
                 Transfers = 0, //todo
