@@ -44,7 +44,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 {
                     addressList.AddRange(plugin.GetChainAddresses(chain));
                 }
-                return addressList;
+                return addressList.Take(100);
             }
             else
             {
@@ -196,23 +196,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 }
             }
             return null;
-        }
-
-        public Block GetBlock(Transaction tx)
-        {
-            var chains = GetAllChains();
-            Chain targetChain = null;
-            foreach (var chain in chains)//todo redo this stupid thing xD
-            {
-                var transaction = chain.FindTransactionByHash(tx.Hash);
-                if (transaction != null)
-                {
-                    targetChain = chain;
-                    break;
-                }
-            }
-
-            return targetChain?.FindTransactionBlock(tx);
         }
 
         public IEnumerable<Token> GetTokens()

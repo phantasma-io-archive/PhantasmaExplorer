@@ -31,17 +31,14 @@ namespace Phantasma.Explorer.Controllers
 
             foreach (var transaction in Repository.GetTransactions())
             {
-                var tempBlock = Repository.GetBlock(transaction);
-                txs.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, tempBlock), transaction));
+                txs.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, transaction.Block), transaction));
             }
 
             // tx history chart calculation
             var repTxs = Repository.GetTransactions(null, 1000);
             foreach (var transaction in repTxs)
             {
-                var tempBlock = Repository.GetBlock(transaction);
-
-                DateTime chartTime = tempBlock.Timestamp;
+                DateTime chartTime = transaction.Block.Timestamp;
                 var chartKey = $"{chartTime.Day}/{chartTime.Month}";
 
                 if (chart.ContainsKey(chartKey))

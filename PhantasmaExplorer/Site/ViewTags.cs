@@ -7,11 +7,11 @@ namespace Phantasma.Explorer.Site
 {
     public class PriceTag : TemplateNode
     {
-        private string key;
+        private RenderingKey key;
 
         public PriceTag(TemplateDocument doc, string key) : base(doc)
         {
-            this.key = key;
+            this.key = RenderingKey.Parse(key, RenderingType.Numeric);
         }
 
         public override void Execute(RenderingContext context)
@@ -33,11 +33,11 @@ namespace Phantasma.Explorer.Site
 
     public class TimeAgoTag : TemplateNode
     {
-        private string key;
+        private RenderingKey key;
 
         public TimeAgoTag(TemplateDocument doc, string key) : base(doc)
         {
-            this.key = key;
+            this.key = RenderingKey.Parse(key, RenderingType.DateTime);
         }
 
         public override void Execute(RenderingContext context)
@@ -84,11 +84,11 @@ namespace Phantasma.Explorer.Site
 
     public class LinkChainTag : TemplateNode
     {
-        private string key;
+        private RenderingKey key;
 
         public LinkChainTag(TemplateDocument doc, string key) : base(doc)
         {
-            this.key = key;
+            this.key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
@@ -106,11 +106,11 @@ namespace Phantasma.Explorer.Site
 
     public class LinkTransactionTag : TemplateNode
     {
-        private string key;
+        private RenderingKey key;
 
         public LinkTransactionTag(TemplateDocument doc, string key) : base(doc)
         {
-            this.key = key;
+            this.key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
@@ -128,11 +128,11 @@ namespace Phantasma.Explorer.Site
 
     public class LinkBlockTag : TemplateNode
     {
-        private string key;
+        private RenderingKey key;
 
         public LinkBlockTag(TemplateDocument doc, string key) : base(doc)
         {
-            this.key = key;
+            this.key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
@@ -150,11 +150,11 @@ namespace Phantasma.Explorer.Site
 
     public class LinkAddressTag : TemplateNode
     {
-        private string key;
+        private RenderingKey key;
 
         public LinkAddressTag(TemplateDocument doc, string key) : base(doc)
         {
-            this.key = key;
+            this.key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)

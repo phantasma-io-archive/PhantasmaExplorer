@@ -22,8 +22,6 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         Block GetBlock(int height, string chainAddress = "");
 
-        Block GetBlock(Transaction tx);
-
         IEnumerable<Chain> GetAllChains();
 
         IEnumerable<string> GetChainNames();

@@ -24,11 +24,10 @@ namespace Phantasma.Explorer.Controllers
             var repoTx = Repository.GetTransactions(txAmount: 20);
             foreach (var transaction in repoTx)
             {
-                var block = Repository.GetBlock(transaction);
-                if (block != null)
+                if (transaction.Block != null)
                 {
                     var tx1 = (Transaction)transaction;
-                    txList.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx1));
+                    txList.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, transaction.Block), tx1));
                 }
             }
             return txList;
@@ -37,8 +36,7 @@ namespace Phantasma.Explorer.Controllers
         public TransactionViewModel GetTransaction(string txHash)
         {
             Transaction transaction = Repository.GetTransaction(txHash);
-            Block block = Repository.GetBlock(transaction);
-            return TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), transaction);
+            return TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, transaction.Block), transaction);
         }
 
         public List<TransactionViewModel> GetTransactionsByBlock(string input)

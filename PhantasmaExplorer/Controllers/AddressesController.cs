@@ -29,7 +29,7 @@ namespace Phantasma.Explorer.Controllers
                 addressVm.Balances.Add(new BalanceViewModel("main", balance));
                 addressList.Add(addressVm);
             }
-            CalculateAddressTokesValue(addressList);
+            CalculateAddressTokenValue(addressList);
             return addressList;
         }
 
@@ -47,7 +47,7 @@ namespace Phantasma.Explorer.Controllers
                 }
             }
             SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
-            CalculateAddressTokesValue(new List<AddressViewModel> { address });
+            CalculateAddressTokenValue(new List<AddressViewModel> { address });
 
             //mock tx
             var mockTransactionList = new List<TransactionViewModel>();
@@ -66,13 +66,14 @@ namespace Phantasma.Explorer.Controllers
             return address;
         }
 
-        private void CalculateAddressTokesValue(List<AddressViewModel> list)//todo
+        private void CalculateAddressTokenValue(List<AddressViewModel> list)//todo
         {
             foreach (var address in list)
             {
                 var mainBalance = address.Balances.FirstOrDefault(p => p.ChainName == "main");
                 if (mainBalance != null)
                 {
+                    address.Balance = mainBalance.Balance;
                     address.Value = mainBalance.Balance * SoulRate;
                 }
             }
