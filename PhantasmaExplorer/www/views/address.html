@@ -6,7 +6,7 @@
                 <tr>
                     <th>Balance</th>
                     <th>Chain</th>
-                    <th>SOUL Value</th>
+                    <th>Value</th>
                     <th>Transactions</th>
                 </tr>
             </thead>
@@ -15,7 +15,7 @@
                 <tr>
                     <td>{{Balance}} SOUL</td>
                     <td>{{ChainName}}</td>
-                    <td>${{#value address.Value}}</td>
+                    <td>{{#value Value}}</td>
                     <td>{{address.Transactions.Count}} txns</td>
                 </tr>
                 {{/each}}

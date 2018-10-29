@@ -33,7 +33,7 @@ namespace Phantasma.Explorer.Site
                 new MenuContext {text = "Addresses", url = urlAddresses, active = false}
             };
 
-            TemplateEngine.RegisterTag("value", (doc, val) => new PriceTag(doc, val));
+            TemplateEngine.RegisterTag("value", (doc, val) => new ValueTag(doc, val));
             TemplateEngine.RegisterTag("timeago", (doc, val) => new TimeAgoTag(doc, val));
             TemplateEngine.RegisterTag("async", (doc, val) => new AsyncTag(doc, val));
             TemplateEngine.RegisterTag("link-chain", (doc, val) => new LinkChainTag(doc, val));
