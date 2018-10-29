@@ -12,12 +12,12 @@ namespace Phantasma.Explorer.Infrastructure.Data
     {
         public Nexus NexusChain { get; set; }
 
-        public decimal GetAddressBalance(Address address, string chainName = "")
+        public decimal GetAddressBalance(Address address, string chainName = null)
         {
             throw new System.NotImplementedException();
         }
 
-        public IEnumerable<Address> GetAddressList(string chainAddress = "", int lastAddressAmount = 20)
+        public IEnumerable<Address> GetAddressList(string chainAddress = null, int lastAddressAmount = 20)
         {
             throw new System.NotImplementedException();
         }
@@ -27,7 +27,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public IEnumerable<Block> GetBlocks(string chainAddress = "", int lastBlocksAmount = 20)
+        public IEnumerable<Block> GetBlocks(string chainAddress = null, int lastBlocksAmount = 20)
         {
             throw new System.NotImplementedException();
         }
@@ -37,7 +37,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
-        public Block GetBlock(int height, string chainAddress = "")
+        public Block GetBlock(int height, string chainAddress = null)
         {
             throw new System.NotImplementedException();
         }
@@ -73,6 +73,11 @@ namespace Phantasma.Explorer.Infrastructure.Data
         }
 
         public Transaction GetTransaction(string txHash)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int GetTotalTransactions()
         {
             throw new System.NotImplementedException();
         }
