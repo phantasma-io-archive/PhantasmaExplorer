@@ -13,10 +13,12 @@ namespace Phantasma.Explorer.ViewModels
         public string ParentChain { get; set; }
         public int Height { get; set; }
         public List<BlockViewModel> Blocks { get; set; }
+        public Dictionary<string, string> ChildChains { get; set; }
+
 
         public static ChainViewModel FromChain(Chain chain, List<BlockViewModel> lastBlocks)
         {
-            return new ChainViewModel
+            var vm = new ChainViewModel
             {
                 Address = chain.Address.Text,
                 Name = chain.Name.ToTitleCase(),
@@ -25,6 +27,11 @@ namespace Phantasma.Explorer.ViewModels
                 Blocks = lastBlocks,
                 ParentChain = chain.ParentChain?.Address.Text ?? ""
             };
+            if (chain.GetChildChains().Any())
+            {
+                vm.ChildChains = chain.GetChildChains();
+            }
+            return vm;
         }
     }
 }

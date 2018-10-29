@@ -7,6 +7,9 @@
             <li class="nav-item">
                 <a class="nav-link" id="blocks-tab" data-toggle="tab" href="#blocks" role="tab" aria-controls="blocks" aria-selected="false">Blocks</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="childs-tab" data-toggle="tab" href="#childs" role="tab" aria-controls="childs" aria-selected="false">Sidechains</a>
+            </li>
         </ul>
 
         <div class="tab-content" id="myTabContent">
@@ -72,6 +75,34 @@
                                     <td><a href="/block/{{Hash}}">{{Hash}}</a></td>
                                     <td><a href="/txsblock/{{Hash}}">{{Transactions}}</a></td>
                                     <td>{{#link-address MiningAddress}}</td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                        {{#else}}
+                        Nothing here...
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="childs" role="tabpanel" aria-labelledby="childs-tab">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Sidechains</div>
+                    <div class="panel-body">
+                        {{#if chain.ChildChains}}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each chain.ChildChains}}
+                                <tr>
+                                    <td>{{Key}}</td>
+                                    <td>{{Value}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>
