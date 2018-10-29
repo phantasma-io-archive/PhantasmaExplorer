@@ -57,7 +57,7 @@ namespace Phantasma.Explorer.ViewModels
                     case EventKind.TokenSend:
                         {
                             var data = evt.GetContent<TokenEventData>();
-                            amount = data.amount;
+                            amount = data.value;
                             senderAddress = evt.Address;
                             senderChain = data.chainAddress;
                             senderToken = nexus.FindTokenBySymbol(data.symbol);
@@ -67,7 +67,7 @@ namespace Phantasma.Explorer.ViewModels
                     case EventKind.TokenReceive:
                         {
                             var data = evt.GetContent<TokenEventData>();
-                            amount = data.amount;
+                            amount = data.value;
                             receiverAddress = evt.Address;
                             receiverChain = data.chainAddress;
                             receiverToken = nexus.FindTokenBySymbol(data.symbol);
