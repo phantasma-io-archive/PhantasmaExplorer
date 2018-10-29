@@ -40,12 +40,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="LunarLabs.Server" Version="1.2.0" />
     <PackageReference Include="LunarParser" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\LunarServer\LunarServer\LunarServer.csproj" />
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj" />
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj" />
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Tests\Phantasma.Tests.csproj" />
