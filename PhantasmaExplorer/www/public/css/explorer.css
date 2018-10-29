@@ -157,3 +157,8 @@ form {
 #tx-chart {
 	min-height:800px;
 }
+
+.short-sep {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}

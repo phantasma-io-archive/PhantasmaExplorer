@@ -30,7 +30,8 @@ namespace Phantasma.Explorer.Site
                 new MenuContext {text = "Chains", url = urlChains, active = false},
                 new MenuContext {text = "Blocks", url = urlBlocks, active = false},
                 new MenuContext {text = "Tokens", url = urlTokens, active = false},
-                new MenuContext {text = "Addresses", url = urlAddresses, active = false}
+                new MenuContext {text = "Addresses", url = urlAddresses, active = false},
+                new MenuContext {text = "Apps", url = urlApps, active = false},
             };
             SetupTags();
             UpdateContext(errorContext, _errorContextInstance);
@@ -325,6 +326,8 @@ namespace Phantasma.Explorer.Site
         private readonly string urlBlock = "/block";
         private readonly string urlAddresses = "/addresses";
         private readonly string urlAddress = "/address";
+        private readonly string urlApps = "/apps";
+        private readonly string urlApp = "/app";
         private readonly string urlError = "/error";
 
         private readonly string homeContext = "home";

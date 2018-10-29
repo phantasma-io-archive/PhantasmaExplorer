@@ -8,6 +8,7 @@
                     <th>Address</th>
                     <th>Height</th>
                     <th>Transactions</th>
+                    <th>Parent</th>
                 </tr>
             </thead>
             <tbody>
@@ -17,6 +18,7 @@
                     <td>{{#link-address Address}}</td>
                     <td>{{Height}}</td>
                     <td>{{Transactions}}</td>
+                    <td>{{#link-chain ParentChain}}</td>
                 </tr>
                 {{/each}}
             </tbody>

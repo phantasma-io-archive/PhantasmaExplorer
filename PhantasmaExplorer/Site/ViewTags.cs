@@ -101,8 +101,15 @@ namespace Phantasma.Explorer.Site
                 return;
             }
 
-            var chain = (Chain)temp;
-            context.output.Append($"<a href=\"/chain/{chain.Address.Text}\">{chain.Name}</a>");
+            var chain = temp as Chain;
+            if (chain != null)
+            {
+                context.output.Append($"<a href=\"/chain/{chain.Address.Text}\">{chain.Name}</a>");
+            }
+            else
+            {
+                context.output.Append("-");
+            }
         }
     }
 
