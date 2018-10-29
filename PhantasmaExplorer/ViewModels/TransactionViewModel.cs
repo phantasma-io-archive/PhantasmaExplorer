@@ -24,6 +24,8 @@ namespace Phantasma.Explorer.ViewModels
         public IEnumerable<EventViewModel> Events { get; set; }
         public IEnumerable<Instruction> Instructions { get; set; }
         public string Description { get; set; }
+        public decimal GasLimit { get; set; }
+        public decimal GasPrice { get; set; }
 
         public static TransactionViewModel FromTransaction(IRepository repository, BlockViewModel block, Transaction tx)
         {
@@ -113,7 +115,9 @@ namespace Phantasma.Explorer.ViewModels
                 FromName = "Anonymous",
                 Events = tx.Events.Select(evt => EventViewModel.FromEvent(repository, tx, evt)),
                 Description = description,
-                Instructions = disasm.GetInstructions()
+                Instructions = disasm.GetInstructions(),
+                GasLimit = TokenUtils.ToDecimal(tx.GasLimit, Nexus.NativeTokenDecimals),
+                GasPrice = TokenUtils.ToDecimal(tx.GasPrice, Nexus.NativeTokenDecimals),
             };
         }
     }
