@@ -19,16 +19,21 @@ namespace Phantasma.Explorer.ViewModels
         public DateTime Date { get; set; }
         public string ChainName { get; set; }
         public string ChainAddress { get; set; }
-        public string FromName { get; set; }
-        public string FromAddress { get; set; }
         public IEnumerable<EventViewModel> Events { get; set; }
         public IEnumerable<Instruction> Instructions { get; set; }
         public string Description { get; set; }
         public decimal GasLimit { get; set; }
         public decimal GasPrice { get; set; }
 
+        // in case of transfer
+        public decimal AmountTransfer { get; set; }
+        public string TokenSymbol { get; set; }
+        public string SenderAddress { get; set; }
+        public string ReceiverAddress { get; set; }
+
         public static TransactionViewModel FromTransaction(IRepository repository, BlockViewModel block, Transaction tx)
         {
+            var vm = new TransactionViewModel();
             var disasm = new Disassembler(tx.Script); //Todo fix me
 
             string description = null;
@@ -96,7 +101,12 @@ namespace Phantasma.Explorer.ViewModels
             {
                 if (amount > 0 && senderAddress != Address.Null && receiverAddress != Address.Null && senderToken != null && senderToken == receiverToken)
                 {
-                    description = $"{TokenUtils.ToDecimal(amount, senderToken.Decimals)} {senderToken.Symbol} sent from {senderAddress.Text} to {receiverAddress.Text}";
+                    var amountDecimal = TokenUtils.ToDecimal(amount, senderToken.Decimals);
+                    description = $"{amountDecimal} {senderToken.Symbol} sent from {senderAddress.Text} to {receiverAddress.Text}";
+                    vm.AmountTransfer = amountDecimal;
+                    vm.TokenSymbol = senderToken.Symbol;
+                    vm.SenderAddress = senderAddress.Text;
+                    vm.ReceiverAddress = receiverAddress.Text;
                 }
                 else
                 {
@@ -104,21 +114,18 @@ namespace Phantasma.Explorer.ViewModels
                 }
             }
 
-            return new TransactionViewModel
-            {
-                Block = block,
-                ChainAddress = block.ChainAddress,
-                ChainName = block.ChainName,
-                Date = block.Timestamp,
-                Hash = tx.Hash.ToString(),
-                FromAddress = "????", // TODO remove this, in Phantasma a TX does not have a specific single sender, can have 0 to N senders
-                FromName = "Anonymous",
-                Events = tx.Events.Select(evt => EventViewModel.FromEvent(repository, tx, evt)),
-                Description = description,
-                Instructions = disasm.GetInstructions(),
-                GasLimit = TokenUtils.ToDecimal(tx.GasLimit, Nexus.NativeTokenDecimals),
-                GasPrice = TokenUtils.ToDecimal(tx.GasPrice, Nexus.NativeTokenDecimals),
-            };
+            vm.Block = block;
+            vm.ChainAddress = block.ChainAddress;
+            vm.ChainName = block.ChainName;
+            vm.Date = block.Timestamp;
+            vm.Hash = tx.Hash.ToString();
+            vm.Events = tx.Events.Select(evt => EventViewModel.FromEvent(repository, tx, evt));
+            vm.Description = description;
+            vm.Instructions = disasm.GetInstructions();
+            vm.GasLimit = TokenUtils.ToDecimal(tx.GasLimit, Nexus.NativeTokenDecimals);
+            vm.GasPrice = TokenUtils.ToDecimal(tx.GasPrice, Nexus.NativeTokenDecimals);
+
+            return vm;
         }
     }
 }

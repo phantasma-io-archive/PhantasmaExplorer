@@ -9,8 +9,6 @@
 				<th>TxHash</th>
 				<th>Block</th>
 				<th>Age</th>
-				<th>From</th>
-				<th>From Name</th>
 			  </tr>
 			</thead>
             <tbody>
@@ -19,8 +17,6 @@
                     <td>{{#link-tx Hash}}</td>
                     <td><a href="/block/{{Block.Height}}">{{Block.Height}}</a></td>
                     <td>{{#date Date}}</td>
-                    <td>{{FromAddress}}</td>
-                    <td>{{FromName}}</td>
                 </tr>
                 {{/each}}
             </tbody>

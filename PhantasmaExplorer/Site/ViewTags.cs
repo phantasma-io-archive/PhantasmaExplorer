@@ -2,6 +2,7 @@
 using LunarLabs.WebServer.Templates;
 using Phantasma.Blockchain;
 using Phantasma.Explorer.Utils;
+using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Site
 {
@@ -77,7 +78,7 @@ namespace Phantasma.Explorer.Site
 
             var id = rnd.Next().ToString();
             var url = key.Replace("_", "/");
-            var obj = "{url:'"+url+"', id:'"+id+"'}";
+            var obj = "{url:'" + url + "', id:'" + id + "'}";
             context.output.Append($"<script>dynamicContents.push({obj});</script><div style=\"display:inline\" id=\"dynamic_{id}\">...</div>");
         }
     }
@@ -167,6 +168,36 @@ namespace Phantasma.Explorer.Site
 
             var address = (string)temp;
             context.output.Append($"<a href=/address/{address}>{address}</a>");
+        }
+    }
+
+    public class DescriptionTag : TemplateNode
+    {
+        private RenderingKey key;
+
+        public DescriptionTag(TemplateDocument doc, string key) : base(doc)
+        {
+            this.key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(key);
+            if (temp == null)
+            {
+                return;
+            }
+            //< td >< a href = "/token/{{Symbol}}" >{ { Name} }</ a ></ td >
+            var vm = (TransactionViewModel)temp;
+            if (string.IsNullOrEmpty(vm.TokenSymbol))
+            {
+                context.output.Append($"{vm.Description}");
+                return;
+            }
+            context.output.Append($"{vm.AmountTransfer} <a href=/token/{vm.TokenSymbol}> {vm.TokenSymbol} </a> sent from " +
+                                  $"<a href=/address/{vm.SenderAddress}>{vm.SenderAddress}</a> to " +
+                                  $"<a href=/address/{vm.ReceiverAddress}>{vm.ReceiverAddress}</a>");
+
         }
     }
 
