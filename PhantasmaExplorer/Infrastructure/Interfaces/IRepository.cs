@@ -10,17 +10,18 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
     {
         //todo calls should be async imo
         Nexus NexusChain { get; set; }//todo remove
-        decimal GetAddressBalance(Address address, string chainName = "");
 
-        IEnumerable<Address> GetAddressList(string chainAddress = "", int lastAddressAmount = 20);
+        decimal GetAddressBalance(Address address, string chainName = null);
+
+        IEnumerable<Address> GetAddressList(string chainAddress = null, int lastAddressAmount = 20);
 
         Address GetAddress(string address);
 
-        IEnumerable<Block> GetBlocks(string chainAddress = "", int lastBlocksAmount = 20);
+        IEnumerable<Block> GetBlocks(string chainAddress = null, int lastBlocksAmount = 20);
 
         Block GetBlock(string hash);
 
-        Block GetBlock(int height, string chainAddress = "");
+        Block GetBlock(int height, string chainAddress = null);
 
         IEnumerable<Chain> GetAllChains();
 
@@ -33,6 +34,8 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
         IEnumerable<Transaction> GetTransactions(string chainAddress = null, int txAmount = 20);
 
         Transaction GetTransaction(string txHash);
+
+        int GetTotalTransactions();
 
         IEnumerable<Token> GetTokens();
 

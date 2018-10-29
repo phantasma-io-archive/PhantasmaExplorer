@@ -15,7 +15,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
     {
         public Nexus NexusChain { get; set; }
 
-        public decimal GetAddressBalance(Address address, string chainName = "") //todo this should not be here
+        public decimal GetAddressBalance(Address address, string chainName = null) //todo this should not be here
         {
             if (string.IsNullOrEmpty(chainName))
             {
@@ -26,7 +26,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return TokenUtils.ToDecimal(chain?.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
         }
 
-        public IEnumerable<Address> GetAddressList(string chainAddress = "", int count = 20) //todo strategy to get address
+        public IEnumerable<Address> GetAddressList(string chainAddress = null, int count = 20) //todo strategy to get address
         {
             // if chainAddress then look only in a certain chain
             // count number of address to return
@@ -59,7 +59,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return address;
         }
 
-        public IEnumerable<Block> GetBlocks(string chainInput = "", int lastBlocksAmount = 20)
+        public IEnumerable<Block> GetBlocks(string chainInput = null, int lastBlocksAmount = 20)
         {
             var blockList = new List<Block>();
 
@@ -98,7 +98,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return null;
         }
 
-        public Block GetBlock(int height, string chainAddress = "")
+        public Block GetBlock(int height, string chainAddress = null)
         {
             Block block;
 
@@ -196,6 +196,11 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 }
             }
             return null;
+        }
+
+        public int GetTotalTransactions()
+        {
+            return NexusChain.GetTotalTransactionCount();
         }
 
         public IEnumerable<Token> GetTokens()

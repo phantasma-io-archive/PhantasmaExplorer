@@ -36,6 +36,7 @@ namespace Phantasma.Explorer.Controllers
         public TransactionViewModel GetTransaction(string txHash)
         {
             Transaction transaction = Repository.GetTransaction(txHash);
+            if (transaction == null) return null;
             return TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, transaction.Block), transaction);
         }
 
