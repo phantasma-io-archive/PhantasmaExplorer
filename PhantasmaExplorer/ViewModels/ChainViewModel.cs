@@ -27,9 +27,14 @@ namespace Phantasma.Explorer.ViewModels
                 Blocks = lastBlocks,
                 ParentChain = chain.ParentChain?.Address.Text ?? ""
             };
-            if (chain.GetChildChains().Any())
+
+            if (chain.ChildChains.Any())
             {
-                vm.ChildChains = chain.GetChildChains();
+                vm.ChildChains = new Dictionary<string, string>();
+                foreach (var childChain in chain.ChildChains)
+                {
+                    vm.ChildChains[childChain.Name] = childChain.Address.Text;
+                }
             }
             return vm;
         }

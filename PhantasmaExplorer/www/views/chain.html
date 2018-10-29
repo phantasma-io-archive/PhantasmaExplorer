@@ -101,8 +101,8 @@
                             <tbody>
                                 {{#each chain.ChildChains}}
                                 <tr>
-                                    <td>{{Key}}</td>
-                                    <td>{{Value}}</td>
+                                    <td><a href="/chain/{{Value}}">{{Key}}</a></td>
+                                    <td>{{#link-address Value}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>
