@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
@@ -22,12 +21,14 @@ namespace Phantasma.Explorer.Controllers
         public TokenViewModel GetToken(string symbol)
         {
             var token = Repository.GetToken(symbol);
+            var tranfers = GetTransactionCount(symbol);
             if (token != null)
             {
                 SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
                 return TokenViewModel.FromToken(token, //todo
                     "Soul is the native asset of Phantasma blockchain",
                     "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
+                    tranfers,
                     SoulRate);
             }
 
@@ -41,9 +42,11 @@ namespace Phantasma.Explorer.Controllers
             SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
             foreach (var token in nexusTokens)
             {
+                var tranfers = GetTransactionCount(token.Symbol);
                 tokensList.Add(TokenViewModel.FromToken(token, //todo
                     "Soul is the native asset of Phantasma blockchain",
                     "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
+                    tranfers,
                     SoulRate));
             }
 
@@ -60,8 +63,10 @@ namespace Phantasma.Explorer.Controllers
                 var balanceSheet = mainChain.GetTokenBalances(token);
                 balanceSheet.ForEach((address, integer) =>
                 {
-                    var vm = new BalanceViewModel(mainChain.Name, TokenUtils.ToDecimal(integer, token.Decimals))
+                    var vm = new BalanceViewModel
                     {
+                        ChainName = mainChain.Name,
+                        Balance = TokenUtils.ToDecimal(integer, token.Decimals),
                         TokenSymbol = token.Symbol,
                         Address = address.Text
                     };
@@ -69,6 +74,23 @@ namespace Phantasma.Explorer.Controllers
                 });
             }
             return balances;
+        }
+
+        public List<TransactionViewModel> GetTransfers(string symbol)
+        {
+            var temp = new List<TransactionViewModel>();
+            var transfers = Repository.GetLastTokenTransfers(symbol, 100).ToList();
+            foreach (var transfer in transfers)
+            {
+                temp.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, transfer.Block), transfer));
+            }
+
+            return new List<TransactionViewModel>(temp.Where(p => p.AmountTransfer > 0).Take(20));
+        }
+
+        public int GetTransactionCount(string symbol)
+        {
+            return Repository.GetTokenTransfersCount(symbol);
         }
     }
 }

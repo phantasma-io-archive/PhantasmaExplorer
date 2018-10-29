@@ -138,8 +138,11 @@ namespace Phantasma.Explorer.Site
                 if (token != null)
                 {
                     var holders = TokensController.GetHolders(token.Symbol);
-                    UpdateContext(holdersContext, holders);
+                    var transfers = TokensController.GetTransfers(token.Symbol);
+
                     UpdateContext(tokenContext, token);
+                    UpdateContext(holdersContext, holders);
+                    UpdateContext("transfers", transfers);
                     return RendererView("layout", tokenContext, holdersContext);
                 }
 
@@ -218,9 +221,16 @@ namespace Phantasma.Explorer.Site
             {
                 var addressText = request.GetVariable("input");
                 var address = AddressesController.GetAddress(addressText);
+                if (address != null)
+                {
+                    UpdateContext(addressContext, address);
+                    return RendererView("layout", addressContext);
+                }
+                _errorContextInstance.errorCode = "Address error";
+                _errorContextInstance.errorDescription = $"Invalid address";
+                UpdateContext(errorContext, _errorContextInstance);
 
-                UpdateContext(addressContext, address);
-                return RendererView("layout", addressContext);
+                return HTTPResponse.Redirect(urlError);
             });
 
             #endregion

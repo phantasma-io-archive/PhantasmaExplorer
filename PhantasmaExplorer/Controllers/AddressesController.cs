@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
@@ -25,8 +26,8 @@ namespace Phantasma.Explorer.Controllers
             foreach (var address in repoAddressList)
             {
                 var balance = Repository.GetAddressBalance(address);
-                var addressVm = AddressViewModel.FromAddress(Repository, address);
-                addressVm.Balances.Add(new BalanceViewModel("main", balance));
+                var addressVm = AddressViewModel.FromAddress(Repository, address, null);
+                addressVm.Balances.Add(new BalanceViewModel { ChainName = "main", Balance = balance });
                 addressList.Add(addressVm);
             }
             CalculateAddressTokenValue(addressList);
@@ -36,34 +37,31 @@ namespace Phantasma.Explorer.Controllers
         public AddressViewModel GetAddress(string addressText)
         {
             var repoAddress = Repository.GetAddress(addressText);
-            var address = AddressViewModel.FromAddress(Repository, repoAddress);
-            var chains = Repository.GetChainNames();
-            foreach (var chain in chains)
+            if (repoAddress != Address.Null)
             {
-                var balance = Repository.GetAddressBalance(repoAddress, chain);
-                if (balance > 0)
+                var txs = Repository.GetAddressTransactions(repoAddress);
+                var address = AddressViewModel.FromAddress(Repository, repoAddress, txs);
+                var chains = Repository.GetChainNames();
+                foreach (var chain in chains)
                 {
-                    address.Balances.Add(new BalanceViewModel(chain, balance));
+                    var balance = Repository.GetAddressBalance(repoAddress, chain);
+                    var txsCount = Repository.GetAddressTransactionCount(repoAddress, chain);
+                    if (balance > 0)
+                    {
+                        address.Balances.Add(new BalanceViewModel
+                        {
+                            ChainName = chain,
+                            Balance = balance,
+                            TxnCount = txsCount
+                        });
+                    }
                 }
-            }
-            SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
-            CalculateAddressTokenValue(new List<AddressViewModel> { address });
-
-            //mock tx
-            var mockTransactionList = new List<TransactionViewModel>();
-            foreach (var nexusChain in Repository.NexusChain.Chains)
-            {
-                mockTransactionList.Add(new TransactionViewModel()
-                {
-                    ChainAddress = nexusChain.Address.Text,
-                    Date = DateTime.Now,
-                    Hash = "mock",
-                    ChainName = nexusChain.Name,
-                });
+                SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId); //todo
+                CalculateAddressTokenValue(new List<AddressViewModel> { address });
+                return address;
             }
 
-            address.Transactions = mockTransactionList;
-            return address;
+            return null;
         }
 
         private void CalculateAddressTokenValue(List<AddressViewModel> list)//todo

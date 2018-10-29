@@ -15,10 +15,8 @@ namespace Phantasma.Explorer.ViewModels
         public decimal Value { get; set; }
         public IEnumerable<TransactionViewModel> Transactions { get; set; }
 
-        public static AddressViewModel FromAddress(IRepository repository, Address address)
+        public static AddressViewModel FromAddress(IRepository repository, Address address, IEnumerable<Transaction> txs)
         {
-            var txs = new List<Transaction>();
-
             return new AddressViewModel
             {
                 Address = address.Text,
@@ -26,7 +24,7 @@ namespace Phantasma.Explorer.ViewModels
                 Value = 0,
                 Balance = 0,
                 Balances = new List<BalanceViewModel>(),
-                Transactions = txs.Select( tx => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, tx.Block), tx))
+                Transactions = txs?.Select(t => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, t.Block), t))
             };
         }
     }

@@ -75,7 +75,33 @@
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane active" id="transfers" role="tabpanel" aria-labelledby="transfers-tab">
                 <div class="panel panel-default">
-                    <div class="panel-body">
+                    <div class="panel-body" style="word-break:break-all">
+                        {{#if transfers}}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>TxHash</th>
+                                    <th>Age</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each transfers}}
+                                <tr>
+                                    <td>{{#link-tx Hash}}</td>
+                                    <td>{{#timeago Block.Timestamp}}</td>
+                                    <td>{{#link-address SenderAddress}}</td>
+                                    <td>{{#link-address ReceiverAddress}}</td>
+                                    <td>{{AmountTransfer}}</td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                        {{#else}}
+                        Nothing here...
+                        {{/if}}
                     </div>
                 </div>
             </div>

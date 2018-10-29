@@ -7,11 +7,6 @@
         public decimal Value { get; set; }
         public string TokenSymbol { get; set; }
         public string Address { get; set; }
-
-        public BalanceViewModel(string name, decimal balance)
-        {
-            ChainName = name;
-            Balance = balance;
-        }
+        public int TxnCount { get; set; }
     }
 }
