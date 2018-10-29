@@ -72,6 +72,16 @@ namespace Phantasma.Explorer.Infrastructure.Data
             throw new System.NotImplementedException();
         }
 
+        public IEnumerable<Transaction> GetAddressTransactions(Address address, int amount = 20)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int GetAddressTransactionCount(Address address, string chainName)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public Transaction GetTransaction(string txHash)
         {
             throw new System.NotImplementedException();
@@ -88,6 +98,16 @@ namespace Phantasma.Explorer.Infrastructure.Data
         }
 
         public Token GetToken(string symbol)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IEnumerable<Transaction> GetLastTokenTransfers(string symbol, int amount)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int GetTokenTransfersCount(string symbol)
         {
             throw new System.NotImplementedException();
         }

@@ -15,7 +15,7 @@ namespace Phantasma.Explorer.ViewModels
         public decimal Price { get; set; }
         public int Transfers { get; set; }
 
-        public static TokenViewModel FromToken(Token token, string description, string logoUrl, decimal price = 0m)
+        public static TokenViewModel FromToken(Token token, string description, string logoUrl, int transfers ,decimal price = 0m)
         {
             return new TokenViewModel
             {
@@ -25,7 +25,7 @@ namespace Phantasma.Explorer.ViewModels
                 CurrentSupply = TokenUtils.ToDecimal(token.CurrentSupply, token.Decimals),
                 Decimals = (int)token.Decimals,
                 Price = price,
-                Transfers = 0, //todo
+                Transfers = transfers,
                 Description = description,
                 LogoUrl = logoUrl //todo
             };

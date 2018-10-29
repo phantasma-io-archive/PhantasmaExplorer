@@ -33,6 +33,10 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         IEnumerable<Transaction> GetTransactions(string chainAddress = null, int txAmount = 20);
 
+        IEnumerable<Transaction> GetAddressTransactions(Address address, int amount = 20);
+
+        int GetAddressTransactionCount(Address address, string chainName);
+
         Transaction GetTransaction(string txHash);
 
         int GetTotalTransactions();
@@ -40,6 +44,10 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
         IEnumerable<Token> GetTokens();
 
         Token GetToken(string symbol);
+
+        IEnumerable<Transaction> GetLastTokenTransfers(string symbol, int amount);
+
+        int GetTokenTransfersCount(string symbol);
 
         string GetEventContent(Block block, Event evt);
     }

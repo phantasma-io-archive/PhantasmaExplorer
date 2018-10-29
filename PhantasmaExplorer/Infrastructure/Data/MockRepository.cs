@@ -55,8 +55,12 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public Address GetAddress(string addressText) //todo
         {
-            var address = Address.FromText(addressText);
-            return address;
+            if (Address.IsValidAddress(addressText))
+            {
+                return Address.FromText(addressText);
+
+            }
+            return Address.Null;
         }
 
         public IEnumerable<Block> GetBlocks(string chainInput = null, int lastBlocksAmount = 20)
@@ -184,6 +188,23 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return txList;
         }
 
+        public IEnumerable<Transaction> GetAddressTransactions(Address address, int amount = 20)
+        {
+            var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
+            return plugin?.GetAddressTransactions(address).OrderByDescending(p => p.Block.Timestamp.Value).Take(amount);
+        }
+
+        public int GetAddressTransactionCount(Address address, string chainName)
+        {
+            var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
+            if (plugin != null)
+            {
+                return plugin.GetAddressTransactions(address).Count(t => t.Block.Chain.Name == chainName);
+            }
+
+            return 0;
+        }
+
         public Transaction GetTransaction(string txHash)
         {
             var hash = Hash.Parse(txHash);
@@ -211,6 +232,31 @@ namespace Phantasma.Explorer.Infrastructure.Data
         public Token GetToken(string symbol)
         {
             return NexusChain.Tokens.SingleOrDefault(t => t.Symbol.ToUpperInvariant() == symbol || t.Name.ToUpperInvariant() == symbol);
+        }
+
+        public IEnumerable<Transaction> GetLastTokenTransfers(string symbol, int amount)
+        {
+            var token = GetToken(symbol);
+            var plugin = NexusChain.GetPlugin<TokenTransactionsPlugin>();
+
+            if (token != null && plugin != null)
+            {
+                return plugin.GetTokenTransactions(token).OrderByDescending(p => p.Block.Timestamp.Value).Take(amount);
+            }
+
+            return null;
+        }
+
+        public int GetTokenTransfersCount(string symbol)
+        {
+            var token = GetToken(symbol);
+            var plugin = NexusChain.GetPlugin<TokenTransactionsPlugin>();
+            if (token != null && plugin != null)
+            {
+                return plugin.GetTokenTransactions(token).Count();
+            }
+
+            return 0;
         }
 
         public string GetEventContent(Block block, Event evt)
