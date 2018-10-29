@@ -6,11 +6,11 @@ using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Site
 {
-    public class PriceTag : TemplateNode
+    public class ValueTag : TemplateNode
     {
         private RenderingKey key;
 
-        public PriceTag(TemplateDocument doc, string key) : base(doc)
+        public ValueTag(TemplateDocument doc, string key) : base(doc)
         {
             this.key = RenderingKey.Parse(key, RenderingType.Numeric);
         }
@@ -28,7 +28,8 @@ namespace Phantasma.Explorer.Site
                 return;
             }
 
-            context.output.Append($"{price:F2}");
+            var Symbol = "$";
+            context.output.Append($"{Symbol}{price:F2}");
         }
     }
 
