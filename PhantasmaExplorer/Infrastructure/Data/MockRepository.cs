@@ -72,9 +72,9 @@ namespace Phantasma.Explorer.Infrastructure.Data
             {
                 foreach (var chain in NexusChain.Chains)
                 {
-                    blockList.AddRange(chain.Blocks.Take(10));
+                    blockList.AddRange(chain.Blocks.TakeLast(10));
                 }
-                blockList = blockList.Take(lastBlocksAmount).ToList();
+                blockList = blockList.OrderByDescending(b => b.Timestamp.Value).Take(lastBlocksAmount).ToList();
             }
             else //specific chain
             {
@@ -135,6 +135,11 @@ namespace Phantasma.Explorer.Infrastructure.Data
         public Chain GetChainByName(string chainName)
         {
             return NexusChain.Chains.SingleOrDefault(c => c.Name == chainName);
+        }
+
+        public int GetChainCount()
+        {
+            return NexusChain.Chains.Count();
         }
 
         public IEnumerable<string> GetChainNames()

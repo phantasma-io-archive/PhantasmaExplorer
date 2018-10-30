@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Blockchain;
+using Phantasma.Blockchain.Tokens;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
@@ -11,7 +12,6 @@ namespace Phantasma.Explorer.Controllers
     {
         public IRepository Repository { get; set; } //todo interface
         private decimal SoulRate { get; set; }
-
 
         public TokensController(IRepository repo)
         {
@@ -24,9 +24,9 @@ namespace Phantasma.Explorer.Controllers
             var tranfers = GetTransactionCount(symbol);
             if (token != null)
             {
-                SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
-                return TokenViewModel.FromToken(token, //todo
-                    "Soul is the native asset of Phantasma blockchain",
+                SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
+
+                return TokenViewModel.FromToken(token,
                     "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
                     tranfers,
                     SoulRate);
@@ -43,8 +43,8 @@ namespace Phantasma.Explorer.Controllers
             foreach (var token in nexusTokens)
             {
                 var tranfers = GetTransactionCount(token.Symbol);
-                tokensList.Add(TokenViewModel.FromToken(token, //todo
-                    "Soul is the native asset of Phantasma blockchain",
+                SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
+                tokensList.Add(TokenViewModel.FromToken(token,
                     "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
                     tranfers,
                     SoulRate));
@@ -58,7 +58,7 @@ namespace Phantasma.Explorer.Controllers
             var mainChain = Repository.GetChainByName("main");
             var token = Repository.GetToken(symbol);
             List<BalanceViewModel> balances = new List<BalanceViewModel>();
-            if (token != null && mainChain != null)
+            if (token != null && mainChain != null && (token.Flags & TokenFlags.Fungible) != 0)
             {
                 var balanceSheet = mainChain.GetTokenBalances(token);
                 balanceSheet.ForEach((address, integer) =>

@@ -31,6 +31,8 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         Chain GetChainByName(string chainName);
 
+        int GetChainCount();
+
         IEnumerable<Transaction> GetTransactions(string chainAddress = null, int txAmount = 20);
 
         IEnumerable<Transaction> GetAddressTransactions(Address address, int amount = 20);

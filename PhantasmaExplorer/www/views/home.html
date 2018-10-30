@@ -26,7 +26,7 @@
                             <td>{{#async marketcap}}</td>
                         </tr>
                         <tr>
-                            <td>Last Block</td>
+                            <td>Main chain last block</td>
                             <td>{{home.BlockHeight}}</td>
                         </tr>
                         <tr>
@@ -39,7 +39,7 @@
                         </tr>
                     </tbody>
                 </table>
-				{{#async rates}}
+                {{#async rates}}
             </div>
         </div>
     </div>
@@ -98,6 +98,7 @@ function onStart(){
                             </td>
                             <td>
                                 Miner: {{#link-address MiningAddress}}<br>
+                                Chain: <a href="/chain/{{ChainAddress}}">{{ChainName}}</a><br>
                                 <a href="/txsblock/{{Hash}}"><strong>{{Transactions}} Txn</strong></a><br>
                                 Block reward: {{Reward}} SOUL
                             </td>

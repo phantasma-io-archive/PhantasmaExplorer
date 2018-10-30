@@ -196,7 +196,7 @@ namespace Phantasma.Explorer.Site
                 if (txList.Count > 0)
                 {
                     UpdateContext(txInBlockContext, txList);
-
+                    UpdateContext("BlockHash", txList[0].Block.Hash);
                     return RendererView("layout", txInBlockContext);
                 }
                 _errorContextInstance.errorCode = "txs error";

@@ -1,13 +1,13 @@
 <div class="row">
 	<div class="col-lg-12">
-		<h1>Transactions for block<br><small>{{transactionsBlock.ElementAt(0).Block.Height}}</small></h1>		
-		<br>
+		<h2>Transactions for block<br><small><a href="/block/{{BlockHash}}">{{BlockHash}}</a></small></h2>		
+	    <br>
 			
 		<table class="table table-striped">
 			<thead>
 			  <tr>
 				<th>TxHash</th>
-				<th>Block</th>
+				<th>Block Height</th>
 				<th>Age</th>
 			  </tr>
 			</thead>
@@ -15,7 +15,7 @@
                 {{#each transactionsBlock}}
                 <tr>
                     <td>{{#link-tx Hash}}</td>
-                    <td><a href="/block/{{Block.Height}}">{{Block.Height}}</a></td>
+                    <td>{{Block.Height}}</td>
                     <td>{{#date Date}}</td>
                 </tr>
                 {{/each}}

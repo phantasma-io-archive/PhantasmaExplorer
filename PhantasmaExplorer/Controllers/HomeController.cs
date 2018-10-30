@@ -51,7 +51,7 @@ namespace Phantasma.Explorer.Controllers
                 }
             }
 
-            int totalChains = Repository.GetAllChains().Count(); //todo repo
+            int totalChains = Repository.GetChainCount();
             uint height = Repository.GetChainByName("main").BlockHeight; //todo repo
             int totalTransactions = Repository.GetTotalTransactions();
 
