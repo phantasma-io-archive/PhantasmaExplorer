@@ -48,5 +48,7 @@ namespace Phantasma.Explorer
 
             return simulator.Nexus;
         }
+
+        public static string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
     }
 }

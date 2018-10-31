@@ -15,7 +15,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
     {
         public Nexus NexusChain { get; set; }
 
-        public decimal GetAddressBalance(Address address, string chainName = null) //todo this should not be here
+        public decimal GetAddressNativeBalance(Address address, string chainName = null) //todo this should not be here
         {
             if (string.IsNullOrEmpty(chainName))
             {
@@ -24,6 +24,18 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
             var chain = GetChainByName(chainName);
             return TokenUtils.ToDecimal(chain?.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
+        }
+
+        public decimal GetAddressBalance(Address address, Token token, string chainName)
+        {
+            var chain = GetChainByName(chainName);
+            decimal balance = 0;
+            if (chain != null)
+            {
+                balance = TokenUtils.ToDecimal(chain.GetTokenBalance(token, address), token.Decimals);
+            }
+
+            return balance;
         }
 
         public IEnumerable<Address> GetAddressList(string chainAddress = null, int count = 20) //todo strategy to get address

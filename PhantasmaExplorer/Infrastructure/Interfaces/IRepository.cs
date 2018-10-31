@@ -11,7 +11,9 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
         //todo calls should be async imo
         Nexus NexusChain { get; set; }//todo remove
 
-        decimal GetAddressBalance(Address address, string chainName = null);
+        decimal GetAddressNativeBalance(Address address, string chainName = null);
+
+        decimal GetAddressBalance(Address address, Token token, string chainName);
 
         IEnumerable<Address> GetAddressList(string chainAddress = null, int lastAddressAmount = 20);
 
