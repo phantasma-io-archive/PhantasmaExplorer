@@ -6,7 +6,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class BlocksController
     {
-        public IRepository Repository { get; set; }
+        private IRepository Repository { get; }
 
         public BlocksController(IRepository repo)
         {

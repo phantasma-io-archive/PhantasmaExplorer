@@ -12,7 +12,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
     //{
     //    public Nexus NexusChain { get; set; }
 
-    //    public decimal GetAddressBalance(Address address, string chainName = null)
+    //    public decimal GetAddressNativeBalance(Address address, string chainName = null)
     //    {
     //        throw new System.NotImplementedException();
     //    }

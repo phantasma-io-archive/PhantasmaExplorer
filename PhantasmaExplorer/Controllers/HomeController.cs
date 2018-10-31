@@ -11,7 +11,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class HomeController
     {
-        public IRepository Repository { get; set; }
+        private IRepository Repository { get; }
 
         public HomeController(IRepository repo)
         {

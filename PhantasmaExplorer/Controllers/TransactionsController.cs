@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
@@ -9,7 +8,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class TransactionsController
     {
-        public IRepository Repository { get; set; } //todo interface
+        private IRepository Repository { get; } //todo interface
 
         public TransactionsController(IRepository repo)
         {

@@ -10,7 +10,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class TokensController
     {
-        public IRepository Repository { get; set; } //todo interface
+        private IRepository Repository { get; }
         private decimal SoulRate { get; set; }
 
         public TokensController(IRepository repo)
@@ -27,7 +27,7 @@ namespace Phantasma.Explorer.Controllers
                 SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
 
                 return TokenViewModel.FromToken(token,
-                    "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
+                    Explorer.MockLogoUrl,
                     tranfers,
                     SoulRate);
             }
@@ -45,7 +45,7 @@ namespace Phantasma.Explorer.Controllers
                 var tranfers = GetTransactionCount(token.Symbol);
                 SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
                 tokensList.Add(TokenViewModel.FromToken(token,
-                    "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png",
+                    Explorer.MockLogoUrl,
                     tranfers,
                     SoulRate));
             }
@@ -67,7 +67,7 @@ namespace Phantasma.Explorer.Controllers
                     {
                         ChainName = mainChain.Name,
                         Balance = TokenUtils.ToDecimal(integer, token.Decimals),
-                        TokenSymbol = token.Symbol,
+                        Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl, 0, 0),
                         Address = address.Text
                     };
                     balances.Add(vm);

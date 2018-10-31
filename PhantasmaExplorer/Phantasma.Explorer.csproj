@@ -24,6 +24,8 @@
     <Content Include="www\public\img\phantasma_logo.png" />
     <Content Include="www\views\address.html" />
     <Content Include="www\views\addresses.html" />
+    <Content Include="www\views\app.html" />
+    <Content Include="www\views\apps.html" />
     <Content Include="www\views\block.html" />
     <Content Include="www\views\blocks.html" />
     <Content Include="www\views\chain.html" />

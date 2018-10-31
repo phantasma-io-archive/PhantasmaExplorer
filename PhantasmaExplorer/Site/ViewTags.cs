@@ -101,15 +101,8 @@ namespace Phantasma.Explorer.Site
                 return;
             }
 
-            var chain = temp as Chain;
-            if (chain != null)
-            {
-                context.output.Append($"<a href=\"/chain/{chain.Address.Text}\">{chain.Name}</a>");
-            }
-            else
-            {
-                context.output.Append("-");
-            }
+            var chain = (string)temp;
+            context.output.Append(!string.IsNullOrEmpty((string)temp) ? $"<a href=\"/chain/{chain}\">{chain}</a>" : "-");
         }
     }
 
@@ -209,4 +202,69 @@ namespace Phantasma.Explorer.Site
         }
     }
 
+    public class LinkAppTag : TemplateNode
+    {
+        private RenderingKey key;
+
+        public LinkAppTag(TemplateDocument doc, string key) : base(doc)
+        {
+            this.key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(key);
+            if (temp == null)
+            {
+                return;
+            }
+
+            var appId = (string)temp;
+            context.output.Append($"<a href=/app/{appId}>{appId}</a>");
+        }
+    }
+
+    public class AppIconTag : TemplateNode
+    {
+        private RenderingKey key;
+
+        public AppIconTag(TemplateDocument doc, string key) : base(doc)
+        {
+            this.key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(key);
+            if (temp == null)
+            {
+                return;
+            }
+
+            var url = (string)temp;
+            context.output.Append($"<img src=\"{url}\" alt=\"\" style=\"width: 20px; height: 20px; \">");
+        }
+    }
+
+    public class LinkExternalTag : TemplateNode
+    {
+        private RenderingKey key;
+
+        public LinkExternalTag(TemplateDocument doc, string key) : base(doc)
+        {
+            this.key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(key);
+            if (temp == null)
+            {
+                return;
+            }
+
+            var url = (string)temp;
+            context.output.Append($"<a href=\"{url}\">{url}</a>");
+        }
+    }
 }

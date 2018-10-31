@@ -6,7 +6,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class ChainsController
     {
-        public IRepository Repository { get; set; }
+        private IRepository Repository { get; }
 
         public ChainsController(IRepository repo)
         {
@@ -38,7 +38,11 @@ namespace Phantasma.Explorer.Controllers
         {
             var repoChain = Repository.GetChain(chainInput);
 
-            if (repoChain == null) return null;
+            if (repoChain == null)
+            {
+                repoChain = Repository.GetChainByName(chainInput);
+                if (repoChain == null) return null;
+            }
 
             var blockList = new List<BlockViewModel>();
             var lastBlocks = Repository.GetBlocks(repoChain.Address.Text);
