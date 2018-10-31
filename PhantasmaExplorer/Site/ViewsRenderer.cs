@@ -60,6 +60,9 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.RegisterTag("link-address", (doc, val) => new LinkAddressTag(doc, val));
             TemplateEngine.RegisterTag("link-block", (doc, val) => new LinkBlockTag(doc, val));
             TemplateEngine.RegisterTag("description", (doc, val) => new DescriptionTag(doc, val));
+            TemplateEngine.RegisterTag("link-app", (doc, val) => new LinkAppTag(doc, val));
+            TemplateEngine.RegisterTag("appIcon", (doc, val) => new AppIconTag(doc, val));
+            TemplateEngine.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
         }
 
         public void SetupControllers(IRepository repo) //todo this should be done by other class
@@ -70,6 +73,7 @@ namespace Phantasma.Explorer.Site
             ChainsController = new ChainsController(repo);
             TransactionsController = new TransactionsController(repo);
             TokensController = new TokensController(repo);
+            AppsController = new AppsController(repo);
         }
 
         public void SetupHandlers() //todo separate each call
@@ -342,6 +346,39 @@ namespace Phantasma.Explorer.Site
                 });
 
             #endregion
+
+            TemplateEngine.Site.Get($"{urlApps}", request =>
+            {
+
+                var appList = AppsController.GetAllApps();
+                if (appList.Count > 0)
+                {
+                    UpdateContext(appsContext, appList);
+                    return RendererView("layout", appsContext);
+                }
+                _errorContextInstance.errorCode = "apps error";
+                _errorContextInstance.errorDescription = "No apps found";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
+            });
+            TemplateEngine.Site.Get($"{urlApp}/{{input}}", request =>
+            {
+                var appId = request.GetVariable("input");
+
+                var app = AppsController.GetApp(appId);
+                if (app != null)
+                {
+                    UpdateContext(appContext, app);
+                    return RendererView("layout", appContext);
+                }
+                
+                _errorContextInstance.errorCode = "apps error";
+                _errorContextInstance.errorDescription = $"No app with {appId} found";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
+            });
         }
 
         #region URL&CONTEXT
@@ -375,6 +412,8 @@ namespace Phantasma.Explorer.Site
         private readonly string blockContext = "block";
         private readonly string chainsContext = "chains";
         private readonly string chainContext = "chain";
+        private readonly string appsContext = "apps";
+        private readonly string appContext = "app";
         private readonly string errorContext = "error";
         private readonly string holdersContext = "holders";
 
@@ -408,6 +447,7 @@ namespace Phantasma.Explorer.Site
         private ChainsController ChainsController { get; set; }
         private TransactionsController TransactionsController { get; set; }
         private TokensController TokensController { get; set; }
+        private AppsController AppsController { get; set; }
 
         #endregion
     }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
@@ -10,7 +9,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class AddressesController
     {
-        public IRepository Repository { get; set; }
+        private IRepository Repository { get; set; }
         private decimal SoulRate { get; set; }
 
         public AddressesController(IRepository repo)

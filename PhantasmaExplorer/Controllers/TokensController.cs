@@ -10,7 +10,7 @@ namespace Phantasma.Explorer.Controllers
 {
     public class TokensController
     {
-        public IRepository Repository { get; set; } //todo interface
+        private IRepository Repository { get; }
         private decimal SoulRate { get; set; }
 
         public TokensController(IRepository repo)

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
+using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 
@@ -54,5 +55,7 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
         int GetTokenTransfersCount(string symbol);
 
         string GetEventContent(Block block, Event evt);
+
+        IEnumerable<AppInfo> GetApps();
     }
 }

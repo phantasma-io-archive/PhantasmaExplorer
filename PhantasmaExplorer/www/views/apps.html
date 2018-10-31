@@ -1,0 +1,27 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1>Apps</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Title</th>
+                    <th>Transactions</th>
+                    <th>Url</th>
+                    <th>Icon</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each apps}}
+                <tr>
+                    <td>{{Rank}}</td>
+                    <td>{{#link-app Title}}</td>
+                    <td>{{TxCount}}</td>
+                    <td>{{#externalLink Url}}</td>
+                    <td>{{#appIcon Icon}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>

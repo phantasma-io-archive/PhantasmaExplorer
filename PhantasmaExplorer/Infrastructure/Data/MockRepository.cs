@@ -93,7 +93,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 var chain = GetChain(chainInput);
                 if (chain != null && chain.Blocks.Any())
                 {
-                    blockList.AddRange(chain.Blocks.Take(lastBlocksAmount));
+                    blockList.AddRange(chain.Blocks.TakeLast(lastBlocksAmount));
                 }
             }
             return blockList;
@@ -341,6 +341,13 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
                 default: return "Nothing.";
             }
+        }
+
+        public IEnumerable<AppInfo> GetApps()
+        {
+            var appChain = NexusChain.FindChainByKind(ContractKind.Apps);
+            var apps = (AppInfo[])appChain.InvokeContract("GetApps", new string[] { });
+            return apps;
         }
 
         private static string GetChainName(Nexus nexus, Address chainAddress)
