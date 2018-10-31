@@ -16,12 +16,22 @@
             <tbody>
                 {{#each tokens}}
                 <tr>
-                    <td><img src="{{LogoUrl}}" alt="" style="width:20; height:20; "></td>
+                    <td><img src="{{LogoUrl}}" alt="" style="width:20px; height:20px; "></td>
                     <td><a href="/token/{{Symbol}}">{{Name}}</a></td>
                     <td>{{Symbol}}</td>
                     <td>{{Decimals}}</td>
-                    <td>{{CurrentSupply}}</td>
-                    <td>{{MaxSupply}}</td>
+
+                    {{#if CurrentSupply >= 0}}
+                    <td>{{CurrentSupply}} {{Symbol}}</td>
+                    {{#else}}
+                    <td>-</td>
+                    {{/if}}
+
+                    {{#if MaxSupply > 0}}
+                    <td>{{MaxSupply}} {{Symbol}}</td>
+                    {{#else}}
+                    <td>-</td>
+                    {{/if}}
                 </tr>
                 {{/each}}
             </tbody>

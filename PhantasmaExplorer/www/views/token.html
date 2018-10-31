@@ -27,13 +27,17 @@
                     <td>
                         <span>Total Supply</span>
                     </td>
-                    <td>{{token.MaxSupply}}</td>
+                    {{#if token.IsFinite}}
+                    <td>{{token.MaxSupply}} {{token.Symbol}}</td>
+                    {{#else}}
+                    <td>-</td>
+                    {{/if}}
                 </tr>
                 <tr>
                     <td>
                         <span>Current Supply</span>
                     </td>
-                    <td>{{token.CurrentSupply}}</td>
+                    <td>{{token.CurrentSupply}} {{token.Symbol}}</td>
                 </tr>
             </tbody>
         </table>
@@ -56,6 +60,27 @@
                         <span>Transfers</span>
                     </td>
                     <td>{{token.Transfers}}</td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <span>Transferable</span>
+                    </td>
+                    {{#if token.IsTransferable}}
+                    <td>Yes</td>
+                    {{#else}}
+                    <td>No</td>
+                    {{/if}}
+                </tr>
+                <tr>
+                    <td>
+                        <span>Fungibility</span>
+                    </td>
+                    {{#if token.IsFungible}}
+                    <td>Fungible</td>
+                    {{#else}}
+                    <td>Non-Fungible</td>
+                    {{/if}}
                 </tr>
             </tbody>
         </table>
@@ -94,7 +119,7 @@
                                     <td>{{#timeago Block.Timestamp}}</td>
                                     <td>{{#link-address SenderAddress}}</td>
                                     <td>{{#link-address ReceiverAddress}}</td>
-                                    <td>{{AmountTransfer}}</td>
+                                    <td>{{AmountTransfer}} {{TokenSymbol}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>
@@ -121,7 +146,7 @@
                                 {{#each holders}}
                                 <tr>
                                     <td>{{#link-address Address}}</td>
-                                    <td>{{Balance}}</td>
+                                    <td>{{Balance}} {{TokenSymbol}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>
