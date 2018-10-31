@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
 using Phantasma.Explorer.Controllers;
@@ -21,10 +22,11 @@ namespace Phantasma.Explorer.Site
         public Dictionary<string, object> Context { get; set; } = new Dictionary<string, object>();
 
         private ErrorContext _errorContextInstance;
+        private List<MenuContext> _menus;
 
         public void Init()
         {
-            var menus = new List<MenuContext>
+            _menus = new List<MenuContext>
             {
                 new MenuContext {text = "Transactions", url = urlTransactions, active = true},
                 new MenuContext {text = "Chains", url = urlChains, active = false},
@@ -35,7 +37,7 @@ namespace Phantasma.Explorer.Site
             };
             SetupTags();
             UpdateContext(errorContext, _errorContextInstance);
-            Context["menu"] = menus;
+            UpdateContext(menuContext, _menus);
         }
 
         public string RendererView(params string[] templateList)
@@ -112,9 +114,19 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Site.Get(urlTokens, request =>
             {
                 var tokensList = TokensController.GetTokens();
+                if (tokensList != null && tokensList.Any())
+                {
+                    ActivateMenuItem(urlTokens);
+                    UpdateContext(menuContext, _menus);
+                    UpdateContext(tokensContext, tokensList);
+                    return RendererView("layout", tokensContext);
+                }
 
-                UpdateContext(tokensContext, tokensList);
-                return RendererView("layout", tokensContext);
+                _errorContextInstance.errorCode = "token error";
+                _errorContextInstance.errorDescription = "Tokens not found";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
             });
 
             TemplateEngine.Site.Get("/marketcap", request =>
@@ -128,7 +140,7 @@ namespace Phantasma.Explorer.Site
             {
                 var coins = HomeController.GetRateInfo();
 
-                var html = TemplateEngine.Render(coins,  new[] { "rates" });
+                var html = TemplateEngine.Render(coins, new[] { "rates" });
                 return html;
             });
 
@@ -161,6 +173,9 @@ namespace Phantasma.Explorer.Site
                 var txList = TransactionsController.GetLastTransactions();
                 if (txList.Count > 0)
                 {
+                    var test = _menus.SingleOrDefault(m => m.url == urlTransactions);
+                    test.active = true;
+
                     UpdateContext(txsContext, txList);
                     return RendererView("layout", txsContext);
                 }
@@ -178,6 +193,8 @@ namespace Phantasma.Explorer.Site
                 var tx = TransactionsController.GetTransaction(txHash);
                 if (tx != null)
                 {
+                    ActivateMenuItem(urlTransaction);
+                    UpdateContext(menuContext, _menus);
                     UpdateContext(txContext, tx);
                     return RendererView("layout", txContext);
                 }
@@ -213,9 +230,19 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Site.Get($"{urlAddresses}", request =>
             {
                 var addressList = AddressesController.GetAddressList();
+                if (addressList != null && addressList.Any())
+                {
+                    ActivateMenuItem(urlAddresses);
+                    UpdateContext(menuContext, _menus);
+                    UpdateContext(addressesContext, addressList);
+                    return RendererView("layout", addressesContext);
+                }
 
-                UpdateContext(addressesContext, addressList);
-                return RendererView("layout", addressesContext);
+                _errorContextInstance.errorCode = "Address error";
+                _errorContextInstance.errorDescription = $"No addresses";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
             });
 
             TemplateEngine.Site.Get($"{urlAddress}/{{input}}", request =>
@@ -227,6 +254,7 @@ namespace Phantasma.Explorer.Site
                     UpdateContext(addressContext, address);
                     return RendererView("layout", addressContext);
                 }
+
                 _errorContextInstance.errorCode = "Address error";
                 _errorContextInstance.errorDescription = $"Invalid address";
                 UpdateContext(errorContext, _errorContextInstance);
@@ -243,6 +271,8 @@ namespace Phantasma.Explorer.Site
                 var blocksList = BlocksController.GetLatestBlocks();
                 if (blocksList.Count > 0)
                 {
+                    ActivateMenuItem(urlBlocks);
+                    UpdateContext(menuContext, _menus);
                     UpdateContext(blocksContext, blocksList);
                     return RendererView("layout", blocksContext);
                 }
@@ -281,6 +311,8 @@ namespace Phantasma.Explorer.Site
                 var chainList = ChainsController.GetChains();
                 if (chainList.Count > 0)
                 {
+                    ActivateMenuItem(urlChains);
+                    UpdateContext(menuContext, _menus);
                     UpdateContext(chainsContext, chainList);
                     return RendererView("layout", chainsContext);
                 }
@@ -331,6 +363,7 @@ namespace Phantasma.Explorer.Site
         private readonly string urlError = "/error";
 
         private readonly string homeContext = "home";
+        private readonly string menuContext = "menu";
         private readonly string tokensContext = "tokens";
         private readonly string tokenContext = "token";
         private readonly string txContext = "transaction";
@@ -345,17 +378,24 @@ namespace Phantasma.Explorer.Site
         private readonly string errorContext = "error";
         private readonly string holdersContext = "holders";
 
-        public struct MenuContext
+        public class MenuContext
         {
-            public string text;
-            public string url;
-            public bool active;
+            public string text { get; set; }
+            public string url { get; set; }
+            public bool active { get; set; }
         }
 
         public struct ErrorContext //todo more info?
         {
             public string errorDescription;
             public string errorCode;
+        }
+
+        private void ActivateMenuItem(string url)
+        {
+            _menus.ForEach(p => p.active = false);
+            var menu = _menus.SingleOrDefault(p => p.url == url);
+            if (menu != null) menu.active = true;
         }
 
         #endregion
