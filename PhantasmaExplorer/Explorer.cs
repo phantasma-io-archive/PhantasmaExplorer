@@ -33,7 +33,7 @@ namespace Phantasma.Explorer
         private static Nexus InitMockData()
         {
             var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
-            var simulator = new ChainSimulator(ownerKey, 12345);
+            var simulator = new ChainSimulator(ownerKey, 12346);
 
             // setup plugins required for explorer
             simulator.Nexus.AddPlugin(new ChainAddressesPlugin(simulator.Nexus));
