@@ -145,8 +145,13 @@
                             <tbody>
                                 {{#each holders}}
                                 <tr>
+
                                     <td>{{#link-address Address}}</td>
+                                    {{#if Token.IsFungible}}
                                     <td>{{Balance}} {{Token.Symbol}}</td>
+                                    {{#else}}
+                                    <td><a href="/tokens/{{Address}}">{{Balance}}</a> {{Token.Symbol}}</td>
+                                    {{/if}}
                                 </tr>
                                 {{/each}}
                             </tbody>
