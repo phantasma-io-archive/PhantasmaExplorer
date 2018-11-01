@@ -18,8 +18,7 @@ namespace Phantasma.Explorer.ViewModels
             {
                 Id = info.id,
                 Title = info.title,
-                //Url = info.url,
-                Url = "https://phantasma.io",
+                Url = info.url,
                 Description = info.description,
                 //Icon = info.icon?.ToString()
                 Icon = Explorer.MockLogoUrl

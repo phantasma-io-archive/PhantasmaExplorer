@@ -7,7 +7,7 @@
                 <tr>
                     <th>Address</th>
                     <th>Name</th>
-                    <th>Balance</th>
+                    <th>Balance (Main Chain)</th>
                     <th>Value</th>
                 </tr>
             </thead>
@@ -16,8 +16,8 @@
                 <tr>
                     <td>{{#link-address Address}}</td>
                     <td>{{Name}}</td>
-                    <td>{{Balance}} SOUL</td>
-					<td>{{#value Value}}</td>                    
+                    <td>{{Balance}} <a href="/token/SOUL">SOUL</a></td>
+                    <td>{{#value Value}}</td>
                 </tr>
                 {{/each}}
             </tbody>

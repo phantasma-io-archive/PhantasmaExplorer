@@ -55,23 +55,26 @@ namespace Phantasma.Explorer.Controllers
 
         public List<BalanceViewModel> GetHolders(string symbol) //todo
         {
-            var mainChain = Repository.GetChainByName("main");
+            var allChains = Repository.GetAllChains();
             var token = Repository.GetToken(symbol);
             List<BalanceViewModel> balances = new List<BalanceViewModel>();
-            if (token != null && mainChain != null && (token.Flags & TokenFlags.Fungible) != 0)
+            if (token != null && allChains != null && (token.Flags & TokenFlags.Fungible) != 0)
             {
-                var balanceSheet = mainChain.GetTokenBalances(token);
-                balanceSheet.ForEach((address, integer) =>
+                foreach (var chain in allChains)
                 {
-                    var vm = new BalanceViewModel
+                    var balanceSheet = chain.GetTokenBalances(token);
+                    balanceSheet.ForEach((address, integer) =>
                     {
-                        ChainName = mainChain.Name,
-                        Balance = TokenUtils.ToDecimal(integer, token.Decimals),
-                        Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl, 0, 0),
-                        Address = address.Text
-                    };
-                    balances.Add(vm);
-                });
+                        var vm = new BalanceViewModel
+                        {
+                            ChainName = chain.Name,
+                            Balance = TokenUtils.ToDecimal(integer, token.Decimals),
+                            Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl, 0, 0),
+                            Address = address.Text
+                        };
+                        balances.Add(vm);
+                    });
+                }
             }
             return balances;
         }

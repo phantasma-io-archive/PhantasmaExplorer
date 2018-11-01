@@ -10,7 +10,7 @@ namespace Phantasma.Explorer.ViewModels
     {
         public string Address { get; set; }
         public string Name { get; set; }
-        public List<BalanceViewModel> Balances { get; set; }
+        public List<BalanceViewModel> NativeBalances { get; set; }
         public List<BalanceViewModel> TokenBalance { get; set; }
         public decimal Balance { get; set; }
         public decimal Value { get; set; }
@@ -24,7 +24,7 @@ namespace Phantasma.Explorer.ViewModels
                 Name = repository.NexusChain.LookUpAddress(address),
                 Value = 0,
                 Balance = 0,
-                Balances = new List<BalanceViewModel>(),
+                NativeBalances = new List<BalanceViewModel>(),
                 TokenBalance = new List<BalanceViewModel>(),
                 Transactions = txs?.Select(t => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, t.Block), t))
             };
