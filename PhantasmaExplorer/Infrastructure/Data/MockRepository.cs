@@ -84,7 +84,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             {
                 foreach (var chain in NexusChain.Chains)
                 {
-                    blockList.AddRange(chain.Blocks.Take(10));
+                    blockList.AddRange(chain.Blocks.TakeLast(10));
                 }
                 blockList = blockList.OrderByDescending(b => b.Timestamp.Value).Take(lastBlocksAmount).ToList();
             }

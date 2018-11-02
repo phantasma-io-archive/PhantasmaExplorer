@@ -57,7 +57,7 @@ namespace Phantasma.Explorer.Controllers
 
             var vm = new HomeViewModel
             {
-                Blocks = blocks.OrderByDescending(b => b.Timestamp).ToList(),
+                Blocks = blocks,
                 Transactions = txs,
                 Chart = chart,
                 TotalTransactions = totalTransactions,
