@@ -364,6 +364,7 @@ namespace Phantasma.Explorer.Site
 
             #endregion
 
+            #region Apps
             TemplateEngine.Site.Get($"{urlApps}", request =>
             {
 
@@ -379,6 +380,7 @@ namespace Phantasma.Explorer.Site
 
                 return HTTPResponse.Redirect(urlError);
             });
+
             TemplateEngine.Site.Get($"{urlApp}/{{input}}", request =>
             {
                 var appId = request.GetVariable("input");
@@ -389,13 +391,14 @@ namespace Phantasma.Explorer.Site
                     UpdateContext(appContext, app);
                     return RendererView("layout", appContext);
                 }
-                
+
                 _errorContextInstance.errorCode = "apps error";
                 _errorContextInstance.errorDescription = $"No app with {appId} found";
                 UpdateContext(errorContext, _errorContextInstance);
 
                 return HTTPResponse.Redirect(urlError);
             });
+            #endregion
         }
 
         #region URL&CONTEXT

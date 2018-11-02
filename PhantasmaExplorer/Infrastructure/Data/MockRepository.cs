@@ -95,6 +95,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 {
                     blockList.AddRange(chain.Blocks.TakeLast(lastBlocksAmount));
                 }
+
+                blockList = blockList.OrderByDescending(b => b.Height).ToList();
             }
             return blockList;
         }
