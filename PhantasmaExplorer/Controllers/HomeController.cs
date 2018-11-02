@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Phantasma.Core;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
+using Phantasma.Numerics;
 
 namespace Phantasma.Explorer.Controllers
 {
@@ -98,18 +100,29 @@ namespace Phantasma.Explorer.Controllers
                     return $"address/{input}";
                 }
 
+                //token
                 var token = Repository.GetToken(input.ToUpperInvariant());
                 if (token != null)// token
                 {
                     return $"token/{token.Symbol}";
                 }
 
+                //app
+                var apps = Repository.GetApps();
+                var app = apps.SingleOrDefault(a => a.id == input);
+                if (app.id == input)
+                {
+                    return $"app/{app.id}";
+                }
+
+                //chain
                 var chain = Repository.GetChainByName(input) ?? Repository.GetChain(input);
                 if (chain != null)
                 {
                     return $"chain/{chain.Address.Text}";
                 }
 
+                //hash
                 var hash = Hash.Parse(input);
                 if (hash != null)
                 {
