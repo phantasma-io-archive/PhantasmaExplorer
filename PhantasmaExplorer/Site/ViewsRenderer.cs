@@ -74,6 +74,7 @@ namespace Phantasma.Explorer.Site
             TransactionsController = new TransactionsController(repo);
             TokensController = new TokensController(repo);
             AppsController = new AppsController(repo);
+            APIController = new APIController(repo);
         }
 
         public void SetupHandlers() //todo separate each call
@@ -362,6 +363,7 @@ namespace Phantasma.Explorer.Site
 
                 return HTTPResponse.Redirect(urlError);
             });
+
             TemplateEngine.Site.Get($"{urlApp}/{{input}}", request =>
             {
                 var appId = request.GetVariable("input");
@@ -379,7 +381,21 @@ namespace Phantasma.Explorer.Site
 
                 return HTTPResponse.Redirect(urlError);
             });
+
+            SetupAPIHandlers();
         }
+
+        #region API
+        private void SetupAPIHandlers()
+        {
+            TemplateEngine.Site.Get($"{urlAPI}/account/{{address}}", request =>
+            {
+                var address = request.GetVariable("address");
+                return APIController.GetAccount(address);
+            });
+        }
+
+        #endregion
 
         #region URL&CONTEXT
 
@@ -398,6 +414,7 @@ namespace Phantasma.Explorer.Site
         private readonly string urlApps = "/apps";
         private readonly string urlApp = "/app";
         private readonly string urlError = "/error";
+        private readonly string urlAPI = "/api";
 
         private readonly string homeContext = "home";
         private readonly string menuContext = "menu";
@@ -448,6 +465,7 @@ namespace Phantasma.Explorer.Site
         private TransactionsController TransactionsController { get; set; }
         private TokensController TokensController { get; set; }
         private AppsController AppsController { get; set; }
+        private APIController APIController { get; set; }
 
         #endregion
     }
