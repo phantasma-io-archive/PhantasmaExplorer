@@ -134,6 +134,23 @@ namespace Phantasma.Explorer.Site
                 return HTTPResponse.Redirect(urlError);
             });
 
+            TemplateEngine.Site.Get($"{urlTokens}/{{input}}", request => //NFTs
+            {
+                var address = request.GetVariable("input");
+                var nftList = TokensController.GetNftListByAddress(address);
+                if (nftList != null && nftList.Any())
+                {
+                    UpdateContext(nftTokensContext, nftList);
+                    return RendererView("layout", nftTokensContext);
+                }
+
+                _errorContextInstance.errorCode = "nft error";
+                _errorContextInstance.errorDescription = $"no nfts found for this {address} address";
+                UpdateContext(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
+            });
+
             TemplateEngine.Site.Get("/marketcap", request =>
             {
                 var info = CoinUtils.GetCoinInfoAsync(CoinUtils.SoulId, "USD").Result;
@@ -329,7 +346,7 @@ namespace Phantasma.Explorer.Site
             });
 
             TemplateEngine.Site.Get($"{urlChain}/{{input}}",
-                request => //todo this could be the name of the chain rather then the address?
+                request =>
                 {
                     var addressText = request.GetVariable("input");
                     var chain = ChainsController.GetChain(addressText);
@@ -348,6 +365,7 @@ namespace Phantasma.Explorer.Site
 
             #endregion
 
+            #region Apps
             TemplateEngine.Site.Get($"{urlApps}", request =>
             {
 
@@ -374,7 +392,7 @@ namespace Phantasma.Explorer.Site
                     UpdateContext(appContext, app);
                     return RendererView("layout", appContext);
                 }
-                
+
                 _errorContextInstance.errorCode = "apps error";
                 _errorContextInstance.errorDescription = $"No app with {appId} found";
                 UpdateContext(errorContext, _errorContextInstance);
@@ -384,6 +402,7 @@ namespace Phantasma.Explorer.Site
 
             SetupAPIHandlers();
         }
+        #endregion
 
         #region API
         private void SetupAPIHandlers()
@@ -419,6 +438,7 @@ namespace Phantasma.Explorer.Site
         private readonly string homeContext = "home";
         private readonly string menuContext = "menu";
         private readonly string tokensContext = "tokens";
+        private readonly string nftTokensContext = "nftTokens";
         private readonly string tokenContext = "token";
         private readonly string txContext = "transaction";
         private readonly string txsContext = "transactions";

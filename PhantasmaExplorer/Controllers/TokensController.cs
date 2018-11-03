@@ -2,6 +2,7 @@
 using System.Linq;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Tokens;
+using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
@@ -58,22 +59,41 @@ namespace Phantasma.Explorer.Controllers
             var allChains = Repository.GetAllChains();
             var token = Repository.GetToken(symbol);
             List<BalanceViewModel> balances = new List<BalanceViewModel>();
-            if (token != null && allChains != null && (token.Flags & TokenFlags.Fungible) != 0)
+            if (token != null && allChains != null)
             {
                 foreach (var chain in allChains)
                 {
-                    var balanceSheet = chain.GetTokenBalances(token);
-                    balanceSheet.ForEach((address, integer) =>
+                    if ((token.Flags & TokenFlags.Fungible) != 0)
                     {
-                        var vm = new BalanceViewModel
+                        var balanceSheet = chain.GetTokenBalances(token);
+                        balanceSheet.ForEach((address, integer) =>
                         {
-                            ChainName = chain.Name,
-                            Balance = TokenUtils.ToDecimal(integer, token.Decimals),
-                            Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl, 0, 0),
-                            Address = address.Text
-                        };
-                        balances.Add(vm);
-                    });
+                            var vm = new BalanceViewModel
+                            {
+                                ChainName = chain.Name,
+                                Balance = TokenUtils.ToDecimal(integer, token.Decimals),
+                                Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl, 0, 0),
+                                Address = address.Text
+                            };
+                            balances.Add(vm);
+                        });
+                    }
+                    else
+                    {
+                        var ownershipSheet = chain.GetTokenOwnerships(token);
+                        ownershipSheet.ForEach((address, integer) =>
+                        {
+                            var vm = new BalanceViewModel
+                            {
+                                ChainName = chain.Name,
+                                Balance = integer.Count(),
+                                Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl, 0, 0),
+                                Address = address.Text
+                            };
+                            balances.Add(vm);
+                        });
+                    }
+
                 }
             }
             return balances;
@@ -94,6 +114,47 @@ namespace Phantasma.Explorer.Controllers
         public int GetTransactionCount(string symbol)
         {
             return Repository.GetTokenTransfersCount(symbol);
+        }
+
+        public List<NftViewModel> GetNftListByAddress(string inputAddress) //todo finish this
+        {
+            var repoAddress = Repository.GetAddress(inputAddress);
+            var nfTokens = Repository.GetTokens().Where(t => !t.Flags.HasFlag(TokenFlags.Fungible));//get only non fungible tokens
+            var chains = Repository.GetAllChains();
+
+            var nftList = new List<NftViewModel>();
+            if (repoAddress != Address.Null)
+            {
+                foreach (var chain in chains)
+                {
+                    foreach (var nfToken in nfTokens)
+                    {
+                        var ownershipSheet = chain.GetTokenOwnerships(nfToken); //todo move this to repository
+                        var test = ownershipSheet.Get(repoAddress);
+                        foreach (var bigInteger in test)
+                        {
+                            var existingVm = nftList.SingleOrDefault(vm => vm.Symbol == nfToken.Symbol);
+                            if (existingVm != null)
+                            {
+                                existingVm.Ids.Add(bigInteger.ToString());
+                            }
+                            else
+                            {
+                                nftList.Add(new NftViewModel
+                                {
+                                    Ids = new List<string>
+                                    {
+                                        bigInteger.ToString()
+                                    },
+                                    Symbol = nfToken.Symbol
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            return nftList;
         }
     }
 }

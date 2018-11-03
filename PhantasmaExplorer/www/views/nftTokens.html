@@ -1,0 +1,20 @@
+<div class="row">
+    {{#each nftTokens}}
+    <h3>{{Symbol}}</h3>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each Ids}}
+            <tr>
+                <td>{{this}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/each}}
+</div>

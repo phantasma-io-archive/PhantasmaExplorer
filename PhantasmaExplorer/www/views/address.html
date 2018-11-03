@@ -86,8 +86,11 @@
                                     {{#each address.TokenBalance}}
                                     <tr>
                                         <td><img src="{{Token.LogoUrl}}" alt="" style="width: 20px; height: 20px;"> {{Token.Name}} (<a href=/token/{{Token.Symbol}}> {{Token.Symbol}} </a>)</td>
+                                        {{#if Token.IsFungible}}
                                         <td>{{Balance}} {{Token.Symbol}}</td>
-
+                                        {{#else}}
+                                        <td><a href="/tokens/{{Address}}">{{Balance}}</a> {{Token.Symbol}}</td>
+                                        {{/if}}
                                     </tr>
                                     {{/each}}
                                 </tbody>
