@@ -1,13 +1,40 @@
 body {
     font-family: Open Sans;
-    font-size: 12px;
+    font-size: 14px;
+    background-image: url('../img/background.png');
+    background-size: 100%;
+    padding-top: 30px;
 }
 
-icon-header {
+.navbar-inverse {
+    background-color: transparent;
+    border-color: transparent;
+    border: none;
+}
+
+.home-title {
+    color: white;
+    font-size: 35px;
+    line-height: 47px;
+    text-align: center;
+    padding-top: 60px;
+    padding-bottom: 100px;
+}
+
+.logo {
+    padding: 10px 10px 0 10px;
+}
+
+.logo-header {
     font-size: 14px;
     font-weight: bold;
     overflow: hidden;
     color: white;
+}
+
+.nav > li > a:focus, .nav > li > a:hover {
+    text-decoration: none;
+    background-color: transparent !important;
 }
 
 .navbar-nav {
@@ -21,34 +48,49 @@ icon-header {
 }
 
     .menu-top-bar-li a {
-        border-color: red;
+        color: white;
+        font-weight: 600;
         font-size: 14px;
     }
 
 
 .footer-copyrights {
-    font-size: 14px;
     color: #17B0E7;
 }
 
-.home-label {
-    height: 19px;
-    color: #7C95AB;
-    font-family: "Open Sans";
-    font-size: 14px;
-    font-weight: 300;
+.table {
     line-height: 19px;
 }
 
-.home-label-value {
-    height: 19px;
-    color: #7C95AB;
-    font-family: "Open Sans";
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 19px;
-    text-align: right;
+    .table .home-label {
+        height: 19px;
+        color: #7C95AB;
+        font-family: "Open Sans";
+        font-weight: 300;
+        border-bottom: 1px solid #ddd;
+        border-top: none;
+    }
+
+
+    .table .home-label-value {
+        height: 19px;
+        color: #7C95AB;
+        font-family: "Open Sans";
+        font-weight: 600;
+        line-height: 19px;
+        text-align: right;
+        border-bottom: 1px solid #ddd;
+        border-top: none;
+    }
+
+.panel-phantasma {
+    border-color: #17B0E7;
 }
+
+.panel-body {
+    padding: 10px 25px;
+}
+
 .label-success {
     margin-left: 10px;
     border-radius: 5px;
@@ -57,4 +99,21 @@ icon-header {
 .label-danger {
     margin-left: 10px;
     border-radius: 5px;
+}
+
+.panel-default > .panel-heading {
+    background-image: none;
+    background-color: #17B0E7;
+    color: white;
+    font-weight: 500;
+    border-radius: 1px;
+    border: 1px;
+    border-color: #17B0E7;
+}
+
+.btn-view-all {
+    border-color: #FFFFFF;
+    border: 2px;
+    background-color: transparent;
+    color: white;
 }

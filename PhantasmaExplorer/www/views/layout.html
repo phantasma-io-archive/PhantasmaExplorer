@@ -11,8 +11,8 @@
     <title>Phantasma Explorer</title>
 
     <!-- CSS libs -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
     <link href="/css/chartist.min.css" rel="stylesheet">
 
@@ -30,12 +30,12 @@
 </head>
 
 <body>
-	<script>
-	var dynamicContents = [];	
-	</script>
+    <script>
+        var dynamicContents = [];
+    </script>
 
     <!-- Navigation -->
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <nav class="navbar navbar-collapse" role="navigation">
         <div class="container">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -45,19 +45,19 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/home">
-                    <img src="/img/phantasma_logo.png" height="34px" alt="">
-					<h3 class="icon-header">Phantasma</h3>
+                <a class="navbar-brand pull-left logo" href="/home">
+                    <span class="pull-left"><img src="/img/logo.png" height="34px" alt="Phantasma"></span>
+                    <h3 class="navbar-text logo-header">Phantasma</h3>
                 </a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-					{{#each menu}}
+                    {{#each menu}}
                     <li class="menu-top-bar-li">
-                        <a href="{{url}}"{{#if active}} class="active"{{/if}}>{{text}}</a>
+                        <a href="{{url}}" {{#if active}} class="active" {{/if}}>{{text}}</a>
                     </li>
-					{{/each}}
+                    {{/each}}
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -66,8 +66,26 @@
     </nav>
 
     <!-- Page Content -->
+
     <div id="main" class="container">
-		{{#body}}
+        <h1 class="home-title"> - Phantasma <span style="font-weight: 600;">Explorer</span> - </h1>
+
+        <div class="row">
+            <div id="custom-search-input">
+                <div class="input-group col-md-12">
+                    <form action="/home" method="POST">
+                        <input type="text" class="search-query form-control" id="searchInput" name="searchInput" value="{{searchInput}}" placeholder="Search by Address / Txhash / Block / Token" />
+                        <span class="input-group-btn">
+                            <button class="btn pull-right" type="submit">
+                                <span class=" glyphicon glyphicon-search"></span>
+                            </button>
+                        </span>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{#body}}
     </div>
     <!-- /.container -->
 
@@ -90,35 +108,35 @@
             </div>
         </div>
     </footer>
-		
+
     <!-- JS libs -->
     <script src="/js/jquery.min.js"></script>
     <script src="/js/chartist.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-	
-	<script>
-	$(function() {
-		let initMethod = "onStart";
-		if (typeof window[initMethod] === "function") {
-			window[initMethod](); 
-		}
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
-		for (let i = 0; i < dynamicContents.length; i++) {
-			let  obj = dynamicContents[i];					
-			let targetID = "#dynamic_"+obj.id;
-			console.log("Fetching ",obj);
-			$.ajax({
-			 type: "GET",
-			 url: obj.url,
-			 success: function(data) {
-				console.log("Set ",targetID, " to ",data);
-				$(targetID).replaceWith(data);
-			 }
+    <script>
+        $(function () {
+            let initMethod = "onStart";
+            if (typeof window[initMethod] === "function") {
+                window[initMethod]();
+            }
 
-			});			
-		} 		
-	});
-	</script>
+            for (let i = 0; i < dynamicContents.length; i++) {
+                let obj = dynamicContents[i];
+                let targetID = "#dynamic_" + obj.id;
+                console.log("Fetching ", obj);
+                $.ajax({
+                    type: "GET",
+                    url: obj.url,
+                    success: function (data) {
+                        console.log("Set ", targetID, " to ", data);
+                        $(targetID).replaceWith(data);
+                    }
+
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
