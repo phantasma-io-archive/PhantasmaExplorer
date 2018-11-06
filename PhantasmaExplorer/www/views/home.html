@@ -22,20 +22,20 @@
                 <table class="table" style="margin-bottom: 0px;">
                     <tbody>
                         <tr>
-                            <td>Market Cap</td>
-                            <td>{{#async marketcap}}</td>
+                            <td class="home-label">Market Cap</td>
+                            <td class="home-label-value">{{#async marketcap}}</td>
                         </tr>
                         <tr>
-                            <td>Main chain last block</td>
-                            <td>{{home.BlockHeight}}</td>
+                            <td class="home-label">Main chain last block</td>
+                            <td class="home-label-value">{{home.BlockHeight}}</td>
                         </tr>
                         <tr>
-                            <td>Total Transactions</td>
-                            <td>{{#format-amount home.TotalTransactions}}</td>
+                            <td class="home-label">Total Transactions</td>
+                            <td class="home-label-value">{{#format-amount home.TotalTransactions}}</td>
                         </tr>
                         <tr>
-                            <td>Total Chains</td>
-                            <td>{{home.TotalChains}}</td>
+                            <td class="home-label">Total Chains</td>
+                            <td class="home-label-value">{{home.TotalChains}}</td>
                         </tr>
                     </tbody>
                 </table>

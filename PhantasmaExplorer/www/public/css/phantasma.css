@@ -1,0 +1,60 @@
+body {
+    font-family: Open Sans;
+    font-size: 12px;
+}
+
+icon-header {
+    font-size: 14px;
+    font-weight: bold;
+    overflow: hidden;
+    color: white;
+}
+
+.navbar-nav {
+    float: right;
+    margin: 0;
+}
+
+.menu-top-bar-li {
+    display: inline;
+    padding: 5px 20px;
+}
+
+    .menu-top-bar-li a {
+        border-color: red;
+        font-size: 14px;
+    }
+
+
+.footer-copyrights {
+    font-size: 14px;
+    color: #17B0E7;
+}
+
+.home-label {
+    height: 19px;
+    color: #7C95AB;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 19px;
+}
+
+.home-label-value {
+    height: 19px;
+    color: #7C95AB;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 19px;
+    text-align: right;
+}
+.label-success {
+    margin-left: 10px;
+    border-radius: 5px;
+}
+
+.label-danger {
+    margin-left: 10px;
+    border-radius: 5px;
+}

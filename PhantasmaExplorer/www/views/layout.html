@@ -13,10 +13,12 @@
     <!-- CSS libs -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
     <link href="/css/chartist.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
     <link href="/css/explorer.css" rel="stylesheet">
+    <link href="/css/phantasma.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -44,15 +46,15 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="/home">
-                    <img src="/img/phantasma_logo.png" height="48px" alt="">
-					<h1>Phantasma Explorer</h1>
+                    <img src="/img/phantasma_logo.png" height="34px" alt="">
+					<h3 class="icon-header">Phantasma</h3>
                 </a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
 					{{#each menu}}
-                    <li>
+                    <li class="menu-top-bar-li">
                         <a href="{{url}}"{{#if active}} class="active"{{/if}}>{{text}}</a>
                     </li>
 					{{/each}}
@@ -80,7 +82,9 @@
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
-					Copyright &copy; <a href="https://phantasma.io">Phantasma Team</a> 2018
+                        <div class="footer-copyrights">
+                            Copyright &copy; <a href="https://phantasma.io">Phantasma Team</a> 2018
+                        </div>
                     </div>
                 </div>
             </div>
