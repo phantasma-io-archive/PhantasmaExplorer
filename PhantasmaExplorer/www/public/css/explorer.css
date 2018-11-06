@@ -85,7 +85,7 @@ footer {
     height: 20px;
     border-radius: 5px;
     outline: none;
-    color: #FFFFF;
+    color: #FFFFFF;
 }
 
     .searchTerm:focus {
@@ -121,8 +121,6 @@ form {
 
 #custom-search-input {
     margin: 0;
-    margin-top: 10px;
-    margin-bottom: 32px;
     padding: 0;
 }
 
@@ -130,9 +128,10 @@ form {
         padding-right: 6px;
         padding-left: 6px;
         margin-bottom: 0;
-        -webkit-border-radius: 3px;
-        -moz-border-radius: 3px;
-        border-radius: 3px;
+        -webkit-border-radius: 0px;
+        -moz-border-radius: 0px;
+        border-radius: 0px;
+        border: 1px solid #0EA4DB;
     }
 
     #custom-search-input button {

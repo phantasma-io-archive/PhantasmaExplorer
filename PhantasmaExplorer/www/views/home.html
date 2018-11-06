@@ -31,7 +31,7 @@
     </div>
 
     <div class="col-sm-6">
-        <div class="panel panel-default panel-phantasma" >
+        <div class="panel panel-default panel-phantasma">
             <div class="panel-heading">Phantasma Transactions History <small>(Last 15 days)</small></div>
             <div class="panel-body">
                 <div id="my-chart"></div>
@@ -74,10 +74,10 @@ function onStart(){
                 </div>
             </div>
             <div class="panel-body">
-                <table class="table table-striped">
+                <table class="table">
                     <tbody>
                         {{#each home.Blocks}}
-                        <tr>
+                        <tr class="home-label">
                             <td>
                                 <span><a href="/block/{{Hash}}">Block {{Height}}</a></span><br>
                                 <i>&gt;{{#timeago Timestamp}}</i>
@@ -105,10 +105,10 @@ function onStart(){
                 </div>
             </div>
             <div class="panel-body">
-                <table class="table table-striped">
+                <table class="table">
                     <tbody>
                         {{#each home.Transactions}}
-                        <tr>
+                        <tr class="home-label">
                             <td>
                                 TX# {{#link-tx Hash}}<br>
                                 <i>&gt;{{#timeago Block.Timestamp}} in <a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain</i><br>
