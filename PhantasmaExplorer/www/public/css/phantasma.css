@@ -19,16 +19,18 @@ body {
     font-size: 35px;
     line-height: 47px;
     text-align: center;
-    padding-top: 30px;
-    padding-bottom: 50px;
+    margin-bottom: 50px;
+}
+
+.first-page-row {
+    margin-top: 50px;
 }
 
 .page-title {
     color: #7C95AB;
     font-size: 25px;
     text-align: center;
-    padding-top: 30px;
-    padding-bottom: 40px;
+    margin: 60px 0;
 }
 
 .logo {
@@ -44,11 +46,11 @@ body {
 
 .search-box {
     background-color: white;
-    padding: 40px;
+    padding: 45px;
     -webkit-box-shadow: 10px 10px 26px -10px rgba(74,74,74,1);
     -moz-box-shadow: 10px 10px 26px -10px rgba(74,74,74,1);
     box-shadow: 10px 10px 26px -10px rgba(74,74,74,1);
-    margin-bottom: 50px;
+    margin-bottom: 0px;
 }
 
 .nav > li > a:focus, .nav > li > a:hover {
@@ -72,56 +74,147 @@ body {
         font-size: 14px;
     }
 
-
-.footer-copyrights {
-    color: #17B0E7;
-}
-
 .table {
     line-height: 19px;
+    table-layout: auto;
+    border-collapse: collapse;
+    overflow: auto;
 }
 
     .table .home-label {
-        height: 19px;
         color: #7C95AB;
         font-family: "Open Sans";
         font-weight: 300;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid #DEDEDE;
+        border-top: none;
+    }
+
+    .table > tbody > tr > td {
         border-top: none;
     }
 
     .table .home-label-value {
-        height: 19px;
         color: #7C95AB;
         font-family: "Open Sans";
         font-weight: 600;
         line-height: 19px;
         text-align: right;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid #DEDEDE;
         border-top: none;
     }
 
-.table-striped > tbody > tr:nth-child(odd) > td,
-.table-striped > tbody > tr:nth-child(odd) > th {
-    background-color: rgba(23, 176, 231, 0.05);
-    padding: 15px;
-    border-bottom: 1px solid #17B0E7;
-}
+    .table tr:last-child td {
+        border-bottom: 0;
+    }
 
 .table-striped > tbody > tr:nth-child(even) > td,
 .table-striped > tbody > tr:nth-child(even) > th {
-    background-color: white;
-    padding: 15px;
+    background-color: rgba(23, 176, 231, 0.05);
+    padding: 10px;
     border-bottom: 1px solid #17B0E7;
 }
 
-.panel-phantasma {
+.table-striped > tbody > tr:nth-child(odd) > td,
+.table-striped > tbody > tr:nth-child(odd) > th {
+    background-color: white;
+    padding: 10px;
+    border-bottom: 1px solid #17B0E7;
+}
+
+.table-general {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+}
+
+    .table-general tbody tr {
+        border: 1px solid #17B0E7;
+    }
+
+    .table-general th {
+        font-size: 14px;
+        font-weight: 600;
+        color: #7C95AB;
+        border-bottom: 1px solid #17B0E7 !important;
+        white-space: nowrap;
+        width: 1%;
+    }
+
+    .table-general td {
+        max-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #7C95AB;
+    }
+
+        .table-general td a {
+            color: #17B0E7;
+        }
+
+.tab-panel-general {
+    margin-top: 40px;
+}
+
+    .tab-panel-general .nav-tabs {
+        border-bottom: 0px;
+    }
+
+        .tab-panel-general .nav-tabs > li > a {
+            color: #7C95AB;
+            cursor: pointer;
+            font-weight: 600;
+            background-color: transparent;
+            border: 0px solid;
+            border-bottom-color: transparent;
+        }
+
+        .tab-panel-general .nav-tabs > li.active > a {
+            cursor: pointer;
+            color: #17B0E7;
+            font-weight: 600;
+            background-color: transparent;
+            border: 0px solid;
+            border-color: transparent;
+        }
+
+.panel-home {
     border-color: #17B0E7;
 }
+
+    .panel-home > .panel-heading {
+        background-image: none;
+        background-color: #17B0E7;
+        color: white;
+        font-weight: 500;
+        border-radius: 1px;
+        border: 1px;
+        border-color: #17B0E7;
+    }
 
 .panel-body {
     padding: 10px 25px;
 }
+
+.panel-single {
+    border-color: #17b0e7;
+}
+
+    .panel-single > .panel-heading {
+        color: #7C95AB;
+        background-color: rgba(23, 176, 231, 0.05);
+        border-color: #17b0e7;
+    }
+
+    .panel-single td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #7C95AB;
+    }
+
+        .panel-single td a {
+            color: #17B0E7;
+        }
+
 
 .label-success {
     margin-left: 10px;
@@ -133,19 +226,26 @@ body {
     border-radius: 5px;
 }
 
-.panel-default > .panel-heading {
-    background-image: none;
-    background-color: #17B0E7;
-    color: white;
-    font-weight: 500;
-    border-radius: 1px;
-    border: 1px;
-    border-color: #17B0E7;
-}
 
 .btn-view-all {
     border-color: #FFFFFF;
     border: 2px;
     background-color: transparent;
     color: white;
+}
+
+.bold-home-link a {
+    color: #17B0E7;
+    font-weight: 600;
+    line-height: 19px;
+}
+
+.thin-home-link > a {
+    color: #17B0E7;
+    font-weight: 300;
+    line-height: 19px;
+}
+
+.td-bottom-border {
+    border-bottom: 1px solid #DEDEDE;
 }

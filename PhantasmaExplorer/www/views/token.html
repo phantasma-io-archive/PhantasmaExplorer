@@ -1,6 +1,6 @@
-<div class="row">
+<div class="row ">
 
-    <h2>
+    <h2 class="page-title">
         Token
         <img src="{{token.LogoUrl}}" alt="" style="width: 20; height: 20;">
         {{token.Symbol}}
@@ -9,7 +9,7 @@
     <br />
     <div class="col-md-6">
 
-        <table class="table">
+        <table class="table table-general"><!-- TODO specific css for these tables -->
             <thead>
                 <tr>
                     <th>{{token.Name}}</th>
@@ -43,7 +43,7 @@
         </table>
     </div>
     <div class="col-md-6">
-        <table class="table">
+        <table class="table table-general">
             <thead>
                 <tr><th>Summary </th></tr>
             </thead>
@@ -86,7 +86,7 @@
         </table>
     </div>
 
-    <div class="col-lg-12">
+    <div class="col-lg-12  tab-panel-general">
 
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item active">
@@ -99,10 +99,10 @@
 
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane active" id="transfers" role="tabpanel" aria-labelledby="transfers-tab">
-                <div class="panel panel-default">
+                <div class="panel panel-single">
                     <div class="panel-body" style="word-break:break-all">
                         {{#if transfers}}
-                        <table class="table table-striped">
+                        <table class="table table-striped table-general">
                             <thead>
                                 <tr>
                                     <th>TxHash</th>
@@ -132,10 +132,10 @@
             </div>
 
             <div class="tab-pane fade" id="holders" role="tabpanel" aria-labelledby="holders-tab">
-                <div class="panel panel-default">
+                <div class="panel panel-single">
                     <div class="panel-body">
                         {{#if holders}}
-                        <table class="table table-striped">
+                        <table class="table table-striped table-general">
                             <thead>
                                 <tr>
                                     <th>Address</th>

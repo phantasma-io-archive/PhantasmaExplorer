@@ -1,8 +1,7 @@
 ﻿
-<div class="row">
-
+<div class="row first-page-row">
     <div class="col-sm-6">
-        <div class="panel panel-default panel-phantasma">
+        <div class="panel panel-default panel-home">
             <div class="panel-heading">Phantasma Overview</div>
             <div class="panel-body">
                 <table class="table" style="margin-bottom: 0;">
@@ -31,7 +30,7 @@
     </div>
 
     <div class="col-sm-6">
-        <div class="panel panel-default panel-phantasma">
+        <div class="panel panel-default panel-home">
             <div class="panel-heading">Phantasma Transactions History <small>(Last 15 days)</small></div>
             <div class="panel-body">
                 <div id="my-chart"></div>
@@ -66,7 +65,7 @@ function onStart(){
 
 <div class="row">
     <div class="col-sm-6">
-        <div class="panel panel-default panel-phantasma">
+        <div class="panel panel-default panel-home">
             <div class="panel-heading">
                 <i class="fas fa-cubes"></i> Blocks
                 <div class="btn-group pull-right">
@@ -78,14 +77,14 @@ function onStart(){
                     <tbody>
                         {{#each home.Blocks}}
                         <tr class="home-label">
-                            <td>
-                                <span><a href="/block/{{Hash}}">Block {{Height}}</a></span><br>
+                            <td class="td-bottom-border">
+                                <span class="bold-home-link"><a href="/block/{{Hash}}">Block {{Height}}</a></span><br>
                                 <i>&gt;{{#timeago Timestamp}}</i>
                             </td>
                             <td>
-                                Miner: {{#link-address MiningAddress}}<br>
-                                Chain: <a href="/chain/{{ChainAddress}}">{{ChainName}}</a><br>
-                                <a href="/txsblock/{{Hash}}"><strong>{{Transactions}} Txn</strong></a><br>
+                                Miner: <span class="thin-home-link">{{#link-address MiningAddress}}</span><br>
+                                Chain: <span class="thin-home-link"> <a href="/chain/{{ChainAddress}}">{{ChainName}}</a></span><br>
+                                <span class="bold-home-link"><a href="/txsblock/{{Hash}}">{{Transactions}} Txn</a></span><br>
                                 Block reward: {{Reward}} SOUL
                             </td>
                         </tr>
@@ -97,11 +96,11 @@ function onStart(){
     </div>
 
     <div class="col-sm-6">
-        <div class="panel panel-default panel-phantasma">
+        <div class="panel panel-default panel-home">
             <div class="panel-heading">
                 <i class="fas fa-database"></i> Transactions
                 <div class="btn-group pull-right">
-                    <a href="/transactions" class="btn btn-default btn-sm" style="margin-top: -4px;">View All</a>
+                    <a href="/transactions" class="btn btn-default btn-sm btn-view-all" style="margin-top: -4px;">View All</a>
                 </div>
             </div>
             <div class="panel-body">
@@ -110,7 +109,10 @@ function onStart(){
                         {{#each home.Transactions}}
                         <tr class="home-label">
                             <td>
-                                TX# {{#link-tx Hash}}<br>
+                                <span class="bold-home-link">
+                                    TX#
+                                    {{#link-tx Hash}}<br>
+                                </span>
                                 <i>&gt;{{#timeago Block.Timestamp}} in <a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain</i><br>
                                 {{{Description}}}<br>
                             </td>

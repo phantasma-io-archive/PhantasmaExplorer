@@ -124,7 +124,7 @@ namespace Phantasma.Explorer.Site
             }
 
             var tx = (string)temp;
-            context.output.Append($"<a href=/tx/{tx}><small>{tx}</small></a>");
+            context.output.Append($"<a href=/tx/{tx}>{tx}</a>");
         }
     }
 
@@ -146,7 +146,7 @@ namespace Phantasma.Explorer.Site
             }
 
             var hash = (string)temp;
-            context.output.Append($"<a href=/block/{hash}><small>{hash}</small></a>");
+            context.output.Append($"<a href=/block/{hash}>{hash}</a>");
         }
     }
 

@@ -18,6 +18,9 @@
     <Content Include="www\public\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="www\public\img\background.png" />
+    <Content Include="www\public\img\logo.png" />
+    <Content Include="www\public\img\old_background.png" />
     <Content Include="www\public\img\phantasma_logo.png" />
     <Content Include="www\views\address.html" />
     <Content Include="www\views\addresses.html" />
