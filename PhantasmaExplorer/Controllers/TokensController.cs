@@ -130,24 +130,36 @@ namespace Phantasma.Explorer.Controllers
                     foreach (var nfToken in nfTokens)
                     {
                         var ownershipSheet = chain.GetTokenOwnerships(nfToken); //todo move this to repository
-                        var test = ownershipSheet.Get(repoAddress);
-                        foreach (var bigInteger in test)
+                        var ids = ownershipSheet.Get(repoAddress);
+                        foreach (var id in ids)
                         {
                             var existingVm = nftList.SingleOrDefault(vm => vm.Symbol == nfToken.Symbol);
                             if (existingVm != null)
                             {
-                                existingVm.Ids.Add(bigInteger.ToString());
+                                existingVm.InfoList.Add(new NftInfoViewModel
+                                {
+                                    ViewerUrl = nfToken.Viewer,
+                                    Id = id.ToString(),
+                                    Info = "Mock info: " + id + existingVm.Symbol
+                                });
                             }
                             else
                             {
-                                nftList.Add(new NftViewModel
+                                var newVm = new NftViewModel
                                 {
-                                    Ids = new List<string>
+                                    Address = inputAddress,
+                                    Symbol = nfToken.Symbol,
+                                    InfoList = new List<NftInfoViewModel>
                                     {
-                                        bigInteger.ToString()
-                                    },
-                                    Symbol = nfToken.Symbol
-                                });
+                                        new NftInfoViewModel
+                                        {
+                                            ViewerUrl = nfToken.Viewer,
+                                            Id = id.ToString(),
+                                            Info = "Test info: " + id + nfToken.Symbol
+                                        }
+                                    }
+                                };
+                                nftList.Add(newVm);
                             }
                         }
                     }
@@ -155,6 +167,17 @@ namespace Phantasma.Explorer.Controllers
             }
 
             return nftList;
+        }
+
+        //todo
+        public string GetViewerUrl(string symbol)
+        {
+            if (symbol == "NACHO")
+            {
+                return "https://nacho.men/luchador/body/";
+            }
+
+            return string.Empty;
         }
     }
 }

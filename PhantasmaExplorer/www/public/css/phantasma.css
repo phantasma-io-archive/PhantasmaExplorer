@@ -81,31 +81,40 @@ body {
     overflow: auto;
 }
 
-    .table .home-label {
-        color: #7C95AB;
-        font-family: "Open Sans";
-        font-weight: 300;
-        border-bottom: 1px solid #DEDEDE;
-        border-top: none;
-    }
+.home-tx-table {
+    table-layout: fixed;
+}
 
-    .table > tbody > tr > td {
-        border-top: none;
-    }
+.table .home-label {
+    color: #7C95AB;
+    font-family: "Open Sans";
+    font-weight: 300;
+    border-bottom: 1px solid #DEDEDE;
+    border-top: none;
+}
 
-    .table .home-label-value {
-        color: #7C95AB;
-        font-family: "Open Sans";
-        font-weight: 600;
-        line-height: 19px;
-        text-align: right;
-        border-bottom: 1px solid #DEDEDE;
-        border-top: none;
-    }
+.table > tbody > tr > td {
+    border-top: none;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-    .table tr:last-child td {
-        border-bottom: 0;
-    }
+.table .home-label-value {
+    color: #7C95AB;
+    font-family: "Open Sans";
+    font-weight: 600;
+    line-height: 19px;
+    text-align: right;
+    border-bottom: 1px solid #DEDEDE;
+    border-top: none;
+}
+
+.table tr:last-child td {
+    border-bottom: 0;
+}
+
+
 
 .table-striped > tbody > tr:nth-child(even) > td,
 .table-striped > tbody > tr:nth-child(even) > th {
@@ -124,6 +133,7 @@ body {
 .table-general {
     width: 100%;
     table-layout: auto;
+    max-width: 100%;
     border-collapse: collapse;
 }
 
@@ -136,15 +146,17 @@ body {
         font-weight: 600;
         color: #7C95AB;
         border-bottom: 1px solid #17B0E7 !important;
-        white-space: nowrap;
-        width: 1%;
+        white-space: normal;
+        width: auto;
     }
 
     .table-general td {
-        max-width: 0;
+        max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
         color: #7C95AB;
+        /*word-wrap: break-word;
+        display: block;*/
     }
 
         .table-general td a {

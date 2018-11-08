@@ -150,7 +150,7 @@
                                     {{#if Token.IsFungible}}
                                     <td>{{Balance}} {{Token.Symbol}}</td>
                                     {{#else}}
-                                    <td><a href="/tokens/{{Address}}">{{Balance}}</a> {{Token.Symbol}}</td>
+                                    <td>{{Balance}} {{Token.Symbol}}<a href="/tokens/{{Address}}"> View All</a> </td>
                                     {{/if}}
                                 </tr>
                                 {{/each}}

@@ -3,9 +3,8 @@
         <h1 class="page-title">Tokens</h1>
         <table class="table table-striped table-general">
             <thead>
-                <tr class="home-label">
+                <tr>
                     <th>Name</th>
-                    <th></th>
                     <th>Ticker</th>
                     <th>Decimals</th>
                     <th>Current Supply</th>
@@ -15,8 +14,7 @@
             <tbody>
                 {{#each tokens}}
                 <tr>
-                    <td><img src="{{LogoUrl}}" alt="" style="width: 20px; height: 20px;"></td>
-                    <td><a href="/token/{{Symbol}}">{{Name}}</a></td>
+                    <td><img src="{{LogoUrl}}" alt="" style="width: 20px; height: 20px;"><a href="/token/{{Symbol}}">     {{Name}}</a></td>
                     <td>{{Symbol}}</td>
                     <td>{{Decimals}}</td>
 
