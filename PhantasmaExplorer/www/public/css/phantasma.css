@@ -7,6 +7,32 @@ body {
     background-size: 100%;
     padding-top: 30px;
 }
+/* Footer */
+footer {
+    color: white;
+}
+
+    footer h3 {
+        margin-bottom: 30px;
+    }
+
+    footer .footer-above {
+        padding-top: 50px;
+        background-color: transparent;
+    }
+
+    footer .footer-col {
+        margin-bottom: 50px;
+    }
+
+    footer .footer-below {
+        padding: 30px 0;
+        background-color: transparent;
+    }
+
+.footer-copyrights {
+    color: #17B0E7;
+}
 
 .navbar-inverse {
     background-color: transparent;
@@ -43,6 +69,11 @@ body {
     overflow: hidden;
     color: white;
 }
+/* SEARCH */
+.search {
+    width: 100%;
+    position: relative
+}
 
 .search-box {
     background-color: white;
@@ -53,6 +84,86 @@ body {
     margin-bottom: 0px;
 }
 
+.searchTerm {
+    float: left;
+    width: 100%;
+    border: 3px solid #00B4CC;
+    padding: 5px;
+    height: 20px;
+    border-radius: 5px;
+    outline: none;
+    color: #FFFFFF;
+}
+
+    .searchTerm:focus {
+        color: black;
+    }
+
+.searchButton {
+    position: absolute;
+    right: -50px;
+    width: 40px;
+    height: 36px;
+    border: 1px solid #00B4CC;
+    background: #00B4CC;
+    text-align: center;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/*Resize the wrap to see the search bar change!*/
+.wrap {
+    width: 50%;
+    position: absolute;
+    top: 12%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+form {
+    display: inherit;
+}
+
+.search-query:focus + button {
+    z-index: 3;
+}
+
+#custom-search-input {
+    margin: 0;
+    padding: 0;
+}
+
+    #custom-search-input .search-query {
+        padding-right: 6px;
+        padding-left: 6px;
+        margin-bottom: 0;
+        -webkit-border-radius: 0px;
+        -moz-border-radius: 0px;
+        border-radius: 0px;
+        border: 1px solid #0EA4DB;
+        width: 100%;
+        height: 55px;
+    }
+
+    /*change this button*/
+    #custom-search-input button {
+        border: 0;
+        background-color: #EEEEEE;
+        color: #777777;
+        padding: 2px 5px;
+        margin-top: 2px;
+        position: relative;
+        left: -28px;
+        margin-bottom: 0;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+        display: block;
+    }
+/* END SEARCH */
+
 .nav > li > a:focus, .nav > li > a:hover {
     text-decoration: none;
     background-color: transparent !important;
@@ -61,6 +172,17 @@ body {
 .navbar-nav {
     float: right;
     margin: 0;
+}
+
+.navbar-brand > h1 {
+    display: inline !important;
+    margin-right: 16px;
+}
+
+.navbar-brand > img {
+    display: inline !important;
+    margin-top: -12px;
+    margin-right: 12px;
 }
 
 .menu-top-bar-li {
@@ -113,8 +235,6 @@ body {
 .table tr:last-child td {
     border-bottom: 0;
 }
-
-
 
 .table-striped > tbody > tr:nth-child(even) > td,
 .table-striped > tbody > tr:nth-child(even) > th {
@@ -227,7 +347,7 @@ body {
             color: #17B0E7;
         }
 
-
+/* Prices */
 .label-success {
     margin-left: 10px;
     border-radius: 5px;
@@ -238,6 +358,10 @@ body {
     border-radius: 5px;
 }
 
+.label-as-badge {
+    border-radius: 1em;
+}
+/* End Prices*/
 
 .btn-view-all {
     border-color: #FFFFFF;
