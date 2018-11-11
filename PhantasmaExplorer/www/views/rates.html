@@ -2,8 +2,8 @@
 	<tbody>
 		{{#each this}}
 		<tr>
-			<td>SOUL/{{Symbol}}</td>
-			<td><small>{{Rate}}</small> {{Symbol}} <span class="label {{#if ChangePercentage > 0}}label-success{{#else}}label-danger{{/if}} label-as-badge pull-right">{{ChangePercentage}}%</span></td>
+			<td class="home-label">SOUL/{{Symbol}}</td>
+			<td class="home-label-value">{{Rate}} {{Symbol}} <span class="label {{#if ChangePercentage > 0}}label-success{{#else}}label-danger{{/if}} label-as-badge pull-right">{{ChangePercentage}}%</span></td>
 		</tr>
 		{{/each}}
 	</tbody>

@@ -6,21 +6,20 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>www\</OutputPath>
+    <OutputPath>www\bin\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="www\netcoreapp2.1\Phantasma.Explorer.deps.json" />
     <Content Include="www\netcoreapp2.1\Phantasma.Explorer.runtimeconfig.dev.json" />
     <Content Include="www\netcoreapp2.1\Phantasma.Explorer.runtimeconfig.json" />
-    <Content Include="www\public\css\bootstrap.min.css" />
-    <Content Include="www\public\css\custom-head-foot-scroll-blue.min.css" />
-    <Content Include="www\public\css\explorer.css" />
-    <Content Include="www\public\css\perfect-scrollbar.css" />
-    <Content Include="www\public\css\profile.css" />
+    <Content Include="www\public\css\phantasma.css" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="www\public\img\background.png" />
+    <Content Include="www\public\img\logo.png" />
+    <Content Include="www\public\img\old_background.png" />
     <Content Include="www\public\img\phantasma_logo.png" />
     <Content Include="www\views\address.html" />
     <Content Include="www\views\addresses.html" />

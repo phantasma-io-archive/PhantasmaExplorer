@@ -412,6 +412,12 @@ namespace Phantasma.Explorer.Site
                 var address = request.GetVariable("address");
                 return APIController.GetAccount(address);
             });
+
+            TemplateEngine.Site.Get($"{urlAPI}/block/{{blockHash}}", request =>
+            {
+                var address = request.GetVariable("blockHash");
+                return APIController.GetBlock(address);
+            });
         }
 
         #endregion

@@ -1,3 +1,4 @@
 .vs/*
 PhantasmaExplorer/obj/*
 PhantasmaExplorer/www/netcore*
+PhantasmaExplorer/www/bin/netcore*

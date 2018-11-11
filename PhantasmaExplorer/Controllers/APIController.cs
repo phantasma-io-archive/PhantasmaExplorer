@@ -1,5 +1,4 @@
-﻿using System;
-using Phantasma.Explorer.Infrastructure.Interfaces;
+﻿using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.API;
 using LunarLabs.Parser;
 using Phantasma.Cryptography;
@@ -22,6 +21,12 @@ namespace Phantasma.Explorer.Controllers
         {
             var address = Address.FromText(addressText);
             return _API.GetAccount(address);
+        }
+
+        public DataNode GetBlock(string blockHash)
+        {
+            var hash = Hash.Parse(blockHash);
+            return _API.GetBlock(hash);
         }
     }
 }
