@@ -28,5 +28,11 @@ namespace Phantasma.Explorer.Controllers
             var hash = Hash.Parse(blockHash);
             return _API.GetBlock(hash);
         }
+
+        public DataNode GetAddressTransactions(string addressText, int amount)
+        {
+            var address = Address.FromText(addressText);
+            return _API.GetAddressTransactions(address, amount);
+        }
     }
 }

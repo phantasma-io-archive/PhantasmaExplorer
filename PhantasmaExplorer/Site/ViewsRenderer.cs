@@ -407,16 +407,23 @@ namespace Phantasma.Explorer.Site
         #region API
         private void SetupAPIHandlers()
         {
-            TemplateEngine.Site.Get($"{urlAPI}/account/{{address}}", request =>
+            TemplateEngine.Site.Get($"{urlAPI}/get_account/{{address}}", request =>
             {
                 var address = request.GetVariable("address");
                 return APIController.GetAccount(address);
             });
 
-            TemplateEngine.Site.Get($"{urlAPI}/block/{{blockHash}}", request =>
+            TemplateEngine.Site.Get($"{urlAPI}/get_block/{{blockHash}}", request =>
             {
                 var address = request.GetVariable("blockHash");
                 return APIController.GetBlock(address);
+            });
+
+            TemplateEngine.Site.Get($"{urlAPI}/get_account_txs/{{address}}/{{amount}}", request =>
+            {
+                var address = request.GetVariable("address");
+                var amount = int.Parse(request.GetVariable("amount"));
+                return APIController.GetAddressTransactions(address, amount);
             });
         }
 
