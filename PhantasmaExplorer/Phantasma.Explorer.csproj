@@ -6,14 +6,13 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>www\</OutputPath>
+    <OutputPath>www\bin\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="www\netcoreapp2.1\Phantasma.Explorer.deps.json" />
     <Content Include="www\netcoreapp2.1\Phantasma.Explorer.runtimeconfig.dev.json" />
     <Content Include="www\netcoreapp2.1\Phantasma.Explorer.runtimeconfig.json" />
-    <Content Include="www\public\css\explorer.css" />
     <Content Include="www\public\css\phantasma.css" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="www\public\fonts\glyphicons-halflings-regular.ttf" />

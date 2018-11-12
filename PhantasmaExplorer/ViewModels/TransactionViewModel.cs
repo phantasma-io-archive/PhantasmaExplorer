@@ -50,7 +50,7 @@ namespace Phantasma.Explorer.ViewModels
 
             var nexus = repository.NexusChain;
 
-            foreach (var evt in tx.Events)
+            foreach (var evt in tx.Events)//todo move this
             {
                 switch (evt.Kind) 
                 {

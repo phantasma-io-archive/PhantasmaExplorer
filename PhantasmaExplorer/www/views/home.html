@@ -111,9 +111,9 @@ function onStart(){
                             <td>
                                 <span class="bold-home-link">
                                     TX#
-                                    {{#link-tx Hash}}<br>
+                                    <small>{{#link-tx Hash}}</small><br>
                                 </span>
-                                <i>&gt;{{#timeago Block.Timestamp}} in <a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain</i><br>
+                                <i>&gt;{{#timeago Block.Timestamp}} in </i> <span class="bold-home-link"><a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain<br></span>
                                 {{{Description}}}<br>
                             </td>
                         </tr>
