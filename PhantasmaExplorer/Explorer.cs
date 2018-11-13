@@ -52,7 +52,7 @@ namespace Phantasma.Explorer
             mempool.Start();
 
             //todo rpc move
-            var rpc = new RPCServer(new NexusAPI(simulator.Nexus, mempool), "/rpc", 10332);
+            var rpc = new RPCServer(new NexusAPI(simulator.Nexus, mempool), "rpc", 7077);
             rpc.Start();
 
             return simulator.Nexus;
