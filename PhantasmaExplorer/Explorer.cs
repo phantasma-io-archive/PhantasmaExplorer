@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using Phantasma.API;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Plugins;
@@ -47,8 +48,11 @@ namespace Phantasma.Explorer
                 simulator.GenerateRandomBlock();
             }
 
+            var mempool = new Mempool(ownerKey, simulator.Nexus);
+            mempool.Start();
+
             //todo rpc move
-            var rpc = new RPCServer(new NexusAPI(simulator.Nexus), "/rpc", 10332);
+            var rpc = new RPCServer(new NexusAPI(simulator.Nexus, mempool), "/rpc", 10332);
             rpc.Start();
 
             return simulator.Nexus;
