@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -43,7 +43,7 @@
 
   <ItemGroup>
     <PackageReference Include="LunarLabs.Parser" Version="1.2.4" />
-    <PackageReference Include="LunarLabs.Server" Version="1.2.5" />
+    <PackageReference Include="LunarLabs.Server" Version="1.2.7" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
   </ItemGroup>
 

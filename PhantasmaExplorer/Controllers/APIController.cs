@@ -26,7 +26,12 @@ namespace Phantasma.Explorer.Controllers
         public DataNode GetBlock(string blockHash)
         {
             var hash = Hash.Parse(blockHash);
-            return _API.GetBlock(hash);
+            return _API.GetBlockByHash(hash);
+        }
+
+        public DataNode GetBlock(uint height, string chainName)
+        {
+            return _API.GetBlockByHeight(height,chainName);
         }
 
         public DataNode GetAddressTransactions(string addressText, int amount)

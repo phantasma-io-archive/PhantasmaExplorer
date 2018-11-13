@@ -419,6 +419,13 @@ namespace Phantasma.Explorer.Site
                 return APIController.GetBlock(address);
             });
 
+            TemplateEngine.Site.Get($"{urlAPI}/get_block/{{chain}}/{{height}}", request =>
+            {
+                var chain = request.GetVariable("chain");
+                var height = (uint.Parse(request.GetVariable("height")));
+                return APIController.GetBlock(height, chain);
+            });
+
             TemplateEngine.Site.Get($"{urlAPI}/get_account_txs/{{address}}/{{amount}}", request =>
             {
                 var address = request.GetVariable("address");
