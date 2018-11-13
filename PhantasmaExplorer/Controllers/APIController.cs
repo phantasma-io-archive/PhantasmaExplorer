@@ -31,7 +31,7 @@ namespace Phantasma.Explorer.Controllers
 
         public DataNode GetBlock(uint height, string chainName)
         {
-            return _API.GetBlockByHeight(height,chainName);
+            return _API.GetBlockByHeight(chainName, height);
         }
 
         public DataNode GetAddressTransactions(string addressText, int amount)
