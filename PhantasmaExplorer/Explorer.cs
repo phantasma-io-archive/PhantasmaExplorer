@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Phantasma.API;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Plugins;
 using Phantasma.Cryptography;
@@ -41,10 +42,14 @@ namespace Phantasma.Explorer
             simulator.Nexus.AddPlugin(new TokenTransactionsPlugin(simulator.Nexus));
 
             // generate blocks with mock transactions
-            for (int i=1; i<=1000; i++)
+            for (int i = 1; i <= 1000; i++)
             {
                 simulator.GenerateRandomBlock();
             }
+
+            //todo rpc move
+            var rpc = new RPCServer(new NexusAPI(simulator.Nexus), "/rpc", 10332);
+            rpc.Start();
 
             return simulator.Nexus;
         }
