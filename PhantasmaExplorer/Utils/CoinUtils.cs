@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using LunarLabs.Parser;
 using LunarLabs.Parser.JSON;
@@ -58,6 +60,38 @@ namespace Phantasma.Explorer.Utils
 
                 root = root["data"];
                 return root;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static decimal[] GetChartForCoin(string symbol, string quote = "USD", int days = 30)
+        {
+            var result = new decimal[days];
+
+            var url = $"https://min-api.cryptocompare.com/data/histoday?fsym={symbol}&tsym={quote}&limit={days}";
+            string json;
+
+            try
+            {
+                using (var wc = new WebClient())
+                {
+                    json = wc.DownloadString(url);
+                }
+
+                var root = JSONReader.ReadFromString(json);
+
+                root = root["data"];
+                for (int i=0; i<days; i++)
+                {
+                    var entry = root.GetNodeByIndex(i);
+                    var val = entry.GetDecimal("high");
+                    result[(days-1) - i] = val;
+                }
+
+                return result;
             }
             catch
             {

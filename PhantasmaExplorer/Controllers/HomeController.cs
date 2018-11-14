@@ -74,14 +74,41 @@ namespace Phantasma.Explorer.Controllers
             var tasks = symbols.Select(symbol => CoinUtils.GetCoinInfoAsync(CoinUtils.SoulId, symbol));
             var rates = Task.WhenAll(tasks).GetAwaiter().GetResult();
 
+            int days = 15;
+            var soulData = CoinUtils.GetChartForCoin("SOUL*", "USD", days);
+
             var coins = new List<CoinRateViewModel>();
             for (int i = 0; i < rates.Length; i++)
             {
+                var symbol = symbols[i];
+
+                var historicalData = symbol == "USD" ? null : CoinUtils.GetChartForCoin(symbol, "USD", days);
+
+                var chart = new Dictionary<string, decimal>();
+                for (int day=0; day<days; day++)
+                {
+                    DateTime date = DateTime.Now - TimeSpan.FromDays(day);
+                    var chartKey = $"{date.Day}/{date.Month}";
+
+                    decimal price;
+                    if (historicalData == null)
+                    {
+                        price = soulData[day];
+                    }
+                    else
+                    {
+                        price = soulData[day] / historicalData[day];
+                    }
+
+                    chart[chartKey] = price;
+                }
+
                 var coin = new CoinRateViewModel
                 {
-                    Symbol = symbols[i],
-                    Rate = rates[i]["quotes"][symbols[i]].GetDecimal("price"),
-                    ChangePercentage = rates[i]["quotes"][symbols[i]].GetDecimal("percent_change_24h")
+                    Symbol = symbol,
+                    Rate = rates[i]["quotes"][symbol].GetDecimal("price"),
+                    ChangePercentage = rates[i]["quotes"][symbol].GetDecimal("percent_change_24h"),
+                    Chart = chart,
                 };
                 coins.Add(coin);
             }
