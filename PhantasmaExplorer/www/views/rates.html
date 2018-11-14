@@ -2,7 +2,7 @@
 	<tbody>
 		{{#each this}}
 		<tr>
-			<td class="home-label"><a id="popover_{{Symbol}}" class="btn" href="#" rel="popover" data-original-title="SOUL/{{Symbol}}">SOUL/{{Symbol}}</a></td>
+			<td class="home-label"><a id="popover_{{Symbol}}" class="btn" href="https://coinmarketcap.com/currencies/phantasma/" rel="popover" data-original-title="SOUL/{{Symbol}}">SOUL/{{Symbol}}</a></td>
 			<td class="home-label-value">{{Rate}} {{Symbol}} <span class="label {{#if ChangePercentage > 0}}label-success{{#else}}label-danger{{/if}} label-as-badge pull-right">{{ChangePercentage}}%</span></td>
 		</tr>
 		{{/each}}
@@ -29,7 +29,7 @@
 			
 	var {{Symbol}}_options = {
 		fullWidth: true,
-		height: 300,
+		height: 400,
 		chartPadding: {
 			right: 40
 		}
