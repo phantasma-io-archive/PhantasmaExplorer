@@ -167,7 +167,7 @@ form {
 
 .nav > li > a:focus, .nav > li > a:hover {
     text-decoration: none;
-    background-color: transparent !important;
+    background-color: red !important;
 }
 
 .navbar-nav {
@@ -288,27 +288,25 @@ form {
     margin-top: 40px;
 }
 
-    .tab-panel-general .nav-tabs {
-        border-bottom: 0px;
-    }
+.tab-panel-general .nav-tabs {
+	border-bottom: 0px;
+}
 
-        .tab-panel-general .nav-tabs > li > a {
-            color: #7C95AB;
-            cursor: pointer;
-            font-weight: 600;
-            background-color: transparent;
-            border: 0px solid;
-            border-bottom-color: transparent;
-        }
+.tab-panel-general .nav-tabs > li > a {
+	color: #7C95AB;
+	cursor: pointer;
+	font-weight: 600;
+    background-color: white;
+    border: 1px solid #0EA4DB;
+}
 
-        .tab-panel-general .nav-tabs > li.active > a {
-            cursor: pointer;
-            color: #17B0E7;
-            font-weight: 600;
-            background-color: transparent;
-            border: 0px solid;
-            border-color: transparent;
-        }
+.tab-panel-general .nav-tabs > li.active > a {
+	cursor: pointer;
+	color: #17B0E7;
+	font-weight: 600;
+	background-color: #F3FBFE;
+	border-bottom-color:#F3FBFE;
+}
 
 .panel-home {
     border-color: #17B0E7;
