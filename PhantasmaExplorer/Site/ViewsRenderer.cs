@@ -228,23 +228,6 @@ namespace Phantasma.Explorer.Site
                 return HTTPResponse.Redirect(urlError);
             });
 
-            TemplateEngine.Site.Get($"{urlTransactionInBlock}/{{input}}", request =>
-            {
-                var input = request.GetVariable("input");
-                var txList = TransactionsController.GetTransactionsByBlock(input);
-                if (txList.Count > 0)
-                {
-                    UpdateContext(txInBlockContext, txList);
-                    UpdateContext("BlockHash", txList[0].Block.Hash);
-                    return RendererView("layout", txInBlockContext);
-                }
-                _errorContextInstance.errorCode = "txs error";
-                _errorContextInstance.errorDescription = $"No transactions found in {input} block";
-                UpdateContext(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-            });
-
             #endregion
 
             #region Address
@@ -442,7 +425,6 @@ namespace Phantasma.Explorer.Site
         private readonly string urlTokens = "/tokens";
         private readonly string urlToken = "/token";
         private readonly string urlTransactions = "/transactions";
-        private readonly string urlTransactionInBlock = "/txsblock";
         private readonly string urlTransaction = "/tx";
         private readonly string urlChains = "/chains";
         private readonly string urlChain = "/chain";
@@ -462,7 +444,6 @@ namespace Phantasma.Explorer.Site
         private readonly string tokenContext = "token";
         private readonly string txContext = "transaction";
         private readonly string txsContext = "transactions";
-        private readonly string txInBlockContext = "transactionsBlock";
         private readonly string addressesContext = "addresses";
         private readonly string addressContext = "address";
         private readonly string blocksContext = "blocks";

@@ -38,7 +38,6 @@
     <Content Include="www\views\tokens.html" />
     <Content Include="www\views\transaction.html" />
     <Content Include="www\views\transactions.html" />
-    <Content Include="www\views\transactionsBlock.html" />
   </ItemGroup>
 
   <ItemGroup>
