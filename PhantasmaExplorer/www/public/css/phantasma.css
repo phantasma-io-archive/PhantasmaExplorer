@@ -82,7 +82,7 @@ footer {
     -moz-box-shadow: 10px 10px 26px -10px rgba(74,74,74,1);
     box-shadow: 10px 10px 26px -10px rgba(74,74,74,1);
     margin-bottom: 0px;
-	border-radius: 6px;
+    border-radius: 0px;
 }
 
 .searchTerm {
@@ -165,9 +165,18 @@ form {
     }
 /* END SEARCH */
 
-.nav > li > a:focus, .nav > li > a:hover {
+.tab-panel-general > nav > li > a:focus {
     text-decoration: none;
-    background-color: red !important;
+    background-color: #F3FBFE !important;
+}
+
+.nav > li > a:hover, .nav > li > a:focus {
+    text-decoration: none;
+    background-color: transparent;
+}
+
+.nav-tabs > li > a {
+    border-radius: 0px;
 }
 
 .navbar-nav {
@@ -288,28 +297,33 @@ form {
     margin-top: 40px;
 }
 
-.tab-panel-general .nav-tabs {
-	border-bottom: 0px;
-}
+    .tab-panel-general .nav-tabs {
+        border-bottom: 0px;
+    }
 
-.tab-panel-general .nav-tabs > li > a {
-	color: #7C95AB;
-	cursor: pointer;
-	font-weight: 600;
-    background-color: white;
-    border: 1px solid #0EA4DB;
-}
+        .tab-panel-general .nav-tabs > li > a {
+            color: #7C95AB;
+            cursor: pointer;
+            font-weight: 600;
+            background-color: white;
+            border: 1px solid #0EA4DB;
+        }
 
-.tab-panel-general .nav-tabs > li.active > a {
-	cursor: pointer;
-	color: #17B0E7;
-	font-weight: 600;
-	background-color: #F3FBFE;
-	border-bottom-color:#F3FBFE;
+        .tab-panel-general .nav-tabs > li.active > a {
+            cursor: pointer;
+            color: #17B0E7;
+            font-weight: 600;
+            background-color: #F3FBFE;
+            border-bottom-color: #F3FBFE;
+        }
+
+.panel-default {
+    border-radius: 0px;
 }
 
 .panel-home {
     border-color: #17B0E7;
+    border-radius: 0px;
 }
 
     .panel-home > .panel-heading {
@@ -317,7 +331,7 @@ form {
         background-color: #17B0E7;
         color: white;
         font-weight: 500;
-        border-radius: 1px;
+        border-radius: 0px;
         border: 1px;
         border-color: #17B0E7;
     }
@@ -328,6 +342,7 @@ form {
 
 .panel-single {
     border-color: #17b0e7;
+    border-radius: 0px;
 }
 
     .panel-single > .panel-heading {

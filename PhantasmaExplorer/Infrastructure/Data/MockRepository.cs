@@ -143,12 +143,12 @@ namespace Phantasma.Explorer.Infrastructure.Data
             if (!Address.IsValidAddress(chainInput)) return null;
             var chainAddress = Address.FromText(chainInput);
 
-            return NexusChain.Chains.SingleOrDefault(c => c.Address == chainAddress);
+            return NexusChain.FindChainByAddress(chainAddress);
         }
 
         public Chain GetChainByName(string chainName)
         {
-            return NexusChain.Chains.SingleOrDefault(c => c.Name == chainName);
+            return NexusChain.FindChainByName(chainName);
         }
 
         public int GetChainCount()

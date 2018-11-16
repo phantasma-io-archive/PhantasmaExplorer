@@ -121,7 +121,7 @@ namespace Phantasma.Explorer.ViewModels
             vm.Hash = tx.Hash.ToString();
             vm.Events = tx.Events.Select(evt => EventViewModel.FromEvent(repository, tx, evt));
             vm.Description = description;
-            vm.Instructions = disasm.GetInstructions();
+            vm.Instructions = disasm.Instructions;
             vm.GasLimit = TokenUtils.ToDecimal(tx.GasLimit, Nexus.NativeTokenDecimals);
             vm.GasPrice = TokenUtils.ToDecimal(tx.GasPrice, Nexus.NativeTokenDecimals);
 

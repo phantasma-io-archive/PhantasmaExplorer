@@ -70,7 +70,7 @@
                                 {{#each block.Txs}}
                                 <tr>
                                     <td>{{#link-tx Hash}}</td>
-									<td>{{Description}}</td> <!-- TODO fix link for description--> 
+									<td>{{#description this}}</td> <!-- TODO fix link for description--> 
                                 </tr>
                                 {{/each}}
                             </tbody>
