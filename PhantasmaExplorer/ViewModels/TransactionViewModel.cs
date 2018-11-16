@@ -50,7 +50,10 @@ namespace Phantasma.Explorer.ViewModels
 
             var nexus = repository.NexusChain;
 
-            foreach (var evt in tx.Events)//todo move this
+            var chainBlock = nexus.FindBlockForTransaction(tx.Hash);
+            var evts = chainBlock.GetEventsForTransaction(tx.Hash);
+
+            foreach (var evt in evts)//todo move this
             {
                 switch (evt.Kind) 
                 {
@@ -119,7 +122,7 @@ namespace Phantasma.Explorer.ViewModels
             vm.ChainName = block.ChainName;
             vm.Date = block.Timestamp;
             vm.Hash = tx.Hash.ToString();
-            vm.Events = tx.Events.Select(evt => EventViewModel.FromEvent(repository, tx, evt));
+            vm.Events = evts.Select(evt => EventViewModel.FromEvent(repository, tx, evt));
             vm.Description = description;
             vm.Instructions = disasm.Instructions;
             vm.GasLimit = TokenUtils.ToDecimal(tx.GasLimit, Nexus.NativeTokenDecimals);

@@ -11,10 +11,12 @@ namespace Phantasma.Explorer.ViewModels
 
         internal static EventViewModel FromEvent(IRepository repository, Transaction tx, Event evt)
         {
+            var block = repository.NexusChain.FindBlockForTransaction(tx);
+
             return new EventViewModel()
             {
                 Kind = evt.Kind,
-                Content = repository.GetEventContent(tx.Block, evt)
+                Content = repository.GetEventContent(block, evt)
             };
         }
     }

@@ -26,7 +26,7 @@ namespace Phantasma.Explorer.ViewModels
                 Balance = 0,
                 NativeBalances = new List<BalanceViewModel>(),
                 TokenBalance = new List<BalanceViewModel>(),
-                Transactions = txs?.Select(t => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, t.Block), t))
+                Transactions = txs?.Select(tx => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, repository.NexusChain.FindBlockForTransaction(tx)), tx))
             };
         }
     }

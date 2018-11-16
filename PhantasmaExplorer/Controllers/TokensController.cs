@@ -103,9 +103,10 @@ namespace Phantasma.Explorer.Controllers
         {
             var temp = new List<TransactionViewModel>();
             var transfers = Repository.GetLastTokenTransfers(symbol, 100).ToList();
-            foreach (var transfer in transfers)
+            foreach (var tx in transfers)
             {
-                temp.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, transfer.Block), transfer));
+                var block = Repository.NexusChain.FindBlockForTransaction(tx);
+                temp.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx));
             }
 
             return new List<TransactionViewModel>(temp.Where(p => p.AmountTransfer > 0).Take(20));

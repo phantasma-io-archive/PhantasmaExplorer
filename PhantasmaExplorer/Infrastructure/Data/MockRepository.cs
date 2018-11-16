@@ -183,7 +183,9 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
                 foreach (var block in blocksList)
                 {
-                    foreach (var tx in block.Transactions)
+                    var chain = NexusChain.FindChainForBlock(block);
+                    var transactions = chain.GetBlockTransactions(block);
+                    foreach (var tx in transactions)
                     {
                         txList.Add((Transaction)tx);
                         if (txList.Count == txAmount) return txList;
@@ -197,9 +199,10 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 {
                     foreach (var block in chain.Blocks)
                     {
-                        foreach (var tx in block.Transactions)
+                        var transactions = chain.GetBlockTransactions(block);
+                        foreach (var tx in transactions)
                         {
-                            txList.Add((Transaction)tx);
+                            txList.Add(tx);
                             if (txList.Count == txAmount) return txList;
                         }
                     }
@@ -212,15 +215,17 @@ namespace Phantasma.Explorer.Infrastructure.Data
         public IEnumerable<Transaction> GetAddressTransactions(Address address, int amount = 20)
         {
             var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
-            return plugin?.GetAddressTransactions(address).OrderByDescending(p => p.Block.Timestamp.Value).Take(amount);
+            return plugin?.GetAddressTransactions(address).OrderByDescending(tx => NexusChain.FindBlockForTransaction(tx).Timestamp.Value).Take(amount);
         }
 
         public int GetAddressTransactionCount(Address address, string chainName)
         {
+            var chain = NexusChain.FindChainByName(chainName);
+
             var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
             if (plugin != null)
             {
-                return plugin.GetAddressTransactions(address).Count(t => t.Block.Chain.Name == chainName);
+                return plugin.GetAddressTransactions(address).Count(tx => NexusChain.FindBlockForTransaction(tx).ChainAddress == chain.Address);
             }
 
             return 0;
@@ -262,7 +267,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
             if (token != null && plugin != null)
             {
-                return plugin.GetTokenTransactions(token).OrderByDescending(p => p.Block.Timestamp.Value).Take(amount);
+                return plugin.GetTokenTransactions(token).OrderByDescending(tx => NexusChain.FindBlockForTransaction(tx).Timestamp.Value).Take(amount);
             }
 
             return null;
@@ -318,18 +323,18 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
                         string chainText;
 
-                        if (data.chainAddress != block.Chain.Address)
+                        if (data.chainAddress != block.ChainAddress)
                         {
                             Address srcAddress, dstAddress;
 
                             if (evt.Kind == EventKind.TokenReceive)
                             {
                                 srcAddress = data.chainAddress;
-                                dstAddress = block.Chain.Address;
+                                dstAddress = block.ChainAddress;
                             }
                             else
                             {
-                                srcAddress = block.Chain.Address;
+                                srcAddress = block.ChainAddress;
                                 dstAddress = data.chainAddress;
                             }
 

@@ -22,20 +22,23 @@ namespace Phantasma.Explorer.ViewModels
 
         public static BlockViewModel FromBlock(IRepository repository, Block block)
         {
+            var chain = repository.NexusChain.FindChainForBlock(block);
+            var transactions = chain.GetBlockTransactions(block);
+
             var vm = new BlockViewModel
             {
                 Height = (int)block.Height,
                 Timestamp = block.Timestamp,
-                Transactions = block.Transactions.Count(),
+                Transactions = transactions.Count(),
                 Hash = block.Hash.ToString(),
                 ParentHash = block.PreviousHash?.ToString(),
                 MiningAddress = block.MinerAddress.Text,
-                ChainName = block.Chain.Name.ToTitleCase(),
-                ChainAddress = block.Chain.Address.Text,
-                Reward = TokenUtils.ToDecimal(block.GetReward(), Nexus.NativeTokenDecimals),
+                ChainName = chain.Name.ToTitleCase(),
+                ChainAddress = chain.Address.Text,
+                Reward = TokenUtils.ToDecimal(chain.GetBlockReward(block), Nexus.NativeTokenDecimals),
                 Txs = new List<TransactionViewModel>()
             };
-            var txsVm = block.Transactions.Select(transaction => TransactionViewModel.FromTransaction(repository, vm, (Transaction)transaction)).ToList();
+            var txsVm = transactions.Select(transaction => TransactionViewModel.FromTransaction(repository, vm, (Transaction)transaction)).ToList();
 
             vm.Txs = txsVm;
             return vm;
