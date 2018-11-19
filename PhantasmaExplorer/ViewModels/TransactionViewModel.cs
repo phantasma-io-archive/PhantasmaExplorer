@@ -50,7 +50,7 @@ namespace Phantasma.Explorer.ViewModels
 
             var nexus = repository.NexusChain;
 
-            var chainBlock = nexus.FindBlockForTransaction(tx.Hash);
+            var chainBlock = nexus.FindBlockForHash(tx.Hash);
             var evts = chainBlock.GetEventsForTransaction(tx.Hash);
 
             foreach (var evt in evts)//todo move this

@@ -55,6 +55,16 @@ namespace Phantasma.Explorer
             var rpc = new RPCServer(new NexusAPI(simulator.Nexus, mempool), "rpc", 7077);
             rpc.Start();
 
+            new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                while (mempool.IsRunning)
+                {
+                    Thread.Sleep(1000 * 60);
+                    simulator.GenerateRandomBlock(mempool);
+                } 
+            }).Start();
+
             return simulator.Nexus;
         }
 
