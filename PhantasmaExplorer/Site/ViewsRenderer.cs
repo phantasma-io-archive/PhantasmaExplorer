@@ -119,6 +119,8 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Site.Get(urlTokens, request =>
             {
                 var tokensList = TokensController.GetTokens();
+                var temp = tokensList.SingleOrDefault(t => t.Name == "Trophy");
+                tokensList.Remove(temp);
                 if (tokensList != null && tokensList.Any())
                 {
                     ActivateMenuItem(urlTokens);
