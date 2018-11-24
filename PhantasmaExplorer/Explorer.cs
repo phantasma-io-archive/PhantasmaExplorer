@@ -30,7 +30,7 @@ namespace Phantasma.Explorer
             viewsRenderer.SetupControllers(mockRepo);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
-            site.server.Run(site);
+            site.Server.Run();
         }
 
         private static Nexus InitMockData()
@@ -59,6 +59,11 @@ namespace Phantasma.Explorer
                 var addresses = new List<Address>();
                 for (int i=0; i<lines.Length; i++)
                 {
+                    if (string.IsNullOrWhiteSpace(lines[i]))
+                    {
+                        continue;
+                    }
+
                     addresses.Add(Address.FromText(lines[i]));
 
                     if (addresses.Count >= 10)

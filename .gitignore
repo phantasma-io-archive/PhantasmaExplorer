@@ -6,3 +6,5 @@ PhantasmaExplorer/www/netcore*
 PhantasmaExplorer/www/bin/netcore*
 PhantasmaExplorer/publish/*
 *.user
+
+PhantasmaExplorer/www/nacho_addresses\.txt
