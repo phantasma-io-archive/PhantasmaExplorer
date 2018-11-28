@@ -34,8 +34,6 @@ namespace Phantasma.Explorer.Site
                 new MenuContext {text = "Apps", url = urlApps, active = false},
             };
             SetupTags();
-            //UpdateContext(errorContext, _errorContextInstance);
-            //UpdateContext(menuContext, _menus);
         }
 
         public string RendererView(Dictionary<string, object> context, params string[] templateList)
@@ -74,94 +72,17 @@ namespace Phantasma.Explorer.Site
 
         public void SetupHandlers() //todo separate each call
         {
-            TemplateEngine.Site.Get("/", request =>
-            {
-                Init();
-                return HTTPResponse.Redirect(urlHome);
-            });
+            TemplateEngine.Site.Get("/", request => HTTPResponse.Redirect(urlHome));
 
-            TemplateEngine.Site.Get(urlHome, request =>
-            {
-                var context = GetSessionContext(request);
-                var blocksAndTxs = HomeController.GetLastestInfo();
-                context[menuContext] = _menus;
-                context[homeContext] = blocksAndTxs;
-                return RendererView(context, "layout", homeContext);
-            });
+            TemplateEngine.Site.Get(urlHome, RouteHome);
 
-            TemplateEngine.Site.Post(urlHome, request =>
-            {
-                try
-                {
-                    var searchInput = request.GetVariable("searchInput");
-                    if (!string.IsNullOrEmpty(searchInput))
-                    {
-                        var url = HomeController.SearchCommand(searchInput);
-                        if (!string.IsNullOrEmpty(url))
-                        {
-                            return HTTPResponse.Redirect(url);
-                        }
-                    }
-                    return HTTPResponse.Redirect(urlHome);
-                }
-                catch (Exception ex)
-                {
-                    _errorContextInstance.errorCode = ex.Message;
-                    _errorContextInstance.errorDescription = ex.StackTrace;
-                    request.session.Set(errorContext, _errorContextInstance);
+            TemplateEngine.Site.Post(urlHome, RouteSearch);
 
-                    return HTTPResponse.Redirect(urlError);
-                }
-            });
+            TemplateEngine.Site.Get(urlError, RouteError);
 
-            TemplateEngine.Site.Get(urlError, request =>
-            {
-                var error = request.session.Get<ErrorContext>("error");
-                var context = GetSessionContext(request);
-                context[menuContext] = _menus;
-                context[errorContext] = error;
-                return RendererView(context, (new[] { "layout", errorContext }));
-            });
+            TemplateEngine.Site.Get(urlTokens, RouteTokens);
 
-            TemplateEngine.Site.Get(urlTokens, request =>
-            {
-                var tokensList = TokensController.GetTokens();
-                var temp = tokensList.SingleOrDefault(t => t.Name == "Trophy");
-                var context = GetSessionContext(request);
-                tokensList.Remove(temp);
-                if (tokensList.Any())
-                {
-                    ActivateMenuItem(urlTokens);
-
-                    context[menuContext] = _menus;
-                    context[tokensContext] = tokensList;
-                    return RendererView(context, "layout", tokensContext);
-                }
-                _errorContextInstance.errorCode = "token error";
-                _errorContextInstance.errorDescription = "Tokens not found";
-                request.session.Set(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-            });
-
-            TemplateEngine.Site.Get($"{urlTokens}/{{input}}", request => //NFTs
-            {
-                var address = request.GetVariable("input");
-                var nftList = TokensController.GetNftListByAddress(address);
-                var context = GetSessionContext(request);
-                if (nftList != null && nftList.Any())
-                {
-                    context[menuContext] = _menus;
-                    context[nftTokensContext] = nftList;
-                    return RendererView(context, "layout", nftTokensContext);
-                }
-
-                _errorContextInstance.errorCode = "nft error";
-                _errorContextInstance.errorDescription = $"no nfts found for this {address} address";
-                context[errorContext] = _errorContextInstance;
-
-                return HTTPResponse.Redirect(urlError);
-            });
+            TemplateEngine.Site.Get($"{urlTokens}/{{input}}", RouteTokensNft);
 
             TemplateEngine.Site.Get("/marketcap", request =>
             {
@@ -178,244 +99,331 @@ namespace Phantasma.Explorer.Site
                 return html;
             });
 
-            TemplateEngine.Site.Get($"{urlToken}/{{input}}", request =>
-            {
-                var tokenSymbol = request.GetVariable("input");
-                var token = TokensController.GetToken(tokenSymbol);
-                var context = GetSessionContext(request);
-                if (token != null)
-                {
-                    var holders = TokensController.GetHolders(token.Symbol);
-                    var transfers = TokensController.GetTransfers(token.Symbol);
+            TemplateEngine.Site.Get($"{urlToken}/{{input}}", RouteToken);
 
-                    context[menuContext] = _menus;
-                    context[tokenContext] = token;
-                    context[holdersContext] = holders;
-                    context["transfers"] = transfers;
-                    return RendererView(context, "layout", tokenContext, holdersContext, "transfers");
-                }
-                _errorContextInstance.errorCode = "token error";
-                _errorContextInstance.errorDescription = "Token not found";
-                request.session.Set(errorContext, _errorContextInstance);
+            TemplateEngine.Site.Get(urlTransactions, RouteTransactions);
 
-                return HTTPResponse.Redirect(urlError);
-            });
+            TemplateEngine.Site.Get($"{urlTransaction}/{{input}}", RouteTransaction);
 
-            #region Transactions
+            TemplateEngine.Site.Get($"{urlAddresses}", RouteAddresses);
 
-            TemplateEngine.Site.Get(urlTransactions, request =>
-            {
-                var txList = TransactionsController.GetLastTransactions();
-                var context = GetSessionContext(request);
-                if (txList.Count > 0)
-                {
-                    ActivateMenuItem(urlTransactions);
+            TemplateEngine.Site.Get($"{urlAddress}/{{input}}", RouteAddress);
 
-                    context[menuContext] = _menus;
-                    context[txsContext] = txList;
-                    return RendererView(context, "layout", txsContext);
-                }
+            TemplateEngine.Site.Get($"{urlBlocks}", RouteBlocks);
 
-                _errorContextInstance.errorCode = "txs error";
-                _errorContextInstance.errorDescription = "No transactions found";
-                request.session.Set(errorContext, _errorContextInstance);
+            TemplateEngine.Site.Get($"{urlBlock}/{{input}}", RouteBlock);
 
-                return HTTPResponse.Redirect(urlError);
-            });
+            TemplateEngine.Site.Get($"{urlChains}", RouteChains);
 
-            TemplateEngine.Site.Get($"{urlTransaction}/{{input}}", request =>
-            {
-                var txHash = request.GetVariable("input");
-                var tx = TransactionsController.GetTransaction(txHash);
-                var context = GetSessionContext(request);
-                if (tx != null)
-                {
-                    ActivateMenuItem(urlTransaction);
+            TemplateEngine.Site.Get($"{urlChain}/{{input}}", RouteChain);
 
-                    context[menuContext] = _menus;
-                    context[txContext] = tx;
+            TemplateEngine.Site.Get($"{urlApps}", RouteApps);
 
-                    return RendererView(context, "layout", txContext);
-                }
-
-                _errorContextInstance.errorCode = "txs error";
-                _errorContextInstance.errorDescription = $"Transaction {txHash} not found";
-                request.session.Set(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-            });
-
-            #endregion
-
-            #region Address
-
-            TemplateEngine.Site.Get($"{urlAddresses}", request =>
-            {
-                var addressList = AddressesController.GetAddressList();
-                var context = GetSessionContext(request);
-                if (addressList != null && addressList.Any())
-                {
-                    ActivateMenuItem(urlAddresses);
-                    context[menuContext] = _menus;
-                    context[addressesContext] = addressList;
-
-                    return RendererView(context, "layout", addressesContext);
-                }
-
-                _errorContextInstance.errorCode = "Address error";
-                _errorContextInstance.errorDescription = $"No addresses";
-                request.session.Set(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-            });
-
-            TemplateEngine.Site.Get($"{urlAddress}/{{input}}", request =>
-            {
-                var addressText = request.GetVariable("input");
-                var address = AddressesController.GetAddress(addressText);
-                var context = GetSessionContext(request);
-                if (address != null)
-                {
-                    context[menuContext] = _menus;
-                    context[addressContext] = address;
-                    return RendererView(context, "layout", addressContext);
-                }
-
-                _errorContextInstance.errorCode = "Address error";
-                _errorContextInstance.errorDescription = $"Invalid address";
-                request.session.Set(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-            });
-
-            #endregion
-
-            #region Blocks
-
-            TemplateEngine.Site.Get($"{urlBlocks}", request =>
-            {
-                var blocksList = BlocksController.GetLatestBlocks();
-                var context = GetSessionContext(request);
-                if (blocksList.Count > 0)
-                {
-                    ActivateMenuItem(urlBlocks);
-                    context[menuContext] = _menus;
-                    context[blocksContext] = blocksList;
-                    return RendererView(context, "layout", blocksContext);
-                }
-
-                _errorContextInstance.errorCode = "blocks error";
-                _errorContextInstance.errorDescription = "No blocks found";
-                request.session.Set(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-
-            });
-
-            TemplateEngine.Site.Get($"{urlBlock}/{{input}}", request => //input can be height or hash
-            {
-                var input = request.GetVariable("input");
-                var block = BlocksController.GetBlock(input);
-                var context = GetSessionContext(request);
-                if (block != null)
-                {
-                    context[menuContext] = _menus;
-                    context[blockContext] = block;
-                    return RendererView(context, "layout", blockContext);
-                }
-
-                _errorContextInstance.errorCode = "blocks error";
-                _errorContextInstance.errorDescription = $"No block found with this {input} input";
-                request.session.Set(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-            });
-
-            #endregion
-
-            #region Chains
-
-            TemplateEngine.Site.Get($"{urlChains}", request =>
-            {
-                var chainList = ChainsController.GetChains();
-                var context = GetSessionContext(request);
-                if (chainList.Count > 0)
-                {
-                    ActivateMenuItem(urlChains);
-                    context[menuContext] = _menus;
-                    context[chainsContext] = chainList;
-
-                    return RendererView(context, "layout", chainsContext);
-                }
-                _errorContextInstance.errorCode = "chains error";
-                _errorContextInstance.errorDescription = "No chains found";
-                request.session.Set(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-            });
-
-            TemplateEngine.Site.Get($"{urlChain}/{{input}}",
-                request =>
-                {
-                    var addressText = request.GetVariable("input");
-                    var chain = ChainsController.GetChain(addressText);
-                    var context = GetSessionContext(request);
-                    if (chain != null)
-                    {
-                        context[menuContext] = _menus;
-                        context[chainContext] = chain;
-
-                        return RendererView(context, "layout", chainContext);
-                    }
-
-                    _errorContextInstance.errorCode = "chains error";
-                    _errorContextInstance.errorDescription = $"No chain found with this {addressText} address";
-                    request.session.Set(errorContext, _errorContextInstance);
-
-                    return HTTPResponse.Redirect(urlError);
-                });
-
-            #endregion
-
-            #region Apps
-            TemplateEngine.Site.Get($"{urlApps}", request =>
-            {
-                var appList = AppsController.GetAllApps();
-                var context = GetSessionContext(request);
-                if (appList.Count > 0)
-                {
-                    context[menuContext] = _menus;
-                    context[appsContext] = appList;
-                    return RendererView(context, "layout", appsContext);
-                }
-                _errorContextInstance.errorCode = "apps error";
-                _errorContextInstance.errorDescription = "No apps found";
-                request.session.Set(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-            });
-
-            TemplateEngine.Site.Get($"{urlApp}/{{input}}", request =>
-            {
-                var appId = request.GetVariable("input");
-                var app = AppsController.GetApp(appId);
-                var context = GetSessionContext(request);
-                if (app != null)
-                {
-                    context[menuContext] = _menus;
-                    context[appContext] = app;
-
-                    return RendererView(context, "layout", appContext);
-                }
-
-                _errorContextInstance.errorCode = "apps error";
-                _errorContextInstance.errorDescription = $"No app with {appId} found";
-                request.session.Set(errorContext, _errorContextInstance);
-
-                return HTTPResponse.Redirect(urlError);
-            });
+            TemplateEngine.Site.Get($"{urlApp}/{{input}}", RouteApp);
 
             SetupAPIHandlers();
+        }
+        #region ROUTES
+
+        private object RouteHome(HTTPRequest request)
+        {
+            var context = GetSessionContext(request);
+            var blocksAndTxs = HomeController.GetLastestInfo();
+            context[menuContext] = _menus;
+            context[homeContext] = blocksAndTxs;
+            return RendererView(context, "layout", homeContext);
+        }
+
+        private object RouteSearch(HTTPRequest request)
+        {
+            try
+            {
+                var searchInput = request.GetVariable("searchInput");
+                if (!string.IsNullOrEmpty(searchInput))
+                {
+                    var url = HomeController.SearchCommand(searchInput);
+                    if (!string.IsNullOrEmpty(url))
+                    {
+                        return HTTPResponse.Redirect(url);
+                    }
+                }
+                return HTTPResponse.Redirect(urlHome);
+            }
+            catch (Exception ex)
+            {
+                _errorContextInstance.errorCode = ex.Message;
+                _errorContextInstance.errorDescription = ex.StackTrace;
+                request.session.Set(errorContext, _errorContextInstance);
+
+                return HTTPResponse.Redirect(urlError);
+            }
+        }
+
+        private object RouteError(HTTPRequest request)
+        {
+            var error = request.session.Get<ErrorContext>("error");
+            var context = GetSessionContext(request);
+            context[menuContext] = _menus;
+            context[errorContext] = error;
+            return RendererView(context, (new[] { "layout", errorContext }));
+        }
+
+        private object RouteTokens(HTTPRequest request)
+        {
+            var tokensList = TokensController.GetTokens();
+            var temp = tokensList.SingleOrDefault(t => t.Name == "Trophy");
+            var context = GetSessionContext(request);
+            tokensList.Remove(temp);
+            if (tokensList.Any())
+            {
+                ActivateMenuItem(urlTokens);
+
+                context[menuContext] = _menus;
+                context[tokensContext] = tokensList;
+                return RendererView(context, "layout", tokensContext);
+            }
+            _errorContextInstance.errorCode = "token error";
+            _errorContextInstance.errorDescription = "Tokens not found";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteTokensNft(HTTPRequest request)
+        {
+            var address = request.GetVariable("input");
+            var nftList = TokensController.GetNftListByAddress(address);
+            var context = GetSessionContext(request);
+            if (nftList != null && nftList.Any())
+            {
+                context[menuContext] = _menus;
+                context[nftTokensContext] = nftList;
+                return RendererView(context, "layout", nftTokensContext);
+            }
+
+            _errorContextInstance.errorCode = "nft error";
+            _errorContextInstance.errorDescription = $"no nfts found for this {address} address";
+            context[errorContext] = _errorContextInstance;
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteToken(HTTPRequest request)
+        {
+            var tokenSymbol = request.GetVariable("input");
+            var token = TokensController.GetToken(tokenSymbol);
+            var context = GetSessionContext(request);
+            if (token != null)
+            {
+                var holders = TokensController.GetHolders(token.Symbol);
+                var transfers = TokensController.GetTransfers(token.Symbol);
+
+                context[menuContext] = _menus;
+                context[tokenContext] = token;
+                context[holdersContext] = holders;
+                context["transfers"] = transfers;
+                return RendererView(context, "layout", tokenContext, holdersContext, "transfers");
+            }
+            _errorContextInstance.errorCode = "token error";
+            _errorContextInstance.errorDescription = "Token not found";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteTransactions(HTTPRequest request)
+        {
+            var txList = TransactionsController.GetLastTransactions();
+            var context = GetSessionContext(request);
+            if (txList.Count > 0)
+            {
+                ActivateMenuItem(urlTransactions);
+
+                context[menuContext] = _menus;
+                context[txsContext] = txList;
+                return RendererView(context, "layout", txsContext);
+            }
+
+            _errorContextInstance.errorCode = "txs error";
+            _errorContextInstance.errorDescription = "No transactions found";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteTransaction(HTTPRequest request)
+        {
+            var txHash = request.GetVariable("input");
+            var tx = TransactionsController.GetTransaction(txHash);
+            var context = GetSessionContext(request);
+            if (tx != null)
+            {
+                ActivateMenuItem(urlTransaction);
+
+                context[menuContext] = _menus;
+                context[txContext] = tx;
+
+                return RendererView(context, "layout", txContext);
+            }
+
+            _errorContextInstance.errorCode = "txs error";
+            _errorContextInstance.errorDescription = $"Transaction {txHash} not found";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteAddresses(HTTPRequest request)
+        {
+            var addressList = AddressesController.GetAddressList();
+            var context = GetSessionContext(request);
+            if (addressList != null && addressList.Any())
+            {
+                ActivateMenuItem(urlAddresses);
+                context[menuContext] = _menus;
+                context[addressesContext] = addressList;
+
+                return RendererView(context, "layout", addressesContext);
+            }
+
+            _errorContextInstance.errorCode = "Address error";
+            _errorContextInstance.errorDescription = $"No addresses";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteAddress(HTTPRequest request)
+        {
+
+            var addressText = request.GetVariable("input");
+            var address = AddressesController.GetAddress(addressText);
+            var context = GetSessionContext(request);
+            if (address != null)
+            {
+                context[menuContext] = _menus;
+                context[addressContext] = address;
+                return RendererView(context, "layout", addressContext);
+            }
+
+            _errorContextInstance.errorCode = "Address error";
+            _errorContextInstance.errorDescription = $"Invalid address";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteBlocks(HTTPRequest request)
+        {
+            var blocksList = BlocksController.GetLatestBlocks();
+            var context = GetSessionContext(request);
+            if (blocksList.Count > 0)
+            {
+                ActivateMenuItem(urlBlocks);
+                context[menuContext] = _menus;
+                context[blocksContext] = blocksList;
+                return RendererView(context, "layout", blocksContext);
+            }
+
+            _errorContextInstance.errorCode = "blocks error";
+            _errorContextInstance.errorDescription = "No blocks found";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteBlock(HTTPRequest request)
+        {
+            var input = request.GetVariable("input");
+            var block = BlocksController.GetBlock(input);
+            var context = GetSessionContext(request);
+            if (block != null)
+            {
+                context[menuContext] = _menus;
+                context[blockContext] = block;
+                return RendererView(context, "layout", blockContext);
+            }
+
+            _errorContextInstance.errorCode = "blocks error";
+            _errorContextInstance.errorDescription = $"No block found with this {input} input";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteChains(HTTPRequest request)
+        {
+            var chainList = ChainsController.GetChains();
+            var context = GetSessionContext(request);
+            if (chainList.Count > 0)
+            {
+                ActivateMenuItem(urlChains);
+                context[menuContext] = _menus;
+                context[chainsContext] = chainList;
+
+                return RendererView(context, "layout", chainsContext);
+            }
+            _errorContextInstance.errorCode = "chains error";
+            _errorContextInstance.errorDescription = "No chains found";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteChain(HTTPRequest request)
+        {
+            var addressText = request.GetVariable("input");
+            var chain = ChainsController.GetChain(addressText);
+            var context = GetSessionContext(request);
+            if (chain != null)
+            {
+                context[menuContext] = _menus;
+                context[chainContext] = chain;
+
+                return RendererView(context, "layout", chainContext);
+            }
+
+            _errorContextInstance.errorCode = "chains error";
+            _errorContextInstance.errorDescription = $"No chain found with this {addressText} address";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+
+        private object RouteApps(HTTPRequest request)
+        {
+            var appList = AppsController.GetAllApps();
+            var context = GetSessionContext(request);
+            if (appList.Count > 0)
+            {
+                context[menuContext] = _menus;
+                context[appsContext] = appList;
+                return RendererView(context, "layout", appsContext);
+            }
+            _errorContextInstance.errorCode = "apps error";
+            _errorContextInstance.errorDescription = "No apps found";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
+        }
+        private object RouteApp(HTTPRequest request)
+        {
+            var appId = request.GetVariable("input");
+            var app = AppsController.GetApp(appId);
+            var context = GetSessionContext(request);
+            if (app != null)
+            {
+                context[menuContext] = _menus;
+                context[appContext] = app;
+
+                return RendererView(context, "layout", appContext);
+            }
+
+            _errorContextInstance.errorCode = "apps error";
+            _errorContextInstance.errorDescription = $"No app with {appId} found";
+            request.session.Set(errorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(urlError);
         }
         #endregion
 
