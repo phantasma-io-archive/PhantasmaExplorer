@@ -33,13 +33,14 @@ namespace Phantasma.Explorer.ViewModels
 
         public static TransactionViewModel FromTransaction(IRepository repository, BlockViewModel block, Transaction tx)
         {
+            var nexus = repository.NexusChain;
             var vm = new TransactionViewModel();
             var disasm = new Disassembler(tx.Script); //Todo fix me
 
             string description = null;
 
             Token senderToken = null;
-            Address senderChain = Address.Null;
+            Address senderChain = nexus.FindChainByName(tx.ChainName).Address;
             Address senderAddress = Address.Null;
 
             Token receiverToken = null;
@@ -48,14 +49,12 @@ namespace Phantasma.Explorer.ViewModels
 
             BigInteger amount = 0;
 
-            var nexus = repository.NexusChain;
-
             var chainBlock = nexus.FindBlockForHash(tx.Hash);
             var evts = chainBlock.GetEventsForTransaction(tx.Hash);
 
             foreach (var evt in evts)//todo move this
             {
-                switch (evt.Kind) 
+                switch (evt.Kind)
                 {
                     case EventKind.TokenSend:
                         {
@@ -105,15 +104,21 @@ namespace Phantasma.Explorer.ViewModels
                 if (amount > 0 && senderAddress != Address.Null && receiverAddress != Address.Null && senderToken != null && senderToken == receiverToken)
                 {
                     var amountDecimal = TokenUtils.ToDecimal(amount, senderToken.Decimals);
-                    description = $"{amountDecimal} {senderToken.Symbol} sent from {senderAddress.Text} to {receiverAddress.Text}";
-                    vm.AmountTransfer = amountDecimal;
-                    vm.TokenSymbol = senderToken.Symbol;
-                    vm.SenderAddress = senderAddress.Text;
-                    vm.ReceiverAddress = receiverAddress.Text;
+                    description = $"{amountDecimal} {senderToken} sent from {senderAddress.Text} to {receiverAddress.Text}";
+                }
+                else if (amount > 0 && receiverAddress != Address.Null && receiverToken != null)
+                {
+                    var amountDecimal = TokenUtils.ToDecimal(amount, receiverToken.Decimals);
+                    description = $"{amountDecimal} {receiverToken} received on {receiverAddress.Text} ";
                 }
                 else
                 {
                     description = "Custom transaction";
+                }
+
+                if (receiverChain != Address.Null && receiverChain != senderChain)
+                {
+                    description += $" from {nexus.FindChainByAddress(senderChain).Name} chain to {nexus.FindChainByAddress(receiverChain).Name} chain";
                 }
             }
 
