@@ -138,7 +138,7 @@ namespace Phantasma.Explorer.Site
         {
             try
             {
-                var searchInput = request.GetVariable("searchInput");
+                var searchInput = request.GetVariable("searchInput").Trim();
                 if (!string.IsNullOrEmpty(searchInput))
                 {
                     var url = HomeController.SearchCommand(searchInput);
