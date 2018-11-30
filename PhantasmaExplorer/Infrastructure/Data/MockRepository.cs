@@ -306,6 +306,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 case EventKind.TokenMint:
                 case EventKind.TokenBurn:
                 case EventKind.TokenSend:
+                case EventKind.TokenEscrow:
                 case EventKind.TokenReceive:
                     {
                         var data = Serialization.Unserialize<TokenEventData>(evt.Data);
@@ -318,6 +319,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
                             case EventKind.TokenBurn: action = "burned"; break;
                             case EventKind.TokenSend: action = "sent"; break;
                             case EventKind.TokenReceive: action = "received"; break;
+                            case EventKind.TokenEscrow: action = "escrowed"; break;
+
                             default: action = "???"; break;
                         }
 

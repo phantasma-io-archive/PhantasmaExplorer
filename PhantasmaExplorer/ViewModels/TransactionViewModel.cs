@@ -76,6 +76,19 @@ namespace Phantasma.Explorer.ViewModels
                         }
                         break;
 
+                    case EventKind.TokenEscrow:
+                        {
+                            var data = evt.GetContent<TokenEventData>();
+                            amount = data.value;
+                            var token = nexus.FindTokenBySymbol(data.symbol);
+                            var amountDecimal = TokenUtils.ToDecimal(amount, token.Decimals);
+                            receiverAddress = evt.Address;
+                            receiverChain = data.chainAddress;
+                            var chain = nexus.FindChainByAddress(receiverChain).Name;
+                            description = $"{amountDecimal} {token.Name} tokens escrowed for address {receiverAddress} in {chain}";
+                        }
+                        break;
+
                     case EventKind.AddressRegister:
                         {
                             var name = evt.GetContent<string>();
