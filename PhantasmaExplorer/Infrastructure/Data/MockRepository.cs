@@ -357,8 +357,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public IEnumerable<AppInfo> GetApps()
         {
-            var appChain = NexusChain.FindChainByKind(ContractKind.Apps);
-            var apps = (AppInfo[])appChain.InvokeContract("GetApps", new string[] { });
+            var appChain = NexusChain.FindChainByName("apps");
+            var apps = (AppInfo[])appChain.InvokeContract("apps", "GetApps", new string[] { });
             return apps;
         }
 

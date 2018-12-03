@@ -123,6 +123,8 @@ namespace Phantasma.Explorer.Controllers
             var nfTokens = Repository.GetTokens().Where(t => !t.Flags.HasFlag(TokenFlags.Fungible));//get only non fungible tokens
             var chains = Repository.GetAllChains();
 
+            var appChain = chains.FirstOrDefault(x => x.Name == "apps");
+
             var nftList = new List<NftViewModel>();
             if (repoAddress != Address.Null)
             {
@@ -132,6 +134,9 @@ namespace Phantasma.Explorer.Controllers
                     {
                         var ownershipSheet = chain.GetTokenOwnerships(nfToken); //todo move this to repository
                         var ids = ownershipSheet.Get(repoAddress);
+
+                        var viewerURL = appChain.InvokeContract("apps", "GetTokenViewer", nfToken.Symbol).ToString();
+
                         foreach (var id in ids)
                         {
                             var existingVm = nftList.SingleOrDefault(vm => vm.Symbol == nfToken.Symbol);
@@ -139,7 +144,7 @@ namespace Phantasma.Explorer.Controllers
                             {
                                 existingVm.InfoList.Add(new NftInfoViewModel
                                 {
-                                    ViewerUrl = nfToken.Viewer,
+                                    ViewerUrl = viewerURL,
                                     Id = id.ToString(),
                                     Info = "Mock info: " + id + existingVm.Symbol
                                 });
@@ -154,7 +159,7 @@ namespace Phantasma.Explorer.Controllers
                                     {
                                         new NftInfoViewModel
                                         {
-                                            ViewerUrl = nfToken.Viewer,
+                                            ViewerUrl = viewerURL,
                                             Id = id.ToString(),
                                             Info = "Test info: " + id + nfToken.Symbol
                                         }

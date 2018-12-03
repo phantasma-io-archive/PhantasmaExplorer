@@ -8,3 +8,5 @@ PhantasmaExplorer/publish/*
 *.user
 
 PhantasmaExplorer/www/nacho_addresses\.txt
+
+PhantasmaExplorer/www/vm_dump\.txt
