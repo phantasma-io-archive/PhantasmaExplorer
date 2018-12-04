@@ -12,7 +12,7 @@
 
     <!-- CSS libs -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    
+
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
     <link href="/css/chartist.min.css" rel="stylesheet">
@@ -70,19 +70,27 @@
 
     <div id="main" class="container">
         <h1 class="home-title"> - Phantasma <span style="font-weight: 600;">Explorer</span> - </h1>
-
-        <div class="row search-box">
+        <div class="col-xs-12 search-box">
             <div id="custom-search-input">
-                <div class="input-group col-md-12">
-                    <form action="/home" method="POST">
+                <form action="/home" method="POST">
+
+                    <div class="input-group">
                         <input type="text" class="search-query form-control" id="searchInput" name="searchInput" value="{{searchInput}}" placeholder="Search by Address / Txhash / Block / Token" />
+
+
                         <span class="input-group-btn">
+                            <button class="btn pull-right">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
+                        <!--<span class="input-group-btn">
                             <button class="btn pull-right" type="submit">
                                 <span class=" glyphicon glyphicon-search"></span>
                             </button>
-                        </span>
-                    </form>
-                </div>
+                        </span>-->
+                    </div>
+
+                </form>
             </div>
         </div>
 
@@ -100,7 +108,7 @@
         <div class="footer-below">
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-12">
+                    <div class="col-xs-12">
                         <div class="footer-copyrights">
                             Copyright &copy; <a href="https://phantasma.io">Phantasma Team</a> 2018
                         </div>
@@ -137,18 +145,18 @@
                 });
             }
         });
-		
-		// Javascript to enable link to tab
-		var hash = document.location.hash;
-		var prefix = "tab_";
-		if (hash) {
-			$('.nav-tabs a[href="'+hash.replace(prefix,"")+'"]').tab('show');
-		} 
 
-		// Change hash for page-reload
-		$('.nav-tabs a').on('shown.bs.tab', function (e) {
-			window.location.hash = e.target.hash.replace("#", "#" + prefix);
-		});		
+        // Javascript to enable link to tab
+        var hash = document.location.hash;
+        var prefix = "tab_";
+        if (hash) {
+            $('.nav-tabs a[href="' + hash.replace(prefix, "") + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash.replace("#", "#" + prefix);
+        });
     </script>
 </body>
 
