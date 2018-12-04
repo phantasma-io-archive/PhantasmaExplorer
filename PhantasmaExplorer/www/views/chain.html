@@ -17,35 +17,35 @@
                 <div class="panel panel-single">
                     <div class="panel-heading">Block Information</div>
                     <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-responsive no-border">
+                                <tbody>
+                                    <tr>
+                                        <td>Name</td>
+                                        <td>{{chain.Name}}</td>
+                                    </tr>
 
-                        <table class="table table-responsive no-border">
-                            <tbody>
-                                <tr>
-                                    <td>Name</td>
-                                    <td>{{chain.Name}}</td>
-                                </tr>
+                                    <tr>
+                                        <td>Address</td>
+                                        <td>{{#link-address chain.Address}}</td>
+                                    </tr>
 
-                                <tr>
-                                    <td>Address</td>
-                                    <td>{{#link-address chain.Address}}</td>
-                                </tr>
+                                    <tr>
+                                        <td>Last block</td>
+                                        <td>{{chain.Height}}</td>
+                                    </tr>
 
-                                <tr>
-                                    <td>Last block</td>
-                                    <td>{{chain.Height}}</td>
-                                </tr>
-
-                                <tr>
-                                    <td>Parent Chain</td>
-                                    {{#if chain.ParentChain}}
-                                    <td><a href="/chain/{{chain.ParentChain}}">{{chain.ParentChain}}</a></td>
-                                    {{#else}}
-                                    <td>-</td>
-                                    {{/if}}
-                                </tr>
-                            </tbody>
-                        </table>
-
+                                    <tr>
+                                        <td>Parent Chain</td>
+                                        {{#if chain.ParentChain}}
+                                        <td><a href="/chain/{{chain.ParentChain}}">{{chain.ParentChain}}</a></td>
+                                        {{#else}}
+                                        <td>-</td>
+                                        {{/if}}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 

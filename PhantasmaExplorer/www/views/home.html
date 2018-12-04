@@ -4,26 +4,28 @@
         <div class="panel panel-default panel-home">
             <div class="panel-heading">Phantasma Overview</div>
             <div class="panel-body">
-                <table class="table table-responsive" style="margin-bottom: 0;">
-                    <tbody>
-                        <tr>
-                            <td class="home-label">Market Cap</td>
-                            <td class="home-label-value">{{#async marketcap}}</td>
-                        </tr>
-                        <tr>
-                            <td class="home-label">Main chain last block</td>
-                            <td class="home-label-value">{{home.BlockHeight}}</td>
-                        </tr>
-                        <tr>
-                            <td class="home-label">Total Transactions</td>
-                            <td class="home-label-value">{{#format-amount home.TotalTransactions}}</td>
-                        </tr>
-                        <tr>
-                            <td class="home-label">Total Chains</td>
-                            <td class="home-label-value">{{home.TotalChains}}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table" style="margin-bottom: 0;">
+                        <tbody>
+                            <tr>
+                                <td class="home-label">Market Cap</td>
+                                <td class="home-label-value">{{#async marketcap}}</td>
+                            </tr>
+                            <tr>
+                                <td class="home-label">Main chain last block</td>
+                                <td class="home-label-value">{{home.BlockHeight}}</td>
+                            </tr>
+                            <tr>
+                                <td class="home-label">Total Transactions</td>
+                                <td class="home-label-value">{{#format-amount home.TotalTransactions}}</td>
+                            </tr>
+                            <tr>
+                                <td class="home-label">Total Chains</td>
+                                <td class="home-label-value">{{home.TotalChains}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                 {{#async rates}}
             </div>
         </div>
@@ -73,24 +75,26 @@ function onStart(){
                 </div>
             </div>
             <div class="panel-body">
-                <table class="table table-responsive">
-                    <tbody>
-                        {{#each home.Blocks}}
-                        <tr class="home-label">
-                            <td class="td-bottom-border">
-                                <span class="bold-home-link"><a href="/block/{{Hash}}">Block {{Height}}</a></span><br>
-                                <i>&gt;{{#timeago Timestamp}}</i>
-                            </td>
-                            <td>
-                                Miner: <span class="thin-home-link">{{#link-address MiningAddress}}</span><br>
-                                Chain: <span class="thin-home-link"> <a href="/chain/{{ChainAddress}}">{{ChainName}}</a></span><br>
-                                <span class="bold-home-link"><a href="/block/{{Hash}}#tab_transactions">{{Transactions}} Txn</a></span><br>
-                                Block reward: {{Reward}} SOUL
-                            </td>
-                        </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody>
+                            {{#each home.Blocks}}
+                            <tr class="home-label">
+                                <td class="td-bottom-border">
+                                    <span class="bold-home-link"><a href="/block/{{Hash}}">Block {{Height}}</a></span><br>
+                                    <i>&gt;{{#timeago Timestamp}}</i>
+                                </td>
+                                <td>
+                                    Miner: <span class="thin-home-link">{{#link-address MiningAddress}}</span><br>
+                                    Chain: <span class="thin-home-link"> <a href="/chain/{{ChainAddress}}">{{ChainName}}</a></span><br>
+                                    <span class="bold-home-link"><a href="/block/{{Hash}}#tab_transactions">{{Transactions}} Txn</a></span><br>
+                                    Block reward: {{Reward}} SOUL
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -104,22 +108,24 @@ function onStart(){
                 </div>
             </div>
             <div class="panel-body">
-                <table class="table table-responsive home-tx-table">
-                    <tbody>
-                        {{#each home.Transactions}}
-                        <tr class="home-label">
-                            <td>
-                                <span class="bold-home-link">
-                                    TX#
-                                    <small>{{#link-tx Hash}}</small><br>
-                                </span>
-                                <i>&gt;{{#timeago Block.Timestamp}} in </i> <span class="bold-home-link"><a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain<br></span>
-                                {{{Description}}}<br>
-                            </td>
-                        </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table home-tx-table">
+                        <tbody>
+                            {{#each home.Transactions}}
+                            <tr class="home-label">
+                                <td>
+                                    <span class="bold-home-link">
+                                        TX#
+                                        <small>{{#link-tx Hash}}</small><br>
+                                    </span>
+                                    <i>&gt;{{#timeago Block.Timestamp}} in </i> <span class="bold-home-link"><a href="/chain/{{Block.ChainAddress}}">{{Block.ChainName}}</a> chain<br></span>
+                                    {{{Description}}}<br>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

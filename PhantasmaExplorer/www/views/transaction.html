@@ -17,45 +17,46 @@
                 <div class="panel panel-single">
                     <div class="panel-heading">Transaction Information</div>
                     <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table no-border">
+                                <tbody>
+                                    <tr>
+                                        <td>Description</td>
+                                        <td>{{#description transaction}}</td>
+                                    </tr>
 
-                        <table class="table table-responsive no-border">
-                            <tbody>
-                                <tr>
-                                    <td>Description</td>
-                                    <td>{{#description transaction}}</td>
-                                </tr>
+                                    <tr>
+                                        <td>Date</td>
+                                        <td>{{#date transaction.Date}}</td>
+                                    </tr>
 
-                                <tr>
-                                    <td>Date</td>
-                                    <td>{{#date transaction.Date}}</td>
-                                </tr>
+                                    <tr>
+                                        <td>Transaction Hash</td>
+                                        <td>{{transaction.Hash}}</td>
+                                    </tr>
 
-                                <tr>
-                                    <td>Transaction Hash</td>
-                                    <td>{{transaction.Hash}}</td>
-                                </tr>
+                                    <tr>
+                                        <td>Chain</td>
+                                        <td><a href="/chain/{{transaction.ChainAddress}}">{{transaction.ChainName}}</a></td>
+                                    </tr>
 
-                                <tr>
-                                    <td>Chain</td>
-                                    <td><a href="/chain/{{transaction.ChainAddress}}">{{transaction.ChainName}}</a></td>
-                                </tr>
+                                    <tr>
+                                        <td>Block Hash</td>
+                                        <td><a href="/block/{{transaction.Block.Hash}}">{{transaction.Block.Hash}}</a></td>
+                                    </tr>
 
-                                <tr>
-                                    <td>Block Hash</td>
-                                    <td><a href="/block/{{transaction.Block.Hash}}">{{transaction.Block.Hash}}</a></td>
-                                </tr>
+                                    <tr>
+                                        <td>Block Height</td>
+                                        <td>{{transaction.Block.Height}}</td>
+                                    </tr>
 
-                                <tr>
-                                    <td>Block Height</td>
-                                    <td>{{transaction.Block.Height}}</td>
-                                </tr>
-
-                                <tr>
-                                    <td>Gas Limit / Price</td>
-                                    <td>{{transaction.GasLimit}} / {{transaction.GasPrice}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    <tr>
+                                        <td>Gas Limit / Price</td>
+                                        <td>{{transaction.GasLimit}} / {{transaction.GasPrice}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -84,22 +85,24 @@
                     <div class="panel-heading">Transaction Events</div>
                     <div class="panel-body">
                         {{#if transaction.Events}}
-                        <table class="table table-responsive table-striped table-general">
-                            <thead>
-                                <tr>
-                                    <th>Kind</th>
-                                    <th>Content</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{#each transaction.Events}}
-                                <tr>
-                                    <td>{{Kind}}</td>
-                                    <td>{{{Content}}}</td>
-                                </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-general">
+                                <thead>
+                                    <tr>
+                                        <th>Kind</th>
+                                        <th>Content</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each transaction.Events}}
+                                    <tr>
+                                        <td>{{Kind}}</td>
+                                        <td>{{{Content}}}</td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
                         {{#else}}
                         Nothing here...
                         {{/if}}

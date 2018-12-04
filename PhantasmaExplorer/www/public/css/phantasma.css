@@ -241,7 +241,7 @@ form {
 }
 
     .table-general tbody tr {
-        border: 1px solid #17B0E7;
+        border: 1px solid #17B0E7 !important;
     }
 
     .table-general th {
@@ -258,8 +258,6 @@ form {
         overflow: hidden;
         text-overflow: ellipsis;
         color: #7C95AB;
-        /*word-wrap: break-word;
-        display: block;*/
     }
 
         .table-general td a {
