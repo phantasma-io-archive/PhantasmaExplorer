@@ -10,6 +10,14 @@
     }
 }
 
+/* change navbar background on collapse */
+@media (max-width: 768px) {
+    nav.navbar {
+        background: #17B0E7;
+    }
+}
+
+
 body {
     font-family: Open Sans;
     font-size: 14px;
@@ -117,6 +125,7 @@ form {
 .input-group {
     width: 100%;
 }
+
 #custom-search-input {
     margin: 0;
     padding: 0;
@@ -155,6 +164,10 @@ form {
 .navbar-nav {
     float: right;
     margin: 0;
+}
+
+.icon-bar {
+    background-color: white !important;
 }
 
 .navbar-brand > h1 {
