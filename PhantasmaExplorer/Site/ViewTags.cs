@@ -1,6 +1,5 @@
 ﻿using System;
 using LunarLabs.WebServer.Templates;
-using Phantasma.Blockchain;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 

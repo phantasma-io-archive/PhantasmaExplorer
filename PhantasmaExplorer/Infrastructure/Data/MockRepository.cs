@@ -187,7 +187,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                     var transactions = chain.GetBlockTransactions(block);
                     foreach (var tx in transactions)
                     {
-                        txList.Add((Transaction)tx);
+                        txList.Add(tx);
                         if (txList.Count == txAmount) return txList;
                     }
                 }

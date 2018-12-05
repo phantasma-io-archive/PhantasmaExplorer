@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.ViewModels;
 
@@ -17,9 +15,6 @@ namespace Phantasma.Explorer.Controllers
 
         public List<AppViewModel> GetAllApps()
         {
-            //todo remove
-            Random rnd = new Random();
-
             List<AppViewModel> appsList = new List<AppViewModel>();
             var apps = Repository.GetApps();
             foreach (var appInfo in apps)

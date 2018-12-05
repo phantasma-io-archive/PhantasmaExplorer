@@ -5,39 +5,36 @@ using Phantasma.Cryptography;
 
 namespace Phantasma.Explorer.Controllers
 {
-    public class APIController
+    public class ApiController
     {
-        private IRepository Repository { get; set; }
+        private readonly NexusAPI _api;
 
-        private NexusAPI _API;
-
-        public APIController(IRepository repo)
+        public ApiController(IRepository repo)
         {
-            Repository = repo;
-            this._API = new NexusAPI(repo.NexusChain);
+            _api = new NexusAPI(repo.NexusChain);
         }
 
         public DataNode GetAccount(string addressText)
         {
             var address = Address.FromText(addressText);
-            return _API.GetAccount(address);
+            return _api.GetAccount(address);
         }
 
         public DataNode GetBlock(string blockHash)
         {
             var hash = Hash.Parse(blockHash);
-            return _API.GetBlockByHash(hash);
+            return _api.GetBlockByHash(hash);
         }
 
         public DataNode GetBlock(uint height, string chainName)
         {
-            return _API.GetBlockByHeight(chainName, height);
+            return _api.GetBlockByHeight(chainName, height);
         }
 
         public DataNode GetAddressTransactions(string addressText, int amount)
         {
             var address = Address.FromText(addressText);
-            return _API.GetAddressTransactions(address, amount);
+            return _api.GetAddressTransactions(address, amount);
         }
     }
 }

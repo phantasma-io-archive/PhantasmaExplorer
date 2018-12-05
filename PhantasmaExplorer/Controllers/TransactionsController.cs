@@ -17,16 +17,15 @@ namespace Phantasma.Explorer.Controllers
 
         public List<TransactionViewModel> GetLastTransactions()
         {
-            var repoChains = Repository.GetAllChains();
             var txList = new List<TransactionViewModel>();
 
-            var repoTx = Repository.GetTransactions(txAmount: 20);
+            var repoTx = Repository.GetTransactions();
             foreach (var transaction in repoTx)
             {
                 var block = Repository.NexusChain.FindBlockForTransaction(transaction);
                 if (block != null)
                 {
-                    var tx1 = (Transaction)transaction;
+                    var tx1 = transaction;
                     txList.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx1));
                 }
             }
@@ -66,7 +65,7 @@ namespace Phantasma.Explorer.Controllers
 
                 foreach (var transaction in transactions)
                 {
-                    var tx = (Transaction)transaction;
+                    var tx = transaction;
                     txList.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx));
                 }
             }

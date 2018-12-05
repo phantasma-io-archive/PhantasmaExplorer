@@ -72,7 +72,7 @@ namespace Phantasma.Explorer.Controllers
                             {
                                 ChainName = chain.Name,
                                 Balance = TokenUtils.ToDecimal(integer, token.Decimals),
-                                Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl, 0, 0),
+                                Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl),
                                 Address = address.Text
                             };
                             balances.Add(vm);
@@ -87,7 +87,7 @@ namespace Phantasma.Explorer.Controllers
                             {
                                 ChainName = chain.Name,
                                 Balance = integer.Count(),
-                                Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl, 0, 0),
+                                Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl),
                                 Address = address.Text
                             };
                             balances.Add(vm);
