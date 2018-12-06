@@ -22,8 +22,6 @@ namespace Phantasma.Explorer.ViewModels
         public IEnumerable<EventViewModel> Events { get; set; }
         public IEnumerable<Instruction> Instructions { get; set; }
         public string Description { get; set; }
-        public decimal GasLimit { get; set; }
-        public decimal GasPrice { get; set; }
 
         // in case of transfer
         public decimal AmountTransfer { get; set; }
@@ -143,8 +141,6 @@ namespace Phantasma.Explorer.ViewModels
             vm.Events = evts.Select(evt => EventViewModel.FromEvent(repository, tx, evt));
             vm.Description = description;
             vm.Instructions = disasm.Instructions;
-            vm.GasLimit = TokenUtils.ToDecimal(tx.GasLimit, Nexus.NativeTokenDecimals);
-            vm.GasPrice = TokenUtils.ToDecimal(tx.GasPrice, Nexus.NativeTokenDecimals);
 
             return vm;
         }
