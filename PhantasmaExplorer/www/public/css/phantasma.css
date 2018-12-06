@@ -1,19 +1,21 @@
+/* change navbar background on collapse */
 @media(max-width:767px) {
     header .breadcrumb {
         display: none;
+    }
+
+    nav.navbar {
+        background: #17B0E7;
+    }
+
+    .home-title {
+        color: #17B0E7 !important; 
     }
 }
 
 @media(min-width:768px) {
     header .navbar {
         display: none;
-    }
-}
-
-/* change navbar background on collapse */
-@media (max-width: 768px) {
-    nav.navbar {
-        background: #17B0E7;
     }
 }
 
@@ -255,6 +257,7 @@ form {
 
     .table-general tbody tr {
         border: 1px solid #17B0E7 !important;
+        border-left: 1px solid #17B0E7 !important;
     }
 
     .table-general th {

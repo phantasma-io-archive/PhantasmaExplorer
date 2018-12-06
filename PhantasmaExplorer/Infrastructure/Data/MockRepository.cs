@@ -291,9 +291,9 @@ namespace Phantasma.Explorer.Infrastructure.Data
             {
                 case EventKind.ChainCreate:
                     {
-                        var chainAddress = Serialization.Unserialize<Address>(evt.Data);
-                        var chain = NexusChain.FindChainByAddress(chainAddress);
-                        return $"{chain.Name} chain created at address <a href=\"/chain/{chainAddress}\">{chainAddress}</a>.";
+                        var tokenData = evt.GetContent<TokenEventData>();
+                        var chain = NexusChain.FindChainByAddress(tokenData.chainAddress);
+                        return $"{chain.Name} chain created at address <a href=\"/chain/{tokenData.chainAddress}\">{tokenData.chainAddress}</a>.";
                     }
 
                 case EventKind.TokenCreate:
@@ -302,7 +302,21 @@ namespace Phantasma.Explorer.Infrastructure.Data
                         var token = NexusChain.FindTokenBySymbol(symbol);
                         return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
                     }
+                case EventKind.GasEscrow:
+                    {
+                        var gasEvent = evt.GetContent<GasEventData>();
+                        var amount = TokenUtils.ToDecimal(gasEvent.amount, Nexus.NativeTokenDecimals);
+                        var price = TokenUtils.ToDecimal(gasEvent.price, Nexus.NativeTokenDecimals);
+                        return $"{amount} {Nexus.PlatformName} tokens escrowed for contract gas, with price of {price} per gas unit";
+                    }
+                case EventKind.GasPayment:
+                    {
+                        var gasEvent = evt.GetContent<GasEventData>();
+                        var amount = TokenUtils.ToDecimal(gasEvent.amount, Nexus.NativeTokenDecimals);
+                        var price = TokenUtils.ToDecimal(gasEvent.price, Nexus.NativeTokenDecimals);
+                        return $"{amount} {Nexus.PlatformName} tokens paid for contract gas, with price of {price} per gas unit";
 
+                    }
                 case EventKind.TokenMint:
                 case EventKind.TokenBurn:
                 case EventKind.TokenSend:
@@ -348,7 +362,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                             chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(NexusChain, data.chainAddress)} chain";
                         }
 
-                        return $"{TokenUtils.ToDecimal(data.value, token.Decimals)} {token.Name} tokens {action} at </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
+                        return $"{TokenUtils.ToDecimal(data.value, token.Decimals)} {token.Name} tokens {action} from </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
                     }
 
                 default: return "Nothing.";
