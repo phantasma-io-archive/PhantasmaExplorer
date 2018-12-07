@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Blockchain;
+using Phantasma.Blockchain.Tokens;
 using Phantasma.Core.Utils;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 

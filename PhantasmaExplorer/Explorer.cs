@@ -5,6 +5,7 @@ using System.Threading;
 using Phantasma.API;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Plugins;
+using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Data;
 using Phantasma.Explorer.Site;
