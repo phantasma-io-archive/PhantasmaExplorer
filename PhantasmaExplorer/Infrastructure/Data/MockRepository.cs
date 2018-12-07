@@ -362,7 +362,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
                             chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(NexusChain, data.chainAddress)} chain";
                         }
 
-                        return $"{TokenUtils.ToDecimal(data.value, token.Decimals)} {token.Name} tokens {action} from </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
+                        string fromAt = action == "sent" ? "from" : "at";
+                        return $"{TokenUtils.ToDecimal(data.value, token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
                     }
 
                 default: return "Nothing.";
