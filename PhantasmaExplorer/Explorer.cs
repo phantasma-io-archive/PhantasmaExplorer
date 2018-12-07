@@ -91,6 +91,7 @@ namespace Phantasma.Explorer
                 while (mempool.IsRunning)
                 {
                     Thread.Sleep(1000 * 60);
+                    simulator.CurrentTime = DateTime.Now;
                     simulator.GenerateRandomBlock(mempool);
                 } 
             }).Start();

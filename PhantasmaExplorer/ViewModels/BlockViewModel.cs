@@ -32,7 +32,7 @@ namespace Phantasma.Explorer.ViewModels
                 Transactions = transactions.Count(),
                 Hash = block.Hash.ToString(),
                 ParentHash = block.PreviousHash?.ToString(),
-                MiningAddress = block.MinerAddress.Text,
+                MiningAddress = Cryptography.Address.Null.Text, // block.MinerAddress.Text, TODO fixme later
                 ChainName = chain.Name.ToTitleCase(),
                 ChainAddress = chain.Address.Text,
                 Reward = TokenUtils.ToDecimal(chain.GetBlockReward(block), Nexus.NativeTokenDecimals),
