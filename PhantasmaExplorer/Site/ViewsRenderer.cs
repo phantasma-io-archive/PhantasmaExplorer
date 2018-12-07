@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
+using Phantasma.Core;
 using Phantasma.Explorer.Controllers;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
@@ -11,10 +12,10 @@ namespace Phantasma.Explorer.Site
 {
     public class ViewsRenderer
     {
-        public ViewsRenderer(LunarLabs.WebServer.Core.Site site, string viewsPath)
+        public ViewsRenderer(HTTPServer server, string viewsPath)
         {
-            if (site == null) throw new ArgumentNullException(nameof(site));
-            TemplateEngine = new TemplateEngine(site, viewsPath);
+            Throw.IfNull(server, nameof(server));
+            TemplateEngine = new TemplateEngine(server, viewsPath);
         }
 
         public TemplateEngine TemplateEngine { get; set; }
@@ -68,30 +69,30 @@ namespace Phantasma.Explorer.Site
             ApiController = new ApiController(repo);
         }
 
-        private Dictionary<string, object> GetSessionContext(HTTPRequest request) => request.session.data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        private Dictionary<string, object> GetSessionContext(HTTPRequest request) => request.session.Data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         public void SetupHandlers() //todo separate each call
         {
-            TemplateEngine.Site.Get("/", request => HTTPResponse.Redirect(urlHome));
+            TemplateEngine.Server.Get("/", request => HTTPResponse.Redirect(urlHome));
 
-            TemplateEngine.Site.Get(urlHome, RouteHome);
+            TemplateEngine.Server.Get(urlHome, RouteHome);
 
-            TemplateEngine.Site.Post(urlHome, RouteSearch);
+            TemplateEngine.Server.Post(urlHome, RouteSearch);
 
-            TemplateEngine.Site.Get(urlError, RouteError);
+            TemplateEngine.Server.Get(urlError, RouteError);
 
-            TemplateEngine.Site.Get(urlTokens, RouteTokens);
+            TemplateEngine.Server.Get(urlTokens, RouteTokens);
 
-            TemplateEngine.Site.Get($"{urlTokens}/{{input}}", RouteTokensNft);
+            TemplateEngine.Server.Get($"{urlTokens}/{{input}}", RouteTokensNft);
 
-            TemplateEngine.Site.Get("/marketcap", request =>
+            TemplateEngine.Server.Get("/marketcap", request =>
             {
                 var info = CoinUtils.GetCoinInfoAsync(CoinUtils.SoulId).Result;
                 var marketCap = info["quotes"]["USD"].GetDecimal("market_cap");
                 return $"${marketCap}";
             });
 
-            TemplateEngine.Site.Get("/rates", request =>
+            TemplateEngine.Server.Get("/rates", request =>
             {
                 var coins = HomeController.GetRateInfo();
 
@@ -99,27 +100,27 @@ namespace Phantasma.Explorer.Site
                 return html;
             });
 
-            TemplateEngine.Site.Get($"{urlToken}/{{input}}", RouteToken);
+            TemplateEngine.Server.Get($"{urlToken}/{{input}}", RouteToken);
 
-            TemplateEngine.Site.Get(urlTransactions, RouteTransactions);
+            TemplateEngine.Server.Get(urlTransactions, RouteTransactions);
 
-            TemplateEngine.Site.Get($"{urlTransaction}/{{input}}", RouteTransaction);
+            TemplateEngine.Server.Get($"{urlTransaction}/{{input}}", RouteTransaction);
 
-            TemplateEngine.Site.Get($"{urlAddresses}", RouteAddresses);
+            TemplateEngine.Server.Get($"{urlAddresses}", RouteAddresses);
 
-            TemplateEngine.Site.Get($"{urlAddress}/{{input}}", RouteAddress);
+            TemplateEngine.Server.Get($"{urlAddress}/{{input}}", RouteAddress);
 
-            TemplateEngine.Site.Get($"{urlBlocks}", RouteBlocks);
+            TemplateEngine.Server.Get($"{urlBlocks}", RouteBlocks);
 
-            TemplateEngine.Site.Get($"{urlBlock}/{{input}}", RouteBlock);
+            TemplateEngine.Server.Get($"{urlBlock}/{{input}}", RouteBlock);
 
-            TemplateEngine.Site.Get($"{urlChains}", RouteChains);
+            TemplateEngine.Server.Get($"{urlChains}", RouteChains);
 
-            TemplateEngine.Site.Get($"{urlChain}/{{input}}", RouteChain);
+            TemplateEngine.Server.Get($"{urlChain}/{{input}}", RouteChain);
 
-            TemplateEngine.Site.Get($"{urlApps}", RouteApps);
+            TemplateEngine.Server.Get($"{urlApps}", RouteApps);
 
-            TemplateEngine.Site.Get($"{urlApp}/{{input}}", RouteApp);
+            TemplateEngine.Server.Get($"{urlApp}/{{input}}", RouteApp);
 
             SetupAPIHandlers();
         }
@@ -153,7 +154,7 @@ namespace Phantasma.Explorer.Site
             {
                 _errorContextInstance.ErrorCode = ex.Message;
                 _errorContextInstance.ErrorDescription = ex.StackTrace;
-                request.session.Set(errorContext, _errorContextInstance);
+                request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
                 return HTTPResponse.Redirect(urlError);
             }
@@ -161,7 +162,7 @@ namespace Phantasma.Explorer.Site
 
         private object RouteError(HTTPRequest request)
         {
-            var error = request.session.Get<ErrorContext>("error");
+            var error = request.session.GetStruct<ErrorContext>("error");
             var context = GetSessionContext(request);
             context[menuContext] = _menus;
             context[errorContext] = error;
@@ -184,7 +185,7 @@ namespace Phantasma.Explorer.Site
             }
             _errorContextInstance.ErrorCode = "token error";
             _errorContextInstance.ErrorDescription = "Tokens not found";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -226,7 +227,7 @@ namespace Phantasma.Explorer.Site
             }
             _errorContextInstance.ErrorCode = "token error";
             _errorContextInstance.ErrorDescription = "Token not found";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -246,7 +247,7 @@ namespace Phantasma.Explorer.Site
 
             _errorContextInstance.ErrorCode = "txs error";
             _errorContextInstance.ErrorDescription = "No transactions found";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -268,7 +269,7 @@ namespace Phantasma.Explorer.Site
 
             _errorContextInstance.ErrorCode = "txs error";
             _errorContextInstance.ErrorDescription = $"Transaction {txHash} not found";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -288,7 +289,7 @@ namespace Phantasma.Explorer.Site
 
             _errorContextInstance.ErrorCode = "Address error";
             _errorContextInstance.ErrorDescription = $"No addresses";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -308,7 +309,7 @@ namespace Phantasma.Explorer.Site
 
             _errorContextInstance.ErrorCode = "Address error";
             _errorContextInstance.ErrorDescription = $"Invalid address";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -327,7 +328,7 @@ namespace Phantasma.Explorer.Site
 
             _errorContextInstance.ErrorCode = "blocks error";
             _errorContextInstance.ErrorDescription = "No blocks found";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -346,7 +347,7 @@ namespace Phantasma.Explorer.Site
 
             _errorContextInstance.ErrorCode = "blocks error";
             _errorContextInstance.ErrorDescription = $"No block found with this {input} input";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -365,7 +366,7 @@ namespace Phantasma.Explorer.Site
             }
             _errorContextInstance.ErrorCode = "chains error";
             _errorContextInstance.ErrorDescription = "No chains found";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -385,7 +386,7 @@ namespace Phantasma.Explorer.Site
 
             _errorContextInstance.ErrorCode = "chains error";
             _errorContextInstance.ErrorDescription = $"No chain found with this {addressText} address";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -402,7 +403,7 @@ namespace Phantasma.Explorer.Site
             }
             _errorContextInstance.ErrorCode = "apps error";
             _errorContextInstance.ErrorDescription = "No apps found";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -421,7 +422,7 @@ namespace Phantasma.Explorer.Site
 
             _errorContextInstance.ErrorCode = "apps error";
             _errorContextInstance.ErrorDescription = $"No app with {appId} found";
-            request.session.Set(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(urlError);
         }
@@ -430,26 +431,26 @@ namespace Phantasma.Explorer.Site
         #region API
         private void SetupAPIHandlers()
         {
-            TemplateEngine.Site.Get($"{urlAPI}/get_account/{{address}}", request =>
+            TemplateEngine.Server.Get($"{urlAPI}/get_account/{{address}}", request =>
             {
                 var address = request.GetVariable("address");
                 return ApiController.GetAccount(address);
             });
 
-            TemplateEngine.Site.Get($"{urlAPI}/get_block/{{blockHash}}", request =>
+            TemplateEngine.Server.Get($"{urlAPI}/get_block/{{blockHash}}", request =>
             {
                 var address = request.GetVariable("blockHash");
                 return ApiController.GetBlock(address);
             });
 
-            TemplateEngine.Site.Get($"{urlAPI}/get_block/{{chain}}/{{height}}", request =>
+            TemplateEngine.Server.Get($"{urlAPI}/get_block/{{chain}}/{{height}}", request =>
             {
                 var chain = request.GetVariable("chain");
                 var height = (uint.Parse(request.GetVariable("height")));
                 return ApiController.GetBlock(height, chain);
             });
 
-            TemplateEngine.Site.Get($"{urlAPI}/get_account_txs/{{address}}/{{amount}}", request =>
+            TemplateEngine.Server.Get($"{urlAPI}/get_account_txs/{{address}}/{{amount}}", request =>
             {
                 var address = request.GetVariable("address");
                 var amount = int.Parse(request.GetVariable("amount"));

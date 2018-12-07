@@ -22,15 +22,15 @@ namespace Phantasma.Explorer
             var curPath = Directory.GetCurrentDirectory();
             Console.WriteLine("Current path: " + curPath);
 
-            var site = HostBuilder.CreateSite(args, "public");
-            var viewsRenderer = new ViewsRenderer(site, "views");
+            var server = HostBuilder.CreateServer(args);
+            var viewsRenderer = new ViewsRenderer(server, "views");
 
             var mockRepo = new MockRepository { NexusChain = nexus };
 
             viewsRenderer.SetupControllers(mockRepo);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
-            site.Server.Run();
+            server.Run();
         }
 
         private static Nexus InitMockData()
