@@ -446,10 +446,10 @@ namespace Phantasma.Explorer.Site
 
             TemplateEngine.Server.Get($"{urlAPI}/get_apps", request => ApiController.GetApps());
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_block_number/{{chain}}", request =>
+            TemplateEngine.Server.Get($"{urlAPI}/get_block_height/{{chain}}", request =>
             {
                 var chain = request.GetVariable("chain");
-                return ApiController.GetBlockNumber(chain);
+                return ApiController.GetBlockHeight(chain);
             });
 
             TemplateEngine.Server.Get($"{urlAPI}/get_block/{{blockHash}}", request =>

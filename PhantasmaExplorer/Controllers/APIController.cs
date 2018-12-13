@@ -42,7 +42,7 @@ namespace Phantasma.Explorer.Controllers
             return _api.GetBlockByHeight(chainName, height);
         }
 
-        public DataNode GetBlockNumber(string chain)
+        public DataNode GetBlockHeight(string chain)
         {
             return _api.GetBlockNumber(chain) ?? _api.GetBlockNumber(Address.FromText(chain));
         }
