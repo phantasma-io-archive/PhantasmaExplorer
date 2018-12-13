@@ -437,24 +437,62 @@ namespace Phantasma.Explorer.Site
                 return ApiController.GetAccount(address);
             });
 
+            TemplateEngine.Server.Get($"{urlAPI}/get_account_txs/{{address}}/{{amount}}", request =>
+            {
+                var address = request.GetVariable("address");
+                var amount = int.Parse(request.GetVariable("amount"));
+                return ApiController.GetAddressTransactions(address, amount);
+            });
+
+            TemplateEngine.Server.Get($"{urlAPI}/get_apps", request => ApiController.GetApps());
+
+            TemplateEngine.Server.Get($"{urlAPI}/get_block_number/{{chain}}", request =>
+            {
+                var chain = request.GetVariable("chain");
+                return ApiController.GetBlockNumber(chain);
+            });
+
             TemplateEngine.Server.Get($"{urlAPI}/get_block/{{blockHash}}", request =>
             {
                 var address = request.GetVariable("blockHash");
-                return ApiController.GetBlock(address);
+                return ApiController.GetBlockByHash(address);
             });
 
             TemplateEngine.Server.Get($"{urlAPI}/get_block/{{chain}}/{{height}}", request =>
             {
                 var chain = request.GetVariable("chain");
                 var height = (uint.Parse(request.GetVariable("height")));
-                return ApiController.GetBlock(height, chain);
+                return ApiController.GetBlockByHeight(height, chain);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_account_txs/{{address}}/{{amount}}", request =>
+            TemplateEngine.Server.Get($"{urlAPI}/get_block_tx_count_by_hash/{{blockHash}}", request =>
             {
-                var address = request.GetVariable("address");
-                var amount = int.Parse(request.GetVariable("amount"));
-                return ApiController.GetAddressTransactions(address, amount);
+                var block = request.GetVariable("blockHash");
+                return ApiController.GetBlockTransactionCountByHash(block);
+            });
+
+            TemplateEngine.Server.Get($"{urlAPI}/get_confirmations/{{txHash}}", request =>
+            {
+                var txHash = request.GetVariable("txHash");
+                return ApiController.GetConfirmations(txHash);
+            });
+
+            TemplateEngine.Server.Get($"{urlAPI}/get_tx_by_block_hash_index/{{block}}/{{index}}", request =>
+            {
+                var block = request.GetVariable("block");
+                var index = int.Parse(request.GetVariable("index"));
+                return ApiController.GetTransactionByBlockHashAndIndex(block, index);
+            });
+
+            TemplateEngine.Server.Get($"{urlAPI}/get_chains", request => ApiController.GetChains());
+
+            TemplateEngine.Server.Get($"{urlAPI}/get_tokens", request => ApiController.GetTokens());
+
+            //todo confirm this
+            TemplateEngine.Server.Post($"{urlAPI}/send_raw_tx/{{signedTx}}", request =>
+            {
+                var signedTx = request.GetVariable("signedTx");
+                return ApiController.SendRawTransaction(signedTx);
             });
         }
 
