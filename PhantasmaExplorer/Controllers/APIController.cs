@@ -16,14 +16,12 @@ namespace Phantasma.Explorer.Controllers
 
         public DataNode GetAccount(string addressText)
         {
-            var address = Address.FromText(addressText);
-            return _api.GetAccount(address);
+            return _api.GetAccount(addressText);
         }
 
         public DataNode GetAddressTransactions(string addressText, int amount)
         {
-            var address = Address.FromText(addressText);
-            return _api.GetAddressTransactions(address, amount);
+            return _api.GetAddressTransactions(addressText, amount);
         }
 
         public DataNode GetApps()
@@ -33,24 +31,31 @@ namespace Phantasma.Explorer.Controllers
 
         public DataNode GetBlockByHash(string blockHash)
         {
-            var hash = Hash.Parse(blockHash);
-            return _api.GetBlockByHash(hash);
+            return _api.GetBlockByHash(blockHash);
         }
 
-        public DataNode GetBlockByHeight(uint height, string chainName)
+        public DataNode GetBlockByHeight(uint height, string chain)
         {
-            return _api.GetBlockByHeight(chainName, height);
+            var result = _api.GetBlockByHeight(chain, height);
+            if (result == null)
+            {
+                if (Address.IsValidAddress(chain))
+                {
+                    result = _api.GetBlockByHeight(Address.FromText(chain), height);
+                }
+            }
+
+            return result;
         }
 
         public DataNode GetBlockHeight(string chain)
         {
-            return _api.GetBlockNumber(chain) ?? _api.GetBlockNumber(Address.FromText(chain));
+            return _api.GetBlockHeightFromName(chain) ?? _api.GetBlockHeightFromAddress(chain);
         }
 
         public DataNode GetBlockTransactionCountByHash(string block)
         {
-            var blockHash = Hash.Parse(block);
-            return _api.GetBlockTransactionCountByHash(blockHash);
+            return _api.GetBlockTransactionCountByHash(block);
         }
 
         public DataNode GetChains()
@@ -60,13 +65,11 @@ namespace Phantasma.Explorer.Controllers
 
         public DataNode GetConfirmations(string txHash)
         {
-            var hash = Hash.Parse(txHash);
-            return _api.GetConfirmations(hash);
+            return _api.GetConfirmations(txHash);
         }
 
-        public DataNode GetTransactionByBlockHashAndIndex(string block, int index)
+        public DataNode GetTransactionByBlockHashAndIndex(string blockHash, int index)
         {
-            var blockHash = Hash.Parse(block);
             return _api.GetTransactionByBlockHashAndIndex(blockHash, index);
         }
 
