@@ -15,6 +15,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
     {
         public Nexus NexusChain { get; set; }
 
+        private Dictionary<Hash, Block> _blocks;//todo
+
         public decimal GetAddressNativeBalance(Address address, string chainName = null) //todo this should not be here
         {
             if (string.IsNullOrEmpty(chainName))

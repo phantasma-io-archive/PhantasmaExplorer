@@ -50,7 +50,7 @@ namespace Phantasma.Explorer.Controllers
 
         public DataNode GetBlockHeight(string chain)
         {
-            return _api.GetBlockHeightFromName(chain) ?? _api.GetBlockHeightFromAddress(chain);
+            return _api.GetBlockHeightFromChainName(chain) ?? _api.GetBlockHeightFromChainAddress(chain);
         }
 
         public DataNode GetBlockTransactionCountByHash(string block)
