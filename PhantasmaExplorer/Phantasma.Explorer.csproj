@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -49,6 +50,7 @@
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.API\Phantasma.API.csproj" />
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj" />
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj" />
+    <ProjectReference Include="..\..\PhantasmaChain\Phantasma.RpcClient\Phantasma.RpcClient.csproj" />
   </ItemGroup>
 
   <ItemGroup>

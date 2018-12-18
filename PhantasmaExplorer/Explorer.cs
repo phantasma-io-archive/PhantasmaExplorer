@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Phantasma.API;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Plugins;
@@ -15,7 +16,7 @@ namespace Phantasma.Explorer
 {
     public class Explorer
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Initializing Phantasma Block Explorer....");
             var nexus = InitMockData();
@@ -27,10 +28,10 @@ namespace Phantasma.Explorer
             var viewsRenderer = new ViewsRenderer(server, "views");
 
             var mockRepo = new MockRepository { NexusChain = nexus };
-
             viewsRenderer.SetupControllers(mockRepo);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
+            await mockRepo.InitRepo();
             server.Run();
         }
 
@@ -45,7 +46,7 @@ namespace Phantasma.Explorer
             simulator.Nexus.AddPlugin(new TokenTransactionsPlugin(simulator.Nexus));
 
             // generate blocks with mock transactions
-            for (int i = 1; i <= 500; i++)
+            for (int i = 1; i <= 50; i++)
             {
                 simulator.GenerateRandomBlock();
             }

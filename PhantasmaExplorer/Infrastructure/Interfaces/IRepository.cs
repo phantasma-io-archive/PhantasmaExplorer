@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
@@ -11,6 +12,14 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
     {
         //todo calls should be async imo
         Nexus NexusChain { get; set; }//todo remove
+
+        //Chain RootChain { get; set; }
+        //Dictionary<Hash, Block> Blocks { get; set; }
+        //Dictionary<string, Chain> Chains { get; set; }
+        //Dictionary<string, Token> Tokens { get; set; }
+
+
+        Task InitRepo();
 
         decimal GetAddressNativeBalance(Address address, string chainName = null);
 

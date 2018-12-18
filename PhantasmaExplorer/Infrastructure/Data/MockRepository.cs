@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
@@ -8,6 +10,16 @@ using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.IO;
+using Phantasma.Numerics;
+using Phantasma.RpcClient;
+using Phantasma.RpcClient.Interfaces;
+using Block = Phantasma.Blockchain.Block;
+using Chain = Phantasma.Blockchain.Chain;
+using Event = Phantasma.Blockchain.Contracts.Event;
+using Token = Phantasma.Blockchain.Tokens.Token;
+using Transaction = Phantasma.Blockchain.Transaction;
+
+using ChainDto = Phantasma.RpcClient.DTOs.Chain;
 
 namespace Phantasma.Explorer.Infrastructure.Data
 {
@@ -15,7 +27,36 @@ namespace Phantasma.Explorer.Infrastructure.Data
     {
         public Nexus NexusChain { get; set; }
 
-        private Dictionary<Hash, Block> _blocks;//todo
+        //public Chain RootChain { get; set; }
+        public Dictionary<ChainDto, Dictionary<Hash, Block>> Chains { get; set; } = new Dictionary<ChainDto, Dictionary<Hash, Block>>();
+        public Dictionary<string, Token> Tokens { get; set; }
+
+        private IPhantasmaRpcService _phantasmaRpcService;
+
+        public async Task InitRepo()
+        {
+            _phantasmaRpcService = new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc")));
+
+            var test = await _phantasmaRpcService.GetTokens.SendRequestAsync();
+            var root = await _phantasmaRpcService.GetRootChain.SendRequestAsync();
+            var chains = await _phantasmaRpcService.GetChains.SendRequestAsync(); //name-address info only
+
+            // working
+            foreach (var chain in chains)
+            {
+                Chains[chain] = new Dictionary<Hash, Block>();
+                var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
+                for (int i = 1; i <= height; i++)//slooow
+                {
+                    var blockDto = await _phantasmaRpcService.GetBlockByHeightSerialized.SendRequestAsync(root.Name, (uint)i);
+                    var block = Block.Unserialize(blockDto.Decode());
+                    Chains[chain].Add(block.Hash, block);
+                }
+            }
+
+            var testGetBlocks1 = GetBlocks(); // works
+            var testGetBlocks2 = GetBlocks("main", 10); //works
+        }
 
         public decimal GetAddressNativeBalance(Address address, string chainName = null) //todo this should not be here
         {
@@ -77,31 +118,31 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return Address.Null;
         }
 
-        public IEnumerable<Block> GetBlocks(string chainInput = null, int lastBlocksAmount = 20)
-        {
-            var blockList = new List<Block>();
+        //public IEnumerable<Block> GetBlocks(string chainInput = null, int lastBlocksAmount = 20)
+        //{
+        //    var blockList = new List<Block>();
 
-            // all chains
-            if (string.IsNullOrEmpty(chainInput))
-            {
-                foreach (var chain in NexusChain.Chains)
-                {
-                    blockList.AddRange(chain.Blocks.TakeLast(10));
-                }
-                blockList = blockList.OrderByDescending(b => b.Timestamp.Value).Take(lastBlocksAmount).ToList();
-            }
-            else //specific chain
-            {
-                var chain = GetChain(chainInput);
-                if (chain != null && chain.Blocks.Any())
-                {
-                    blockList.AddRange(chain.Blocks.TakeLast(lastBlocksAmount));
-                }
+        //    // all chains
+        //    if (string.IsNullOrEmpty(chainInput))
+        //    {
+        //        foreach (var chain in NexusChain.Chains)
+        //        {
+        //            blockList.AddRange(chain.Blocks.TakeLast(10));
+        //        }
+        //        blockList = blockList.OrderByDescending(b => b.Timestamp.Value).Take(lastBlocksAmount).ToList();
+        //    }
+        //    else //specific chain
+        //    {
+        //        var chain = GetChain(chainInput);
+        //        if (chain != null && chain.Blocks.Any())
+        //        {
+        //            blockList.AddRange(chain.Blocks.TakeLast(lastBlocksAmount));
+        //        }
 
-                blockList = blockList.OrderByDescending(b => b.Height).ToList();
-            }
-            return blockList;
-        }
+        //        blockList = blockList.OrderByDescending(b => b.Height).ToList();
+        //    }
+        //    return blockList;
+        //}
 
         public Block GetBlock(string hash)
         {
@@ -135,7 +176,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return block;
         }
 
-        public IEnumerable<Chain> GetAllChains()
+        public IEnumerable<Blockchain.Chain> GetAllChains()
         {
             return NexusChain.Chains.ToList();
         }
@@ -390,5 +431,38 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return "???";
         }
 
+
+        //TODO NEW without nexus
+
+        private ChainDto getChain(string input)
+        {
+            return Chains.FirstOrDefault(x => x.Key.Address == input || x.Key.Name == input).Key;
+        }
+
+
+        public IEnumerable<Block> GetBlocks(string chainInput = null, int lastBlocksAmount = 20)
+        {
+            var blockList = new List<Block>();
+
+            // all chains
+            if (string.IsNullOrEmpty(chainInput))// working without nexus
+            {
+                foreach (var chain in Chains)
+                {
+                    blockList.AddRange(chain.Value.Values.TakeLast(10));
+                }
+                blockList = blockList.OrderByDescending(b => b.Timestamp.Value).Take(lastBlocksAmount).ToList();
+            }
+            else //specific chain
+            {
+                var chain = getChain(chainInput);
+                if (chain != null && Chains[chain].Any())
+                {
+                    blockList.AddRange(Chains[chain].Values.TakeLast(lastBlocksAmount));
+                }
+                blockList = blockList.OrderByDescending(b => b.Height).ToList();
+            }
+            return blockList;
+        }
     }
 }
