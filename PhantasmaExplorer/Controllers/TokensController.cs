@@ -105,7 +105,7 @@ namespace Phantasma.Explorer.Controllers
             var transfers = Repository.GetLastTokenTransfers(symbol, 100).ToList();
             foreach (var tx in transfers)
             {
-                var block = Repository.NexusChain.FindBlockForTransaction(tx);
+                var block = Repository.FindBlockForTransaction(tx.Txid);
                 temp.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx));
             }
 

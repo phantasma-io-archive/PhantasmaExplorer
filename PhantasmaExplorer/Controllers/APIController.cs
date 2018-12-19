@@ -11,7 +11,7 @@ namespace Phantasma.Explorer.Controllers
 
         public ApiController(IRepository repo)
         {
-            _api = new NexusAPI(repo.NexusChain);
+            //_api = new NexusAPI(repo.NexusChain); todo
         }
 
         public DataNode GetAccount(string addressText)

@@ -27,11 +27,11 @@ namespace Phantasma.Explorer
             var server = HostBuilder.CreateServer(args);
             var viewsRenderer = new ViewsRenderer(server, "views");
 
-            var mockRepo = new MockRepository { NexusChain = nexus };
+            var mockRepo = new MockRepository();
             viewsRenderer.SetupControllers(mockRepo);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
-            await mockRepo.InitRepo();
+            //await mockRepo.InitRepo();
             server.Run();
         }
 

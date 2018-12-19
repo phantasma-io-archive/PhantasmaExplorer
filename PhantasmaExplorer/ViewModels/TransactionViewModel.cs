@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Numerics;
+using Phantasma.RpcClient.DTOs;
 using Phantasma.VM;
 
 namespace Phantasma.Explorer.ViewModels
@@ -19,7 +19,7 @@ namespace Phantasma.Explorer.ViewModels
         public DateTime Date { get; set; }
         public string ChainName { get; set; }
         public string ChainAddress { get; set; }
-        public IEnumerable<EventViewModel> Events { get; set; }
+        //public IEnumerable<EventViewModel> Events { get; set; }
         public IEnumerable<Instruction> Instructions { get; set; }
         public string Description { get; set; }
 
@@ -29,82 +29,106 @@ namespace Phantasma.Explorer.ViewModels
         public string SenderAddress { get; set; }
         public string ReceiverAddress { get; set; }
 
-        public static TransactionViewModel FromTransaction(IRepository repository, BlockViewModel block, Transaction tx)
+        public static TransactionViewModel FromTransaction(IRepository repository, BlockViewModel block, TransactionDto tx)
         {
-            var nexus = repository.NexusChain;
             var vm = new TransactionViewModel();
-            var disasm = new Disassembler(tx.Script); //Todo fix me
+            var disasm = new Disassembler(tx.Script.Decode()); //Todo fix me
 
+            string description = GetTxDescription(tx, repository.GetAllChains()?.ToList(), repository.GetTokens()?.ToList());
+
+            vm.Block = block;
+            vm.ChainAddress = block.ChainAddress;
+            vm.ChainName = block.ChainName;
+            vm.Date = block.Timestamp;
+            vm.Hash = tx.Txid;
+            //vm.Events = evts.Select(evt => EventViewModel.FromEvent(repository, tx, evt));
+            vm.Description = description;
+            vm.Instructions = disasm.Instructions;
+
+            return vm;
+        }
+
+        //todo revisit
+        public static string GetTxDescription(TransactionDto tx, List<ChainDto> phantasmaChains, List<TokenDto> phantasmaTokens)
+        {
             string description = null;
 
-            Token senderToken = null;
-            Address senderChain = nexus.FindChainByName(tx.ChainName).Address;
+            string senderToken = null;
+            Address senderChain = Address.FromText(tx.ChainAddress);
             Address senderAddress = Address.Null;
 
-            Token receiverToken = null;
+            string receiverToken = null;
             Address receiverChain = Address.Null;
             Address receiverAddress = Address.Null;
 
             BigInteger amount = 0;
 
-            var chainBlock = nexus.FindBlockForHash(tx.Hash);
-            var evts = chainBlock.GetEventsForTransaction(tx.Hash);
-
-            foreach (var evt in evts)//todo move this
+            foreach (var evt in tx.Events) //todo move this
             {
-                switch (evt.Kind)
+                Event nativeEvent;
+                if (evt.Data != null)
                 {
-                    case EventKind.TokenSend:
+                    nativeEvent = new Event((EventKind)evt.EvtKind,
+                        Address.FromText(evt.EventAddress), evt.Data.Decode());
+                }
+                else
+                {
+                    nativeEvent =
+                        new Event((EventKind)evt.EvtKind, Address.FromText(evt.EventAddress));
+                }
+
+                switch (evt.EvtKind)
+                {
+                    case EvtKind.TokenSend:
                         {
-                            var data = evt.GetContent<TokenEventData>();
+                            var data = nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
-                            senderAddress = evt.Address;
-                            senderChain = data.chainAddress;
-                            senderToken = nexus.FindTokenBySymbol(data.symbol);
+                            senderAddress = nativeEvent.Address;
+                            senderToken = (data.symbol);
                         }
                         break;
 
-                    case EventKind.TokenReceive:
+                    case EvtKind.TokenReceive:
                         {
-                            var data = evt.GetContent<TokenEventData>();
+                            var data = nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
-                            receiverAddress = evt.Address;
+                            receiverAddress = nativeEvent.Address;
                             receiverChain = data.chainAddress;
-                            receiverToken = nexus.FindTokenBySymbol(data.symbol);
+                            receiverToken = data.symbol;
                         }
                         break;
 
-                    case EventKind.TokenEscrow:
+                    case EvtKind.TokenEscrow:
                         {
-                            var data = evt.GetContent<TokenEventData>();
+                            var data = nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
-                            var token = nexus.FindTokenBySymbol(data.symbol);
-                            var amountDecimal = TokenUtils.ToDecimal(amount, token.Decimals);
-                            receiverAddress = evt.Address;
+                            var amountDecimal = TokenUtils.ToDecimal(amount,
+                                phantasmaTokens.SingleOrDefault(p => p.Symbol == data.symbol).Decimals);
+                            receiverAddress = nativeEvent.Address;
                             receiverChain = data.chainAddress;
-                            var chain = nexus.FindChainByAddress(receiverChain).Name;
-                            description = $"{amountDecimal} {token.Name} tokens escrowed for address {receiverAddress} in {chain}";
+                            var chain = GetChainName(receiverChain.Text, phantasmaChains);
+                            description =
+                                $"{amountDecimal} {data.symbol} tokens escrowed for address {receiverAddress} in {chain}";
+                        }
+                        break;
+                    case EvtKind.AddressRegister:
+                        {
+                            var name = nativeEvent.GetContent<string>();
+                            description = $"{nativeEvent.Address} registered the name '{name}'";
                         }
                         break;
 
-                    case EventKind.AddressRegister:
+                    case EvtKind.FriendAdd:
                         {
-                            var name = evt.GetContent<string>();
-                            description = $"{evt.Address} registered the name '{name}'";
+                            var address = nativeEvent.GetContent<Address>();
+                            description = $"{nativeEvent.Address} added '{address} to friends.'";
                         }
                         break;
 
-                    case EventKind.FriendAdd:
+                    case EvtKind.FriendRemove:
                         {
-                            var address = evt.GetContent<Address>();
-                            description = $"{evt.Address} added '{address} to friends.'";
-                        }
-                        break;
-
-                    case EventKind.FriendRemove:
-                        {
-                            var address = evt.GetContent<Address>();
-                            description = $"{evt.Address} removed '{address} from friends.'";
+                            var address = nativeEvent.GetContent<Address>();
+                            description = $"{nativeEvent.Address} removed '{address} from friends.'";
                         }
                         break;
                 }
@@ -112,14 +136,18 @@ namespace Phantasma.Explorer.ViewModels
 
             if (description == null)
             {
-                if (amount > 0 && senderAddress != Address.Null && receiverAddress != Address.Null && senderToken != null && senderToken == receiverToken)
+                if (amount > 0 && senderAddress != Address.Null && receiverAddress != Address.Null &&
+                    senderToken != null && senderToken == receiverToken)
                 {
-                    var amountDecimal = TokenUtils.ToDecimal(amount, senderToken.Decimals);
-                    description = $"{amountDecimal} {senderToken} sent from {senderAddress.Text} to {receiverAddress.Text}";
+                    var amountDecimal = TokenUtils.ToDecimal(amount,
+                        phantasmaTokens.SingleOrDefault(p => p.Symbol == senderToken).Decimals);
+                    description =
+                        $"{amountDecimal} {senderToken} sent from {senderAddress.Text} to {receiverAddress.Text}";
                 }
                 else if (amount > 0 && receiverAddress != Address.Null && receiverToken != null)
                 {
-                    var amountDecimal = TokenUtils.ToDecimal(amount, receiverToken.Decimals);
+                    var amountDecimal = TokenUtils.ToDecimal(amount,
+                        phantasmaTokens.SingleOrDefault(p => p.Symbol == receiverToken).Decimals);
                     description = $"{amountDecimal} {receiverToken} received on {receiverAddress.Text} ";
                 }
                 else
@@ -129,20 +157,21 @@ namespace Phantasma.Explorer.ViewModels
 
                 if (receiverChain != Address.Null && receiverChain != senderChain)
                 {
-                    description += $" from {nexus.FindChainByAddress(senderChain).Name} chain to {nexus.FindChainByAddress(receiverChain).Name} chain";
+                    description +=
+                        $" from {GetChainName(senderChain.Text, phantasmaChains)} chain to {GetChainName(receiverChain.Text, phantasmaChains)} chain";
                 }
             }
 
-            vm.Block = block;
-            vm.ChainAddress = block.ChainAddress;
-            vm.ChainName = block.ChainName;
-            vm.Date = block.Timestamp;
-            vm.Hash = tx.Hash.ToString();
-            vm.Events = evts.Select(evt => EventViewModel.FromEvent(repository, tx, evt));
-            vm.Description = description;
-            vm.Instructions = disasm.Instructions;
+            return description;
+        }
+        private static string GetChainName(string address, List<ChainDto> phantasmaChains)
+        {
+            foreach (var element in phantasmaChains)
+            {
+                if (element.Address == address) return element.Name;
+            }
 
-            return vm;
+            return string.Empty;
         }
     }
 }

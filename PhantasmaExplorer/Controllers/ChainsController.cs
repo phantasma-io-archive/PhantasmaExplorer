@@ -21,14 +21,14 @@ namespace Phantasma.Explorer.Controllers
             foreach (var repoChain in repoChains)
             {
                 var blockList = new List<BlockViewModel>();
-                var lastBlocks = Repository.GetBlocks(repoChain.Address.Text);
+                var lastBlocks = Repository.GetBlocks(repoChain.Address);
 
                 foreach (var block in lastBlocks)
                 {
                     blockList.Add(BlockViewModel.FromBlock(Repository, block));
                 }
 
-                chainList.Add(ChainViewModel.FromChain(repoChain, blockList));
+                chainList.Add(ChainViewModel.FromChain(Repository, repoChain, blockList));
             }
 
             return chainList;
@@ -40,19 +40,19 @@ namespace Phantasma.Explorer.Controllers
 
             if (repoChain == null)
             {
-                repoChain = Repository.GetChainByName(chainInput);
+                repoChain = Repository.GetChain(chainInput);
                 if (repoChain == null) return null;
             }
 
             var blockList = new List<BlockViewModel>();
-            var lastBlocks = Repository.GetBlocks(repoChain.Address.Text);
+            var lastBlocks = Repository.GetBlocks(repoChain.ChainInfo.Address);
 
             foreach (var block in lastBlocks)
             {
                 blockList.Add(BlockViewModel.FromBlock(Repository, block));
             }
 
-            return ChainViewModel.FromChain(repoChain, blockList);
+            return ChainViewModel.FromChain(Repository, repoChain.ChainInfo, blockList);
         }
     }
 }

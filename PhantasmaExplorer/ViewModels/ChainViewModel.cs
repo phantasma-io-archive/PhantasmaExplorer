@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Phantasma.Blockchain;
 using Phantasma.Core.Utils;
+using Phantasma.Explorer.Infrastructure.Interfaces;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -16,24 +17,24 @@ namespace Phantasma.Explorer.ViewModels
         public Dictionary<string, string> ChildChains { get; set; }
 
 
-        public static ChainViewModel FromChain(Chain chain, List<BlockViewModel> lastBlocks)
+        public static ChainViewModel FromChain(IRepository repository,ChainDto chain, List<BlockViewModel> lastBlocks)
         {
             var vm = new ChainViewModel
             {
-                Address = chain.Address.Text,
+                Address = chain.Address,
                 Name = chain.Name.ToTitleCase(),
-                Transactions = chain.TransactionCount,
-                Height = chain.Blocks.Count(),
+                Transactions = repository.GetTotalChainTransactionCount(chain.Address),
+                Height = chain.Height,
                 Blocks = lastBlocks,
-                ParentChain = chain.ParentChain?.Address.Text ?? ""
+                ParentChain = chain.ParentAddress ?? ""
             };
 
-            if (chain.ChildChains.Any())
+            if (chain.Children.Any())
             {
                 vm.ChildChains = new Dictionary<string, string>();
-                foreach (var childChain in chain.ChildChains)
+                foreach (var childChain in chain.Children)
                 {
-                    vm.ChildChains[childChain.Name] = childChain.Address.Text;
+                    vm.ChildChains[childChain.Name] = childChain.Address;
                 }
             }
             return vm;

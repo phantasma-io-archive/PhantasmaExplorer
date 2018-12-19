@@ -1,70 +1,61 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Phantasma.Blockchain;
-using Phantasma.Blockchain.Contracts;
-using Phantasma.Blockchain.Contracts.Native;
-using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
+using Phantasma.Explorer.Infrastructure.Models;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Infrastructure.Interfaces
 {
-    public interface IRepository//<T> where T : BaseDbEntity
+    public interface IRepository
     {
-        //todo calls should be async imo
-        Nexus NexusChain { get; set; }//todo remove
-
-        //Chain RootChain { get; set; }
-        //Dictionary<Hash, Block> Blocks { get; set; }
-        //Dictionary<string, Chain> Chains { get; set; }
-        //Dictionary<string, Token> Tokens { get; set; }
-
-
         Task InitRepo();
 
         decimal GetAddressNativeBalance(Address address, string chainName = null);
 
-        decimal GetAddressBalance(Address address, Token token, string chainName);
+        decimal GetAddressBalance(Address address, TokenDto token, string chainName);
 
         IEnumerable<Address> GetAddressList(string chainAddress = null, int lastAddressAmount = 20);
 
         Address GetAddress(string address);
 
-        IEnumerable<Block> GetBlocks(string chainAddress = null, int lastBlocksAmount = 20);
+        IEnumerable<BlockDto> GetBlocks(string chainAddress = null, int lastBlocksAmount = 20);
 
-        Block GetBlock(string hash);
+        BlockDto GetBlock(string hash);
 
-        Block GetBlock(int height, string chainAddress = null);
+        BlockDto GetBlock(int height, string chainAddress = null);
 
-        IEnumerable<Chain> GetAllChains();
+        IEnumerable<ChainDto> GetAllChains();
 
         IEnumerable<string> GetChainNames();
 
-        Chain GetChain(string chainAddress);
-
-        Chain GetChainByName(string chainName);
+        ChainRepository GetChain(string chainInput);
 
         int GetChainCount();
 
-        IEnumerable<Transaction> GetTransactions(string chainAddress = null, int txAmount = 20);
+        IEnumerable<TransactionDto> GetTransactions(string chainAddress = null, int txAmount = 20);
 
-        IEnumerable<Transaction> GetAddressTransactions(Address address, int amount = 20);
+        IEnumerable<TransactionDto> GetAddressTransactions(Address address, int amount = 20);
 
         int GetAddressTransactionCount(Address address, string chainName);
 
-        Transaction GetTransaction(string txHash);
+        int GetTotalChainTransactionCount(string chain);
+
+        TransactionDto GetTransaction(string txHash);
 
         int GetTotalTransactions();
 
-        IEnumerable<Token> GetTokens();
+        IEnumerable<TokenDto> GetTokens();
 
-        Token GetToken(string symbol);
+        TokenDto GetToken(string symbol);
 
-        IEnumerable<Transaction> GetLastTokenTransfers(string symbol, int amount);
+        IEnumerable<TransactionDto> GetLastTokenTransfers(string symbol, int amount);
 
         int GetTokenTransfersCount(string symbol);
 
-        string GetEventContent(Block block, Event evt);
+        string GetEventContent(BlockDto block, EventDto evt);
 
-        IEnumerable<AppInfo> GetApps();
+        IEnumerable<AppDto> GetApps();
+
+        BlockDto FindBlockForTransaction(string txHash);
     }
 }

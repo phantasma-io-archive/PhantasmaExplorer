@@ -2,7 +2,7 @@
 using System.Linq;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
-using Transaction = Phantasma.Blockchain.Transaction;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -16,17 +16,17 @@ namespace Phantasma.Explorer.ViewModels
         public decimal Value { get; set; }
         public IEnumerable<TransactionViewModel> Transactions { get; set; }
 
-        public static AddressViewModel FromAddress(IRepository repository, Address address, IEnumerable<Transaction> txs)
+        public static AddressViewModel FromAddress(IRepository repository, Address address, IEnumerable<TransactionDto> txs)
         {
             return new AddressViewModel
             {
                 Address = address.Text,
-                Name = repository.NexusChain.LookUpAddress(address),
+                //todo Name = repository.NexusChain.LookUpAddress(address),
                 Value = 0,
                 Balance = 0,
                 NativeBalances = new List<BalanceViewModel>(),
                 TokenBalance = new List<BalanceViewModel>(),
-                Transactions = txs?.Select(tx => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, repository.NexusChain.FindBlockForTransaction(tx)), tx))
+                Transactions = txs?.Select(tx => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, repository.FindBlockForTransaction(tx.Txid)), tx))
             };
         }
     }

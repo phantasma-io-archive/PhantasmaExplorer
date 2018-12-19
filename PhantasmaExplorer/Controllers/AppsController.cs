@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.ViewModels;
 
@@ -19,8 +20,8 @@ namespace Phantasma.Explorer.Controllers
             var apps = Repository.GetApps();
             foreach (var appInfo in apps)
             {
-                var chain = Repository.GetChainByName(appInfo.id);
-                var txs = Repository.GetAddressTransactions(chain.Address).ToList();
+                var chain = Repository.GetChain(appInfo.Id);
+                var txs = Repository.GetAddressTransactions(Address.FromText(chain.ChainInfo.Address)).ToList();
                 var vm = AppViewModel.FromApp(appInfo);
                 vm.TxCount = txs.Count;
                 appsList.Add(vm);
@@ -37,7 +38,7 @@ namespace Phantasma.Explorer.Controllers
         public AppViewModel GetApp(string appId)
         {
             var apps = Repository.GetApps();
-            var app = apps.SingleOrDefault(a => a.id == appId);
+            var app = apps.SingleOrDefault(a => a.Id == appId);
             return AppViewModel.FromApp(app);
         }
     }

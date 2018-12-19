@@ -9,6 +9,6 @@ namespace Phantasma.Explorer.ViewModels
         public Dictionary<string, uint> Chart { get; set; }
         public int TotalChains { get; set; }
         public int TotalTransactions { get; set; }
-        public uint BlockHeight { get; set; }
+        public int BlockHeight { get; set; }
     }
 }
