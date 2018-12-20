@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Core.Types;
 using Phantasma.Core.Utils;
-using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.RpcClient.DTOs;
 
@@ -31,7 +30,7 @@ namespace Phantasma.Explorer.ViewModels
                 Transactions = block.Txs.Count,
                 Hash = block.Hash,
                 ParentHash = block.PreviousHash,
-                MiningAddress = Address.Null.Text, // block.MinerAddress.Text, TODO fixme later
+                MiningAddress = block.MinerAddress,
                 ChainName = repository.GetChainName(block.ChainAddress).ToTitleCase(),
                 ChainAddress = block.ChainAddress,
                 Reward = block.Reward,

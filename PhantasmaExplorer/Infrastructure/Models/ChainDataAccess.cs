@@ -2,6 +2,7 @@
 using System.Linq;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
+using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Infrastructure.Models
@@ -14,22 +15,54 @@ namespace Phantasma.Explorer.Infrastructure.Models
         public int Height { get; set; }
         public List<ChainDto> Children { get; set; }
 
-        private Dictionary<Hash, BlockDto> _blocks;
+        private Dictionary<Hash, BlockDto> _blocks = new Dictionary<Hash, BlockDto>();
         private Dictionary<TokenDto, BalanceSheet> _tokenBalances = new Dictionary<TokenDto, BalanceSheet>();
-        private Dictionary<TokenDto, OwnershipSheet> _tokenOwnerships = new Dictionary<TokenDto, OwnershipSheet>();
+        private Dictionary<TokenDto, OwnershipSheet> _tokenOwnerships = new Dictionary<TokenDto, OwnershipSheet>(); //todo public add
 
-        public ChainDataAccess(ChainDto dto, Dictionary<Hash, BlockDto> blocks)
+        public ChainDataAccess(ChainDto dto)
         {
             Name = dto.Name;
             Address = dto.Address;
             ParentAddress = dto.ParentAddress;
-            _blocks = blocks;
         }
 
+        public void SetBlock(BlockDto block)
+        {
+            _blocks.Add(Hash.Parse(block.Hash), block);
+            Height = (int)block.Height;
+        }
 
-        public BalanceSheet GetTokenBalances(TokenDto dto) => null;//todo
+        public void UpdateTokenBalance(TokenDto token, Address address, BigInteger balance, bool add)
+        {
+            var sheet = _tokenBalances.ContainsKey(token) ? _tokenBalances[token] : new BalanceSheet();
+            if (add)
+            {
+                sheet.Add(address, balance);
+            }
+            else
+            {
+                sheet.Subtract(address, balance);
+            }
+            _tokenBalances[token] = sheet;
+        }
 
-        public OwnershipSheet GetTokenOwnerships(TokenDto dto) => null;//todo
+        public void UpdateTokenOwnership(TokenDto token, Address address, BigInteger balance, bool add)
+        {
+            var sheet = _tokenOwnerships.ContainsKey(token) ? _tokenOwnerships[token] : new OwnershipSheet();
+            if (add)
+            {
+                sheet.Give(address, balance);
+            }
+            else
+            {
+                sheet.Take(address, balance);
+            }
+            _tokenOwnerships[token] = sheet;
+        } 
+
+        public BalanceSheet GetTokenBalances(TokenDto dto) => _tokenBalances.ContainsKey(dto) ? _tokenBalances[dto] : null;
+
+        public OwnershipSheet GetTokenOwnerships(TokenDto dto) => _tokenOwnerships.ContainsKey(dto) ? _tokenOwnerships[dto] : null;
 
         // Get DTOs
         public List<BlockDto> GetBlocks => _blocks.Values.OrderByDescending(p => p.Height).ToList(); //todo remove orderBy, and make it save in correct order
@@ -42,9 +75,6 @@ namespace Phantasma.Explorer.Infrastructure.Models
             Height = Height,
             ParentAddress = ParentAddress
         };
-
-
-
 
         //
         public BlockDto FindBlockByHash(Hash hash)

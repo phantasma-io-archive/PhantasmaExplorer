@@ -23,8 +23,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
         //public Nexus NexusChain { get; set; }
 
         private RootChainDto _rootChain;
-        private List<ChainDataAccess> _chains = new List<ChainDataAccess>();
-        private Dictionary<string, TokenDto> _tokens = new Dictionary<string, TokenDto>();
+        private readonly List<ChainDataAccess> _chains = new List<ChainDataAccess>();
+        private readonly Dictionary<string, TokenDto> _tokens = new Dictionary<string, TokenDto>();
         private int NativeTokenDecimals = 8;
 
         public List<AppDto> Apps { get; set; }
@@ -52,14 +52,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
             foreach (var chain in chains)
             {
-                var blocks = new Dictionary<Hash, BlockDto>();
-                var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
-                for (int i = 1; i <= height; i++)//slooow
-                {
-                    var blockDto = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(root.Name, i);
-                    blocks.Add(Hash.Parse(blockDto.Hash), blockDto);
-                }
-                _chains.Add(new ChainDataAccess(chain, blocks));
+                var persistentChain = SetupChain(chain);
+                SetupBlocks(persistentChain);
             }
 
             var testGetBlocks1 = GetBlocks(); // works
@@ -512,6 +506,66 @@ namespace Phantasma.Explorer.Infrastructure.Data
         public string GetChainName(string chainAddress)
         {
             return _chains.SingleOrDefault(p => p.Address == chainAddress)?.Name;
+        }
+
+        private ChainDataAccess SetupChain(ChainDto chain)
+        {
+            var newChain = new ChainDataAccess(chain);
+            _chains.Add(newChain);
+            return newChain;
+        }
+
+        //todo move
+        private async void SetupBlocks(ChainDataAccess chain)
+        {
+            var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
+
+            for (int i = 1; i <= height; i++) //slooow
+            {
+                var blockDto = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, i);
+                foreach (var tx in blockDto.Txs)
+                {
+                    if (tx.Events != null && tx.Events.Any()) //todo not sure if this is needed
+                    {
+                        foreach (var txEvent in tx.Events)
+                        {
+                            if (txEvent.Data != null)
+                            {
+                                var nativeEvent = new Event((EventKind)txEvent.EvtKind,
+                                    Address.FromText((txEvent.EventAddress)), txEvent.Data.Decode());
+                                TokenDto token;
+                                Address address;
+                                BigInteger amount;
+                                TokenEventData data;
+                                switch (txEvent.EvtKind)
+                                {
+                                    case EvtKind.TokenBurn:
+                                    case EvtKind.TokenSend:
+                                        data = nativeEvent.GetContent<TokenEventData>();
+                                        amount = data.value;
+                                        address = nativeEvent.Address;
+                                        token = GetToken(data.symbol);
+
+                                        chain.UpdateTokenBalance(token, address, amount, false);
+                                        break;
+
+                                    case EvtKind.TokenMint:
+                                    case EvtKind.TokenReceive:
+                                        data = nativeEvent.GetContent<TokenEventData>();
+                                        amount = data.value;
+                                        address = nativeEvent.Address;
+                                        token = GetToken(data.symbol);
+
+                                        chain.UpdateTokenBalance(token, address, amount, true);
+                                        break;
+                                }
+                            }
+                        }
+                    }
+
+                    chain.SetBlock(blockDto);
+                }
+            }
         }
     }
 }

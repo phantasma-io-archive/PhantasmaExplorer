@@ -41,9 +41,9 @@ namespace Phantasma.Explorer
             var simulator = new ChainSimulator(ownerKey, 12346);
 
             // setup plugins required for explorer
-            simulator.Nexus.AddPlugin(new ChainAddressesPlugin(simulator.Nexus));
-            simulator.Nexus.AddPlugin(new AddressTransactionsPlugin(simulator.Nexus));
-            simulator.Nexus.AddPlugin(new TokenTransactionsPlugin(simulator.Nexus));
+            simulator.Nexus.AddPlugin(new ChainAddressesPlugin());
+            simulator.Nexus.AddPlugin(new AddressTransactionsPlugin());
+            simulator.Nexus.AddPlugin(new TokenTransactionsPlugin());
 
             // generate blocks with mock transactions
             for (int i = 1; i <= 50; i++)
