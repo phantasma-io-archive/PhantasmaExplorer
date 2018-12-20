@@ -36,7 +36,7 @@ namespace Phantasma.Explorer.Controllers
 
         public AddressViewModel GetAddress(string addressText)
         {
-            var repoAddress = Repository.GetAddress(addressText);
+            var repoAddress = AddressUtils.ValidateAddress(addressText.Trim());
             if (repoAddress != Address.Null)
             {
                 var txs = Repository.GetAddressTransactions(repoAddress);

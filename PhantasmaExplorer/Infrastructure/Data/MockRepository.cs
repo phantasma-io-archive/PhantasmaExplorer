@@ -24,8 +24,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         private RootChainDto _rootChain;
         private List<ChainDataAccess> _chains = new List<ChainDataAccess>();
-        private Dictionary<string, TokenDto> Tokens { get; set; }
-        
+        private Dictionary<string, TokenDto> _tokens = new Dictionary<string, TokenDto>();
+        private int NativeTokenDecimals = 8;
 
         public List<AppDto> Apps { get; set; }
 
@@ -35,7 +35,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
         {
             _phantasmaRpcService = new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc")));
 
-            var test = await _phantasmaRpcService.GetTokens.SendRequestAsync();
             var root = await _phantasmaRpcService.GetRootChain.SendRequestAsync();
             var chains = await _phantasmaRpcService.GetChains.SendRequestAsync(); //name-address info only
             var tokens = await _phantasmaRpcService.GetTokens.SendRequestAsync();
@@ -46,7 +45,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
             foreach (var token in tokens.Tokens)
             {
-                Tokens.Add(token.Symbol, token);
+                _tokens.Add(token.Symbol, token);
             }
 
             // working
@@ -82,7 +81,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public decimal GetAddressBalance(Address address, TokenDto token, string chainName)
         {
-            throw new NotImplementedException();
+            return 0;//todo
         }
 
         public decimal GetAddressBalance(Address address, Token token, string chainName)
@@ -125,17 +124,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
             //    return plugin.GetChainAddresses(chain);
             //}
         }
-
-        public Address GetAddress(string addressText) //todo
-        {
-            if (Address.IsValidAddress(addressText))
-            {
-                return Address.FromText(addressText);
-
-            }
-            return Address.Null;
-        }
-
 
         public ChainDataAccess GetChain(string chainInput)
         {
@@ -185,9 +173,9 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 var chain = GetChain(chainAddress);
                 if (chain != null)
                 {
-                    foreach (var block in chain.Blocks)
+                    foreach (var block in chain.GetBlocks)
                     {
-                        foreach (var tx in block.Value.Txs)
+                        foreach (var tx in block.Txs)
                         {
                             txList.Add(tx);
                             if (txList.Count == txAmount) return txList;
@@ -247,13 +235,13 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public IEnumerable<TokenDto> GetTokens()
         {
-            var tokens = Tokens.Values.ToList();
+            var tokens = _tokens.Values.ToList();
             return tokens;
         }
 
         public TokenDto GetToken(string symbol)
         {
-            return Tokens[symbol];
+            return _tokens[symbol];
         }
 
         public IEnumerable<TransactionDto> GetLastTokenTransfers(string symbol, int amount)
@@ -316,15 +304,15 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 case EvtKind.GasEscrow:
                     {
                         var gasEvent = nativeEvent.GetContent<GasEventData>();
-                        var amount = TokenUtils.ToDecimal(gasEvent.amount, Nexus.NativeTokenDecimals);
-                        var price = TokenUtils.ToDecimal(gasEvent.price, Nexus.NativeTokenDecimals);
+                        var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
+                        var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
                         return $"{amount} {Nexus.PlatformName} tokens escrowed for contract gas, with price of {price} per gas unit";
                     }
                 case EvtKind.GasPayment:
                     {
                         var gasEvent = nativeEvent.GetContent<GasEventData>();
-                        var amount = TokenUtils.ToDecimal(gasEvent.amount, Nexus.NativeTokenDecimals);
-                        var price = TokenUtils.ToDecimal(gasEvent.price, Nexus.NativeTokenDecimals);
+                        var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
+                        var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
                         return $"{amount} {Nexus.PlatformName} tokens paid for contract gas, with price of {price} per gas unit";
 
                     }
@@ -386,18 +374,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return Apps;
         }
 
-        private static string GetChainName(Nexus nexus, Address chainAddress)
-        {
-            var chain = nexus.FindChainByAddress(chainAddress);
-            if (chain != null)
-            {
-                return chain.Name;
-            }
-
-            return "???";
-        }
-
-
 
 
         //TODO NEW without nexus
@@ -415,18 +391,17 @@ namespace Phantasma.Explorer.Infrastructure.Data
             {
                 foreach (var chain in _chains)
                 {
-                    blockList.AddRange(chain.GetBlocks.TakeLast(10));
+                    blockList.AddRange(chain.GetBlocks.Take((lastBlocksAmount / _chains.Count) + lastBlocksAmount)); //todo revisit logic
                 }
-                blockList = blockList.OrderByDescending(b => DateTime.Parse(b.Timestamp)).Take(lastBlocksAmount).ToList();
+                blockList = blockList.OrderByDescending(b => b.Timestamp).Take(lastBlocksAmount).ToList();
             }
             else //specific chain
             {
                 var chain = GetChain(chainInput);
                 if (chain != null)
                 {
-                    blockList.AddRange(chain.GetBlocks.TakeLast(lastBlocksAmount));
+                    blockList.AddRange(chain.GetBlocks.Take(lastBlocksAmount));//don't need reorder
                 }
-                blockList = blockList.OrderByDescending(b => b.Height).ToList();
             }
             return blockList;
         }
@@ -473,16 +448,17 @@ namespace Phantasma.Explorer.Infrastructure.Data
         public BlockDto FindBlockByHeight(string chainInput, int height)
         {
             var chain = GetChain(chainInput);
-            return chain?.GetBlocks.Find(p => p.Height == height);
+            return chain?.FindBlockByHeight(height);
         }
 
         public BlockDto FindBlockByHash(Hash hash)
         {
             foreach (var chain in _chains)
             {
-                if (chain.Blocks.ContainsKey(hash))
+                var block = chain.FindBlockByHash(hash);
+                if (block != null)
                 {
-                    return chain.Blocks[hash];
+                    return block;
                 }
             }
 
@@ -493,27 +469,15 @@ namespace Phantasma.Explorer.Infrastructure.Data
         {
             foreach (var chain in _chains)
             {
-                foreach (var block in chain.Blocks)
+                foreach (var block in chain.GetBlocks)
                 {
-                    if (block.Value.Txs.SingleOrDefault(p => p.Txid == txHash) != null)
+                    if (block.Txs.SingleOrDefault(p => p.Txid == txHash) != null)
                     {
-                        return block.Value;
+                        return block;
                     }
                 }
             }
 
-            return null;
-        }
-
-        public ChainDataAccess FindChainForBlock(BlockDto block)
-        {
-            foreach (var chain in _chains)
-            {
-                if (chain.Blocks.ContainsValue(block))
-                {
-                    return chain;
-                }
-            }
             return null;
         }
 
@@ -545,7 +509,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return _chains;
         }
 
-        private string GetChainName(string chainAddress)
+        public string GetChainName(string chainAddress)
         {
             return _chains.SingleOrDefault(p => p.Address == chainAddress)?.Name;
         }

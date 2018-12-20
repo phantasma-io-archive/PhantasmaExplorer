@@ -29,7 +29,7 @@ namespace Phantasma.Explorer.ViewModels
                 ParentChain = chain.ParentAddress ?? ""
             };
 
-            if (chain.Children.Any())
+            if (chain.Children != null && chain.Children.Any())
             {
                 vm.ChildChains = new Dictionary<string, string>();
                 foreach (var childChain in chain.Children)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Phantasma.Core.Types;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
@@ -41,7 +42,7 @@ namespace Phantasma.Explorer.Controllers
             {
                 var block = Repository.FindBlockForTransaction(transaction.Txid);
 
-                DateTime chartTime = DateTime.Parse(block.Timestamp);
+                DateTime chartTime = new Timestamp((uint)block.Timestamp);
                 var chartKey = $"{chartTime.Day}/{chartTime.Month}";
 
                 if (chart.ContainsKey(chartKey))

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Phantasma.Core.Types;
+using Phantasma.Core.Utils;
+using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.RpcClient.DTOs;
 
@@ -21,20 +24,20 @@ namespace Phantasma.Explorer.ViewModels
 
         public static BlockViewModel FromBlock(IRepository repository, BlockDto block)
         {
-
             var vm = new BlockViewModel
             {
                 Height = (int)block.Height,
-                Timestamp = DateTime.Parse(block.Timestamp),
+                Timestamp = new Timestamp((uint)block.Timestamp),
                 Transactions = block.Txs.Count,
                 Hash = block.Hash,
                 ParentHash = block.PreviousHash,
-                MiningAddress = Cryptography.Address.Null.Text, // block.MinerAddress.Text, TODO fixme later
-                //ChainName = bloc.Name.ToTitleCase(), todo
+                MiningAddress = Address.Null.Text, // block.MinerAddress.Text, TODO fixme later
+                ChainName = repository.GetChainName(block.ChainAddress).ToTitleCase(),
                 ChainAddress = block.ChainAddress,
                 Reward = block.Reward,
                 Txs = new List<TransactionViewModel>()
             };
+
             var txsVm = block.Txs.Select(transaction => TransactionViewModel.FromTransaction(repository, vm, transaction)).ToList();
 
             vm.Txs = txsVm;

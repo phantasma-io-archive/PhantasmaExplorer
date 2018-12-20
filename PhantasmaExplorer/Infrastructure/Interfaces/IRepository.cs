@@ -16,8 +16,6 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         IEnumerable<Address> GetAddressList(string chainAddress = null, int lastAddressAmount = 20);
 
-        Address GetAddress(string address);
-
         IEnumerable<BlockDto> GetBlocks(string chainAddress = null, int lastBlocksAmount = 20);
 
         BlockDto GetBlock(string hash);
@@ -29,6 +27,8 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
         IEnumerable<ChainDataAccess> GetAllChains();
 
         IEnumerable<string> GetChainNames();
+
+        string GetChainName(string chainAddress);
 
         ChainDataAccess GetChain(string chainInput);
 

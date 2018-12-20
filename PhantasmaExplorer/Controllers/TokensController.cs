@@ -120,11 +120,9 @@ namespace Phantasma.Explorer.Controllers
 
         public List<NftViewModel> GetNftListByAddress(string inputAddress) //todo finish this
         {
-            var repoAddress = Repository.GetAddress(inputAddress);
+            var repoAddress = AddressUtils.ValidateAddress(inputAddress.Trim());
             var nfTokens = Repository.GetTokens().Where(t => !t.Flags.HasFlag(TokenFlags.Fungible));//get only non fungible tokens
             var chains = Repository.GetAllChains();
-
-            var appChain = chains.FirstOrDefault(x => x.Name == "apps");
 
             var nftList = new List<NftViewModel>();
             if (repoAddress != Address.Null)

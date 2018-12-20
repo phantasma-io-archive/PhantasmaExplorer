@@ -14,7 +14,7 @@ namespace Phantasma.Explorer.Infrastructure.Models
         public int Height { get; set; }
         public List<ChainDto> Children { get; set; }
 
-        public Dictionary<Hash, BlockDto> Blocks { get; set; }
+        private Dictionary<Hash, BlockDto> _blocks;
         private Dictionary<TokenDto, BalanceSheet> _tokenBalances = new Dictionary<TokenDto, BalanceSheet>();
         private Dictionary<TokenDto, OwnershipSheet> _tokenOwnerships = new Dictionary<TokenDto, OwnershipSheet>();
 
@@ -23,16 +23,16 @@ namespace Phantasma.Explorer.Infrastructure.Models
             Name = dto.Name;
             Address = dto.Address;
             ParentAddress = dto.ParentAddress;
-            Blocks = blocks;
+            _blocks = blocks;
         }
 
 
-        public BalanceSheet GetTokenBalances(TokenDto dto) =>  null;//todo
+        public BalanceSheet GetTokenBalances(TokenDto dto) => null;//todo
 
         public OwnershipSheet GetTokenOwnerships(TokenDto dto) => null;//todo
 
         // Get DTOs
-        public List<BlockDto> GetBlocks => Blocks.Values.ToList();
+        public List<BlockDto> GetBlocks => _blocks.Values.OrderByDescending(p => p.Height).ToList(); //todo remove orderBy, and make it save in correct order
 
         public ChainDto GetChainInfo => new ChainDto
         {
@@ -42,5 +42,24 @@ namespace Phantasma.Explorer.Infrastructure.Models
             Height = Height,
             ParentAddress = ParentAddress
         };
+
+
+
+
+        //
+        public BlockDto FindBlockByHash(Hash hash)
+        {
+            if (_blocks.ContainsKey(hash))
+            {
+                return _blocks[hash];
+            }
+
+            return null;
+        }
+
+        public BlockDto FindBlockByHeight(int height)
+        {
+            return GetBlocks.Find(p => p.Height == height);
+        }
     }
 }
