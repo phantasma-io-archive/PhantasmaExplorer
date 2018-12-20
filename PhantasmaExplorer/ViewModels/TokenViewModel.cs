@@ -1,6 +1,4 @@
-﻿using Phantasma.Blockchain;
-using Phantasma.Blockchain.Tokens;
-using Phantasma.RpcClient.DTOs;
+﻿using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -27,7 +25,7 @@ namespace Phantasma.Explorer.ViewModels
                 Decimals = token.Decimals,
                 Price = price,
                 Transfers = transfers,
-                //Flags = token.Flags, todo
+                Flags = token.Flags,
                 LogoUrl = logoUrl //todo
             };
         }

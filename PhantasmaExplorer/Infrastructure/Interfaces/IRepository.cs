@@ -24,11 +24,13 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         BlockDto GetBlock(int height, string chainAddress = null);
 
-        IEnumerable<ChainDto> GetAllChains();
+        IEnumerable<ChainDto> GetAllChainsInfo();
+
+        IEnumerable<ChainDataAccess> GetAllChains();
 
         IEnumerable<string> GetChainNames();
 
-        ChainRepository GetChain(string chainInput);
+        ChainDataAccess GetChain(string chainInput);
 
         int GetChainCount();
 

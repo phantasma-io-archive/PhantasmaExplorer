@@ -21,7 +21,7 @@ namespace Phantasma.Explorer.Controllers
             foreach (var appInfo in apps)
             {
                 var chain = Repository.GetChain(appInfo.Id);
-                var txs = Repository.GetAddressTransactions(Address.FromText(chain.ChainInfo.Address)).ToList();
+                var txs = Repository.GetAddressTransactions(Address.FromText(chain.Address)).ToList();
                 var vm = AppViewModel.FromApp(appInfo);
                 vm.TxCount = txs.Count;
                 appsList.Add(vm);

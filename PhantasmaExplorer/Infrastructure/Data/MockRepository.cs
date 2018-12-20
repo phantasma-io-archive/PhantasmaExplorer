@@ -22,9 +22,10 @@ namespace Phantasma.Explorer.Infrastructure.Data
     {
         //public Nexus NexusChain { get; set; }
 
-        public RootChainDto RootChain { get; set; }
-        public List<ChainRepository> Chains { get; set; } = new List<ChainRepository>();
-        public Dictionary<string, TokenDto> Tokens { get; set; }
+        private RootChainDto _rootChain;
+        private List<ChainDataAccess> _chains = new List<ChainDataAccess>();
+        private Dictionary<string, TokenDto> Tokens { get; set; }
+        
 
         public List<AppDto> Apps { get; set; }
 
@@ -41,7 +42,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
 
             Apps = appList.Apps;
-            RootChain = root;
+            _rootChain = root;
 
             foreach (var token in tokens.Tokens)
             {
@@ -59,7 +60,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                     var blockDto = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(root.Name, i);
                     blocks.Add(Hash.Parse(blockDto.Hash), blockDto);
                 }
-                Chains.Add(new ChainRepository(chain, blocks));
+                _chains.Add(new ChainDataAccess(chain, blocks));
             }
 
             var testGetBlocks1 = GetBlocks(); // works
@@ -120,7 +121,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             //}
             //else
             //{
-            //    var chain = NexusChain.FindChainByAddress(Address.FromText(chainAddress));
+            //    var chain = NexusChain.GetChainInfoByAddress(Address.FromText(chainAddress));
             //    return plugin.GetChainAddresses(chain);
             //}
         }
@@ -136,22 +137,22 @@ namespace Phantasma.Explorer.Infrastructure.Data
         }
 
 
-        public ChainRepository GetChain(string chainInput)
+        public ChainDataAccess GetChain(string chainInput)
         {
-            return Chains.SingleOrDefault(p => p.ChainInfo.Address.Equals(chainInput, StringComparison.InvariantCulture) || p.ChainInfo.Name.Equals(chainInput, StringComparison.InvariantCulture));
+            return _chains.SingleOrDefault(p => p.Address.Equals(chainInput, StringComparison.InvariantCulture) || p.Name.Equals(chainInput, StringComparison.InvariantCulture));
         }
 
         public int GetChainCount()
         {
-            return Chains.Count;
+            return _chains.Count;
         }
 
         public IEnumerable<string> GetChainNames()
         {
             var nameList = new List<string>();
-            foreach (var chain in Chains)
+            foreach (var chain in _chains)
             {
-                nameList.Add(chain.ChainInfo.Name);
+                nameList.Add(chain.Name);
             }
 
             return nameList;
@@ -163,7 +164,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             var blocksList = new List<BlockDto>();
             if (string.IsNullOrEmpty(chainAddress)) //all chains
             {
-                foreach (var chain in Chains)
+                foreach (var chain in _chains)
                 {
                     blocksList.AddRange(chain.GetBlocks.TakeLast(txAmount * 10));
                 }
@@ -235,7 +236,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
         public int GetTotalTransactions()
         {
             int total = 0;
-            foreach (var chain in Chains)
+            foreach (var chain in _chains)
             {
                 var blocks = chain.GetBlocks;
                 total += blocks.Select(p => p.Txs).Count();
@@ -302,7 +303,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 case EvtKind.ChainCreate:
                     {
                         var tokenData = nativeEvent.GetContent<TokenEventData>();
-                        var chain = FindChainByAddress(tokenData.chainAddress.ToString());
+                        var chain = GetChainInfoByAddress(tokenData.chainAddress.ToString());
                         return $"{chain.Name} chain created at address <a href=\"/chain/{tokenData.chainAddress}\">{tokenData.chainAddress}</a>.";
                     }
 
@@ -401,9 +402,9 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         //TODO NEW without nexus
 
-        private ChainRepository GetRootChain => Chains.FirstOrDefault(p =>
-            p.ChainInfo.Address.Equals(RootChain.Address, StringComparison.InvariantCultureIgnoreCase) ||
-            p.ChainInfo.Name.Equals(RootChain.Name, StringComparison.InvariantCultureIgnoreCase));
+        private ChainDataAccess GetRootChain => _chains.FirstOrDefault(p =>
+            p.Address.Equals(_rootChain.Address, StringComparison.InvariantCultureIgnoreCase) ||
+            p.Name.Equals(_rootChain.Name, StringComparison.InvariantCultureIgnoreCase));
 
         public IEnumerable<BlockDto> GetBlocks(string chainInput = null, int lastBlocksAmount = 20)
         {
@@ -412,7 +413,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             // all chains
             if (string.IsNullOrEmpty(chainInput))
             {
-                foreach (var chain in Chains)
+                foreach (var chain in _chains)
                 {
                     blockList.AddRange(chain.GetBlocks.TakeLast(10));
                 }
@@ -456,7 +457,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             else
             {
                 var chain = GetChain(chainAddress);
-                block = FindBlockByHeight(chain.ChainInfo.Address, height);
+                block = FindBlockByHeight(chain.Address, height);
             }
 
             if (block == null && !string.IsNullOrEmpty(chainAddress))
@@ -477,7 +478,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public BlockDto FindBlockByHash(Hash hash)
         {
-            foreach (var chain in Chains)
+            foreach (var chain in _chains)
             {
                 if (chain.Blocks.ContainsKey(hash))
                 {
@@ -490,7 +491,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public BlockDto FindBlockForTransaction(string txHash)
         {
-            foreach (var chain in Chains)
+            foreach (var chain in _chains)
             {
                 foreach (var block in chain.Blocks)
                 {
@@ -504,9 +505,9 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return null;
         }
 
-        public ChainRepository FindChainForBlock(BlockDto block)
+        public ChainDataAccess FindChainForBlock(BlockDto block)
         {
-            foreach (var chain in Chains)
+            foreach (var chain in _chains)
             {
                 if (chain.Blocks.ContainsValue(block))
                 {
@@ -516,14 +517,14 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return null;
         }
 
-        public ChainDto FindChainByAddress(string address)
+        public ChainDto GetChainInfoByAddress(string address)
         {
-            return Chains.SingleOrDefault(p => p.ChainInfo.Address.Equals(address))?.ChainInfo;
+            return _chains.SingleOrDefault(p => p.Address.Equals(address))?.GetChainInfo;
         }
 
         public TransactionDto FindTransactionByHash(string hash)
         {
-            foreach (var chain in Chains)
+            foreach (var chain in _chains)
             {
                 foreach (var block in chain.GetBlocks)
                 {
@@ -534,14 +535,19 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return null;
         }
 
-        public IEnumerable<ChainDto> GetAllChains()
+        public IEnumerable<ChainDto> GetAllChainsInfo()
         {
-            return Chains.Select(p => p.ChainInfo);
+            return _chains.Select(p => p.GetChainInfo);
+        }
+
+        public IEnumerable<ChainDataAccess> GetAllChains()
+        {
+            return _chains;
         }
 
         private string GetChainName(string chainAddress)
         {
-            return Chains.SingleOrDefault(p => p.ChainInfo.Address == chainAddress)?.ChainInfo.Name;
+            return _chains.SingleOrDefault(p => p.Address == chainAddress)?.Name;
         }
     }
 }

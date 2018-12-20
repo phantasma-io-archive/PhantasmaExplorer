@@ -55,7 +55,7 @@ namespace Phantasma.Explorer.Controllers
             }
 
             int totalChains = Repository.GetChainCount();
-            int height = Repository.GetChain("main").ChainInfo.Height; //todo repo
+            int height = Repository.GetChain("main").Height; //todo repo
             int totalTransactions = Repository.GetTotalTransactions();
 
             var vm = new HomeViewModel
@@ -147,7 +147,7 @@ namespace Phantasma.Explorer.Controllers
                 var chain = Repository.GetChain(input) ?? Repository.GetChain(input);
                 if (chain != null)
                 {
-                    return $"chain/{chain.ChainInfo.Address}";
+                    return $"chain/{chain.Address}";
                 }
 
                 //hash

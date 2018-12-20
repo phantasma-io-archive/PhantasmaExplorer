@@ -47,7 +47,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
     //        throw new System.NotImplementedException();
     //    }
 
-    //    public IEnumerable<Chain> GetAllChains()
+    //    public IEnumerable<Chain> GetAllChainsInfo()
     //    {
     //        throw new System.NotImplementedException();
     //    }

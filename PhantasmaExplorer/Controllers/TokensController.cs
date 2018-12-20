@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Phantasma.Blockchain;
 using Phantasma.Blockchain.Tokens;
+//using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
+using TokenFlags = Phantasma.RpcClient.DTOs.TokenFlags;
 
 namespace Phantasma.Explorer.Controllers
 {
@@ -135,7 +136,7 @@ namespace Phantasma.Explorer.Controllers
                         var ownershipSheet = chain.GetTokenOwnerships(nfToken); //todo move this to repository
                         var ids = ownershipSheet.Get(repoAddress);
 
-                        var viewerURL = appChain.InvokeContract("apps", "GetTokenViewer", nfToken.Symbol).ToString();
+                        var viewerURL = "";// todo appChain.InvokeContract("apps", "GetTokenViewer", nfToken.Symbol).ToString();
 
                         foreach (var id in ids)
                         {

@@ -34,7 +34,7 @@ namespace Phantasma.Explorer.ViewModels
             var vm = new TransactionViewModel();
             var disasm = new Disassembler(tx.Script.Decode()); //Todo fix me
 
-            string description = GetTxDescription(tx, repository.GetAllChains()?.ToList(), repository.GetTokens()?.ToList());
+            string description = GetTxDescription(tx, repository.GetAllChainsInfo()?.ToList(), repository.GetTokens()?.ToList());
 
             vm.Block = block;
             vm.ChainAddress = block.ChainAddress;
