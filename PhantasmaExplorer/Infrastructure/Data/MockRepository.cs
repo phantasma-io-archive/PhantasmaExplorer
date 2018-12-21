@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
@@ -23,8 +23,10 @@ namespace Phantasma.Explorer.Infrastructure.Data
         private RootChainDto _rootChain;
         private readonly List<ChainDataAccess> _chains = new List<ChainDataAccess>();
         private readonly Dictionary<string, TokenDto> _tokens = new Dictionary<string, TokenDto>();
+        private readonly Dictionary<TokenDto, int> _tokenTransfers = new Dictionary<TokenDto, int>();
         private readonly List<Address> _addresses = new List<Address>();
         private const int NativeTokenDecimals = 8;
+        private const string PlatformName = "Phantasma";
 
         public List<AppDto> Apps { get; set; }
 
@@ -52,11 +54,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
             foreach (var chain in chains)
             {
                 var persistentChain = SetupChain(chain);
-                SetupBlocks(persistentChain);
+                await SetupBlocks(persistentChain);
             }
-
-            var testGetBlocks1 = GetBlocks(); // works
-            var testGetBlocks2 = GetBlocks("main", 10); //works
         }
 
         public decimal GetAddressNativeBalance(Address address, string chainName = null) //todo this should not be here
@@ -80,6 +79,11 @@ namespace Phantasma.Explorer.Infrastructure.Data
             }
 
             return balance;
+        }
+
+        public string GetAddressName(string address)
+        {
+            return _phantasmaRpcService.GetAccount.SendRequestAsync(address).Result.Name;//todo remove rpc
         }
 
         public IEnumerable<Address> GetAddressList(int count = 20)
@@ -151,23 +155,13 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public IEnumerable<TransactionDto> GetAddressTransactions(Address address, int amount = 20)
         {
-            //    var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
-            //    return plugin?.GetAddressTransactions(address).OrderByDescending(tx => NexusChain.FindBlockForTransaction(tx).Timestamp.Value).Take(amount);
-            return new List<TransactionDto>(); //todo
+            var txs = _phantasmaRpcService.GetAddressTxs.SendRequestAsync(address.ToString(), amount).Result;//todo remove result
+            return txs.Txs; //todo
         }
 
         public int GetAddressTransactionCount(Address address, string chainName)
         {
-            //todo
-            //var chain = NexusChain.FindChainByName(chainName);
-
-            //var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
-            //if (plugin != null)
-            //{
-            //    return plugin.GetAddressTransactions(address).Count(tx => NexusChain.FindBlockForTransaction(tx).ChainAddress == chain.Address);
-            //}
-
-            return 0;
+            return _phantasmaRpcService.GetAddressTxCount.SendRequestAsync(address.ToString(), chainName).Result;
         }
 
         public int GetTotalChainTransactionCount(string chainInput)
@@ -175,7 +169,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
             var chain = GetChain(chainInput);
             return chain.GetBlocks.SelectMany(p => p.Txs).Count(); //todo confirm this
         }
-
 
         public TransactionDto GetTransaction(string txHash)
         {
@@ -206,31 +199,14 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return _tokens[symbol];
         }
 
-        public IEnumerable<TransactionDto> GetLastTokenTransfers(string symbol, int amount)
+        public IEnumerable<TransactionDto> GetLastTokenTransfers(string symbol, int amount) //todo persist
         {
-            //todo
-            //var token = GetToken(symbol);
-            //var plugin = NexusChain.GetPlugin<TokenTransactionsPlugin>();
-
-            //if (token != null && plugin != null)
-            //{
-            //    return plugin.GetTokenTransactions(token).OrderByDescending(tx => NexusChain.FindBlockForTransaction(tx).Timestamp.Value).Take(amount);
-            //}
-
-            return new List<TransactionDto>();
+            return _phantasmaRpcService.GetTokenTransfers.SendRequestAsync(symbol, amount).Result;
         }
 
-        public int GetTokenTransfersCount(string symbol)
+        public int GetTokenTransfersCount(string symbol) //todo persist
         {
-            //todo
-            //var token = GetToken(symbol);
-            //var plugin = NexusChain.GetPlugin<TokenTransactionsPlugin>();
-            //if (token != null && plugin != null)
-            //{
-            //    return plugin.GetTokenTransactions(token).Count();
-            //}
-
-            return 0;
+            return _phantasmaRpcService.GetTokenTransferCount.SendRequestAsync(symbol).Result;
         }
 
 
@@ -256,7 +232,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
                         var chain = GetChainInfoByAddress(tokenData.chainAddress.ToString());
                         return $"{chain.Name} chain created at address <a href=\"/chain/{tokenData.chainAddress}\">{tokenData.chainAddress}</a>.";
                     }
-
                 case EvtKind.TokenCreate:
                     {
                         var symbol = Serialization.Unserialize<string>(nativeEvent.Data);
@@ -268,14 +243,14 @@ namespace Phantasma.Explorer.Infrastructure.Data
                         var gasEvent = nativeEvent.GetContent<GasEventData>();
                         var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
                         var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
-                        return $"{amount} {Nexus.PlatformName} tokens escrowed for contract gas, with price of {price} per gas unit";
+                        return $"{amount} {PlatformName} tokens escrowed for contract gas, with price of {price} per gas unit";
                     }
                 case EvtKind.GasPayment:
                     {
                         var gasEvent = nativeEvent.GetContent<GasEventData>();
                         var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
                         var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
-                        return $"{amount} {Nexus.PlatformName} tokens paid for contract gas, with price of {price} per gas unit";
+                        return $"{amount} {PlatformName} tokens paid for contract gas, with price of {price} per gas unit";
 
                     }
                 case EvtKind.TokenMint:
@@ -378,7 +353,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public BlockDto GetBlock(int height, string chainAddress = null)
         {
-            BlockDto block = null;
+            BlockDto block;
 
             if (string.IsNullOrEmpty(chainAddress)) // search in main chain
             {
@@ -447,7 +422,8 @@ namespace Phantasma.Explorer.Infrastructure.Data
             {
                 foreach (var block in chain.GetBlocks)
                 {
-                    return block.Txs.SingleOrDefault(t => t.Txid.Equals(hash));
+                    var tx = block.Txs.SingleOrDefault(t => t.Txid.Equals(hash));
+                    if (tx != null) return tx;
                 }
             }
 
@@ -477,7 +453,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
         }
 
         //todo move
-        private async void SetupBlocks(ChainDataAccess chain)
+        private async Task SetupBlocks(ChainDataAccess chain)
         {
             var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
 
@@ -494,18 +470,26 @@ namespace Phantasma.Explorer.Infrastructure.Data
                             {
                                 var nativeEvent = new Event((EventKind)txEvent.EvtKind, //todo remove native event
                                     Address.FromText((txEvent.EventAddress)), txEvent.Data.Decode());
-                                TokenDto token;
                                 Address address;
                                 BigInteger amount;
                                 TokenEventData data;
+                                TokenDto token;
+                                AddAddressToList(address);
+                                //UpdateTokenTransfer(token);
+
+                                if (address != Address.Null)
+                                {
+                                    chain.UpdateAddressTransactions(address, tx);
+                                }
+
                                 switch (txEvent.EvtKind)
                                 {
                                     case EvtKind.TokenBurn:
                                     case EvtKind.TokenSend:
                                         data = nativeEvent.GetContent<TokenEventData>();
+                                        token = GetToken(data.symbol);
                                         amount = data.value;
                                         address = nativeEvent.Address;
-                                        token = GetToken(data.symbol);
                                         if (token.Fungible)
                                         {
                                             chain.UpdateTokenBalance(token, address, amount, false);
@@ -514,7 +498,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
                                         {
                                             chain.UpdateTokenOwnership(token, address, amount, false);
                                         }
-                                        AddAddressToList(address);
                                         break;
 
                                     case EvtKind.TokenMint:
@@ -531,24 +514,29 @@ namespace Phantasma.Explorer.Infrastructure.Data
                                         {
                                             chain.UpdateTokenOwnership(token, address, amount, true);
                                         }
-
-                                        AddAddressToList(address);
                                         break;
                                 }
                             }
                         }
                     }
 
+                    Debug.WriteLine($"setup block n:{i}");
                     chain.SetBlock(blockDto);
                 }
             }
         }
+
         private void AddAddressToList(Address address)
         {
             if (!_addresses.Contains(address))
             {
                 _addresses.Add(address);
             }
+        }
+
+        private void UpdateTokenTransfer(TokenDto dto)
+        {
+            _tokenTransfers[dto] += 1;
         }
     }
 }

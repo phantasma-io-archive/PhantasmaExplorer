@@ -18,6 +18,7 @@ namespace Phantasma.Explorer.Infrastructure.Models
         private readonly Dictionary<Hash, BlockDto> _blocks = new Dictionary<Hash, BlockDto>();
         private readonly Dictionary<TokenDto, BalanceSheet> _tokenBalances = new Dictionary<TokenDto, BalanceSheet>();
         private readonly Dictionary<TokenDto, OwnershipSheet> _tokenOwnerships = new Dictionary<TokenDto, OwnershipSheet>(); //todo public add
+        private readonly Dictionary<Address, HashSet<TransactionDto>> _addressTransactions = new Dictionary<Address, HashSet<TransactionDto>>();
 
         public ChainDataAccess(ChainDto dto)
         {
@@ -32,6 +33,19 @@ namespace Phantasma.Explorer.Infrastructure.Models
         {
             _blocks[Hash.Parse(block.Hash)] = block;
             Height = (int)block.Height;
+        }
+
+        public void UpdateAddressTransactions(Address address, TransactionDto tx)
+        {
+            if (_addressTransactions.ContainsKey(address))
+            {
+                _addressTransactions[address].Add(tx);
+            }
+            else
+            {
+                _addressTransactions.Add(address, new HashSet<TransactionDto> { tx });
+            }
+
         }
 
         public void UpdateTokenBalance(TokenDto token, Address address, BigInteger balance, bool add)
@@ -66,8 +80,8 @@ namespace Phantasma.Explorer.Infrastructure.Models
 
         public OwnershipSheet GetTokenOwnerships(TokenDto dto) => _tokenOwnerships.ContainsKey(dto) ? _tokenOwnerships[dto] : null;
 
-        public BigInteger GetTokenAddressBalance(TokenDto dto, Address address) => _tokenBalances[dto].Get(address);
-        public IEnumerable<BigInteger> GetTokenAddressOwnership(TokenDto dto, Address address) => _tokenOwnerships[dto].Get(address);
+        public BigInteger GetTokenAddressBalance(TokenDto dto, Address address) => _tokenBalances.ContainsKey(dto) ? _tokenBalances[dto].Get(address) : 0;
+        public IEnumerable<BigInteger> GetTokenAddressOwnership(TokenDto dto, Address address) => _tokenOwnerships.ContainsKey(dto) ? _tokenOwnerships[dto].Get(address) : new BigInteger[0];
 
         // Get DTOs
         public List<BlockDto> GetBlocks => _blocks.Values.OrderByDescending(p => p.Height).ToList(); //todo remove orderBy, and make it save in correct order

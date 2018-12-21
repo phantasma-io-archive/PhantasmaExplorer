@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Blockchain.Tokens;
-//using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
@@ -39,10 +38,10 @@ namespace Phantasma.Explorer.Controllers
 
         public List<TokenViewModel> GetTokens()
         {
-            var nexusTokens = Repository.GetTokens();
+            var tokens = Repository.GetTokens();
             var tokensList = new List<TokenViewModel>();
             SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
-            foreach (var token in nexusTokens)
+            foreach (var token in tokens)
             {
                 var tranfers = GetTransactionCount(token.Symbol);
                 SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
@@ -67,7 +66,7 @@ namespace Phantasma.Explorer.Controllers
                     if ((token.Flags & TokenFlags.Fungible) != 0)
                     {
                         var balanceSheet = chain.GetTokenBalances(token);
-                        balanceSheet.ForEach((address, integer) =>
+                        balanceSheet?.ForEach((address, integer) =>
                         {
                             var vm = new BalanceViewModel
                             {
@@ -82,7 +81,7 @@ namespace Phantasma.Explorer.Controllers
                     else
                     {
                         var ownershipSheet = chain.GetTokenOwnerships(token);
-                        ownershipSheet.ForEach((address, integer) =>
+                        ownershipSheet?.ForEach((address, integer) =>
                         {
                             var vm = new BalanceViewModel
                             {
@@ -107,7 +106,10 @@ namespace Phantasma.Explorer.Controllers
             foreach (var tx in transfers)
             {
                 var block = Repository.FindBlockForTransaction(tx.Txid);
-                temp.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx));
+                if (block != null)
+                {
+                    temp.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx));
+                }
             }
 
             return new List<TransactionViewModel>(temp.Where(p => p.AmountTransfer > 0).Take(20));
@@ -132,7 +134,7 @@ namespace Phantasma.Explorer.Controllers
                     foreach (var nfToken in nfTokens)
                     {
                         var ownershipSheet = chain.GetTokenOwnerships(nfToken); //todo move this to repository
-                        var ids = ownershipSheet.Get(repoAddress);
+                        var ids = ownershipSheet?.Get(repoAddress);
 
                         var viewerURL = ""; //todo invoke contracts appChain.InvokeContract("apps", "GetTokenViewer", nfToken.Symbol).ToString();
 

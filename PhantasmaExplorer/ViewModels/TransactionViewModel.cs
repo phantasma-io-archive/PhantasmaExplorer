@@ -34,7 +34,7 @@ namespace Phantasma.Explorer.ViewModels
             var vm = new TransactionViewModel();
             var disasm = new Disassembler(tx.Script.Decode()); //Todo fix me
 
-            string description = GetTxDescription(tx, repository.GetAllChainsInfo()?.ToList(), repository.GetTokens()?.ToList());
+            string description = GetTxDescription(vm, tx, repository.GetAllChainsInfo()?.ToList(), repository.GetTokens()?.ToList());
 
             vm.Block = block;
             vm.ChainAddress = block.ChainAddress;
@@ -49,7 +49,7 @@ namespace Phantasma.Explorer.ViewModels
         }
 
         //todo revisit
-        public static string GetTxDescription(TransactionDto tx, List<ChainDto> phantasmaChains, List<TokenDto> phantasmaTokens)
+        public static string GetTxDescription(TransactionViewModel vm, TransactionDto tx, List<ChainDto> phantasmaChains, List<TokenDto> phantasmaTokens)
         {
             string description = null;
 
@@ -141,6 +141,10 @@ namespace Phantasma.Explorer.ViewModels
                 {
                     var amountDecimal = TokenUtils.ToDecimal(amount,
                         phantasmaTokens.SingleOrDefault(p => p.Symbol == senderToken).Decimals);
+                    vm.AmountTransfer = amountDecimal;
+                    vm.TokenSymbol = senderToken;
+                    vm.SenderAddress = senderAddress.ToString();
+                    vm.ReceiverAddress = receiverAddress.ToString();
                     description =
                         $"{amountDecimal} {senderToken} sent from {senderAddress.Text} to {receiverAddress.Text}";
                 }
@@ -148,6 +152,9 @@ namespace Phantasma.Explorer.ViewModels
                 {
                     var amountDecimal = TokenUtils.ToDecimal(amount,
                         phantasmaTokens.SingleOrDefault(p => p.Symbol == receiverToken).Decimals);
+                    vm.AmountTransfer = amountDecimal;
+                    vm.TokenSymbol = receiverToken;
+                    vm.ReceiverAddress = receiverAddress.ToString();
                     description = $"{amountDecimal} {receiverToken} received on {receiverAddress.Text} ";
                 }
                 else
@@ -161,7 +168,6 @@ namespace Phantasma.Explorer.ViewModels
                         $" from {GetChainName(senderChain.Text, phantasmaChains)} chain to {GetChainName(receiverChain.Text, phantasmaChains)} chain";
                 }
             }
-
             return description;
         }
         private static string GetChainName(string address, List<ChainDto> phantasmaChains)

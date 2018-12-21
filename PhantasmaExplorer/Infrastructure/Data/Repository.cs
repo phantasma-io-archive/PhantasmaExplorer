@@ -10,7 +10,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
     ////todo get db stuff from local node?
     //public class Repository : IRepository
     //{
-    //    public Nexus NexusChain { get; set; }
 
     //    public decimal GetAddressNativeBalance(Address address, string chainName = null)
     //    {

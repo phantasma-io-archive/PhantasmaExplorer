@@ -42,7 +42,7 @@ namespace Phantasma.Explorer.Controllers
                 var txs = Repository.GetAddressTransactions(repoAddress);
                 var soulToken = Repository.GetTokens().SingleOrDefault(x => x.Symbol == "SOUL");
                 SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
-                var tokens = Repository.GetTokens().Where(x => x.Symbol != "SOUL");//todo check
+                var tokens = Repository.GetTokens().Where(x => x.Symbol != "SOUL");
                 var address = AddressViewModel.FromAddress(Repository, repoAddress, txs);
                 var chains = Repository.GetChainNames();
 
