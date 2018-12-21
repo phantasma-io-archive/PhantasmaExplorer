@@ -134,7 +134,7 @@ namespace Phantasma.Explorer.Controllers
                         var ownershipSheet = chain.GetTokenOwnerships(nfToken); //todo move this to repository
                         var ids = ownershipSheet.Get(repoAddress);
 
-                        var viewerURL = "";// todo appChain.InvokeContract("apps", "GetTokenViewer", nfToken.Symbol).ToString();
+                        var viewerURL = ""; //todo invoke contracts appChain.InvokeContract("apps", "GetTokenViewer", nfToken.Symbol).ToString();
 
                         foreach (var id in ids)
                         {

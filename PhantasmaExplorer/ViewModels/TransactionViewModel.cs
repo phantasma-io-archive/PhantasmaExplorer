@@ -19,7 +19,7 @@ namespace Phantasma.Explorer.ViewModels
         public DateTime Date { get; set; }
         public string ChainName { get; set; }
         public string ChainAddress { get; set; }
-        //public IEnumerable<EventViewModel> Events { get; set; }
+        public IEnumerable<EventViewModel> Events { get; set; }
         public IEnumerable<Instruction> Instructions { get; set; }
         public string Description { get; set; }
 
@@ -41,7 +41,7 @@ namespace Phantasma.Explorer.ViewModels
             vm.ChainName = block.ChainName;
             vm.Date = block.Timestamp;
             vm.Hash = tx.Txid;
-            //vm.Events = evts.Select(evt => EventViewModel.FromEvent(repository, tx, evt));
+            vm.Events = tx.Events.Select(evt => EventViewModel.FromEvent(repository, tx, evt));
             vm.Description = description;
             vm.Instructions = disasm.Instructions;
 
@@ -84,7 +84,7 @@ namespace Phantasma.Explorer.ViewModels
                             var data = nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
                             senderAddress = nativeEvent.Address;
-                            senderToken = (data.symbol);
+                            senderToken = data.symbol;
                         }
                         break;
 

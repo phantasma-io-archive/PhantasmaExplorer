@@ -15,20 +15,22 @@ namespace Phantasma.Explorer.Infrastructure.Models
         public int Height { get; set; }
         public List<ChainDto> Children { get; set; }
 
-        private Dictionary<Hash, BlockDto> _blocks = new Dictionary<Hash, BlockDto>();
-        private Dictionary<TokenDto, BalanceSheet> _tokenBalances = new Dictionary<TokenDto, BalanceSheet>();
-        private Dictionary<TokenDto, OwnershipSheet> _tokenOwnerships = new Dictionary<TokenDto, OwnershipSheet>(); //todo public add
+        private readonly Dictionary<Hash, BlockDto> _blocks = new Dictionary<Hash, BlockDto>();
+        private readonly Dictionary<TokenDto, BalanceSheet> _tokenBalances = new Dictionary<TokenDto, BalanceSheet>();
+        private readonly Dictionary<TokenDto, OwnershipSheet> _tokenOwnerships = new Dictionary<TokenDto, OwnershipSheet>(); //todo public add
 
         public ChainDataAccess(ChainDto dto)
         {
             Name = dto.Name;
             Address = dto.Address;
             ParentAddress = dto.ParentAddress;
+            Children = dto.Children;
+            Height = dto.Height;
         }
 
         public void SetBlock(BlockDto block)
         {
-            _blocks.Add(Hash.Parse(block.Hash), block);
+            _blocks[Hash.Parse(block.Hash)] = block;
             Height = (int)block.Height;
         }
 
@@ -46,23 +48,26 @@ namespace Phantasma.Explorer.Infrastructure.Models
             _tokenBalances[token] = sheet;
         }
 
-        public void UpdateTokenOwnership(TokenDto token, Address address, BigInteger balance, bool add)
+        public void UpdateTokenOwnership(TokenDto token, Address address, BigInteger id, bool add)
         {
             var sheet = _tokenOwnerships.ContainsKey(token) ? _tokenOwnerships[token] : new OwnershipSheet();
             if (add)
             {
-                sheet.Give(address, balance);
+                sheet.Give(address, id);
             }
             else
             {
-                sheet.Take(address, balance);
+                sheet.Take(address, id);
             }
             _tokenOwnerships[token] = sheet;
-        } 
+        }
 
         public BalanceSheet GetTokenBalances(TokenDto dto) => _tokenBalances.ContainsKey(dto) ? _tokenBalances[dto] : null;
 
         public OwnershipSheet GetTokenOwnerships(TokenDto dto) => _tokenOwnerships.ContainsKey(dto) ? _tokenOwnerships[dto] : null;
+
+        public BigInteger GetTokenAddressBalance(TokenDto dto, Address address) => _tokenBalances[dto].Get(address);
+        public IEnumerable<BigInteger> GetTokenAddressOwnership(TokenDto dto, Address address) => _tokenOwnerships[dto].Get(address);
 
         // Get DTOs
         public List<BlockDto> GetBlocks => _blocks.Values.OrderByDescending(p => p.Height).ToList(); //todo remove orderBy, and make it save in correct order

@@ -14,7 +14,7 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         decimal GetAddressBalance(Address address, TokenDto token, string chainName);
 
-        IEnumerable<Address> GetAddressList(string chainAddress = null, int lastAddressAmount = 20);
+        IEnumerable<Address> GetAddressList(int lastAddressAmount = 20);
 
         IEnumerable<BlockDto> GetBlocks(string chainAddress = null, int lastBlocksAmount = 20);
 

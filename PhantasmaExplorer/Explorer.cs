@@ -31,6 +31,7 @@ namespace Phantasma.Explorer
             viewsRenderer.SetupControllers(mockRepo);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
+            await Task.Delay(10000);
             await mockRepo.InitRepo();
             server.Run();
         }

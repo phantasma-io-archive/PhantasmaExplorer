@@ -18,14 +18,13 @@ using Event = Phantasma.Blockchain.Contracts.Event;
 
 namespace Phantasma.Explorer.Infrastructure.Data
 {
-    public class MockRepository : IRepository //todo getTokenOwnserships
+    public class MockRepository : IRepository
     {
-        //public Nexus NexusChain { get; set; }
-
         private RootChainDto _rootChain;
         private readonly List<ChainDataAccess> _chains = new List<ChainDataAccess>();
         private readonly Dictionary<string, TokenDto> _tokens = new Dictionary<string, TokenDto>();
-        private int NativeTokenDecimals = 8;
+        private readonly List<Address> _addresses = new List<Address>();
+        private const int NativeTokenDecimals = 8;
 
         public List<AppDto> Apps { get; set; }
 
@@ -62,61 +61,30 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         public decimal GetAddressNativeBalance(Address address, string chainName = null) //todo this should not be here
         {
-            //todo
-            //if (string.IsNullOrEmpty(chainName))
-            //{
-            //    return TokenUtils.ToDecimal(NexusChain.RootChain.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
-            //}
+            if (string.IsNullOrEmpty(chainName))
+            {
+                return TokenUtils.ToDecimal(GetRootChain.GetTokenAddressBalance(GetNativeToken, address), GetNativeToken.Decimals);
+            }
+            var chain = GetChain(chainName);
 
-            //var chain = GetChainName(chainName);
-            return 0;
-            //return TokenUtils.ToDecimal(chain?.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
+            return TokenUtils.ToDecimal(chain.GetTokenAddressBalance(GetNativeToken, address), GetNativeToken.Decimals);
         }
 
         public decimal GetAddressBalance(Address address, TokenDto token, string chainName)
         {
-            return 0;//todo
+            var chain = GetChain(chainName);
+            decimal balance = 0;
+            if (chain != null)
+            {
+                balance = TokenUtils.ToDecimal(chain.GetTokenAddressBalance(token, address), token.Decimals);
+            }
+
+            return balance;
         }
 
-        public decimal GetAddressBalance(Address address, Token token, string chainName)
+        public IEnumerable<Address> GetAddressList(int count = 20)
         {
-            return 0;
-            //todo
-            //var chain = GetChainByName(chainName);
-            //decimal balance = 0;
-            //if (chain != null)
-            //{
-            //    balance = TokenUtils.ToDecimal(chain.GetTokenBalance(token, address), token.Decimals);
-            //}
-
-            //return balance;
-        }
-
-        public IEnumerable<Address> GetAddressList(string chainAddress = null, int count = 20) //todo strategy to get address
-        {
-            // if chainAddress then look only in a certain chain
-            // count number of address to return
-            return null;
-            //var plugin = NexusChain.GetPlugin<ChainAddressesPlugin>();
-            //if (plugin == null)
-            //{
-            //    return Enumerable.Empty<Address>();
-            //}
-
-            //if (string.IsNullOrEmpty(chainAddress))
-            //{
-            //    var addressList = new List<Address>();
-            //    foreach (var chain in NexusChain.Chains)
-            //    {
-            //        addressList.AddRange(plugin.GetChainAddresses(chain));
-            //    }
-            //    return addressList.Take(100);
-            //}
-            //else
-            //{
-            //    var chain = NexusChain.GetChainInfoByAddress(Address.FromText(chainAddress));
-            //    return plugin.GetChainAddresses(chain);
-            //}
+            return _addresses.Take(count);
         }
 
         public ChainDataAccess GetChain(string chainInput)
@@ -185,7 +153,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
         {
             //    var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
             //    return plugin?.GetAddressTransactions(address).OrderByDescending(tx => NexusChain.FindBlockForTransaction(tx).Timestamp.Value).Take(amount);
-            return null; //todo
+            return new List<TransactionDto>(); //todo
         }
 
         public int GetAddressTransactionCount(Address address, string chainName)
@@ -249,7 +217,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             //    return plugin.GetTokenTransactions(token).OrderByDescending(tx => NexusChain.FindBlockForTransaction(tx).Timestamp.Value).Take(amount);
             //}
 
-            return null;
+            return new List<TransactionDto>();
         }
 
         public int GetTokenTransfersCount(string symbol)
@@ -368,13 +336,13 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return Apps;
         }
 
-
-
         //TODO NEW without nexus
 
         private ChainDataAccess GetRootChain => _chains.FirstOrDefault(p =>
             p.Address.Equals(_rootChain.Address, StringComparison.InvariantCultureIgnoreCase) ||
             p.Name.Equals(_rootChain.Name, StringComparison.InvariantCultureIgnoreCase));
+
+        private TokenDto GetNativeToken => _tokens["SOUL"];
 
         public IEnumerable<BlockDto> GetBlocks(string chainInput = null, int lastBlocksAmount = 20)
         {
@@ -405,14 +373,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             var blockHash = (Hash.Parse(hash));
 
             var block = FindBlockByHash(blockHash);
-            if (block != null)
-            {
-                return block;
-            }
-
-            //try get by rpc
-            var blockDto = _phantasmaRpcService.GetBlockByHash.SendRequestAsync(hash).Result; //todo remove
-            return blockDto;
+            return block;
         }
 
         public BlockDto GetBlock(int height, string chainAddress = null)
@@ -465,7 +426,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             {
                 foreach (var block in chain.GetBlocks)
                 {
-                    if (block.Txs.SingleOrDefault(p => p.Txid == txHash) != null)
+                    if (block.Txs.SingleOrDefault(p => p.Txid.Equals(txHash)) != null)
                     {
                         return block;
                     }
@@ -486,7 +447,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             {
                 foreach (var block in chain.GetBlocks)
                 {
-                    return block.Txs.Find(t => t.Txid == hash);
+                    return block.Txs.SingleOrDefault(t => t.Txid.Equals(hash));
                 }
             }
 
@@ -531,7 +492,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                         {
                             if (txEvent.Data != null)
                             {
-                                var nativeEvent = new Event((EventKind)txEvent.EvtKind,
+                                var nativeEvent = new Event((EventKind)txEvent.EvtKind, //todo remove native event
                                     Address.FromText((txEvent.EventAddress)), txEvent.Data.Decode());
                                 TokenDto token;
                                 Address address;
@@ -545,8 +506,15 @@ namespace Phantasma.Explorer.Infrastructure.Data
                                         amount = data.value;
                                         address = nativeEvent.Address;
                                         token = GetToken(data.symbol);
-
-                                        chain.UpdateTokenBalance(token, address, amount, false);
+                                        if (token.Fungible)
+                                        {
+                                            chain.UpdateTokenBalance(token, address, amount, false);
+                                        }
+                                        else
+                                        {
+                                            chain.UpdateTokenOwnership(token, address, amount, false);
+                                        }
+                                        AddAddressToList(address);
                                         break;
 
                                     case EvtKind.TokenMint:
@@ -555,8 +523,16 @@ namespace Phantasma.Explorer.Infrastructure.Data
                                         amount = data.value;
                                         address = nativeEvent.Address;
                                         token = GetToken(data.symbol);
+                                        if (token.Fungible)
+                                        {
+                                            chain.UpdateTokenBalance(token, address, amount, true);
+                                        }
+                                        else
+                                        {
+                                            chain.UpdateTokenOwnership(token, address, amount, true);
+                                        }
 
-                                        chain.UpdateTokenBalance(token, address, amount, true);
+                                        AddAddressToList(address);
                                         break;
                                 }
                             }
@@ -565,6 +541,13 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
                     chain.SetBlock(blockDto);
                 }
+            }
+        }
+        private void AddAddressToList(Address address)
+        {
+            if (!_addresses.Contains(address))
+            {
+                _addresses.Add(address);
             }
         }
     }
