@@ -25,7 +25,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             }
 
             var chain = GetChainByName(chainName);
-            return TokenUtils.ToDecimal(chain?.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
+            return TokenUtils.ToDecimal(chain.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
         }
 
         public decimal GetAddressBalance(Address address, Token token, string chainName)
@@ -217,7 +217,14 @@ namespace Phantasma.Explorer.Infrastructure.Data
         public IEnumerable<Transaction> GetAddressTransactions(Address address, int amount = 20)
         {
             var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
-            return plugin?.GetAddressTransactions(address).OrderByDescending(tx => NexusChain.FindBlockForTransaction(tx).Timestamp.Value).Take(amount);
+            var hashes = plugin?.GetAddressTransactions(address).OrderByDescending(tx => NexusChain.FindBlockForHash(tx).Timestamp.Value).Take(amount);
+            List<Transaction> txList = new List<Transaction>();
+            foreach (var hash in hashes)
+            {
+                txList.Add(GetTransaction(hash.ToString()));
+            }
+
+            return txList;
         }
 
         public int GetAddressTransactionCount(Address address, string chainName)
@@ -227,7 +234,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
             if (plugin != null)
             {
-                return plugin.GetAddressTransactions(address).Count(tx => NexusChain.FindBlockForTransaction(tx).ChainAddress == chain.Address);
+                return plugin.GetAddressTransactions(address).Count(tx => NexusChain.FindBlockForHash(tx).ChainAddress == chain.Address);
             }
 
             return 0;
@@ -266,13 +273,18 @@ namespace Phantasma.Explorer.Infrastructure.Data
         {
             var token = GetToken(symbol);
             var plugin = NexusChain.GetPlugin<TokenTransactionsPlugin>();
-
+            List<Hash> txHashes = new List<Hash>();
             if (token != null && plugin != null)
             {
-                return plugin.GetTokenTransactions(token).OrderByDescending(tx => NexusChain.FindBlockForTransaction(tx).Timestamp.Value).Take(amount);
+                txHashes = plugin.GetTokenTransactions(token.Symbol).OrderByDescending(tx => NexusChain.FindBlockForHash(tx).Timestamp.Value).Take(amount).ToList();
+            }
+            List<Transaction> txs = new List<Transaction>();
+            foreach (var txHash in txHashes)
+            {
+                txs.Add(GetTransaction(txHash.ToString()));
             }
 
-            return null;
+            return txs;
         }
 
         public int GetTokenTransfersCount(string symbol)
@@ -281,7 +293,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             var plugin = NexusChain.GetPlugin<TokenTransactionsPlugin>();
             if (token != null && plugin != null)
             {
-                return plugin.GetTokenTransactions(token).Count();
+                return plugin.GetTokenTransactions(token.Symbol).Count();
             }
 
             return 0;
