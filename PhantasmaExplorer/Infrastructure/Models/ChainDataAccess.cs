@@ -81,6 +81,7 @@ namespace Phantasma.Explorer.Infrastructure.Models
         public OwnershipSheet GetTokenOwnerships(TokenDto dto) => _tokenOwnerships.ContainsKey(dto) ? _tokenOwnerships[dto] : null;
 
         public BigInteger GetTokenAddressBalance(TokenDto dto, Address address) => _tokenBalances.ContainsKey(dto) ? _tokenBalances[dto].Get(address) : 0;
+
         public IEnumerable<BigInteger> GetTokenAddressOwnership(TokenDto dto, Address address) => _tokenOwnerships.ContainsKey(dto) ? _tokenOwnerships[dto].Get(address) : new BigInteger[0];
 
         // Get DTOs
