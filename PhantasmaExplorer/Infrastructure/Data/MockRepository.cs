@@ -36,26 +36,26 @@ namespace Phantasma.Explorer.Infrastructure.Data
         {
             _phantasmaRpcService = new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc")));
 
-            //var root = await _phantasmaRpcService.GetRootChain.SendRequestAsync();
-            //var chains = await _phantasmaRpcService.GetChains.SendRequestAsync(); //name-address info only
-            //var tokens = await _phantasmaRpcService.GetTokens.SendRequestAsync();
-            //var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
+            var root = await _phantasmaRpcService.GetRootChain.SendRequestAsync();
+            var chains = await _phantasmaRpcService.GetChains.SendRequestAsync(); //name-address info only
+            var tokens = await _phantasmaRpcService.GetTokens.SendRequestAsync();
+            var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
 
-            //Apps = appList;
-            //_rootChain = root;
+            Apps = appList;
+            _rootChain = root;
 
-            //foreach (var token in tokens)
-            //{
-            //    _tokens.Add(token.Symbol, token);
-            //}
+            foreach (var token in tokens)
+            {
+                _tokens.Add(token.Symbol, token);
+            }
 
-            //// working
+            // working
 
-            //foreach (var chain in chains)
-            //{
-            //    var persistentChain = SetupChain(chain);
-            //    await SetupBlocks(persistentChain);
-            //}
+            foreach (var chain in chains)
+            {
+                var persistentChain = SetupChain(chain);
+                await SetupBlocks(persistentChain);
+            }
         }
 
         public decimal GetAddressNativeBalance(Address address, string chainName = null) //todo this should not be here
@@ -470,11 +470,14 @@ namespace Phantasma.Explorer.Infrastructure.Data
                             {
                                 var nativeEvent = new Event((EventKind)txEvent.EvtKind, //todo remove native event
                                     Address.FromText((txEvent.EventAddress)), txEvent.Data.Decode());
-                                Address address;
+                                Address address = Address.FromText((txEvent.EventAddress));
                                 BigInteger amount;
                                 TokenEventData data;
                                 TokenDto token;
-                                AddAddressToList(address);
+                                if (address != Address.Null)
+                                {
+                                    AddAddressToList(address);
+                                }
                                 //UpdateTokenTransfer(token);
 
                                 if (address != Address.Null)
