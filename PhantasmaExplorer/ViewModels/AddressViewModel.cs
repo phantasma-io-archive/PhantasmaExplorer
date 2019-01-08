@@ -21,7 +21,7 @@ namespace Phantasma.Explorer.ViewModels
             return new AddressViewModel
             {
                 Address = address.Text,
-                //todo Name = repository.NexusChain.LookUpAddress(address),
+                Name = repository.GetAddressName(address.Text),
                 Value = 0,
                 Balance = 0,
                 NativeBalances = new List<BalanceViewModel>(),
