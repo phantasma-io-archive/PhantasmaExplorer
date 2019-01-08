@@ -12,7 +12,7 @@ namespace Phantasma.Explorer.Infrastructure.Models
         public string Name { get; set; }
         public string Address { get; set; }
         public string ParentAddress { get; set; }
-        public int Height { get; set; }
+        public uint Height { get; set; }
         public List<ChainDto> Children { get; set; }
 
         private readonly Dictionary<Hash, BlockDto> _blocks = new Dictionary<Hash, BlockDto>();
@@ -36,7 +36,7 @@ namespace Phantasma.Explorer.Infrastructure.Models
         public void SetBlock(BlockDto block)
         {
             _blocks[Hash.Parse(block.Hash)] = block;
-            Height = (int)block.Height;
+            Height = block.Height;
         }
 
         public void UpdateAddressTransactions(Address address, TransactionDto tx)

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Core.Utils;
-using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
@@ -12,7 +11,7 @@ namespace Phantasma.Explorer.ViewModels
         public string Name { get; set; }
         public int Transactions { get; set; }
         public string ParentChain { get; set; }
-        public int Height { get; set; }
+        public uint Height { get; set; }
         public List<BlockViewModel> Blocks { get; set; }
         public Dictionary<string, string> ChildChains { get; set; }
 
