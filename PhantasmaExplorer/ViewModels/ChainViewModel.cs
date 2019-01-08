@@ -17,7 +17,7 @@ namespace Phantasma.Explorer.ViewModels
         public Dictionary<string, string> ChildChains { get; set; }
 
 
-        public static ChainViewModel FromChain(ChainDto chain, List<BlockViewModel> lastBlocks, int totalTxs)
+        public static ChainViewModel FromChain(List<ChainDto> chains, ChainDto chain, List<BlockViewModel> lastBlocks, int totalTxs)
         {
             var vm = new ChainViewModel
             {
@@ -29,12 +29,15 @@ namespace Phantasma.Explorer.ViewModels
                 ParentChain = chain.ParentAddress ?? ""
             };
 
-            if (chain.Children != null && chain.Children.Any())
+            if (chains != null && chains.Any())
             {
                 vm.ChildChains = new Dictionary<string, string>();
-                foreach (var childChain in chain.Children)
+                foreach (var repoChain in chains)
                 {
-                    vm.ChildChains[childChain.Name] = childChain.Address;
+                    if (repoChain.ParentAddress.Equals(chain.Address))
+                    {
+                        vm.ChildChains[repoChain.Name] = repoChain.Address;
+                    }
                 }
             }
             return vm;

@@ -54,6 +54,13 @@ namespace Phantasma.Explorer.Infrastructure.Data
             foreach (var chain in chains)
             {
                 var persistentChain = SetupChain(chain);
+                var childs = chains.Where(p => p.ParentAddress.Equals(chain.Address));
+
+                if (childs.Any())
+                {
+                    persistentChain.AddChildren(childs.ToList());
+                }
+
                 await SetupBlocks(persistentChain);
             }
         }

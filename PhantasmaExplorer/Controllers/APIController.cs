@@ -41,7 +41,7 @@ namespace Phantasma.Explorer.Controllers
             {
                 if (Address.IsValidAddress(chain))
                 {
-                    result = _api.GetBlockByHeight(Address.FromText(chain), height);
+                    result = _api.GetBlockByHeight(chain, height);
                 }
             }
 

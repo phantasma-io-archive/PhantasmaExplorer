@@ -25,8 +25,12 @@ namespace Phantasma.Explorer.Infrastructure.Models
             Name = dto.Name;
             Address = dto.Address;
             ParentAddress = dto.ParentAddress;
-            Children = dto.Children;
             Height = dto.Height;
+        }
+
+        public void AddChildren(List<ChainDto> children)
+        {
+            Children = new List<ChainDto>(children);
         }
 
         public void SetBlock(BlockDto block)
@@ -91,7 +95,6 @@ namespace Phantasma.Explorer.Infrastructure.Models
         {
             Address = Address,
             Name = Name,
-            Children = Children,
             Height = Height,
             ParentAddress = ParentAddress
         };
