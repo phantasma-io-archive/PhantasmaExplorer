@@ -15,7 +15,7 @@ namespace Phantasma.Explorer.ViewModels
         public int Transactions { get; set; }
         public string Hash { get; set; }
         public string ParentHash { get; set; }
-        public string MiningAddress { get; set; }
+        public string ValidatorAddress { get; set; }
         public string ChainName { get; set; }
         public string ChainAddress { get; set; }
         public decimal Reward { get; set; }
@@ -30,7 +30,7 @@ namespace Phantasma.Explorer.ViewModels
                 Transactions = block.Txs.Count,
                 Hash = block.Hash,
                 ParentHash = block.PreviousHash,
-                MiningAddress = block.MinerAddress,
+                ValidatorAddress = block.ValidatorAddress,
                 ChainName = repository.GetChainName(block.ChainAddress).ToTitleCase(),
                 ChainAddress = block.ChainAddress,
                 Reward = block.Reward,
