@@ -16,6 +16,9 @@ namespace Phantasma.Explorer
 {
     public class Explorer
     {
+        //todo remove from here
+        private static MockRepository _repo;
+
         static async Task Main(string[] args)
         {
             Console.WriteLine("Initializing Phantasma Block Explorer....");
@@ -28,6 +31,7 @@ namespace Phantasma.Explorer
             var viewsRenderer = new ViewsRenderer(server, "views");
 
             var mockRepo = new MockRepository();
+            _repo = mockRepo;
             viewsRenderer.SetupControllers(mockRepo);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
@@ -54,12 +58,12 @@ namespace Phantasma.Explorer
             var airdropFile = "nacho_addresses.txt";
             if (File.Exists(airdropFile))
             {
-                Console.WriteLine("Loading airdrops from "+airdropFile);
+                Console.WriteLine("Loading airdrops from " + airdropFile);
 
                 var lines = File.ReadAllLines(airdropFile);
 
                 var addresses = new List<Address>();
-                for (int i=0; i<lines.Length; i++)
+                for (int i = 0; i < lines.Length; i++)
                 {
                     if (string.IsNullOrWhiteSpace(lines[i]))
                     {
@@ -95,7 +99,17 @@ namespace Phantasma.Explorer
                     Thread.Sleep(1000 * 60);
                     simulator.CurrentTime = DateTime.Now;
                     simulator.GenerateRandomBlock(mempool);
-                } 
+                }
+            }).Start();
+
+            new Thread(async () =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    await _repo.SyncronizeNewBlocks();
+                }
             }).Start();
 
             return simulator.Nexus;

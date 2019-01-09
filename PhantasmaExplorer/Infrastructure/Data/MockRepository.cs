@@ -29,6 +29,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
         private const string PlatformName = "Phantasma";
 
         public List<AppDto> Apps { get; set; }
+        private bool IsInitFinish = false;
 
         private IPhantasmaRpcService _phantasmaRpcService;
 
@@ -62,6 +63,23 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 }
 
                 await SetupBlocks(persistentChain);
+            }
+
+            IsInitFinish = true;
+        }
+
+        public async Task SyncronizeNewBlocks()
+        {
+            if (!IsInitFinish) return;
+            foreach (var chain in _chains)
+            {
+                var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
+                if (height > chain.Height)
+                {
+                    Debug.WriteLine($"NEW BLOCK: Chain: {chain.Name}, block: {height}");
+                    var block = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, height);
+                    SetupSingleBlock(chain, block);
+                }
             }
         }
 
@@ -459,6 +477,76 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return newChain;
         }
 
+        private void SetupSingleBlock(ChainDataAccess chain, BlockDto block)
+        {
+            foreach (var tx in block.Txs)
+            {
+                if (tx.Events != null && tx.Events.Any()) //todo not sure if this is needed
+                {
+                    foreach (var txEvent in tx.Events)
+                    {
+                        if (txEvent.Data != null)
+                        {
+                            var nativeEvent = new Event((EventKind)txEvent.EvtKind, //todo remove native event
+                                Address.FromText((txEvent.EventAddress)), txEvent.Data.Decode());
+                            Address address = Address.FromText((txEvent.EventAddress));
+                            BigInteger amount;
+                            TokenEventData data;
+                            TokenDto token;
+                            if (address != Address.Null)
+                            {
+                                AddAddressToList(address);
+                            }
+                            //UpdateTokenTransfer(token);
+
+                            if (address != Address.Null)
+                            {
+                                chain.UpdateAddressTransactions(address, tx);
+                            }
+
+                            switch (txEvent.EvtKind)
+                            {
+                                case EvtKind.TokenBurn:
+                                case EvtKind.TokenSend:
+                                    data = nativeEvent.GetContent<TokenEventData>();
+                                    token = GetToken(data.symbol);
+                                    amount = data.value;
+                                    address = nativeEvent.Address;
+                                    if (token.Fungible)
+                                    {
+                                        chain.UpdateTokenBalance(token, address, amount, false);
+                                    }
+                                    else
+                                    {
+                                        chain.UpdateTokenOwnership(token, address, amount, false);
+                                    }
+                                    break;
+
+                                case EvtKind.TokenMint:
+                                case EvtKind.TokenReceive:
+                                    data = nativeEvent.GetContent<TokenEventData>();
+                                    amount = data.value;
+                                    address = nativeEvent.Address;
+                                    token = GetToken(data.symbol);
+                                    if (token.Fungible)
+                                    {
+                                        chain.UpdateTokenBalance(token, address, amount, true);
+                                    }
+                                    else
+                                    {
+                                        chain.UpdateTokenOwnership(token, address, amount, true);
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                Debug.WriteLine($"setup block n:{block.Height}");
+                chain.SetBlock(block);
+            }
+        }
+
         //todo move
         private async Task SetupBlocks(ChainDataAccess chain)
         {
@@ -467,72 +555,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             for (int i = 1; i <= height; i++) //slooow
             {
                 var blockDto = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, i);
-                foreach (var tx in blockDto.Txs)
-                {
-                    if (tx.Events != null && tx.Events.Any()) //todo not sure if this is needed
-                    {
-                        foreach (var txEvent in tx.Events)
-                        {
-                            if (txEvent.Data != null)
-                            {
-                                var nativeEvent = new Event((EventKind)txEvent.EvtKind, //todo remove native event
-                                    Address.FromText((txEvent.EventAddress)), txEvent.Data.Decode());
-                                Address address = Address.FromText((txEvent.EventAddress));
-                                BigInteger amount;
-                                TokenEventData data;
-                                TokenDto token;
-                                if (address != Address.Null)
-                                {
-                                    AddAddressToList(address);
-                                }
-                                //UpdateTokenTransfer(token);
-
-                                if (address != Address.Null)
-                                {
-                                    chain.UpdateAddressTransactions(address, tx);
-                                }
-
-                                switch (txEvent.EvtKind)
-                                {
-                                    case EvtKind.TokenBurn:
-                                    case EvtKind.TokenSend:
-                                        data = nativeEvent.GetContent<TokenEventData>();
-                                        token = GetToken(data.symbol);
-                                        amount = data.value;
-                                        address = nativeEvent.Address;
-                                        if (token.Fungible)
-                                        {
-                                            chain.UpdateTokenBalance(token, address, amount, false);
-                                        }
-                                        else
-                                        {
-                                            chain.UpdateTokenOwnership(token, address, amount, false);
-                                        }
-                                        break;
-
-                                    case EvtKind.TokenMint:
-                                    case EvtKind.TokenReceive:
-                                        data = nativeEvent.GetContent<TokenEventData>();
-                                        amount = data.value;
-                                        address = nativeEvent.Address;
-                                        token = GetToken(data.symbol);
-                                        if (token.Fungible)
-                                        {
-                                            chain.UpdateTokenBalance(token, address, amount, true);
-                                        }
-                                        else
-                                        {
-                                            chain.UpdateTokenOwnership(token, address, amount, true);
-                                        }
-                                        break;
-                                }
-                            }
-                        }
-                    }
-
-                    Debug.WriteLine($"setup block n:{i}");
-                    chain.SetBlock(blockDto);
-                }
+                SetupSingleBlock(chain, blockDto);
             }
         }
 
