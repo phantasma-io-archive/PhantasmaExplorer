@@ -1,5 +1,4 @@
-﻿using Phantasma.Blockchain;
-using Phantasma.Blockchain.Tokens;
+﻿using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -15,14 +14,14 @@ namespace Phantasma.Explorer.ViewModels
         public int Transfers { get; set; }
         public TokenFlags Flags { get; set; }
 
-        public static TokenViewModel FromToken(Token token, string logoUrl, int transfers = 0, decimal price = 0m)
+        public static TokenViewModel FromToken(TokenDto token, string logoUrl, int transfers = 0, decimal price = 0m)
         {
             return new TokenViewModel
             {
                 Symbol = token.Symbol,
                 Name = token.Name,
-                MaxSupply = TokenUtils.ToDecimal(token.MaxSupply, token.Decimals),
-                CurrentSupply = TokenUtils.ToDecimal(token.CurrentSupply, token.Decimals),
+                MaxSupply = decimal.Parse(token.MaxSupply),
+                CurrentSupply = decimal.Parse(token.CurrentSupply),
                 Decimals = token.Decimals,
                 Price = price,
                 Transfers = transfers,

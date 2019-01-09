@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.ViewModels;
 
@@ -15,20 +16,21 @@ namespace Phantasma.Explorer.Controllers
 
         public List<ChainViewModel> GetChains()
         {
-            var repoChains = Repository.GetAllChains();
+            var repoChains = Repository.GetAllChainsInfo();
             var chainList = new List<ChainViewModel>();
 
             foreach (var repoChain in repoChains)
             {
                 var blockList = new List<BlockViewModel>();
-                var lastBlocks = Repository.GetBlocks(repoChain.Address.Text);
+                var lastBlocks = Repository.GetBlocks(repoChain.Address);
 
                 foreach (var block in lastBlocks)
                 {
                     blockList.Add(BlockViewModel.FromBlock(Repository, block));
                 }
 
-                chainList.Add(ChainViewModel.FromChain(repoChain, blockList));
+                var totalTx = Repository.GetTotalChainTransactionCount(repoChain.Address);
+                chainList.Add(ChainViewModel.FromChain(repoChains.ToList(), repoChain, blockList, totalTx));
             }
 
             return chainList;
@@ -37,22 +39,23 @@ namespace Phantasma.Explorer.Controllers
         public ChainViewModel GetChain(string chainInput)
         {
             var repoChain = Repository.GetChain(chainInput);
+            var repoChains = Repository.GetAllChainsInfo().ToList();
 
             if (repoChain == null)
             {
-                repoChain = Repository.GetChainByName(chainInput);
+                repoChain = Repository.GetChain(chainInput);
                 if (repoChain == null) return null;
             }
 
             var blockList = new List<BlockViewModel>();
-            var lastBlocks = Repository.GetBlocks(repoChain.Address.Text);
-
+            var lastBlocks = Repository.GetBlocks(repoChain.Address);
             foreach (var block in lastBlocks)
             {
                 blockList.Add(BlockViewModel.FromBlock(Repository, block));
             }
 
-            return ChainViewModel.FromChain(repoChain, blockList);
+            var totalTxs = Repository.GetTotalChainTransactionCount(repoChain.Address);
+            return ChainViewModel.FromChain(repoChains, repoChain.GetChainInfo, blockList, totalTxs);
         }
     }
 }

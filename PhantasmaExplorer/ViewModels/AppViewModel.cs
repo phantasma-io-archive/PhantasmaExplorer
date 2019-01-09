@@ -1,4 +1,4 @@
-﻿using Phantasma.Blockchain.Contracts.Native;
+﻿using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -12,15 +12,15 @@ namespace Phantasma.Explorer.ViewModels
         public int TxCount { get; set; }
         public int Rank { get; set; }
 
-        public static AppViewModel FromApp(AppInfo info)
+        public static AppViewModel FromApp(AppDto info)
         {
             return new AppViewModel
             {
-                Id = info.id,
-                Title = info.title,
-                Url = info.url,
-                Description = info.description,
-                //Icon = info.icon?.ToString()
+                Id = info.Id,
+                Title = info.Title,
+                Url = info.Url,
+                Description = info.Description,
+               // Icon = info.Icon,
                 Icon = Explorer.MockLogoUrl
             };
         }

@@ -1,167 +1,135 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using Phantasma.Blockchain;
+using System.Threading.Tasks;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
-using Phantasma.Blockchain.Plugins;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
+using Phantasma.Explorer.Infrastructure.Models;
 using Phantasma.IO;
+using Phantasma.Numerics;
+using Phantasma.RpcClient;
+using Phantasma.RpcClient.DTOs;
+using Phantasma.RpcClient.Interfaces;
+using Event = Phantasma.Blockchain.Contracts.Event;
 
 namespace Phantasma.Explorer.Infrastructure.Data
 {
     public class MockRepository : IRepository
     {
-        public Nexus NexusChain { get; set; }
+        private RootChainDto _rootChain;
+        private readonly List<ChainDataAccess> _chains = new List<ChainDataAccess>();
+        private readonly Dictionary<string, TokenDto> _tokens = new Dictionary<string, TokenDto>();
+        private readonly Dictionary<TokenDto, int> _tokenTransfers = new Dictionary<TokenDto, int>();
+        private readonly List<Address> _addresses = new List<Address>();
+        private const int NativeTokenDecimals = 8;
+        private const string PlatformName = "Phantasma";
 
-        private Dictionary<Hash, Block> _blocks;//todo
+        public List<AppDto> Apps { get; set; }
+        private bool IsInitFinish = false;
+
+        private IPhantasmaRpcService _phantasmaRpcService;
+
+        public async Task InitRepo()
+        {
+            _phantasmaRpcService = new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc")));
+
+            var root = await _phantasmaRpcService.GetRootChain.SendRequestAsync();
+            var chains = await _phantasmaRpcService.GetChains.SendRequestAsync(); //name-address info only
+            var tokens = await _phantasmaRpcService.GetTokens.SendRequestAsync();
+            var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
+
+            Apps = appList;
+            _rootChain = root;
+
+            foreach (var token in tokens)
+            {
+                _tokens.Add(token.Symbol, token);
+            }
+
+            // working
+
+            foreach (var chain in chains)
+            {
+                var persistentChain = SetupChain(chain);
+                var childs = chains.Where(p => p.ParentAddress.Equals(chain.Address));
+
+                if (childs.Any())
+                {
+                    persistentChain.AddChildren(childs.ToList());
+                }
+
+                await SetupBlocks(persistentChain);
+            }
+
+            IsInitFinish = true;
+        }
+
+        public async Task SyncronizeNewBlocks()
+        {
+            if (!IsInitFinish) return;
+            foreach (var chain in _chains)
+            {
+                var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
+                if (height > chain.Height)
+                {
+                    Debug.WriteLine($"NEW BLOCK: Chain: {chain.Name}, block: {height}");
+                    var block = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, height);
+                    SetupSingleBlock(chain, block);
+                }
+            }
+        }
 
         public decimal GetAddressNativeBalance(Address address, string chainName = null) //todo this should not be here
         {
             if (string.IsNullOrEmpty(chainName))
             {
-                return TokenUtils.ToDecimal(NexusChain.RootChain.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
+                return TokenUtils.ToDecimal(GetRootChain.GetTokenAddressBalance(GetNativeToken, address), GetNativeToken.Decimals);
             }
+            var chain = GetChain(chainName);
 
-            var chain = GetChainByName(chainName);
-            return TokenUtils.ToDecimal(chain.GetTokenBalance(NexusChain.NativeToken, address), NexusChain.NativeToken.Decimals);
+            return TokenUtils.ToDecimal(chain.GetTokenAddressBalance(GetNativeToken, address), GetNativeToken.Decimals);
         }
 
-        public decimal GetAddressBalance(Address address, Token token, string chainName)
+        public decimal GetAddressBalance(Address address, TokenDto token, string chainName)
         {
-            var chain = GetChainByName(chainName);
+            var chain = GetChain(chainName);
             decimal balance = 0;
             if (chain != null)
             {
-                balance = TokenUtils.ToDecimal(chain.GetTokenBalance(token, address), token.Decimals);
+                balance = TokenUtils.ToDecimal(chain.GetTokenAddressBalance(token, address), token.Decimals);
             }
 
             return balance;
         }
 
-        public IEnumerable<Address> GetAddressList(string chainAddress = null, int count = 20) //todo strategy to get address
+        public string GetAddressName(string address)
         {
-            // if chainAddress then look only in a certain chain
-            // count number of address to return
-
-            var plugin = NexusChain.GetPlugin<ChainAddressesPlugin>();
-            if (plugin == null)
-            {
-                return Enumerable.Empty<Address>();
-            }
-
-            if (string.IsNullOrEmpty(chainAddress))
-            {
-                var addressList = new List<Address>();
-                foreach (var chain in NexusChain.Chains)
-                {
-                    addressList.AddRange(plugin.GetChainAddresses(chain));
-                }
-                return addressList.Take(100);
-            }
-            else
-            {
-                var chain = NexusChain.FindChainByAddress(Address.FromText(chainAddress));
-                return plugin.GetChainAddresses(chain);
-            }
+            return _phantasmaRpcService.GetAccount.SendRequestAsync(address).Result.Name;//todo remove rpc
         }
 
-        public Address GetAddress(string addressText) //todo
+        public IEnumerable<Address> GetAddressList(int count = 20)
         {
-            if (Address.IsValidAddress(addressText))
-            {
-                return Address.FromText(addressText);
-
-            }
-            return Address.Null;
+            return _addresses.Take(count);
         }
 
-        public IEnumerable<Block> GetBlocks(string chainInput = null, int lastBlocksAmount = 20)
+        public ChainDataAccess GetChain(string chainInput)
         {
-            var blockList = new List<Block>();
-
-            // all chains
-            if (string.IsNullOrEmpty(chainInput))
-            {
-                foreach (var chain in NexusChain.Chains)
-                {
-                    blockList.AddRange(chain.Blocks.TakeLast(10));
-                }
-                blockList = blockList.OrderByDescending(b => b.Timestamp.Value).Take(lastBlocksAmount).ToList();
-            }
-            else //specific chain
-            {
-                var chain = GetChain(chainInput);
-                if (chain != null && chain.Blocks.Any())
-                {
-                    blockList.AddRange(chain.Blocks.TakeLast(lastBlocksAmount));
-                }
-
-                blockList = blockList.OrderByDescending(b => b.Height).ToList();
-            }
-            return blockList;
-        }
-
-        public Block GetBlock(string hash)
-        {
-            var blockHash = (Hash.Parse(hash));
-            foreach (var chain in NexusChain.Chains)
-            {
-                var block = chain.FindBlockByHash(blockHash);
-                if (block != null)
-                {
-                    return block;
-                }
-            }
-
-            return null;
-        }
-
-        public Block GetBlock(int height, string chainAddress = null)
-        {
-            Block block;
-
-            if (string.IsNullOrEmpty(chainAddress)) // search in main chain
-            {
-                block = NexusChain.RootChain.FindBlockByHeight(height);
-            }
-            else
-            {
-                var chain = GetChain(chainAddress);
-                block = chain.FindBlockByHeight(height);
-            }
-
-            return block;
-        }
-
-        public IEnumerable<Chain> GetAllChains()
-        {
-            return NexusChain.Chains.ToList();
-        }
-
-        public Chain GetChain(string chainInput)
-        {
-            if (!Address.IsValidAddress(chainInput)) return null;
-            var chainAddress = Address.FromText(chainInput);
-
-            return NexusChain.FindChainByAddress(chainAddress);
-        }
-
-        public Chain GetChainByName(string chainName)
-        {
-            return NexusChain.FindChainByName(chainName);
+            return _chains.SingleOrDefault(p => p.Address.Equals(chainInput, StringComparison.InvariantCulture) || p.Name.Equals(chainInput, StringComparison.InvariantCulture));
         }
 
         public int GetChainCount()
         {
-            return NexusChain.Chains.Count();
+            return _chains.Count;
         }
 
         public IEnumerable<string> GetChainNames()
         {
             var nameList = new List<string>();
-            foreach (var chain in GetAllChains())
+            foreach (var chain in _chains)
             {
                 nameList.Add(chain.Name);
             }
@@ -169,25 +137,22 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return nameList;
         }
 
-        public IEnumerable<Transaction> GetTransactions(string chainAddress, int txAmount)
+        public IEnumerable<TransactionDto> GetTransactions(string chainAddress, int txAmount)
         {
-            var txList = new List<Transaction>();
-            var blocksList = new List<Block>();
+            var txList = new List<TransactionDto>();
+            var blocksList = new List<BlockDto>();
             if (string.IsNullOrEmpty(chainAddress)) //all chains
             {
-                var chains = GetAllChains();
-                foreach (var chain in chains)
+                foreach (var chain in _chains)
                 {
-                    blocksList.AddRange(chain.Blocks.TakeLast(txAmount * 10));
+                    blocksList.AddRange(chain.GetBlocks.TakeLast(txAmount * 10));
                 }
 
-                blocksList = blocksList.OrderByDescending(b => b.Timestamp.Value).ToList();
+                blocksList = blocksList.OrderByDescending(b => b.Timestamp).ToList();
 
                 foreach (var block in blocksList)
                 {
-                    var chain = NexusChain.FindChainForBlock(block);
-                    var transactions = chain.GetBlockTransactions(block);
-                    foreach (var tx in transactions)
+                    foreach (var tx in block.Txs)
                     {
                         txList.Add(tx);
                         if (txList.Count == txAmount) return txList;
@@ -199,10 +164,9 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 var chain = GetChain(chainAddress);
                 if (chain != null)
                 {
-                    foreach (var block in chain.Blocks)
+                    foreach (var block in chain.GetBlocks)
                     {
-                        var transactions = chain.GetBlockTransactions(block);
-                        foreach (var tx in transactions)
+                        foreach (var tx in block.Txs)
                         {
                             txList.Add(tx);
                             if (txList.Count == txAmount) return txList;
@@ -214,193 +178,401 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return txList;
         }
 
-        public IEnumerable<Transaction> GetAddressTransactions(Address address, int amount = 20)
+        public IEnumerable<TransactionDto> GetAddressTransactions(Address address, int amount = 20)
         {
-            var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
-            var hashes = plugin?.GetAddressTransactions(address).OrderByDescending(tx => NexusChain.FindBlockForHash(tx).Timestamp.Value).Take(amount);
-            List<Transaction> txList = new List<Transaction>();
-            foreach (var hash in hashes)
-            {
-                txList.Add(GetTransaction(hash.ToString()));
-            }
+            var txs = _phantasmaRpcService.GetAddressTxs.SendRequestAsync(address.ToString(), amount).Result;//todo remove result
+            return txs.Txs; //todo
+        }
 
             return txList;
         }
 
         public int GetAddressTransactionCount(Address address, string chainName)
         {
-            var chain = NexusChain.FindChainByName(chainName);
-
-            var plugin = NexusChain.GetPlugin<AddressTransactionsPlugin>();
-            if (plugin != null)
-            {
-                return plugin.GetAddressTransactions(address).Count(tx => NexusChain.FindBlockForHash(tx).ChainAddress == chain.Address);
-            }
-
-            return 0;
+            return _phantasmaRpcService.GetAddressTxCount.SendRequestAsync(address.ToString(), chainName).Result;
         }
 
-        public Transaction GetTransaction(string txHash)
+        public int GetTotalChainTransactionCount(string chainInput)
         {
-            var hash = Hash.Parse(txHash);
-            foreach (var chain in NexusChain.Chains)
-            {
-                var tx = chain.FindTransactionByHash(hash);
-                if (tx != null)
-                {
-                    return tx;
-                }
-            }
-            return null;
+            var chain = GetChain(chainInput);
+            return chain.GetBlocks.SelectMany(p => p.Txs).Count(); //todo confirm this
+        }
+
+        public TransactionDto GetTransaction(string txHash)
+        {
+            var tx = FindTransactionByHash(txHash);
+            return tx;
         }
 
         public int GetTotalTransactions()
         {
-            return NexusChain.GetTotalTransactionCount();
-        }
-
-        public IEnumerable<Token> GetTokens()
-        {
-            return NexusChain.Tokens.ToList();
-        }
-
-        public Token GetToken(string symbol)
-        {
-            return NexusChain.Tokens.SingleOrDefault(t => t.Symbol.ToUpperInvariant() == symbol || t.Name.ToUpperInvariant() == symbol);
-        }
-
-        public IEnumerable<Transaction> GetLastTokenTransfers(string symbol, int amount)
-        {
-            var token = GetToken(symbol);
-            var plugin = NexusChain.GetPlugin<TokenTransactionsPlugin>();
-            List<Hash> txHashes = new List<Hash>();
-            if (token != null && plugin != null)
+            int total = 0;
+            foreach (var chain in _chains)
             {
-                txHashes = plugin.GetTokenTransactions(token.Symbol).OrderByDescending(tx => NexusChain.FindBlockForHash(tx).Timestamp.Value).Take(amount).ToList();
-            }
-            List<Transaction> txs = new List<Transaction>();
-            foreach (var txHash in txHashes)
-            {
-                txs.Add(GetTransaction(txHash.ToString()));
+                var blocks = chain.GetBlocks;
+                total += blocks.Select(p => p.Txs).Count();
             }
 
-            return txs;
+            return total;
         }
 
-        public int GetTokenTransfersCount(string symbol)
+        public IEnumerable<TokenDto> GetTokens()
         {
-            var token = GetToken(symbol);
-            var plugin = NexusChain.GetPlugin<TokenTransactionsPlugin>();
-            if (token != null && plugin != null)
+            var tokens = _tokens.Values.ToList();
+            return tokens;
+        }
+
+        public TokenDto GetToken(string symbol)
+        {
+            return _tokens[symbol];
+        }
+
+        public IEnumerable<TransactionDto> GetLastTokenTransfers(string symbol, int amount) //todo persist
+        {
+            return _phantasmaRpcService.GetTokenTransfers.SendRequestAsync(symbol, amount).Result;
+        }
+
+        public int GetTokenTransfersCount(string symbol) //todo persist
+        {
+            return _phantasmaRpcService.GetTokenTransferCount.SendRequestAsync(symbol).Result;
+        }
+
+
+        public string GetEventContent(BlockDto block, EventDto evt) //todo remove Native event dependency
+        {
+            Event nativeEvent;
+            if (evt.Data != null)
             {
-                return plugin.GetTokenTransactions(token.Symbol).Count();
+                nativeEvent = new Event((EventKind)evt.EvtKind,
+                    Address.FromText(evt.EventAddress), evt.Data.Decode());
+            }
+            else
+            {
+                nativeEvent =
+                    new Event((EventKind)evt.EvtKind, Address.FromText(evt.EventAddress));
             }
 
-            return 0;
-        }
-
-        public string GetEventContent(Block block, Event evt)
-        {
-            switch (evt.Kind)
+            switch (evt.EvtKind)
             {
-                case EventKind.ChainCreate:
+                case EvtKind.ChainCreate:
                     {
-                        var tokenData = evt.GetContent<TokenEventData>();
-                        var chain = NexusChain.FindChainByAddress(tokenData.chainAddress);
+                        var tokenData = nativeEvent.GetContent<TokenEventData>();
+                        var chain = GetChainInfoByAddress(tokenData.chainAddress.ToString());
                         return $"{chain.Name} chain created at address <a href=\"/chain/{tokenData.chainAddress}\">{tokenData.chainAddress}</a>.";
                     }
-
-                case EventKind.TokenCreate:
+                case EvtKind.TokenCreate:
                     {
-                        var symbol = Serialization.Unserialize<string>(evt.Data);
-                        var token = NexusChain.FindTokenBySymbol(symbol);
+                        var symbol = Serialization.Unserialize<string>(nativeEvent.Data);
+                        var token = GetToken(symbol);
                         return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
                     }
-                case EventKind.GasEscrow:
+                case EvtKind.GasEscrow:
                     {
-                        var gasEvent = evt.GetContent<GasEventData>();
-                        var amount = TokenUtils.ToDecimal(gasEvent.amount, Nexus.NativeTokenDecimals);
-                        var price = TokenUtils.ToDecimal(gasEvent.price, Nexus.NativeTokenDecimals);
-                        return $"{amount} {Nexus.PlatformName} tokens escrowed for contract gas, with price of {price} per gas unit";
+                        var gasEvent = nativeEvent.GetContent<GasEventData>();
+                        var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
+                        var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
+                        return $"{amount} {PlatformName} tokens escrowed for contract gas, with price of {price} per gas unit";
                     }
-                case EventKind.GasPayment:
+                case EvtKind.GasPayment:
                     {
-                        var gasEvent = evt.GetContent<GasEventData>();
-                        var amount = TokenUtils.ToDecimal(gasEvent.amount, Nexus.NativeTokenDecimals);
-                        var price = TokenUtils.ToDecimal(gasEvent.price, Nexus.NativeTokenDecimals);
-                        return $"{amount} {Nexus.PlatformName} tokens paid for contract gas, with price of {price} per gas unit";
+                        var gasEvent = nativeEvent.GetContent<GasEventData>();
+                        var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
+                        var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
+                        return $"{amount} {PlatformName} tokens paid for contract gas, with price of {price} per gas unit";
 
                     }
-                case EventKind.TokenMint:
-                case EventKind.TokenBurn:
-                case EventKind.TokenSend:
-                case EventKind.TokenEscrow:
-                case EventKind.TokenReceive:
+                case EvtKind.TokenMint:
+                case EvtKind.TokenBurn:
+                case EvtKind.TokenSend:
+                case EvtKind.TokenEscrow:
+                case EvtKind.TokenReceive:
                     {
-                        var data = Serialization.Unserialize<TokenEventData>(evt.Data);
-                        var token = NexusChain.FindTokenBySymbol(data.symbol);
+                        var data = Serialization.Unserialize<TokenEventData>(nativeEvent.Data);
+                        var token = GetToken(data.symbol);
                         string action;
 
-                        switch (evt.Kind)
+                        switch (evt.EvtKind)
                         {
-                            case EventKind.TokenMint: action = "minted"; break;
-                            case EventKind.TokenBurn: action = "burned"; break;
-                            case EventKind.TokenSend: action = "sent"; break;
-                            case EventKind.TokenReceive: action = "received"; break;
-                            case EventKind.TokenEscrow: action = "escrowed"; break;
+                            case EvtKind.TokenMint: action = "minted"; break;
+                            case EvtKind.TokenBurn: action = "burned"; break;
+                            case EvtKind.TokenSend: action = "sent"; break;
+                            case EvtKind.TokenReceive: action = "received"; break;
+                            case EvtKind.TokenEscrow: action = "escrowed"; break;
 
                             default: action = "???"; break;
                         }
 
                         string chainText;
 
-                        if (data.chainAddress != block.ChainAddress)
+                        if (data.chainAddress.ToString() != block.ChainAddress)
                         {
                             Address srcAddress, dstAddress;
 
-                            if (evt.Kind == EventKind.TokenReceive)
+                            if (evt.EvtKind == EvtKind.TokenReceive)
                             {
                                 srcAddress = data.chainAddress;
-                                dstAddress = block.ChainAddress;
+                                dstAddress = Address.FromText(block.ChainAddress);
                             }
                             else
                             {
-                                srcAddress = block.ChainAddress;
+                                srcAddress = Address.FromText(block.ChainAddress);
                                 dstAddress = data.chainAddress;
                             }
 
-                            chainText = $"from <a href=\"/chain/{srcAddress}\">{GetChainName(NexusChain, srcAddress)} chain</a> to <a href=\"/chain/{dstAddress}\">{GetChainName(NexusChain, dstAddress)} chain";
+                            chainText = $"from <a href=\"/chain/{srcAddress}\">{GetChainName(srcAddress.ToString())} chain</a> to <a href=\"/chain/{dstAddress}\">{GetChainName(dstAddress.ToString())} chain";
                         }
                         else
                         {
-                            chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(NexusChain, data.chainAddress)} chain";
+                            chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(data.chainAddress.ToString())} chain";
                         }
 
                         string fromAt = action == "sent" ? "from" : "at";
-                        return $"{TokenUtils.ToDecimal(data.value, token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
+                        return $"{TokenUtils.ToDecimal(data.value, token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{nativeEvent.Address}\">{nativeEvent.Address}</a> {chainText}.";
                     }
 
                 default: return "Nothing.";
             }
         }
 
-        public IEnumerable<AppInfo> GetApps()
+        public IEnumerable<AppDto> GetApps()
         {
-            var appChain = NexusChain.FindChainByName("apps");
-            var apps = (AppInfo[])appChain.InvokeContract("apps", "GetApps", new string[] { });
-            return apps;
+            return Apps;
         }
 
-        private static string GetChainName(Nexus nexus, Address chainAddress)
+        //TODO NEW without nexus
+
+        private ChainDataAccess GetRootChain => _chains.FirstOrDefault(p =>
+            p.Address.Equals(_rootChain.Address, StringComparison.InvariantCultureIgnoreCase) ||
+            p.Name.Equals(_rootChain.Name, StringComparison.InvariantCultureIgnoreCase));
+
+        private TokenDto GetNativeToken => _tokens["SOUL"];
+
+        public IEnumerable<BlockDto> GetBlocks(string chainInput = null, int lastBlocksAmount = 20)
         {
-            var chain = nexus.FindChainByAddress(chainAddress);
-            if (chain != null)
+            var blockList = new List<BlockDto>();
+
+            // all chains
+            if (string.IsNullOrEmpty(chainInput))
             {
-                return chain.Name;
+                foreach (var chain in _chains)
+                {
+                    blockList.AddRange(chain.GetBlocks.Take((lastBlocksAmount / _chains.Count) + lastBlocksAmount)); //todo revisit logic
+                }
+                blockList = blockList.OrderByDescending(b => b.Timestamp).Take(lastBlocksAmount).ToList();
+            }
+            else //specific chain
+            {
+                var chain = GetChain(chainInput);
+                if (chain != null)
+                {
+                    blockList.AddRange(chain.GetBlocks.Take(lastBlocksAmount));//don't need reorder
+                }
+            }
+            return blockList;
+        }
+
+        public BlockDto GetBlock(string hash)
+        {
+            var blockHash = (Hash.Parse(hash));
+
+            var block = FindBlockByHash(blockHash);
+            return block;
+        }
+
+        public BlockDto GetBlock(int height, string chainAddress = null)
+        {
+            BlockDto block;
+
+            if (string.IsNullOrEmpty(chainAddress)) // search in main chain
+            {
+                block = FindBlockByHeight(chainAddress, height);
+            }
+            else
+            {
+                var chain = GetChain(chainAddress);
+                block = FindBlockByHeight(chain.Address, height);
             }
 
-            return "???";
+            if (block == null && !string.IsNullOrEmpty(chainAddress))
+            {
+                block = _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chainAddress, height).Result;
+            }
+
+            return block;
         }
 
+
+        // aux methods
+        public BlockDto FindBlockByHeight(string chainInput, int height)
+        {
+            var chain = GetChain(chainInput);
+            return chain?.FindBlockByHeight(height);
+        }
+
+        public BlockDto FindBlockByHash(Hash hash)
+        {
+            foreach (var chain in _chains)
+            {
+                var block = chain.FindBlockByHash(hash);
+                if (block != null)
+                {
+                    return block;
+                }
+            }
+
+            return null;
+        }
+
+        public BlockDto FindBlockForTransaction(string txHash)
+        {
+            foreach (var chain in _chains)
+            {
+                foreach (var block in chain.GetBlocks)
+                {
+                    if (block.Txs.SingleOrDefault(p => p.Txid.Equals(txHash)) != null)
+                    {
+                        return block;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public ChainDto GetChainInfoByAddress(string address)
+        {
+            return _chains.SingleOrDefault(p => p.Address.Equals(address))?.GetChainInfo;
+        }
+
+        public TransactionDto FindTransactionByHash(string hash)
+        {
+            foreach (var chain in _chains)
+            {
+                foreach (var block in chain.GetBlocks)
+                {
+                    var tx = block.Txs.SingleOrDefault(t => t.Txid.Equals(hash));
+                    if (tx != null) return tx;
+                }
+            }
+
+            return null;
+        }
+
+        public IEnumerable<ChainDto> GetAllChainsInfo()
+        {
+            return _chains.Select(p => p.GetChainInfo);
+        }
+
+        public IEnumerable<ChainDataAccess> GetAllChains()
+        {
+            return _chains;
+        }
+
+        public string GetChainName(string chainAddress)
+        {
+            return _chains.SingleOrDefault(p => p.Address == chainAddress)?.Name;
+        }
+
+        private ChainDataAccess SetupChain(ChainDto chain)
+        {
+            var newChain = new ChainDataAccess(chain);
+            _chains.Add(newChain);
+            return newChain;
+        }
+
+        private void SetupSingleBlock(ChainDataAccess chain, BlockDto block)
+        {
+            foreach (var tx in block.Txs)
+            {
+                if (tx.Events != null && tx.Events.Any()) //todo not sure if this is needed
+                {
+                    foreach (var txEvent in tx.Events)
+                    {
+                        if (txEvent.Data != null)
+                        {
+                            var nativeEvent = new Event((EventKind)txEvent.EvtKind, //todo remove native event
+                                Address.FromText((txEvent.EventAddress)), txEvent.Data.Decode());
+                            Address address = Address.FromText((txEvent.EventAddress));
+                            BigInteger amount;
+                            TokenEventData data;
+                            TokenDto token;
+                            if (address != Address.Null)
+                            {
+                                AddAddressToList(address);
+                            }
+                            //UpdateTokenTransfer(token);
+
+                            if (address != Address.Null)
+                            {
+                                chain.UpdateAddressTransactions(address, tx);
+                            }
+
+                            switch (txEvent.EvtKind)
+                            {
+                                case EvtKind.TokenBurn:
+                                case EvtKind.TokenSend:
+                                    data = nativeEvent.GetContent<TokenEventData>();
+                                    token = GetToken(data.symbol);
+                                    amount = data.value;
+                                    address = nativeEvent.Address;
+                                    if (token.Fungible)
+                                    {
+                                        chain.UpdateTokenBalance(token, address, amount, false);
+                                    }
+                                    else
+                                    {
+                                        chain.UpdateTokenOwnership(token, address, amount, false);
+                                    }
+                                    break;
+
+                                case EvtKind.TokenMint:
+                                case EvtKind.TokenReceive:
+                                    data = nativeEvent.GetContent<TokenEventData>();
+                                    amount = data.value;
+                                    address = nativeEvent.Address;
+                                    token = GetToken(data.symbol);
+                                    if (token.Fungible)
+                                    {
+                                        chain.UpdateTokenBalance(token, address, amount, true);
+                                    }
+                                    else
+                                    {
+                                        chain.UpdateTokenOwnership(token, address, amount, true);
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                Debug.WriteLine($"setup block n:{block.Height}");
+                chain.SetBlock(block);
+            }
+        }
+
+        //todo move
+        private async Task SetupBlocks(ChainDataAccess chain)
+        {
+            var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
+
+            for (int i = 1; i <= height; i++) //slooow
+            {
+                var blockDto = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, i);
+                SetupSingleBlock(chain, blockDto);
+            }
+        }
+
+        private void AddAddressToList(Address address)
+        {
+            if (!_addresses.Contains(address))
+            {
+                _addresses.Add(address);
+            }
+        }
+
+        private void UpdateTokenTransfer(TokenDto dto)
+        {
+            _tokenTransfers[dto] += 1;
+        }
     }
 }

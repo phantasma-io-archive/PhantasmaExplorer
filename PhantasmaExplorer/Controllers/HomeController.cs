@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Phantasma.Core.Types;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.Utils;
@@ -31,7 +32,7 @@ namespace Phantasma.Explorer.Controllers
 
             foreach (var transaction in Repository.GetTransactions())
             {
-                var block = Repository.NexusChain.FindBlockForTransaction(transaction);
+                var block = Repository.FindBlockForTransaction(transaction.Txid);
                 txs.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), transaction));
             }
 
@@ -39,9 +40,9 @@ namespace Phantasma.Explorer.Controllers
             var repTxs = Repository.GetTransactions(null, 1000);
             foreach (var transaction in repTxs)
             {
-                var block = Repository.NexusChain.FindBlockForTransaction(transaction);
+                var block = Repository.FindBlockForTransaction(transaction.Txid);
 
-                DateTime chartTime = block.Timestamp;
+                DateTime chartTime = new Timestamp((uint)block.Timestamp);
                 var chartKey = $"{chartTime.Day}/{chartTime.Month}";
 
                 if (chart.ContainsKey(chartKey))
@@ -55,7 +56,7 @@ namespace Phantasma.Explorer.Controllers
             }
 
             int totalChains = Repository.GetChainCount();
-            uint height = Repository.GetChainByName("main").BlockHeight; //todo repo
+            uint height = Repository.GetChain("main").Height; //todo repo
             int totalTransactions = Repository.GetTotalTransactions();
 
             var vm = new HomeViewModel
@@ -137,17 +138,17 @@ namespace Phantasma.Explorer.Controllers
 
                 //app
                 var apps = Repository.GetApps();
-                var app = apps.SingleOrDefault(a => a.id == input);
-                if (app.id == input)
+                var app = apps.SingleOrDefault(a => a.Id == input);
+                if (app.Title == input)
                 {
-                    return $"app/{app.id}";
+                    return $"app/{app.Id}";
                 }
 
                 //chain
-                var chain = Repository.GetChainByName(input) ?? Repository.GetChain(input);
+                var chain = Repository.GetChain(input) ?? Repository.GetChain(input);
                 if (chain != null)
                 {
-                    return $"chain/{chain.Address.Text}";
+                    return $"chain/{chain.Address}";
                 }
 
                 //hash
@@ -157,7 +158,7 @@ namespace Phantasma.Explorer.Controllers
                     var tx = Repository.GetTransaction(hash.ToString());
                     if (tx != null)
                     {
-                        return $"tx/{tx.Hash}";
+                        return $"tx/{tx.Txid}";
                     }
 
                     var block = Repository.GetBlock(hash.ToString());

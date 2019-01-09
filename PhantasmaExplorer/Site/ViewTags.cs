@@ -1,5 +1,5 @@
 ﻿using System;
-using LunarLabs.WebServer.Templates;
+using LunarLabs.Templates;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 
@@ -7,16 +7,16 @@ namespace Phantasma.Explorer.Site
 {
     public class ValueTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public ValueTag(TemplateDocument doc, string key) : base(doc)
+        public ValueTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.Numeric);
+            _key = RenderingKey.Parse(key, RenderingType.Numeric);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;
@@ -34,16 +34,16 @@ namespace Phantasma.Explorer.Site
 
     public class TimeAgoTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public TimeAgoTag(TemplateDocument doc, string key) : base(doc)
+        public TimeAgoTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.DateTime);
+            _key = RenderingKey.Parse(key, RenderingType.DateTime);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;
@@ -59,12 +59,12 @@ namespace Phantasma.Explorer.Site
 
     public class AsyncTag : TemplateNode
     {
-        private string key;
-        private Random rnd = new Random();
+        private readonly string _key;
+        private readonly Random _rnd = new Random();
 
-        public AsyncTag(TemplateDocument doc, string key) : base(doc)
+        public AsyncTag(Document doc, string key) : base(doc)
         {
-            this.key = key;
+            _key = key;
         }
 
         public override void Execute(RenderingContext context)
@@ -76,8 +76,8 @@ namespace Phantasma.Explorer.Site
                 return;
             }*/
 
-            var id = rnd.Next().ToString();
-            var url = key.Replace("_", "/");
+            var id = _rnd.Next().ToString();
+            var url = _key.Replace("_", "/");
             var obj = "{url:'" + url + "', id:'" + id + "'}";
             context.output.Append($"<script>dynamicContents.push({obj});</script><div style=\"display:inline\" id=\"dynamic_{id}\">...</div>");
         }
@@ -85,16 +85,16 @@ namespace Phantasma.Explorer.Site
 
     public class LinkChainTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public LinkChainTag(TemplateDocument doc, string key) : base(doc)
+        public LinkChainTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.String);
+            _key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;
@@ -107,16 +107,16 @@ namespace Phantasma.Explorer.Site
 
     public class LinkTransactionTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public LinkTransactionTag(TemplateDocument doc, string key) : base(doc)
+        public LinkTransactionTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.String);
+            _key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;
@@ -129,16 +129,16 @@ namespace Phantasma.Explorer.Site
 
     public class LinkBlockTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public LinkBlockTag(TemplateDocument doc, string key) : base(doc)
+        public LinkBlockTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.String);
+            _key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;
@@ -151,16 +151,16 @@ namespace Phantasma.Explorer.Site
 
     public class LinkAddressTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public LinkAddressTag(TemplateDocument doc, string key) : base(doc)
+        public LinkAddressTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.String);
+            _key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;
@@ -173,16 +173,16 @@ namespace Phantasma.Explorer.Site
 
     public class DescriptionTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public DescriptionTag(TemplateDocument doc, string key) : base(doc)
+        public DescriptionTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.String);
+            _key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;
@@ -203,16 +203,16 @@ namespace Phantasma.Explorer.Site
 
     public class LinkAppTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public LinkAppTag(TemplateDocument doc, string key) : base(doc)
+        public LinkAppTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.String);
+            this._key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;
@@ -225,16 +225,16 @@ namespace Phantasma.Explorer.Site
 
     public class AppIconTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public AppIconTag(TemplateDocument doc, string key) : base(doc)
+        public AppIconTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.String);
+            _key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;
@@ -247,16 +247,16 @@ namespace Phantasma.Explorer.Site
 
     public class LinkExternalTag : TemplateNode
     {
-        private RenderingKey key;
+        private readonly RenderingKey _key;
 
-        public LinkExternalTag(TemplateDocument doc, string key) : base(doc)
+        public LinkExternalTag(Document doc, string key) : base(doc)
         {
-            this.key = RenderingKey.Parse(key, RenderingType.String);
+            _key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(key);
+            var temp = context.EvaluateObject(_key);
             if (temp == null)
             {
                 return;

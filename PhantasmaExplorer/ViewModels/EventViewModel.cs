@@ -1,21 +1,20 @@
-﻿using Phantasma.Blockchain;
-using Phantasma.Blockchain.Contracts;
-using Phantasma.Explorer.Infrastructure.Interfaces;
+﻿using Phantasma.Explorer.Infrastructure.Interfaces;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
 {
     public class EventViewModel
     {
-        public EventKind Kind { get; set; }
+        public EvtKind Kind { get; set; }
         public string Content { get; set; }
 
-        internal static EventViewModel FromEvent(IRepository repository, Transaction tx, Event evt)
+        internal static EventViewModel FromEvent(IRepository repository, TransactionDto tx, EventDto evt)
         {
-            var block = repository.NexusChain.FindBlockForTransaction(tx);
+            var block = repository.FindBlockForTransaction(tx.Txid);
 
             return new EventViewModel()
             {
-                Kind = evt.Kind,
+                Kind = evt.EvtKind,
                 Content = repository.GetEventContent(block, evt)
             };
         }

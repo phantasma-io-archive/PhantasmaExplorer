@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Phantasma.API;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Plugins;
@@ -15,7 +16,10 @@ namespace Phantasma.Explorer
 {
     public class Explorer
     {
-        static void Main(string[] args)
+        //todo remove from here
+        private static MockRepository _repo;
+
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Initializing Phantasma Block Explorer....");
             var nexus = InitMockData();
@@ -26,11 +30,12 @@ namespace Phantasma.Explorer
             var server = HostBuilder.CreateServer(args);
             var viewsRenderer = new ViewsRenderer(server, "views");
 
-            var mockRepo = new MockRepository { NexusChain = nexus };
-
+            var mockRepo = new MockRepository();
+            _repo = mockRepo;
             viewsRenderer.SetupControllers(mockRepo);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
+            await mockRepo.InitRepo();
             server.Run();
         }
 
@@ -45,7 +50,7 @@ namespace Phantasma.Explorer
             simulator.Nexus.AddPlugin(new TokenTransactionsPlugin());
 
             // generate blocks with mock transactions
-            for (int i = 1; i <= 500; i++)
+            for (int i = 1; i <= 50; i++)
             {
                 simulator.GenerateRandomBlock();
             }
@@ -53,12 +58,12 @@ namespace Phantasma.Explorer
             var airdropFile = "nacho_addresses.txt";
             if (File.Exists(airdropFile))
             {
-                Console.WriteLine("Loading airdrops from "+airdropFile);
+                Console.WriteLine("Loading airdrops from " + airdropFile);
 
                 var lines = File.ReadAllLines(airdropFile);
 
                 var addresses = new List<Address>();
-                for (int i=0; i<lines.Length; i++)
+                for (int i = 0; i < lines.Length; i++)
                 {
                     if (string.IsNullOrWhiteSpace(lines[i]))
                     {
@@ -94,7 +99,17 @@ namespace Phantasma.Explorer
                     Thread.Sleep(1000 * 60);
                     simulator.CurrentTime = DateTime.Now;
                     simulator.GenerateRandomBlock(mempool);
-                } 
+                }
+            }).Start();
+
+            new Thread(async () =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    await _repo.SyncronizeNewBlocks();
+                }
             }).Start();
 
             return simulator.Nexus;

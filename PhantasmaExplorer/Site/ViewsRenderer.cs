@@ -44,17 +44,17 @@ namespace Phantasma.Explorer.Site
 
         private void SetupTags()
         {
-            TemplateEngine.RegisterTag("value", (doc, val) => new ValueTag(doc, val));
-            TemplateEngine.RegisterTag("timeago", (doc, val) => new TimeAgoTag(doc, val));
-            TemplateEngine.RegisterTag("async", (doc, val) => new AsyncTag(doc, val));
-            TemplateEngine.RegisterTag("link-chain", (doc, val) => new LinkChainTag(doc, val));
-            TemplateEngine.RegisterTag("link-tx", (doc, val) => new LinkTransactionTag(doc, val));
-            TemplateEngine.RegisterTag("link-address", (doc, val) => new LinkAddressTag(doc, val));
-            TemplateEngine.RegisterTag("link-block", (doc, val) => new LinkBlockTag(doc, val));
-            TemplateEngine.RegisterTag("description", (doc, val) => new DescriptionTag(doc, val));
-            TemplateEngine.RegisterTag("link-app", (doc, val) => new LinkAppTag(doc, val));
-            TemplateEngine.RegisterTag("appIcon", (doc, val) => new AppIconTag(doc, val));
-            TemplateEngine.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("value", (doc, val) => new ValueTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("timeago", (doc, val) => new TimeAgoTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("async", (doc, val) => new AsyncTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("link-chain", (doc, val) => new LinkChainTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("link-tx", (doc, val) => new LinkTransactionTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("link-address", (doc, val) => new LinkAddressTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("link-block", (doc, val) => new LinkBlockTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("description", (doc, val) => new DescriptionTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("link-app", (doc, val) => new LinkAppTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("appIcon", (doc, val) => new AppIconTag(doc, val));
+            TemplateEngine.Compiler.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
         }
 
         public void SetupControllers(IRepository repo) //todo this should be done by other class

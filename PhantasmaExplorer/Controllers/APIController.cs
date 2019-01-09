@@ -11,27 +11,27 @@ namespace Phantasma.Explorer.Controllers
 
         public ApiController(IRepository repo)
         {
-            _api = new NexusAPI(repo.NexusChain);
+            //_api = new NexusAPI(repo.NexusChain); todo
         }
 
         public DataNode GetAccount(string addressText)
         {
-            return _api.GetAccount(addressText);
+            return APIUtils.FromAPIResult(_api.GetAccount(addressText));
         }
 
         public DataNode GetAddressTransactions(string addressText, int amount)
         {
-            return _api.GetAddressTransactions(addressText, amount);
+            return APIUtils.FromAPIResult(_api.GetAddressTransactions(addressText, amount));
         }
 
         public DataNode GetApps()
         {
-            return _api.GetApps();
+            return APIUtils.FromAPIResult(_api.GetApps());
         }
 
         public DataNode GetBlockByHash(string blockHash)
         {
-            return _api.GetBlockByHash(blockHash);
+            return APIUtils.FromAPIResult(_api.GetBlockByHash(blockHash));
         }
 
         public DataNode GetBlockByHeight(uint height, string chain)
@@ -41,46 +41,46 @@ namespace Phantasma.Explorer.Controllers
             {
                 if (Address.IsValidAddress(chain))
                 {
-                    result = _api.GetBlockByHeight(Address.FromText(chain), height);
+                    result = _api.GetBlockByHeight(chain, height);
                 }
             }
 
-            return result;
+            return APIUtils.FromAPIResult(result);
         }
 
         public DataNode GetBlockHeight(string chain)
         {
-            return _api.GetBlockHeightFromChainName(chain) ?? _api.GetBlockHeightFromChainAddress(chain);
+            return APIUtils.FromAPIResult(_api.GetBlockHeightFromChain(chain));
         }
 
         public DataNode GetBlockTransactionCountByHash(string block)
         {
-            return _api.GetBlockTransactionCountByHash(block);
+            return APIUtils.FromAPIResult(_api.GetBlockTransactionCountByHash(block));
         }
 
         public DataNode GetChains()
         {
-            return _api.GetChains();
+            return APIUtils.FromAPIResult(_api.GetChains());
         }
 
         public DataNode GetConfirmations(string txHash)
         {
-            return _api.GetConfirmations(txHash);
+            return APIUtils.FromAPIResult(_api.GetConfirmations(txHash));
         }
 
         public DataNode GetTransactionByBlockHashAndIndex(string blockHash, int index)
         {
-            return _api.GetTransactionByBlockHashAndIndex(blockHash, index);
+            return APIUtils.FromAPIResult(_api.GetTransactionByBlockHashAndIndex(blockHash, index));
         }
 
         public DataNode GetTokens()
         {
-            return _api.GetTokens();
+            return APIUtils.FromAPIResult(_api.GetTokens());
         }
 
         public DataNode SendRawTransaction(string signedTx)
         {
-            return _api.SendRawTransaction(signedTx);
+            return APIUtils.FromAPIResult(_api.SendRawTransaction(signedTx));
         }
 
     }

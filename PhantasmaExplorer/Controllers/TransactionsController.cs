@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using Phantasma.Blockchain;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.Explorer.ViewModels;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Controllers
 {
@@ -22,7 +22,7 @@ namespace Phantasma.Explorer.Controllers
             var repoTx = Repository.GetTransactions();
             foreach (var transaction in repoTx)
             {
-                var block = Repository.NexusChain.FindBlockForTransaction(transaction);
+                var block = Repository.FindBlockForTransaction(transaction.Txid);
                 if (block != null)
                 {
                     var tx1 = transaction;
@@ -34,9 +34,9 @@ namespace Phantasma.Explorer.Controllers
 
         public TransactionViewModel GetTransaction(string txHash)
         {
-            Transaction transaction = Repository.GetTransaction(txHash);
+            var transaction = Repository.GetTransaction(txHash);
             if (transaction == null) return null;
-            var block = Repository.NexusChain.FindBlockForTransaction(transaction);
+            var block = Repository.FindBlockForTransaction(transaction.Txid);
             return TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), transaction);
         }
 
@@ -44,26 +44,14 @@ namespace Phantasma.Explorer.Controllers
         {
             var blockHash = Hash.Parse(input);
 
-            Block block = null;
+            BlockDto block = null;
             var txList = new List<TransactionViewModel>();
-            var chains = Repository.GetAllChains();
 
-            foreach (var chain in chains)
-            {
-                var x = chain.FindBlockByHash(blockHash);
-                if (x != null)
-                {
-                    block = x;
-                    break;
-                }
-            }
+            block = Repository.GetBlock(blockHash.ToString());
 
             if (block != null)
             {
-                var chain = Repository.NexusChain.FindChainForBlock(block);
-                var transactions = chain.GetBlockTransactions(block);
-
-                foreach (var transaction in transactions)
+                foreach (var transaction in block.Txs)
                 {
                     var tx = transaction;
                     txList.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx));
