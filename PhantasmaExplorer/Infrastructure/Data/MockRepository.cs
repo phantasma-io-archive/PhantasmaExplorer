@@ -184,9 +184,6 @@ namespace Phantasma.Explorer.Infrastructure.Data
             return txs.Txs; //todo
         }
 
-            return txList;
-        }
-
         public int GetAddressTransactionCount(Address address, string chainName)
         {
             return _phantasmaRpcService.GetAddressTxCount.SendRequestAsync(address.ToString(), chainName).Result;
