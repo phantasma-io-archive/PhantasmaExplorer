@@ -38,7 +38,7 @@ namespace Phantasma.Explorer.Persistance
         {
             builder.HasKey(e => e.Address);
 
-            builder.OwnsMany(p => p.Blocks);
+            builder.HasMany(p => p.Blocks);
         }
     }
 
@@ -64,7 +64,7 @@ namespace Phantasma.Explorer.Persistance
         public void Configure(EntityTypeBuilder<Transaction> builder)
         {
             builder.HasKey(e => e.Hash);
-            builder.OwnsMany(p => p.Events);
+            builder.OwnsMany(p => p.Events).HasForeignKey();
 
             builder.HasOne(p => p.Block)
                 .WithMany(p => p.Transactions)

@@ -170,6 +170,7 @@ namespace Phantasma.Explorer.ViewModels
             }
             return description;
         }
+
         private static string GetChainName(string address, List<ChainDto> phantasmaChains)
         {
             foreach (var element in phantasmaChains)

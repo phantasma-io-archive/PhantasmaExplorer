@@ -14,7 +14,8 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
         private const string AspNetCoreEnvironment = "ASPNETCORE_ENVIRONMENT";
 
         public TContext CreateDbContext(string[] args)
-        {//todo
+        {
+            //todo
             var basePath = Directory.GetCurrentDirectory() + string.Format("{0}..{0}Explorer.WebUI", Path.DirectorySeparatorChar);
             return Create(basePath, Environment.GetEnvironmentVariable(AspNetCoreEnvironment));
         }

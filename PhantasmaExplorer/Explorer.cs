@@ -11,13 +11,13 @@ using Phantasma.API;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Plugins;
 using Phantasma.Blockchain.Tokens;
+using Phantasma.Blockchain.Utils;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Data;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Site;
 using Phantasma.RpcClient;
 using Phantasma.RpcClient.Interfaces;
-using Phantasma.Tests;
 
 namespace Phantasma.Explorer
 {
@@ -32,18 +32,28 @@ namespace Phantasma.Explorer
         static async Task Main(string[] args)
         {
             Console.WriteLine("Initializing Phantasma Block Explorer....");
+
             InitMockData();
+            var mockRepo = new MockRepository();
+            _repo = mockRepo;
 
             var curPath = Directory.GetCurrentDirectory();
             Console.WriteLine("Current path: " + curPath);
 
-            IServiceCollection serviceCollection = new ServiceCollection();
-            _app = new Application(serviceCollection);
+            //new
+            //IServiceCollection serviceCollection = new ServiceCollection();
+            //_app = new Application(serviceCollection);
+
+            //var context = AppServices.GetService<ExplorerDbContext>();
+            //context.Database.Migrate();
+
+            //await ExplorerInicializer.Initialize(context);
+            //..
+
 
             var server = HostBuilder.CreateServer(args);
 
-            var mockRepo = new MockRepository();
-            _repo = mockRepo;
+
 
             var viewsRenderer = new ViewsRenderer(server, "views");
             viewsRenderer.SetupControllers(mockRepo);
@@ -54,7 +64,7 @@ namespace Phantasma.Explorer
             server.Run();
         }
 
-        private static Nexus InitMockData()
+        private static void InitMockData()
         {
             var ownerKey = KeyPair.FromWIF("L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N");
             var simulator = new ChainSimulator(ownerKey, 12346);
@@ -103,8 +113,8 @@ namespace Phantasma.Explorer
             mempool.Start();
 
             //todo rpc move
-            var rpc = new RPCServer(new NexusAPI(simulator.Nexus, mempool), "rpc", 7077);
-            rpc.Start();
+            //var rpc = new RPCServer(new NexusAPI(simulator.Nexus, mempool), "rpc", 7077);
+            //rpc.Start();
 
             new Thread(() =>
             {
@@ -126,8 +136,6 @@ namespace Phantasma.Explorer
                     await _repo.SyncronizeNewBlocks();
                 }
             }).Start();
-
-            return simulator.Nexus;
         }
 
         private static void FlushAirdrop(KeyPair keyPair, ChainSimulator simulator, List<Address> addresses)
@@ -159,7 +167,8 @@ namespace Phantasma.Explorer
 
         private void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddDbContext<ExplorerDbContext>();
+            serviceCollection.AddDbContext<ExplorerDbContext>(options =>
+                    options.UseSqlServer("PhantasmaExplorerDatabase"));
 
             serviceCollection.AddScoped<IPhantasmaRpcService>(provider => new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc"), httpClientHandler: new HttpClientHandler
             {
