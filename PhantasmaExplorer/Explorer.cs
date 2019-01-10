@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.API;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Plugins;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Infrastructure.Data;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Site;
+using Phantasma.RpcClient;
+using Phantasma.RpcClient.Interfaces;
 using Phantasma.Tests;
 
 namespace Phantasma.Explorer
@@ -19,22 +26,30 @@ namespace Phantasma.Explorer
         //todo remove from here
         private static MockRepository _repo;
 
+        public static IServiceProvider AppServices => _app.Services;
+        private static Application _app;
+
         static async Task Main(string[] args)
         {
             Console.WriteLine("Initializing Phantasma Block Explorer....");
-            var nexus = InitMockData();
+            InitMockData();
 
             var curPath = Directory.GetCurrentDirectory();
             Console.WriteLine("Current path: " + curPath);
 
+            IServiceCollection serviceCollection = new ServiceCollection();
+            _app = new Application(serviceCollection);
+
             var server = HostBuilder.CreateServer(args);
-            var viewsRenderer = new ViewsRenderer(server, "views");
 
             var mockRepo = new MockRepository();
             _repo = mockRepo;
+
+            var viewsRenderer = new ViewsRenderer(server, "views");
             viewsRenderer.SetupControllers(mockRepo);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
+
             await mockRepo.InitRepo();
             server.Run();
         }
@@ -130,5 +145,26 @@ namespace Phantasma.Explorer
         }
 
         public static string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
+    }
+
+    public class Application
+    {
+        public IServiceProvider Services { get; set; }
+
+        public Application(IServiceCollection serviceCollection)
+        {
+            ConfigureServices(serviceCollection);
+            Services = serviceCollection.BuildServiceProvider();
+        }
+
+        private void ConfigureServices(IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddDbContext<ExplorerDbContext>();
+
+            serviceCollection.AddScoped<IPhantasmaRpcService>(provider => new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc"), httpClientHandler: new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            })));
+        }
     }
 }

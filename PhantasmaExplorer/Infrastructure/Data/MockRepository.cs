@@ -88,7 +88,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             catch (Exception ex)
             {
                 Debug.WriteLine("Exception: " + ex.Message);
-                await SyncronizeNewBlocks();
+                await SyncronizeNewBlocks();//todo revisit logic
             }
         }
 
