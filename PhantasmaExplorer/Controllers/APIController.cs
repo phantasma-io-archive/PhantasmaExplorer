@@ -1,7 +1,6 @@
 ﻿using Phantasma.Explorer.Infrastructure.Interfaces;
 using Phantasma.API;
 using LunarLabs.Parser;
-using Phantasma.Cryptography;
 
 namespace Phantasma.Explorer.Controllers
 {
@@ -11,7 +10,7 @@ namespace Phantasma.Explorer.Controllers
 
         public ApiController(IRepository repo)
         {
-            //_api = new NexusAPI(repo.NexusChain); todo
+
         }
 
         public DataNode GetAccount(string addressText)
@@ -34,18 +33,19 @@ namespace Phantasma.Explorer.Controllers
             return APIUtils.FromAPIResult(_api.GetBlockByHash(blockHash));
         }
 
-        public DataNode GetBlockByHeight(uint height, string chain)
+        public DataNode GetRawBlockByHash(string blockHash)
         {
-            var result = _api.GetBlockByHeight(chain, height);
-            if (result == null)
-            {
-                if (Address.IsValidAddress(chain))
-                {
-                    result = _api.GetBlockByHeight(chain, height);
-                }
-            }
+            return APIUtils.FromAPIResult(_api.GetRawBlockByHash(blockHash));
+        }
 
-            return APIUtils.FromAPIResult(result);
+        public DataNode GetBlockByHeight(string chain, uint height)
+        {
+            return APIUtils.FromAPIResult(_api.GetBlockByHeight(chain, height));
+        }
+
+        public DataNode GetRawBlockByHeight(string chain, uint height)
+        {
+            return APIUtils.FromAPIResult(_api.GetRawBlockByHeight(chain, height));
         }
 
         public DataNode GetBlockHeight(string chain)
@@ -53,9 +53,9 @@ namespace Phantasma.Explorer.Controllers
             return APIUtils.FromAPIResult(_api.GetBlockHeightFromChain(chain));
         }
 
-        public DataNode GetBlockTransactionCountByHash(string block)
+        public DataNode GetBlockTransactionCountByHash(string blockHash)
         {
-            return APIUtils.FromAPIResult(_api.GetBlockTransactionCountByHash(block));
+            return APIUtils.FromAPIResult(_api.GetBlockTransactionCountByHash(blockHash));
         }
 
         public DataNode GetChains()
@@ -68,6 +68,11 @@ namespace Phantasma.Explorer.Controllers
             return APIUtils.FromAPIResult(_api.GetConfirmations(txHash));
         }
 
+        public DataNode GetTransactionByHash(string txHash)
+        {
+            return APIUtils.FromAPIResult(_api.GetTransaction(txHash));
+        }
+
         public DataNode GetTransactionByBlockHashAndIndex(string blockHash, int index)
         {
             return APIUtils.FromAPIResult(_api.GetTransactionByBlockHashAndIndex(blockHash, index));
@@ -76,6 +81,21 @@ namespace Phantasma.Explorer.Controllers
         public DataNode GetTokens()
         {
             return APIUtils.FromAPIResult(_api.GetTokens());
+        }
+
+        public DataNode GetTokenBalance(string address, string tokenSymbol, string chain)
+        {
+            return APIUtils.FromAPIResult(_api.GetTokenBalance(address, tokenSymbol, chain));
+        }
+
+        public DataNode GetTokenTransfers(string tokenSymbol, int amount)
+        {
+            return APIUtils.FromAPIResult(_api.GetTokenTransfers(tokenSymbol, amount));
+        }
+
+        public DataNode GetTokenTransferCount(string tokenSymbol)
+        {
+            return APIUtils.FromAPIResult(_api.GetTokenTransferCount(tokenSymbol));
         }
 
         public DataNode SendRawTransaction(string signedTx)

@@ -25,11 +25,12 @@ namespace Phantasma.Explorer.Infrastructure.Data
         private readonly Dictionary<string, TokenDto> _tokens = new Dictionary<string, TokenDto>();
         private readonly Dictionary<TokenDto, int> _tokenTransfers = new Dictionary<TokenDto, int>();
         private readonly List<Address> _addresses = new List<Address>();
+
+        private bool _isInitFinish;
         private const int NativeTokenDecimals = 8;
         private const string PlatformName = "Phantasma";
 
         public List<AppDto> Apps { get; set; }
-        private bool IsInitFinish = false;
 
         private IPhantasmaRpcService _phantasmaRpcService;
 
@@ -65,25 +66,33 @@ namespace Phantasma.Explorer.Infrastructure.Data
                 await SetupBlocks(persistentChain);
             }
 
-            IsInitFinish = true;
+            _isInitFinish = true;
         }
 
         public async Task SyncronizeNewBlocks()
         {
-            if (!IsInitFinish) return;
-            foreach (var chain in _chains)
+            if (!_isInitFinish) return;
+            try
             {
-                var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
-                if (height > chain.Height)
+                foreach (var chain in _chains)
                 {
-                    Debug.WriteLine($"NEW BLOCK: Chain: {chain.Name}, block: {height}");
-                    var block = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, height);
-                    SetupSingleBlock(chain, block);
+                    var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
+                    if (height > chain.Height)
+                    {
+                        Debug.WriteLine($"NEW BLOCK: Chain: {chain.Name}, block: {height}");
+                        var block = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, height);
+                        SetupSingleBlock(chain, block);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Exception: " + ex.Message);
+                await SyncronizeNewBlocks();
             }
         }
 
-        public decimal GetAddressNativeBalance(Address address, string chainName = null) //todo this should not be here
+        public decimal GetAddressNativeBalance(Address address, string chainName = null)
         {
             if (string.IsNullOrEmpty(chainName))
             {
@@ -207,7 +216,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
             foreach (var chain in _chains)
             {
                 var blocks = chain.GetBlocks;
-                total += blocks.Select(p => p.Txs).Count();
+                total += blocks.Sum(p => p.Txs.Count);
             }
 
             return total;
@@ -479,10 +488,12 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         private void SetupSingleBlock(ChainDataAccess chain, BlockDto block)
         {
+            bool incrementCounter = false;
             foreach (var tx in block.Txs)
             {
                 if (tx.Events != null && tx.Events.Any()) //todo not sure if this is needed
                 {
+                    TokenDto token = null;
                     foreach (var txEvent in tx.Events)
                     {
                         if (txEvent.Data != null)
@@ -492,12 +503,11 @@ namespace Phantasma.Explorer.Infrastructure.Data
                             Address address = Address.FromText((txEvent.EventAddress));
                             BigInteger amount;
                             TokenEventData data;
-                            TokenDto token;
+
                             if (address != Address.Null)
                             {
                                 AddAddressToList(address);
                             }
-                            //UpdateTokenTransfer(token);
 
                             if (address != Address.Null)
                             {
@@ -520,6 +530,7 @@ namespace Phantasma.Explorer.Infrastructure.Data
                                     {
                                         chain.UpdateTokenOwnership(token, address, amount, false);
                                     }
+                                    incrementCounter = true;
                                     break;
 
                                 case EvtKind.TokenMint:
@@ -536,9 +547,15 @@ namespace Phantasma.Explorer.Infrastructure.Data
                                     {
                                         chain.UpdateTokenOwnership(token, address, amount, true);
                                     }
+                                    incrementCounter = true;
                                     break;
                             }
                         }
+                    }
+
+                    if (incrementCounter && token != null)
+                    {
+                        UpdateTokenTransfer(token);
                     }
                 }
 
@@ -569,7 +586,14 @@ namespace Phantasma.Explorer.Infrastructure.Data
 
         private void UpdateTokenTransfer(TokenDto dto)
         {
-            _tokenTransfers[dto] += 1;
+            if (_tokenTransfers.ContainsKey(dto))
+            {
+                _tokenTransfers[dto] += 1;
+            }
+            else
+            {
+                _tokenTransfers.Add(dto, 1);
+            }
         }
     }
 }

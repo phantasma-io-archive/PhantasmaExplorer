@@ -122,7 +122,7 @@ namespace Phantasma.Explorer.Site
 
             TemplateEngine.Server.Get($"{urlApp}/{{input}}", RouteApp);
 
-            SetupAPIHandlers();
+            //SetupAPIHandlers(); todo
         }
         #region ROUTES
 
@@ -462,7 +462,7 @@ namespace Phantasma.Explorer.Site
             {
                 var chain = request.GetVariable("chain");
                 var height = (uint.Parse(request.GetVariable("height")));
-                return ApiController.GetBlockByHeight(height, chain);
+                return ApiController.GetBlockByHeight(chain, height);
             });
 
             TemplateEngine.Server.Get($"{urlAPI}/get_block_tx_count_by_hash/{{blockHash}}", request =>
