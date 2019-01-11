@@ -17,20 +17,26 @@ namespace Phantasma.Explorer.Persistance
         public async Task SeedEverythingAsync(ExplorerDbContext context)
         {
             context.Database.EnsureCreated();
+            _phantasmaRpcService = (IPhantasmaRpcService)Explorer.AppServices.GetService(typeof(IPhantasmaRpcService));
 
-            if (context.Chains.Any())
+            if (!context.Apps.Any())
             {
-                return; // Db has been seeded)
+                await SeedApps(context);
+            }
+            if (!context.Tokens.Any())
+            {
+                await SeedTokens(context);
             }
 
-            _phantasmaRpcService = (IPhantasmaRpcService)Explorer.AppServices.GetService(typeof(IPhantasmaRpcService));
+            if (!context.Chains.Any())
+            {
+                await SeedChains(context);
+            }
+
 
             //var root = await _phantasmaRpcService.GetRootChain.SendRequestAsync();
             //var chains = await _phantasmaRpcService.GetChains.SendRequestAsync(); //name-address info only
             //var tokens = await _phantasmaRpcService.GetTokens.SendRequestAsync();
-
-
-            await SeedApps(context);
 
             //Apps = appList;
             //_rootChain = root;
@@ -56,9 +62,28 @@ namespace Phantasma.Explorer.Persistance
             //}
         }
 
+        private async Task SeedChains(ExplorerDbContext context)
+        {
+            var chains = await _phantasmaRpcService.GetChains.SendRequestAsync();
+
+            foreach (var chainDto in chains)
+            {
+                context.Chains.Add(new Chain()
+                {
+                    Address = chainDto.Address,
+                    Name = chainDto.Name,
+                    Height = chainDto.Height,
+                    ParentAddress = chainDto.ParentAddress,
+                });
+            }
+
+            await context.SaveChangesAsync();
+        }
+
         private async Task SeedApps(ExplorerDbContext context)
         {
             var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
+
             foreach (var dto in appList)
             {
                 context.Apps.Add(new App
@@ -71,6 +96,29 @@ namespace Phantasma.Explorer.Persistance
                 });
             }
 
+            await context.SaveChangesAsync();
+        }
+
+        private async Task SeedTokens(ExplorerDbContext context)
+        {
+            var tokenList = await _phantasmaRpcService.GetTokens.SendRequestAsync();
+
+            foreach (var tokenDto in tokenList)
+            {
+                context.Tokens.Add(new Token
+                {
+                    Name = tokenDto.Name,
+                    Symbol = tokenDto.Symbol,
+                    Decimals = (uint)tokenDto.Decimals,
+                    Flags = (TokenFlags)tokenDto.Flags,
+                    MaxSupply = tokenDto.MaxSupply,
+                    CurrentSupply = tokenDto.CurrentSupply,
+                    Fungible = tokenDto.Fungible,
+                    OwnerAddress = tokenDto.OwnerAddress
+                });
+            }
+
+            await context.SaveChangesAsync();
         }
     }
 }

@@ -9,6 +9,12 @@ namespace Phantasma.Explorer.Persistance
         public void Configure(EntityTypeBuilder<Account> builder)
         {
             builder.HasKey(e => e.Address);
+            builder.OwnsMany(p => p.FTokenBalance, a =>
+            {
+                a.HasForeignKey("Address");
+                a.Property<int>("Id");
+                a.HasKey("Address", "Id");
+            });
         }
     }
 
@@ -64,11 +70,20 @@ namespace Phantasma.Explorer.Persistance
         public void Configure(EntityTypeBuilder<Transaction> builder)
         {
             builder.HasKey(e => e.Hash);
-            builder.OwnsMany(p => p.Events).HasForeignKey();
+            builder.OwnsMany(p => p.Events, a =>
+            {
+                a.HasForeignKey("Hash");
+                a.Property<int>("Id");
+                a.HasKey("Hash", "Id");
+            });
 
             builder.HasOne(p => p.Block)
                 .WithMany(p => p.Transactions)
-                .HasForeignKey(p => p.BlockHash);
+                .HasForeignKey(p => p.Hash);
+
+            //.Property(c => c.Data).HasColumnName("EventData");
+            //builder.OwnsMany(p => p.Events).Property(c => c.EventAddress).HasColumnName("EventAddress");
+            //builder.OwnsMany(p => p.Events).Property(c => c.EventKind).HasColumnName("EventKind");
         }
     }
 }

@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Phantasma.Explorer.Persistance.Infrastructure
 {
-
     public abstract class DesignTimeDbContextFactoryBase<TContext> :
         IDesignTimeDbContextFactory<TContext> where TContext : DbContext
     {
@@ -16,7 +15,7 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
         public TContext CreateDbContext(string[] args)
         {
             //todo
-            var basePath = Directory.GetCurrentDirectory() + string.Format("{0}..{0}Explorer.WebUI", Path.DirectorySeparatorChar);
+            var basePath = Directory.GetCurrentDirectory();
             return Create(basePath, Environment.GetEnvironmentVariable(AspNetCoreEnvironment));
         }
 

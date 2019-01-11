@@ -11,9 +11,7 @@ namespace Phantasma.Explorer.Domain.Entities
         }
 
         public string Hash { get; set; }
-        public string ChainAddress { get; set; }
         public uint Timestamp { get; set; }
-        public uint BlockHash { get; set; }
         public string Script { get; set; }
 
         public Chain Chain { get; set; }

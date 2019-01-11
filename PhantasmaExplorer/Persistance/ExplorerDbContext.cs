@@ -21,6 +21,7 @@ namespace Phantasma.Explorer.Persistance
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ExplorerDbContext).Assembly);
+            //modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
         }
     }
 }

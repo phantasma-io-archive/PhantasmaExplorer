@@ -41,19 +41,18 @@ namespace Phantasma.Explorer
             Console.WriteLine("Current path: " + curPath);
 
             //new
-            //IServiceCollection serviceCollection = new ServiceCollection();
-            //_app = new Application(serviceCollection);
+            IServiceCollection serviceCollection = new ServiceCollection();
+            _app = new Application(serviceCollection);
 
-            //var context = AppServices.GetService<ExplorerDbContext>();
-            //context.Database.Migrate();
+            var context = AppServices.GetService<ExplorerDbContext>();
 
-            //await ExplorerInicializer.Initialize(context);
-            //..
+            context.Database.Migrate();
+
+            await ExplorerInicializer.Initialize(context);
+            //...
 
 
             var server = HostBuilder.CreateServer(args);
-
-
 
             var viewsRenderer = new ViewsRenderer(server, "views");
             viewsRenderer.SetupControllers(mockRepo);
@@ -168,7 +167,7 @@ namespace Phantasma.Explorer
         private void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddDbContext<ExplorerDbContext>(options =>
-                    options.UseSqlServer("PhantasmaExplorerDatabase"));
+                    options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=PhantasmaExplorerDatabase;Trusted_Connection=True;"));
 
             serviceCollection.AddScoped<IPhantasmaRpcService>(provider => new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc"), httpClientHandler: new HttpClientHandler
             {

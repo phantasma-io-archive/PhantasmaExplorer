@@ -8,12 +8,11 @@ namespace Phantasma.Explorer.Domain.Infrastructure
     {
         protected static bool EqualOperator(ValueObject left, ValueObject right)
         {
-            if (left is null ^ right is null)
+            if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null))
             {
                 return false;
             }
-
-            return left?.Equals(right) != false;
+            return ReferenceEquals(left, null) || left.Equals(right);
         }
 
         protected static bool NotEqualOperator(ValueObject left, ValueObject right)
@@ -30,13 +29,13 @@ namespace Phantasma.Explorer.Domain.Infrastructure
                 return false;
             }
 
-            var other = (ValueObject)obj;
-            var thisValues = GetAtomicValues().GetEnumerator();
-            var otherValues = other.GetAtomicValues().GetEnumerator();
-
+            ValueObject other = (ValueObject)obj;
+            IEnumerator<object> thisValues = GetAtomicValues().GetEnumerator();
+            IEnumerator<object> otherValues = other.GetAtomicValues().GetEnumerator();
             while (thisValues.MoveNext() && otherValues.MoveNext())
             {
-                if (thisValues.Current is null ^ otherValues.Current is null)
+                if (ReferenceEquals(thisValues.Current, null) ^
+                    ReferenceEquals(otherValues.Current, null))
                 {
                     return false;
                 }
@@ -47,7 +46,6 @@ namespace Phantasma.Explorer.Domain.Infrastructure
                     return false;
                 }
             }
-
             return !thisValues.MoveNext() && !otherValues.MoveNext();
         }
 
@@ -57,5 +55,6 @@ namespace Phantasma.Explorer.Domain.Infrastructure
                 .Select(x => x != null ? x.GetHashCode() : 0)
                 .Aggregate((x, y) => x ^ y);
         }
+        // Other utilility methods
     }
 }
