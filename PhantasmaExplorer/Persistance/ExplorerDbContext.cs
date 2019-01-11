@@ -5,7 +5,7 @@ namespace Phantasma.Explorer.Persistance
 {
     public class ExplorerDbContext : DbContext
     {
-        public ExplorerDbContext(DbContextOptions<ExplorerDbContext> options)
+        public ExplorerDbContext(DbContextOptions options)
             : base(options)
         {
         }
@@ -14,14 +14,13 @@ namespace Phantasma.Explorer.Persistance
         public DbSet<App> Apps { get; set; }
         public DbSet<Block> Blocks { get; set; }
         public DbSet<Chain> Chains { get; set; }
-        public DbSet<NFBalance> NfBalances { get; set; }
+        public DbSet<NonFungibleToken> NonFungibleTokens { get; set; }
         public DbSet<Token> Tokens { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ExplorerDbContext).Assembly);
-            //modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
         }
     }
 }

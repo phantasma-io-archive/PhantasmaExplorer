@@ -2,15 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Phantasma.Explorer.Persistance;
 
 namespace Phantasma.Explorer.Migrations
 {
     [DbContext(typeof(ExplorerDbContext))]
-    partial class ExplorerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190111173955_Nftokens")]
+    partial class Nftokens
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,19 +30,6 @@ namespace Phantasma.Explorer.Migrations
                     b.HasKey("Address");
 
                     b.ToTable("Accounts");
-                });
-
-            modelBuilder.Entity("Phantasma.Explorer.Domain.Entities.AccountTransaction", b =>
-                {
-                    b.Property<string>("AccountId");
-
-                    b.Property<string>("TransactionId");
-
-                    b.HasKey("AccountId", "TransactionId");
-
-                    b.HasIndex("TransactionId");
-
-                    b.ToTable("AccountTransaction");
                 });
 
             modelBuilder.Entity("Phantasma.Explorer.Domain.Entities.App", b =>
@@ -150,6 +139,8 @@ namespace Phantasma.Explorer.Migrations
                     b.Property<string>("Hash")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("AccountAddress");
+
                     b.Property<string>("BlockHash");
 
                     b.Property<string>("Script");
@@ -157,6 +148,8 @@ namespace Phantasma.Explorer.Migrations
                     b.Property<long>("Timestamp");
 
                     b.HasKey("Hash");
+
+                    b.HasIndex("AccountAddress");
 
                     b.HasIndex("BlockHash");
 
@@ -186,19 +179,6 @@ namespace Phantasma.Explorer.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Phantasma.Explorer.Domain.Entities.AccountTransaction", b =>
-                {
-                    b.HasOne("Phantasma.Explorer.Domain.Entities.Account", "Account")
-                        .WithMany("Transactions")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Phantasma.Explorer.Domain.Entities.Transaction", "Transaction")
-                        .WithMany("Accounts")
-                        .HasForeignKey("TransactionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Phantasma.Explorer.Domain.Entities.Block", b =>
                 {
                     b.HasOne("Phantasma.Explorer.Domain.Entities.Chain", "Chain")
@@ -216,6 +196,10 @@ namespace Phantasma.Explorer.Migrations
 
             modelBuilder.Entity("Phantasma.Explorer.Domain.Entities.Transaction", b =>
                 {
+                    b.HasOne("Phantasma.Explorer.Domain.Entities.Account")
+                        .WithMany("Transactions")
+                        .HasForeignKey("AccountAddress");
+
                     b.HasOne("Phantasma.Explorer.Domain.Entities.Block", "Block")
                         .WithMany("Transactions")
                         .HasForeignKey("BlockHash")

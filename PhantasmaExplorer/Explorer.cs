@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Phantasma.API;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Plugins;
 using Phantasma.Blockchain.Tokens;
@@ -41,14 +40,14 @@ namespace Phantasma.Explorer
             Console.WriteLine("Current path: " + curPath);
 
             //new
-            IServiceCollection serviceCollection = new ServiceCollection();
-            _app = new Application(serviceCollection);
+            //IServiceCollection serviceCollection = new ServiceCollection();
+            //_app = new Application(serviceCollection);
 
-            var context = AppServices.GetService<ExplorerDbContext>();
+            //var context = AppServices.GetService<ExplorerDbContext>();
 
-            context.Database.Migrate();
+            //context.Database.Migrate();
 
-            await ExplorerInicializer.Initialize(context);
+            //await ExplorerInicializer.Initialize(context);
             //...
 
 

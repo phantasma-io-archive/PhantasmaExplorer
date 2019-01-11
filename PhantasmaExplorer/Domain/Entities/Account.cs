@@ -7,16 +7,16 @@ namespace Phantasma.Explorer.Domain.Entities
     {
         public Account()
         {
-            FTokenBalance = new HashSet<FBalance>();
-            NFTokenBalance = new HashSet<NFBalance>();
-            Transactions = new HashSet<Transaction>();
+            TokenBalance = new HashSet<FBalance>();
+            NonFungibleTokens = new HashSet<NonFungibleToken>();
+            AccountTransactions = new HashSet<AccountTransaction>();
         }
 
         public string Address { get; set; }
         public string Name { get; set; }
 
-        public ICollection<FBalance> FTokenBalance { get; }
-        public ICollection<NFBalance> NFTokenBalance { get; }
-        public ICollection<Transaction> Transactions { get; }
+        public ICollection<FBalance> TokenBalance { get; }
+        public ICollection<NonFungibleToken> NonFungibleTokens { get; set; }
+        public ICollection<AccountTransaction> AccountTransactions { get; }
     }
 }

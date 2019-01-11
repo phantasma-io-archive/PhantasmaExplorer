@@ -9,12 +9,25 @@ namespace Phantasma.Explorer.Persistance
         public void Configure(EntityTypeBuilder<Account> builder)
         {
             builder.HasKey(e => e.Address);
-            builder.OwnsMany(p => p.FTokenBalance, a =>
+            builder.OwnsMany(p => p.TokenBalance, a =>
             {
                 a.HasForeignKey("Address");
-                a.Property<int>("Id");
-                a.HasKey("Address", "Id");
+                a.Property(ca => ca.Chain);
+                a.Property(ca => ca.TokenSymbol);
+                a.HasKey("Address", "Chain", "TokenSymbol", "Amount");
             });
+        }
+    }
+
+    public class NonFungibleTokenConfiguration : IEntityTypeConfiguration<NonFungibleToken>
+    {
+        public void Configure(EntityTypeBuilder<NonFungibleToken> builder)
+        {
+            builder.HasKey(e => e.Id);
+
+            builder.HasOne(p => p.Account)
+                .WithMany(p => p.NonFungibleTokens)
+                .HasForeignKey(p => p.AccountAddress);
         }
     }
 
@@ -26,34 +39,24 @@ namespace Phantasma.Explorer.Persistance
         }
     }
 
+    public class ChainConfiguration : IEntityTypeConfiguration<Chain>
+    {
+        public void Configure(EntityTypeBuilder<Chain> builder)
+        {
+            builder.HasKey(e => e.Address);
+        }
+    }
+
     public class BlockConfiguration : IEntityTypeConfiguration<Block>
     {
         public void Configure(EntityTypeBuilder<Block> builder)
         {
             builder.HasKey(e => e.Hash);
 
-            builder.HasOne(p => p.Chain)
+            builder.HasOne(d => d.Chain)
                 .WithMany(p => p.Blocks)
-                .HasForeignKey(p => p.ChainAddress);
-        }
-    }
-
-    public class ChainConfiguration : IEntityTypeConfiguration<Chain>
-    {
-        public void Configure(EntityTypeBuilder<Chain> builder)
-        {
-            builder.HasKey(e => e.Address);
-
-            builder.HasMany(p => p.Blocks);
-        }
-    }
-
-
-    public class NFBalanceConfiguration : IEntityTypeConfiguration<NFBalance>
-    {
-        public void Configure(EntityTypeBuilder<NFBalance> builder)
-        {
-            builder.HasKey(p => p.Id);
+                .HasForeignKey(d => d.ChainAddress)
+            .HasConstraintName("FK_Blocks_Chains");
         }
     }
 
@@ -70,20 +73,36 @@ namespace Phantasma.Explorer.Persistance
         public void Configure(EntityTypeBuilder<Transaction> builder)
         {
             builder.HasKey(e => e.Hash);
+
+            builder.HasOne(d => d.Block)
+                .WithMany(p => p.Transactions)
+                .HasForeignKey(d => d.BlockHash)
+                .HasConstraintName("FK_Transactions_Blocks");
+
             builder.OwnsMany(p => p.Events, a =>
             {
                 a.HasForeignKey("Hash");
-                a.Property<int>("Id");
-                a.HasKey("Hash", "Id");
+                a.Property(ca => ca.Data);
+                a.Property(ca => ca.EventAddress);
+                a.Property(ca => ca.EventKind);
+                a.HasKey("Hash", "Data", "EventAddress", "EventKind");
             });
+        }
+    }
 
-            builder.HasOne(p => p.Block)
-                .WithMany(p => p.Transactions)
-                .HasForeignKey(p => p.Hash);
+    public class AccountTransactionConfiguration : IEntityTypeConfiguration<AccountTransaction>
+    {
+        public void Configure(EntityTypeBuilder<AccountTransaction> builder)
+        {
+            builder.HasKey(at => new { at.AccountId, at.TransactionId });
 
-            //.Property(c => c.Data).HasColumnName("EventData");
-            //builder.OwnsMany(p => p.Events).Property(c => c.EventAddress).HasColumnName("EventAddress");
-            //builder.OwnsMany(p => p.Events).Property(c => c.EventKind).HasColumnName("EventKind");
+            builder.HasOne(at => at.Account)
+                .WithMany(b => b.AccountTransactions)
+                .HasForeignKey(at => at.AccountId);
+
+            builder.HasOne(at => at.Transaction)
+                .WithMany(c => c.AccountTransactions)
+                .HasForeignKey(at => at.TransactionId);
         }
     }
 }
