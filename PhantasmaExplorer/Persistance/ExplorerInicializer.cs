@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Phantasma.Explorer.Domain.Entities;
@@ -10,8 +11,6 @@ namespace Phantasma.Explorer.Persistance
     public class ExplorerInicializer
     {
         private IPhantasmaRpcService _phantasmaRpcService;
-
-        public bool IsInitialized { get; private set; }
 
         public static async Task Initialize(ExplorerDbContext context)
         {
@@ -39,21 +38,11 @@ namespace Phantasma.Explorer.Persistance
                 await SeedChains(context);
             }
 
-            if (!context.Blocks.Any())
-            {
-                foreach (var chain in context.Chains)
-                {
-                    await SeedBlocks(context, chain);
-                }
-            }
-
             // account balances
-            if (context.Accounts.Any(p => p.TokenBalance.Count == 0))
+            if (context.Accounts.Any())
             {
                 await SeedAccountsBalance(context);
             }
-
-            IsInitialized = true;
         }
 
         private async Task SeedApps(ExplorerDbContext context)
@@ -103,7 +92,7 @@ namespace Phantasma.Explorer.Persistance
 
             foreach (var chainDto in chains)
             {
-                Debug.WriteLine($"Seeding chain {chainDto.Name}");
+                Console.WriteLine($"Seeding chain {chainDto.Name}");
 
                 var chain = new Chain
                 {
@@ -114,6 +103,8 @@ namespace Phantasma.Explorer.Persistance
                 };
 
                 context.Chains.Add(chain);
+
+                await SeedBlocks(context, chain);
             }
 
             await context.SaveChangesAsync();
@@ -125,7 +116,7 @@ namespace Phantasma.Explorer.Persistance
 
             for (int i = 1; i <= height; i++)
             {
-                Debug.WriteLine($"Seeding block {i}");
+                Console.WriteLine($"Seeding block {i}");
 
                 var blockDto = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, i);
                 var block = new Block
@@ -169,11 +160,11 @@ namespace Phantasma.Explorer.Persistance
 
                 chain.Blocks.Add(block);
 
-                Debug.WriteLine($"Finished seeding block {blockDto.Height}");
-                Debug.WriteLine("****************************************");
+                Console.WriteLine($"Finished seeding block {blockDto.Height}");
+                Console.WriteLine("****************************************");
             }
 
-            await context.SaveChangesAsync();
+            //await context.SaveChangesAsync();
         }
 
         private async Task UpdateAccount(ExplorerDbContext context, Transaction transaction, string eventDtoEventAddress)
@@ -233,14 +224,17 @@ namespace Phantasma.Explorer.Persistance
                     {
                         foreach (var id in tokenBalance.Ids)
                         {
-                            var nftoken = new NonFungibleToken
+                            if (account.NonFungibleTokens.SingleOrDefault(p => p.Id.Equals(id)) != null)
                             {
-                                Chain = tokenBalance.ChainName,
-                                TokenSymbol = tokenBalance.Symbol,
-                                Id = id,
-                                Account = account,
-                            };
-                            account.NonFungibleTokens.Add(nftoken);
+                                var nftoken = new NonFungibleToken
+                                {
+                                    Chain = tokenBalance.ChainName,
+                                    TokenSymbol = tokenBalance.Symbol,
+                                    Id = id,
+                                    Account = account,
+                                };
+                                account.NonFungibleTokens.Add(nftoken);
+                            }
                         }
                     }
                 }

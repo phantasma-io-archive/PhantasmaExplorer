@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Application.Queries;
-using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 
@@ -13,18 +12,11 @@ namespace Phantasma.Explorer.Controllers
 {
     public class HomeController
     {
-        private readonly ExplorerDbContext _context;
-
-        public HomeController(ExplorerDbContext context)
-        {
-            _context = context;
-        }
-
         public HomeViewModel GetLastestInfo()
         {
-            var blockQuery = new BlockQueries(_context);
-            var txsQuery = new TransactionQueries(_context);
-            var chainQuery = new ChainQueries(_context);
+            var blockQuery = new BlockQueries();
+            var txsQuery = new TransactionQueries();
+            var chainQuery = new ChainQueries();
 
             var blocksVm = new List<BlockViewModel>();
             var txsVm = new List<TransactionViewModel>();
@@ -139,21 +131,21 @@ namespace Phantasma.Explorer.Controllers
                 }
 
                 //token
-                var token = new TokenQueries(_context).QueryToken(input.ToUpperInvariant());
+                var token = new TokenQueries().QueryToken(input.ToUpperInvariant());
                 if (token != null)// token
                 {
                     return $"token/{token.Symbol}";
                 }
 
                 //app
-                var app = new AppQueries(_context).QueryApp(input);
+                var app = new AppQueries().QueryApp(input);
                 if (app != null)
                 {
                     return $"app/{app.Id}";
                 }
 
                 //chain
-                var chain = new ChainQueries(_context).QueryChain(input);
+                var chain = new ChainQueries().QueryChain(input);
                 if (chain != null)
                 {
                     return $"chain/{chain.Address}";
@@ -163,13 +155,13 @@ namespace Phantasma.Explorer.Controllers
                 var hash = Hash.Parse(input);
                 if (hash != null)
                 {
-                    var tx = new TransactionQueries(_context).QueryTransaction(input);
+                    var tx = new TransactionQueries().QueryTransaction(input);
                     if (tx != null)
                     {
                         return $"tx/{tx.Hash}";
                     }
 
-                    var block = new BlockQueries(_context).QueryBlock(input);
+                    var block = new BlockQueries().QueryBlock(input);
                     if (block != null)
                     {
                         return $"block/{block.Hash}";

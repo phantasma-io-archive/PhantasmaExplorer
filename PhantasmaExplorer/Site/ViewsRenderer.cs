@@ -60,16 +60,16 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Compiler.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
         }
 
-        public void SetupControllers(ExplorerDbContext context) //todo this should be done by other class
+        public void SetupControllers() //todo this should be done by other class
         {
-            HomeController = new HomeController(context);
-            AddressesController = new AddressesController(context);
-            BlocksController = new BlocksController(context);
-            ChainsController = new ChainsController(context);
-            TransactionsController = new TransactionsController(context);
-            TokensController = new TokensController(context);
-            AppsController = new AppsController(context);
-            ApiController = new ApiController(context);
+            HomeController = new HomeController();
+            AddressesController = new AddressesController();
+            BlocksController = new BlocksController();
+            ChainsController = new ChainsController();
+            TransactionsController = new TransactionsController();
+            TokensController = new TokensController();
+            AppsController = new AppsController();
+            ApiController = new ApiController();
         }
 
         private Dictionary<string, object> GetSessionContext(HTTPRequest request) => request.session.Data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);

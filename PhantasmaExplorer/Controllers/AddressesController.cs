@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Explorer.Application.Queries;
-using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 
@@ -9,19 +8,12 @@ namespace Phantasma.Explorer.Controllers
 {
     public class AddressesController
     {
-        private readonly ExplorerDbContext _context;
-
         private decimal SoulRate { get; set; }
-
-        public AddressesController(ExplorerDbContext context)
-        {
-            _context = context;
-        }
 
         public List<AddressViewModel> GetAddressList()
         {
-            var addressQueries = new AccountQueries(_context);
-            var tokenQueries = new TokenQueries(_context);
+            var addressQueries = new AccountQueries();
+            var tokenQueries = new TokenQueries();
             var addressList = new List<AddressViewModel>();
 
             var list = addressQueries.QueryRichList(numberOfAddresses: 30);
@@ -40,9 +32,9 @@ namespace Phantasma.Explorer.Controllers
 
         public AddressViewModel GetAddress(string addressText)
         {
-            var addressQueries = new AccountQueries(_context);
-            var tokenQueries = new TokenQueries(_context);
-            var transactionQueries = new TransactionQueries(_context);
+            var addressQueries = new AccountQueries();
+            var tokenQueries = new TokenQueries();
+            var transactionQueries = new TransactionQueries();
             var account = addressQueries.QueryAccount(addressText);
 
             if (account != null)

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
@@ -9,7 +10,6 @@ using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Persistance;
 using Phantasma.IO;
 using Phantasma.Numerics;
-using Phantasma.RpcClient.DTOs;
 using EventKind = Phantasma.Explorer.Domain.Entities.EventKind;
 
 namespace Phantasma.Explorer.Application.Queries
@@ -18,32 +18,47 @@ namespace Phantasma.Explorer.Application.Queries
     {
         private readonly ExplorerDbContext _context;
 
-        public TransactionQueries(ExplorerDbContext context)
+        public TransactionQueries()
         {
-            _context = context;
+            _context = Explorer.AppServices.GetService<ExplorerDbContext>();
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
-        public IEnumerable<Transaction> QueryTransactions(string chain = null, int amount = 20)
+        public ICollection<Transaction> QueryTransactions(string chain = null, int amount = 20)
         {
             if (string.IsNullOrEmpty(chain)) //no specific chain
             {
-                return _context.Transactions.OrderByDescending(p => p.Timestamp).Take(amount);
+                return _context.Transactions
+                    .Include(p => p.Block)
+                    .Include(p => p.Block.Chain)
+                    .OrderByDescending(p => p.Timestamp)
+                    .Take(amount)
+                    .ToList();
             }
 
             return _context.Transactions
+                .Include(p => p.Block)
+                .Include(p => p.Block.Chain)
                 .Where(p => p.Block.Chain.Address.Equals(chain) || p.Block.Chain.Name.Equals(chain))
-                .OrderByDescending(p => p.Timestamp).Take(amount);
+                .OrderByDescending(p => p.Timestamp)
+                .Take(amount)
+                .ToList();
         }
 
-        public IEnumerable<Transaction> QueryAddressTransactions(string address, int amount = 20)
+        public ICollection<Transaction> QueryAddressTransactions(string address, int amount = 20)
         {
-            return _context.Accounts.SingleOrDefault(p => p.Address.Equals(address))?.AccountTransactions.Select(c => c.Transaction);
+            return _context.Accounts.SingleOrDefault(p => p.Address.Equals(address))?
+                .AccountTransactions
+                .Select(c => c.Transaction)
+                .ToList();
         }
 
         public Transaction QueryTransaction(string hash)
         {
-            return _context.Transactions.SingleOrDefault(p => p.Hash.Equals(hash));
+            return _context.Transactions
+                .Include(p => p.Block)
+                .Include(p => p.Block.Chain)
+                .SingleOrDefault(p => p.Hash.Equals(hash));
         }
 
         public int QueryAddressTransactionCount(string address, string chain = null)
@@ -57,7 +72,9 @@ namespace Phantasma.Explorer.Application.Queries
                 return account.AccountTransactions.Count;
             }
 
-            return account.AccountTransactions.Count(p => p.Transaction.Block.Chain.Address.Equals(chain) || p.Transaction.Block.Chain.Name.Equals(chain));
+            return account.AccountTransactions
+                .Count(p => p.Transaction.Block.Chain.Address.Equals(chain)
+                            || p.Transaction.Block.Chain.Name.Equals(chain));
         }
 
         public int QueryTotalChainTransactionCount(string chain = null)
@@ -74,11 +91,16 @@ namespace Phantasma.Explorer.Application.Queries
             return contextChain.Blocks.Select(p => p.Transactions.Count).Sum();
         }
 
-        public IEnumerable<Transaction> QueryLastTokenTransactions(string tokenSymbol, int amount = 20)
+        public ICollection<Transaction> QueryLastTokenTransactions(string tokenSymbol, int amount = 20)
         {
             var txList = new List<Transaction>();
 
-            var eventList = _context.Transactions.OrderByDescending(p => p.Timestamp);
+            var eventList = _context.Transactions
+                .OrderByDescending(p => p.Timestamp)
+                .Include(p => p.Block)
+                .Include(p => p.Block.Chain)
+                .ToList();
+
             foreach (var tx in eventList) //todo move this to share
             {
                 foreach (var txEvent in tx.Events)
@@ -92,7 +114,7 @@ namespace Phantasma.Explorer.Application.Queries
                 }
             }
 
-            return txList.Take(amount);
+            return txList.Take(amount).ToList();
         }
 
         public string GetEventContent(Block block, Domain.ValueObjects.Event evt) //todo remove Native event dependency and move this

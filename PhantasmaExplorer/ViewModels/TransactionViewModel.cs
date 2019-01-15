@@ -18,7 +18,7 @@ namespace Phantasma.Explorer.ViewModels
     public class TransactionViewModel
     {
         public string Hash { get; set; }
-        public BlockViewModel Block { get; set; }
+        //public BlockViewModel Block { get; set; }
         public DateTime Date { get; set; }
         public string ChainName { get; set; }
         public string ChainAddress { get; set; }
@@ -32,7 +32,7 @@ namespace Phantasma.Explorer.ViewModels
         public string SenderAddress { get; set; }
         public string ReceiverAddress { get; set; }
 
-        public static TransactionViewModel FromTransaction(Transaction tx) //todo find way to remove context
+        public static TransactionViewModel FromTransaction(Transaction tx)  //todo fix vm .From
         {
             var vm = new TransactionViewModel();
 
@@ -41,12 +41,12 @@ namespace Phantasma.Explorer.ViewModels
 
             string description = GetTxDescription(vm, tx, context.Chains.ToList(), context.Tokens.ToList());
 
-            vm.Block = BlockViewModel.FromBlock(tx.Block);
+            //vm.Block = blockVm;//BlockViewModel.FromBlock(tx.Block);
             vm.ChainAddress = tx.Block.ChainAddress;
             vm.ChainName = tx.Block.Chain.Name;
             vm.Date = new Timestamp(tx.Block.Timestamp);
             vm.Hash = tx.Hash;
-            vm.Events = tx.Events.Select(evt => EventViewModel.FromEvent(context, tx, evt));
+            vm.Events = tx.Events.Select(evt => EventViewModel.FromEvent(tx, evt));
             vm.Description = description;
             vm.Instructions = disasm.Instructions;
             return vm;

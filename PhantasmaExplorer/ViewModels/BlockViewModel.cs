@@ -37,9 +37,8 @@ namespace Phantasma.Explorer.ViewModels
                 Txs = new List<TransactionViewModel>()
             };
 
-            var txsVm = block.Transactions.Select(TransactionViewModel.FromTransaction);
+            vm.Txs = block.Transactions.Select(TransactionViewModel.FromTransaction).ToList();
 
-            vm.Txs = txsVm.ToList();
             return vm;
         }
     }

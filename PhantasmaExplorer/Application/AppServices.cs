@@ -22,7 +22,8 @@ namespace Phantasma.Explorer.Application
         private void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddDbContext<ExplorerDbContext>(options =>
-                options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=PhantasmaExplorerDatabase;Trusted_Connection=True;"));
+                options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=PhantasmaExplorerDatabase;Trusted_Connection=True;"),
+                ServiceLifetime.Transient);
 
             serviceCollection.AddScoped<IPhantasmaRpcService>(provider => new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc"), httpClientHandler: new HttpClientHandler
             {

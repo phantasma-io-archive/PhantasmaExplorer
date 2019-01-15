@@ -10,9 +10,9 @@ namespace Phantasma.Explorer.Controllers
 
         private readonly ExplorerDbContext _context;
 
-        public ApiController(ExplorerDbContext context)
+        public ApiController()
         {
-            _context = context;
+            //_context = context;
         }
 
         public DataNode GetAccount(string addressText)
