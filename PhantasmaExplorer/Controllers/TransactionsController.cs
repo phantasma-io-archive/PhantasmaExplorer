@@ -1,41 +1,37 @@
 ﻿using System.Collections.Generic;
-using Phantasma.Explorer.Infrastructure.Interfaces;
+using System.Linq;
+using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
 {
     public class TransactionsController
     {
-        private IRepository Repository { get; } //todo interface
+        private readonly ExplorerDbContext _context;
 
-        public TransactionsController(IRepository repo)
+        public TransactionsController(ExplorerDbContext context)
         {
-            Repository = repo;
+            _context = context;
         }
 
         public List<TransactionViewModel> GetLastTransactions()
         {
-            var txList = new List<TransactionViewModel>();
+            var txQuery = new TransactionQueries(_context);
 
-            var repoTx = Repository.GetTransactions();
-            foreach (var transaction in repoTx)
-            {
-                var block = Repository.FindBlockForTransaction(transaction.Txid);
-                if (block != null)
-                {
-                    var tx1 = transaction;
-                    txList.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), tx1));
-                }
-            }
-            return txList;
+            var repoTx = txQuery.QueryTransactions();
+
+            return repoTx.Select(TransactionViewModel.FromTransaction).ToList();
         }
 
         public TransactionViewModel GetTransaction(string txHash)
         {
-            var transaction = Repository.GetTransaction(txHash);
+            var txQuery = new TransactionQueries(_context);
+            var transaction = txQuery.QueryTransaction(txHash);
+
             if (transaction == null) return null;
-            var block = Repository.FindBlockForTransaction(transaction.Txid);
-            return TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), transaction);
+
+            return TransactionViewModel.FromTransaction(transaction);
         }
     }
 }

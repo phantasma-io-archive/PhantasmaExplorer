@@ -1,6 +1,6 @@
-﻿using Phantasma.Explorer.Infrastructure.Interfaces;
-using Phantasma.API;
+﻿using Phantasma.API;
 using LunarLabs.Parser;
+using Phantasma.Explorer.Persistance;
 
 namespace Phantasma.Explorer.Controllers
 {
@@ -8,9 +8,11 @@ namespace Phantasma.Explorer.Controllers
     {
         private readonly NexusAPI _api;
 
-        public ApiController(IRepository repo)
-        {
+        private readonly ExplorerDbContext _context;
 
+        public ApiController(ExplorerDbContext context)
+        {
+            _context = context;
         }
 
         public DataNode GetAccount(string addressText)
@@ -102,6 +104,5 @@ namespace Phantasma.Explorer.Controllers
         {
             return APIUtils.FromAPIResult(_api.SendRawTransaction(signedTx));
         }
-
     }
 }

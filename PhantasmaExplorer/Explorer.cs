@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +10,10 @@ using Phantasma.Blockchain.Plugins;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Blockchain.Utils;
 using Phantasma.Cryptography;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Infrastructure.Data;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Site;
-using Phantasma.RpcClient;
-using Phantasma.RpcClient.Interfaces;
 
 namespace Phantasma.Explorer
 {
@@ -26,7 +23,7 @@ namespace Phantasma.Explorer
         private static MockRepository _repo;
 
         public static IServiceProvider AppServices => _app.Services;
-        private static Application _app;
+        private static AppServices _app;
 
         static async Task Main(string[] args)
         {
@@ -40,21 +37,21 @@ namespace Phantasma.Explorer
             Console.WriteLine("Current path: " + curPath);
 
             //new
-            //IServiceCollection serviceCollection = new ServiceCollection();
-            //_app = new Application(serviceCollection);
+            IServiceCollection serviceCollection = new ServiceCollection();
+            _app = new AppServices(serviceCollection);
 
-            //var context = AppServices.GetService<ExplorerDbContext>();
+            var context = AppServices.GetService<ExplorerDbContext>();
 
-            //context.Database.Migrate();
+            context.Database.Migrate();
 
-            //await ExplorerInicializer.Initialize(context);
+            await ExplorerInicializer.Initialize(context);
             //...
 
 
             var server = HostBuilder.CreateServer(args);
 
             var viewsRenderer = new ViewsRenderer(server, "views");
-            viewsRenderer.SetupControllers(mockRepo);
+            viewsRenderer.SetupControllers(context);
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
 
@@ -151,27 +148,5 @@ namespace Phantasma.Explorer
         }
 
         public static string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
-    }
-
-    public class Application
-    {
-        public IServiceProvider Services { get; set; }
-
-        public Application(IServiceCollection serviceCollection)
-        {
-            ConfigureServices(serviceCollection);
-            Services = serviceCollection.BuildServiceProvider();
-        }
-
-        private void ConfigureServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddDbContext<ExplorerDbContext>(options =>
-                    options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=PhantasmaExplorerDatabase;Trusted_Connection=True;"));
-
-            serviceCollection.AddScoped<IPhantasmaRpcService>(provider => new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc"), httpClientHandler: new HttpClientHandler
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            })));
-        }
     }
 }

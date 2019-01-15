@@ -4,7 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
-using Phantasma.Explorer.Infrastructure.Interfaces;
+using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 
@@ -12,37 +13,44 @@ namespace Phantasma.Explorer.Controllers
 {
     public class HomeController
     {
-        private IRepository Repository { get; }
+        private readonly ExplorerDbContext _context;
 
-        public HomeController(IRepository repo)
+        public HomeController(ExplorerDbContext context)
         {
-            Repository = repo;
+            _context = context;
         }
 
         public HomeViewModel GetLastestInfo()
         {
-            var blocks = new List<BlockViewModel>();
-            var txs = new List<TransactionViewModel>();
-            foreach (var block in Repository.GetBlocks())
+            var blockQuery = new BlockQueries(_context);
+            var txsQuery = new TransactionQueries(_context);
+            var chainQuery = new ChainQueries(_context);
+
+            var blocksVm = new List<BlockViewModel>();
+            var txsVm = new List<TransactionViewModel>();
+
+            var blocks = blockQuery.QueryBlocks();
+            var transactions = txsQuery.QueryTransactions();
+
+            foreach (var block in blocks)
             {
-                blocks.Add(BlockViewModel.FromBlock(Repository, block));
+                blocksVm.Add(BlockViewModel.FromBlock(block));
             }
 
-            var chart = new Dictionary<string, uint>();
-
-            foreach (var transaction in Repository.GetTransactions())
+            foreach (var transaction in transactions)
             {
-                var block = Repository.FindBlockForTransaction(transaction.Txid);
-                txs.Add(TransactionViewModel.FromTransaction(Repository, BlockViewModel.FromBlock(Repository, block), transaction));
+                txsVm.Add(TransactionViewModel.FromTransaction(transaction));
             }
 
             // tx history chart calculation
-            var repTxs = Repository.GetTransactions(null, 1000);
+            var repTxs = txsQuery.QueryTransactions(null, 1000);
+
+            var chart = new Dictionary<string, uint>();
+
             foreach (var transaction in repTxs)
             {
-                var block = Repository.FindBlockForTransaction(transaction.Txid);
-
-                DateTime chartTime = new Timestamp((uint)block.Timestamp);
+                var block = transaction.Block;
+                DateTime chartTime = new Timestamp(block.Timestamp);
                 var chartKey = $"{chartTime.Day}/{chartTime.Month}";
 
                 if (chart.ContainsKey(chartKey))
@@ -55,19 +63,20 @@ namespace Phantasma.Explorer.Controllers
                 }
             }
 
-            int totalChains = Repository.GetChainCount();
-            uint height = Repository.GetChain("main").Height; //todo repo
-            int totalTransactions = Repository.GetTotalTransactions();
+            int totalChains = chainQuery.QueryChainCount;
+            uint height = chainQuery.QueryChain("main").Height;
+            int totalTransactions = txsQuery.QueryTotalChainTransactionCount();
 
             var vm = new HomeViewModel
             {
-                Blocks = blocks,
-                Transactions = txs,
+                Blocks = blocksVm,
+                Transactions = txsVm,
                 Chart = chart,
                 TotalTransactions = totalTransactions,
                 TotalChains = totalChains,
                 BlockHeight = height,
             };
+
             return vm;
         }
 
@@ -89,7 +98,7 @@ namespace Phantasma.Explorer.Controllers
                 var historicalData = symbol == "USD" ? null : CoinUtils.GetChartForCoin(symbol, "USD", days);
 
                 var chart = new Dictionary<string, decimal>();
-                for (int day=0; day<days; day++)
+                for (int day = 0; day < days; day++)
                 {
                     DateTime date = DateTime.Now - TimeSpan.FromDays(day);
                     var chartKey = $"{date.Day}/{date.Month}";
@@ -130,22 +139,21 @@ namespace Phantasma.Explorer.Controllers
                 }
 
                 //token
-                var token = Repository.GetToken(input.ToUpperInvariant());
+                var token = new TokenQueries(_context).QueryToken(input.ToUpperInvariant());
                 if (token != null)// token
                 {
                     return $"token/{token.Symbol}";
                 }
 
                 //app
-                var apps = Repository.GetApps();
-                var app = apps.SingleOrDefault(a => a.Id == input);
-                if (app.Title == input)
+                var app = new AppQueries(_context).QueryApp(input);
+                if (app != null)
                 {
                     return $"app/{app.Id}";
                 }
 
                 //chain
-                var chain = Repository.GetChain(input) ?? Repository.GetChain(input);
+                var chain = new ChainQueries(_context).QueryChain(input);
                 if (chain != null)
                 {
                     return $"chain/{chain.Address}";
@@ -155,13 +163,13 @@ namespace Phantasma.Explorer.Controllers
                 var hash = Hash.Parse(input);
                 if (hash != null)
                 {
-                    var tx = Repository.GetTransaction(hash.ToString());
+                    var tx = new TransactionQueries(_context).QueryTransaction(input);
                     if (tx != null)
                     {
-                        return $"tx/{tx.Txid}";
+                        return $"tx/{tx.Hash}";
                     }
 
-                    var block = Repository.GetBlock(hash.ToString());
+                    var block = new BlockQueries(_context).QueryBlock(input);
                     if (block != null)
                     {
                         return $"block/{block.Hash}";

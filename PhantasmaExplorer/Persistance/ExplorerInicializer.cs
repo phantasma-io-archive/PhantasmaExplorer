@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.RpcClient.Interfaces;
@@ -11,6 +10,8 @@ namespace Phantasma.Explorer.Persistance
     public class ExplorerInicializer
     {
         private IPhantasmaRpcService _phantasmaRpcService;
+
+        public bool IsInitialized { get; private set; }
 
         public static async Task Initialize(ExplorerDbContext context)
         {
@@ -47,7 +48,12 @@ namespace Phantasma.Explorer.Persistance
             }
 
             // account balances
-            await SeedAccountsBalance(context);
+            if (context.Accounts.Any(p => p.TokenBalance.Count == 0))
+            {
+                await SeedAccountsBalance(context);
+            }
+
+            IsInitialized = true;
         }
 
         private async Task SeedApps(ExplorerDbContext context)
@@ -125,7 +131,6 @@ namespace Phantasma.Explorer.Persistance
                 var block = new Block
                 {
                     Chain = chain,
-                    //ChainAddress = chain.Address,
                     Hash = blockDto.Hash,
                     PreviousHash = blockDto.PreviousHash,
                     Timestamp = blockDto.Timestamp,
@@ -141,7 +146,6 @@ namespace Phantasma.Explorer.Persistance
                     var transaction = new Transaction
                     {
                         Block = block,
-                        //BlockHash = block.Hash,
                         Hash = transactionDto.Txid,
                         Timestamp = transactionDto.Timestamp,
                         Script = transactionDto.Script
@@ -166,6 +170,7 @@ namespace Phantasma.Explorer.Persistance
                 chain.Blocks.Add(block);
 
                 Debug.WriteLine($"Finished seeding block {blockDto.Height}");
+                Debug.WriteLine("****************************************");
             }
 
             await context.SaveChangesAsync();
@@ -234,7 +239,6 @@ namespace Phantasma.Explorer.Persistance
                                 TokenSymbol = tokenBalance.Symbol,
                                 Id = id,
                                 Account = account,
-                                AccountAddress = account.Address
                             };
                             account.NonFungibleTokens.Add(nftoken);
                         }

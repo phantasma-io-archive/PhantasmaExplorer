@@ -5,10 +5,7 @@ namespace Phantasma.Explorer.Persistance
 {
     public class ExplorerDbContext : DbContext
     {
-        public ExplorerDbContext(DbContextOptions options)
-            : base(options)
-        {
-        }
+        public ExplorerDbContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Account> Accounts { get; set; }
         public DbSet<App> Apps { get; set; }

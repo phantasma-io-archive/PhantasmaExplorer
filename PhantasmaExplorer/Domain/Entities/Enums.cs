@@ -12,7 +12,7 @@ namespace Phantasma.Explorer.Domain.Entities
         Divisible = 1 << 3,
     }
 
-    public enum EventKind
+    public enum EventKind //todo maybe replace this with original enum
     {
         ChainCreate,
         TokenCreate,

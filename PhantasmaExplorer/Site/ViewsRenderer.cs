@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
+using Microsoft.EntityFrameworkCore;
 using Phantasma.Core;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Controllers;
 using Phantasma.Explorer.Infrastructure.Interfaces;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer.Site
@@ -57,16 +60,16 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Compiler.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
         }
 
-        public void SetupControllers(IRepository repo) //todo this should be done by other class
+        public void SetupControllers(ExplorerDbContext context) //todo this should be done by other class
         {
-            HomeController = new HomeController(repo);
-            AddressesController = new AddressesController(repo);
-            BlocksController = new BlocksController(repo);
-            ChainsController = new ChainsController(repo);
-            TransactionsController = new TransactionsController(repo);
-            TokensController = new TokensController(repo);
-            AppsController = new AppsController(repo);
-            ApiController = new ApiController(repo);
+            HomeController = new HomeController(context);
+            AddressesController = new AddressesController(context);
+            BlocksController = new BlocksController(context);
+            ChainsController = new ChainsController(context);
+            TransactionsController = new TransactionsController(context);
+            TokensController = new TokensController(context);
+            AppsController = new AppsController(context);
+            ApiController = new ApiController(context);
         }
 
         private Dictionary<string, object> GetSessionContext(HTTPRequest request) => request.session.Data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);

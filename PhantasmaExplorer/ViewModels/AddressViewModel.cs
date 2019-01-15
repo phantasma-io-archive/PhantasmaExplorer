@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Phantasma.Cryptography;
-using Phantasma.Explorer.Infrastructure.Interfaces;
-using Phantasma.RpcClient.DTOs;
+using Phantasma.Explorer.Domain.Entities;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -10,24 +8,45 @@ namespace Phantasma.Explorer.ViewModels
     {
         public string Address { get; set; }
         public string Name { get; set; }
-        public List<BalanceViewModel> NativeBalances { get; set; }
-        public List<BalanceViewModel> TokenBalance { get; set; }
         public decimal Balance { get; set; }
         public decimal Value { get; set; }
+
+        public List<BalanceViewModel> NativeBalances { get; set; }
+        public List<BalanceViewModel> TokenBalance { get; set; }
         public IEnumerable<TransactionViewModel> Transactions { get; set; }
 
-        public static AddressViewModel FromAddress(IRepository repository, Address address, IEnumerable<TransactionDto> txs)
+        public static AddressViewModel FromAddress(Account account, List<Token> phantasmaTokens)
         {
-            return new AddressViewModel
+            var vm = new AddressViewModel
             {
-                Address = address.Text,
-                Name = repository.GetAddressName(address.Text),
+                Address = account.Address,
+                Name = account.Name,
                 Value = 0,
-                Balance = 0,
                 NativeBalances = new List<BalanceViewModel>(),
                 TokenBalance = new List<BalanceViewModel>(),
-                Transactions = txs?.Select(tx => TransactionViewModel.FromTransaction(repository, BlockViewModel.FromBlock(repository, repository.FindBlockForTransaction(tx.Txid)), tx))
+                Transactions = account.AccountTransactions.Select(p => TransactionViewModel.FromTransaction(p.Transaction)).ToList(),
             };
+
+            var soulTokens = account.TokenBalance.Where(p => p.TokenSymbol.Equals("SOUL"));
+            var otherTokens = account.TokenBalance.Where(p => !p.TokenSymbol.Equals("SOUL"));
+
+            foreach (var balance in soulTokens)
+            {
+                vm.NativeBalances.Add(BalanceViewModel.FromAccountBalance(account,
+                    balance,
+                    phantasmaTokens.SingleOrDefault(p => p.Symbol.Equals(balance.TokenSymbol))));
+            }
+
+            vm.Balance = vm.NativeBalances.Sum(p => p.Balance);
+
+            foreach (var balance in otherTokens)
+            {
+                vm.TokenBalance.Add(BalanceViewModel.FromAccountBalance(account,
+                    balance,
+                    phantasmaTokens.SingleOrDefault(p => p.Symbol.Equals(balance.TokenSymbol))));
+            }
+
+            return vm;
         }
     }
 }

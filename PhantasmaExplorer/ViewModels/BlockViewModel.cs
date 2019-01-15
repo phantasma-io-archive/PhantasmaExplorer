@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Core.Types;
 using Phantasma.Core.Utils;
-using Phantasma.Explorer.Infrastructure.Interfaces;
-using Phantasma.RpcClient.DTOs;
+using Phantasma.Explorer.Domain.Entities;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -19,27 +18,28 @@ namespace Phantasma.Explorer.ViewModels
         public string ChainName { get; set; }
         public string ChainAddress { get; set; }
         public decimal Reward { get; set; }
+
         public List<TransactionViewModel> Txs { get; set; }
 
-        public static BlockViewModel FromBlock(IRepository repository, BlockDto block)
+        public static BlockViewModel FromBlock(Block block)
         {
             var vm = new BlockViewModel
             {
                 Height = (int)block.Height,
-                Timestamp = new Timestamp((uint)block.Timestamp),
-                Transactions = block.Txs.Count,
+                Timestamp = new Timestamp(block.Timestamp),
+                Transactions = block.Transactions.Count,
                 Hash = block.Hash,
                 ParentHash = block.PreviousHash,
                 ValidatorAddress = block.ValidatorAddress,
-                ChainName = repository.GetChainName(block.ChainAddress).ToTitleCase(),
+                ChainName = block.Chain.Name.ToTitleCase(),
                 ChainAddress = block.ChainAddress,
                 Reward = block.Reward,
                 Txs = new List<TransactionViewModel>()
             };
 
-            var txsVm = block.Txs.Select(transaction => TransactionViewModel.FromTransaction(repository, vm, transaction)).ToList();
+            var txsVm = block.Transactions.Select(TransactionViewModel.FromTransaction);
 
-            vm.Txs = txsVm;
+            vm.Txs = txsVm.ToList();
             return vm;
         }
     }

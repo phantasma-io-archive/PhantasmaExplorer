@@ -1,61 +1,44 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Phantasma.Explorer.Infrastructure.Interfaces;
+using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
 {
     public class ChainsController
     {
-        private IRepository Repository { get; }
+        private readonly ExplorerDbContext _context;
 
-        public ChainsController(IRepository repo)
+        public ChainsController(ExplorerDbContext context)
         {
-            Repository = repo;
+            _context = context;
         }
 
         public List<ChainViewModel> GetChains()
         {
-            var repoChains = Repository.GetAllChainsInfo();
-            var chainList = new List<ChainViewModel>();
+            var chainQuery = new ChainQueries(_context);
+            var chainVmList = new List<ChainViewModel>();
 
-            foreach (var repoChain in repoChains)
+            var allChains = chainQuery.QueryChains().ToList();
+
+            foreach (var chain in allChains)
             {
-                var blockList = new List<BlockViewModel>();
-                var lastBlocks = Repository.GetBlocks(repoChain.Address);
-
-                foreach (var block in lastBlocks)
-                {
-                    blockList.Add(BlockViewModel.FromBlock(Repository, block));
-                }
-
-                var totalTx = Repository.GetTotalChainTransactionCount(repoChain.Address);
-                chainList.Add(ChainViewModel.FromChain(repoChains.ToList(), repoChain, blockList, totalTx));
+                chainVmList.Add(ChainViewModel.FromChain(allChains, chain));
             }
 
-            return chainList;
+            return chainVmList;
         }
 
         public ChainViewModel GetChain(string chainInput)
         {
-            var repoChain = Repository.GetChain(chainInput);
-            var repoChains = Repository.GetAllChainsInfo().ToList();
+            var chainQuery = new ChainQueries(_context);
+            var repoChain = chainQuery.QueryChain(chainInput);
+            var chainList = chainQuery.QueryChains().ToList();
 
-            if (repoChain == null)
-            {
-                repoChain = Repository.GetChain(chainInput);
-                if (repoChain == null) return null;
-            }
+            if (repoChain == null) return null;
 
-            var blockList = new List<BlockViewModel>();
-            var lastBlocks = Repository.GetBlocks(repoChain.Address);
-            foreach (var block in lastBlocks)
-            {
-                blockList.Add(BlockViewModel.FromBlock(Repository, block));
-            }
-
-            var totalTxs = Repository.GetTotalChainTransactionCount(repoChain.Address);
-            return ChainViewModel.FromChain(repoChains, repoChain.GetChainInfo, blockList, totalTxs);
+            return ChainViewModel.FromChain(chainList, repoChain);
         }
     }
 }

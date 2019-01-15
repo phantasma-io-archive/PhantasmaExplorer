@@ -12,54 +12,54 @@ namespace Phantasma.Explorer.Infrastructure.Interfaces
 
         decimal GetAddressNativeBalance(Address address, string chainName = null);
 
-        decimal GetAddressBalance(Address address, TokenDto token, string chainName);
+        decimal GetAddressBalance(Address address, TokenDto token, string chainName); //done
 
-        string GetAddressName(string address);
+        string GetAddressName(string address);  //done
 
-        IEnumerable<Address> GetAddressList(int lastAddressAmount = 20);
+        IEnumerable<Address> GetAddressList(int lastAddressAmount = 20); //done
 
-        IEnumerable<BlockDto> GetBlocks(string chainAddress = null, int lastBlocksAmount = 20);
+        IEnumerable<BlockDto> GetBlocks(string chainAddress = null, int lastBlocksAmount = 20);//done
 
-        BlockDto GetBlock(string hash);
+        BlockDto GetBlock(string hash);//done
 
-        BlockDto GetBlock(int height, string chainAddress = null);
+        BlockDto GetBlock(int height, string chainAddress = null);//done
 
-        IEnumerable<ChainDto> GetAllChainsInfo();
+        IEnumerable<ChainDto> GetAllChainsInfo();//dtone
 
-        IEnumerable<ChainDataAccess> GetAllChains();
+        IEnumerable<ChainDataAccess> GetAllChains();//dtone
 
-        IEnumerable<string> GetChainNames();
+        IEnumerable<string> GetChainNames();//dtone
 
-        string GetChainName(string chainAddress);
+        string GetChainName(string chainAddress);//dtone
 
-        ChainDataAccess GetChain(string chainInput);
+        ChainDataAccess GetChain(string chainInput); //done
 
-        int GetChainCount();
+        int GetChainCount();//done 
 
-        IEnumerable<TransactionDto> GetTransactions(string chainAddress = null, int txAmount = 20);
+        IEnumerable<TransactionDto> GetTransactions(string chainAddress = null, int txAmount = 20);//done
 
-        IEnumerable<TransactionDto> GetAddressTransactions(Address address, int amount = 20);
+        IEnumerable<TransactionDto> GetAddressTransactions(Address address, int amount = 20);//done
 
-        int GetAddressTransactionCount(Address address, string chainName);
+        int GetAddressTransactionCount(Address address, string chainName); //done
 
-        int GetTotalChainTransactionCount(string chain);
+        int GetTotalChainTransactionCount(string chain);//done 
 
-        TransactionDto GetTransaction(string txHash);
+        TransactionDto GetTransaction(string txHash); //done
 
-        int GetTotalTransactions();
+        int GetTotalTransactions(); //done
 
-        IEnumerable<TokenDto> GetTokens();
+        IEnumerable<TokenDto> GetTokens(); //done
 
-        TokenDto GetToken(string symbol);
+        TokenDto GetToken(string symbol); //done
 
-        IEnumerable<TransactionDto> GetLastTokenTransfers(string symbol, int amount);
+        IEnumerable<TransactionDto> GetLastTokenTransfers(string symbol, int amount); //done?
 
-        int GetTokenTransfersCount(string symbol);
+        int GetTokenTransfersCount(string symbol); //done
 
-        string GetEventContent(BlockDto block, EventDto evt);
+        string GetEventContent(BlockDto block, EventDto evt);//todo move to utils?
 
-        IEnumerable<AppDto> GetApps();
+        IEnumerable<AppDto> GetApps(); //done
 
-        BlockDto FindBlockForTransaction(string txHash);
+        BlockDto FindBlockForTransaction(string txHash); //done
     }
 }

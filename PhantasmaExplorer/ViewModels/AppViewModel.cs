@@ -1,4 +1,4 @@
-﻿using Phantasma.RpcClient.DTOs;
+﻿using Phantasma.Explorer.Domain.Entities;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -12,7 +12,7 @@ namespace Phantasma.Explorer.ViewModels
         public int TxCount { get; set; }
         public int Rank { get; set; }
 
-        public static AppViewModel FromApp(AppDto info)
+        public static AppViewModel FromApp(App info)
         {
             return new AppViewModel
             {
