@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
@@ -9,7 +11,9 @@ namespace Phantasma.Explorer.Controllers
     {
         public List<TransactionViewModel> GetLastTransactions()
         {
-            var txQuery = new TransactionQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var txQuery = new TransactionQueries(context);
 
             var repoTx = txQuery.QueryTransactions();
 
@@ -18,7 +22,9 @@ namespace Phantasma.Explorer.Controllers
 
         public TransactionViewModel GetTransaction(string txHash)
         {
-            var txQuery = new TransactionQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var txQuery = new TransactionQueries(context);
             var transaction = txQuery.QueryTransaction(txHash);
 
             if (transaction == null) return null;

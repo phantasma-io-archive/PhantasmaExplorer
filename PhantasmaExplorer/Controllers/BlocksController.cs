@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
@@ -8,7 +10,9 @@ namespace Phantasma.Explorer.Controllers
     {
         public List<BlockViewModel> GetLatestBlocks()
         {
-            var blockQuery = new BlockQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var blockQuery = new BlockQueries(context);
             var blockList = new List<BlockViewModel>();
 
             foreach (var block in blockQuery.QueryBlocks())
@@ -21,10 +25,13 @@ namespace Phantasma.Explorer.Controllers
 
         public BlockViewModel GetBlock(string input)
         {
-            var blockQuery = new BlockQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
 
-            var block = int.TryParse(input, out var height) ?
-                blockQuery.QueryBlock(height, "main") : blockQuery.QueryBlock(input);//todo height only works with main
+            var blockQuery = new BlockQueries(context);
+
+            var block = int.TryParse(input, out var height)
+                ? blockQuery.QueryBlock(height, "main")
+                : blockQuery.QueryBlock(input);//todo height only works with main
 
             if (block != null)
             {

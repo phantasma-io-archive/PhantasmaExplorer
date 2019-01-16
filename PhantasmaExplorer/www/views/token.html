@@ -24,7 +24,6 @@
                         <td>${{token.Price}}</td>
                     </tr>
                     <tr>
-
                         <td>
                             <span>Total Supply</span>
                         </td>
@@ -121,7 +120,7 @@
                                     {{#each transfers}}
                                     <tr>
                                         <td>{{#link-tx Hash}}</td>
-                                        <td>{{#timeago Block.Timestamp}}</td>
+                                        <td>{{#timeago Date}}</td>
                                         <td>{{#link-address SenderAddress}}</td>
                                         <td>{{#link-address ReceiverAddress}}</td>
                                         <td>{{AmountTransfer}} {{TokenSymbol}}</td>

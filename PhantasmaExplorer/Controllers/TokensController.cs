@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 
@@ -13,7 +15,9 @@ namespace Phantasma.Explorer.Controllers
 
         public TokenViewModel GetToken(string symbol)
         {
-            var tokenQuery = new TokenQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var tokenQuery = new TokenQueries(context);
             var token = tokenQuery.QueryToken(symbol);
             var tranfers = GetTransactionCount(symbol);
 
@@ -32,7 +36,9 @@ namespace Phantasma.Explorer.Controllers
 
         public List<TokenViewModel> GetTokens()
         {
-            var tokenQuery = new TokenQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var tokenQuery = new TokenQueries(context);
             var tokenList = tokenQuery.QueryTokens();
             var tokensList = new List<TokenViewModel>();
 
@@ -53,8 +59,10 @@ namespace Phantasma.Explorer.Controllers
 
         public List<BalanceViewModel> GetHolders(string symbol) //todo
         {
-            var accountQuery = new AccountQueries();
-            var tokenQuery = new TokenQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var accountQuery = new AccountQueries(context);
+            var tokenQuery = new TokenQueries(context);
 
             var token = tokenQuery.QueryToken(symbol);
 
@@ -92,7 +100,9 @@ namespace Phantasma.Explorer.Controllers
 
         public List<TransactionViewModel> GetTransfers(string symbol)
         {
-            var txsQuery = new TransactionQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var txsQuery = new TransactionQueries(context);
             var transfers = txsQuery.QueryLastTokenTransactions(symbol, 100);
 
             var temp = transfers.Select(TransactionViewModel.FromTransaction).ToList();
@@ -102,12 +112,16 @@ namespace Phantasma.Explorer.Controllers
 
         public int GetTransactionCount(string symbol)
         {
-            return new TokenQueries().QueryTokenTransfersCount(symbol);
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            return new TokenQueries(context).QueryTokenTransfersCount(symbol);
         }
 
         public List<NftViewModel> GetNftListByAddress(string inputAddress) //todo test this
         {
-            var accountQuery = new AccountQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var accountQuery = new AccountQueries(context);
             var account = accountQuery.QueryAccount(inputAddress);
             var nftList = new List<NftViewModel>();
 

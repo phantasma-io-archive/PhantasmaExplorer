@@ -78,7 +78,6 @@ namespace Phantasma.Explorer.Persistance
                     Flags = (TokenFlags)tokenDto.Flags,
                     MaxSupply = tokenDto.MaxSupply,
                     CurrentSupply = tokenDto.CurrentSupply,
-                    Fungible = tokenDto.Fungible,
                     OwnerAddress = tokenDto.OwnerAddress
                 });
             }

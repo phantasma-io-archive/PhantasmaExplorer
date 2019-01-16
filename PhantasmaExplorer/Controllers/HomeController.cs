@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 
@@ -14,25 +16,17 @@ namespace Phantasma.Explorer.Controllers
     {
         public HomeViewModel GetLastestInfo()
         {
-            var blockQuery = new BlockQueries();
-            var txsQuery = new TransactionQueries();
-            var chainQuery = new ChainQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
 
-            var blocksVm = new List<BlockViewModel>();
-            var txsVm = new List<TransactionViewModel>();
+            var blockQuery = new BlockQueries(context);
+            var txsQuery = new TransactionQueries(context);
+            var chainQuery = new ChainQueries(context);
 
             var blocks = blockQuery.QueryBlocks();
             var transactions = txsQuery.QueryTransactions();
+            var blocksVm = blocks.Select(BlockHomeViewModel.FromBlock).ToList();
 
-            foreach (var block in blocks)
-            {
-                blocksVm.Add(BlockViewModel.FromBlock(block));
-            }
-
-            foreach (var transaction in transactions)
-            {
-                txsVm.Add(TransactionViewModel.FromTransaction(transaction));
-            }
+            var txsVm = transactions.Select(transaction => TransactionHomeViewModel.FromTransaction(transaction, context)).ToList();
 
             // tx history chart calculation
             var repTxs = txsQuery.QueryTransactions(null, 1000);
@@ -125,27 +119,29 @@ namespace Phantasma.Explorer.Controllers
         {
             try
             {
+                var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
                 if (Address.IsValidAddress(input)) //maybe is address
                 {
                     return $"address/{input}";
                 }
 
                 //token
-                var token = new TokenQueries().QueryToken(input.ToUpperInvariant());
+                var token = new TokenQueries(context).QueryToken(input.ToUpperInvariant());
                 if (token != null)// token
                 {
                     return $"token/{token.Symbol}";
                 }
 
                 //app
-                var app = new AppQueries().QueryApp(input);
+                var app = new AppQueries(context).QueryApp(input);
                 if (app != null)
                 {
                     return $"app/{app.Id}";
                 }
 
                 //chain
-                var chain = new ChainQueries().QueryChain(input);
+                var chain = new ChainQueries(context).QueryChain(input);
                 if (chain != null)
                 {
                     return $"chain/{chain.Address}";
@@ -155,13 +151,13 @@ namespace Phantasma.Explorer.Controllers
                 var hash = Hash.Parse(input);
                 if (hash != null)
                 {
-                    var tx = new TransactionQueries().QueryTransaction(input);
+                    var tx = new TransactionQueries(context).QueryTransaction(input);
                     if (tx != null)
                     {
                         return $"tx/{tx.Hash}";
                     }
 
-                    var block = new BlockQueries().QueryBlock(input);
+                    var block = new BlockQueries(context).QueryBlock(input);
                     if (block != null)
                     {
                         return $"block/{block.Hash}";

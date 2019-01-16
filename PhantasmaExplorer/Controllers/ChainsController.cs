@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
@@ -9,7 +11,9 @@ namespace Phantasma.Explorer.Controllers
     {
         public List<ChainViewModel> GetChains()
         {
-            var chainQuery = new ChainQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var chainQuery = new ChainQueries(context);
             var chainVmList = new List<ChainViewModel>();
 
             var allChains = chainQuery.QueryChains().ToList();
@@ -24,7 +28,9 @@ namespace Phantasma.Explorer.Controllers
 
         public ChainViewModel GetChain(string chainInput)
         {
-            var chainQuery = new ChainQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var chainQuery = new ChainQueries(context);
             var repoChain = chainQuery.QueryChain(chainInput);
             var chainList = chainQuery.QueryChains().ToList();
 

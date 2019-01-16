@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Persistance;
+using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer.Application.Queries
 {
@@ -11,9 +11,9 @@ namespace Phantasma.Explorer.Application.Queries
     {
         private readonly ExplorerDbContext _context;
 
-        public BlockQueries()
+        public BlockQueries(ExplorerDbContext context)
         {
-            _context = Explorer.AppServices.GetService<ExplorerDbContext>();
+            _context = context;
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
@@ -24,15 +24,15 @@ namespace Phantasma.Explorer.Application.Queries
                 return _context.Blocks
                     .OrderByDescending(p => p.Timestamp)
                     .Take(amount)
-                    .Include(p => p.Transactions)
+                    .IncludeTransactions()
                     .ToList();
             }
 
             return _context.Blocks
                 .Where(p => p.Chain.Address.Equals(chain) || p.ChainAddress.Equals(chain))
-                .OrderByDescending(p => p.Timestamp)
+                .OrderByDescending(p => p.Height)
                 .Take(amount)
-                .Include(p => p.Transactions)
+                .IncludeTransactions()
                 .ToList();
         }
 

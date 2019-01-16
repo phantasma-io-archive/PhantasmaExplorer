@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
@@ -9,10 +11,14 @@ namespace Phantasma.Explorer.Controllers
     {
         public List<AppViewModel> GetAllApps()
         {
-            var appQuery = new AppQueries();
-            var chainQuery = new ChainQueries();
-            var txQuery = new TransactionQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var appQuery = new AppQueries(context);
+            var chainQuery = new ChainQueries(context);
+            var txQuery = new TransactionQueries(context);
+
             List<AppViewModel> appsList = new List<AppViewModel>();
+
             var apps = appQuery.QueryApps();
 
             foreach (var appInfo in apps)
@@ -37,7 +43,9 @@ namespace Phantasma.Explorer.Controllers
 
         public AppViewModel GetApp(string appId)
         {
-            var appQuery = new AppQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var appQuery = new AppQueries(context);
             var app = appQuery.QueryApp(appId);
             return AppViewModel.FromApp(app);
         }

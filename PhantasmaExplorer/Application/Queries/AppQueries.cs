@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Persistance;
 
 namespace Phantasma.Explorer.Application.Queries
@@ -10,9 +9,9 @@ namespace Phantasma.Explorer.Application.Queries
     {
         private readonly ExplorerDbContext _context;
 
-        public AppQueries()
+        public AppQueries(ExplorerDbContext context)
         {
-            _context = Explorer.AppServices.GetService<ExplorerDbContext>();
+            _context = context;
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 

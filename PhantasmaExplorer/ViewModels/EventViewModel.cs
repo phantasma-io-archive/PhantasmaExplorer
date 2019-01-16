@@ -1,6 +1,8 @@
-﻿using Phantasma.Explorer.Application.Queries;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
+using Phantasma.Explorer.Persistance;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -11,10 +13,11 @@ namespace Phantasma.Explorer.ViewModels
 
         internal static EventViewModel FromEvent(Transaction tx, Event evt)
         {
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>(); //todo remove this
             return new EventViewModel
             {
                 Kind = evt.EventKind,
-                Content = new TransactionQueries().GetEventContent(tx.Block, evt)
+                Content = new TransactionQueries(context).GetEventContent(tx.Block, evt)
             };
         }
     }

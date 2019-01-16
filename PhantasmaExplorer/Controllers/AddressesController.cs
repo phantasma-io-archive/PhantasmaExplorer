@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
 
@@ -12,8 +14,11 @@ namespace Phantasma.Explorer.Controllers
 
         public List<AddressViewModel> GetAddressList()
         {
-            var addressQueries = new AccountQueries();
-            var tokenQueries = new TokenQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var addressQueries = new AccountQueries(context);
+            var tokenQueries = new TokenQueries(context);
+
             var addressList = new List<AddressViewModel>();
 
             var list = addressQueries.QueryRichList(numberOfAddresses: 30);
@@ -32,9 +37,12 @@ namespace Phantasma.Explorer.Controllers
 
         public AddressViewModel GetAddress(string addressText)
         {
-            var addressQueries = new AccountQueries();
-            var tokenQueries = new TokenQueries();
-            var transactionQueries = new TransactionQueries();
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+            var addressQueries = new AccountQueries(context);
+            var tokenQueries = new TokenQueries(context);
+            var transactionQueries = new TransactionQueries(context);
+
             var account = addressQueries.QueryAccount(addressText);
 
             if (account != null)

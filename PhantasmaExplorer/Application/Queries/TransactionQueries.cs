@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
@@ -18,9 +17,9 @@ namespace Phantasma.Explorer.Application.Queries
     {
         private readonly ExplorerDbContext _context;
 
-        public TransactionQueries()
+        public TransactionQueries(ExplorerDbContext context)
         {
-            _context = Explorer.AppServices.GetService<ExplorerDbContext>();
+            _context = context;
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
@@ -29,16 +28,14 @@ namespace Phantasma.Explorer.Application.Queries
             if (string.IsNullOrEmpty(chain)) //no specific chain
             {
                 return _context.Transactions
-                    .Include(p => p.Block)
-                    .Include(p => p.Block.Chain)
                     .OrderByDescending(p => p.Timestamp)
+                    .Include(p => p.Block)
                     .Take(amount)
                     .ToList();
             }
 
             return _context.Transactions
                 .Include(p => p.Block)
-                .Include(p => p.Block.Chain)
                 .Where(p => p.Block.Chain.Address.Equals(chain) || p.Block.Chain.Name.Equals(chain))
                 .OrderByDescending(p => p.Timestamp)
                 .Take(amount)
@@ -63,7 +60,12 @@ namespace Phantasma.Explorer.Application.Queries
 
         public int QueryAddressTransactionCount(string address, string chain = null)
         {
-            var account = _context.Accounts.SingleOrDefault(p => p.Address.Equals(address));
+            var account = _context.Accounts
+                .Include(p => p.AccountTransactions)
+                .ThenInclude(p => p.Transaction)
+                .ThenInclude(p => p.Block)
+                .ThenInclude(p => p.Chain)
+                .SingleOrDefault(p => p.Address.Equals(address));
 
             if (account == null) return 0;
 
@@ -138,13 +140,13 @@ namespace Phantasma.Explorer.Application.Queries
             {
                 case EventKind.ChainCreate:
                     {
-                        var tokenData = nativeEvent.GetContent<TokenEventData>();
+                        var tokenData = nativeEvent.GetContent<Address>();
                         var chainName = block.Chain.Name;
-                        return $"{chainName} chain created at address <a href=\"/chain/{tokenData.chainAddress}\">{tokenData.chainAddress}</a>.";
+                        return $"{chainName} chain created at address <a href=\"/chain/{tokenData.ToString()}\">{tokenData.ToString()}</a>.";
                     }
                 case EventKind.TokenCreate:
                     {
-                        var symbol = Serialization.Unserialize<string>(nativeEvent.Data);
+                        var symbol = nativeEvent.GetContent<string>();
                         var token = _context.Tokens.Single(t => t.Symbol.Equals(symbol));
                         return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
                     }

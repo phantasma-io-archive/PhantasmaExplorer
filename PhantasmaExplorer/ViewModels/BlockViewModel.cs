@@ -25,7 +25,7 @@ namespace Phantasma.Explorer.ViewModels
         {
             var vm = new BlockViewModel
             {
-                Height = (int)block.Height,
+                Height = (int) block.Height,
                 Timestamp = new Timestamp(block.Timestamp),
                 Transactions = block.Transactions.Count,
                 Hash = block.Hash,
@@ -34,10 +34,9 @@ namespace Phantasma.Explorer.ViewModels
                 ChainName = block.ChainName.ToTitleCase(),
                 ChainAddress = block.ChainAddress,
                 Reward = block.Reward,
-                Txs = new List<TransactionViewModel>()
+                Txs = block.Transactions.Select(TransactionViewModel.FromTransaction).ToList(),
             };
 
-            vm.Txs = block.Transactions.Select(TransactionViewModel.FromTransaction).ToList();
 
             return vm;
         }
