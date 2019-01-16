@@ -74,8 +74,8 @@ namespace Phantasma.Explorer.Controllers
                 {
                     foreach (var account in accountQuery.QueryRichList(symbol, 30))
                     {
-
                         var accountTokenBalanceList = accountQuery.QueryAccountTokenBalanceList(account.Address, symbol);
+
                         foreach (var balance in accountTokenBalanceList)
                         {
                             var vm = new BalanceViewModel

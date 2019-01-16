@@ -55,7 +55,11 @@
                         <td>
                             <span>Decimals</span>
                         </td>
+                        {{#if token.IsFungible}}
                         <td>{{token.Decimals}}</td>
+                        {{#else}}
+                        <td>-</td>
+                        {{/if}}
                     </tr>
                     <tr>
                         <td>
