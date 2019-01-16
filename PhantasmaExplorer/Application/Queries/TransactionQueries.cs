@@ -1,15 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Phantasma.Blockchain.Contracts;
-using Phantasma.Blockchain.Contracts.Native;
-using Phantasma.Blockchain.Tokens;
-using Phantasma.Cryptography;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Persistance;
 using Phantasma.IO;
 using Phantasma.Numerics;
-using EventKind = Phantasma.Explorer.Domain.Entities.EventKind;
 
 namespace Phantasma.Explorer.Application.Queries
 {
@@ -117,110 +112,6 @@ namespace Phantasma.Explorer.Application.Queries
             }
 
             return txList.Take(amount).ToList();
-        }
-
-        public string GetEventContent(Block block, Domain.ValueObjects.Event evt) //todo remove Native event dependency and move this
-        {
-            Event nativeEvent;
-            if (evt.Data != null)
-            {
-                nativeEvent = new Event((Blockchain.Contracts.EventKind)evt.EventKind,
-                    Address.FromText(evt.EventAddress), evt.Data.Decode());
-            }
-            else
-            {
-                nativeEvent =
-                    new Event((Blockchain.Contracts.EventKind)evt.EventKind, Address.FromText(evt.EventAddress));
-            }
-
-            string PlatformName = "Phantasma";
-            int NativeTokenDecimals = 8;
-
-            switch (evt.EventKind)
-            {
-                case EventKind.ChainCreate:
-                    {
-                        var tokenData = nativeEvent.GetContent<Address>();
-                        var chainName = block.Chain.Name;
-                        return $"{chainName} chain created at address <a href=\"/chain/{tokenData.ToString()}\">{tokenData.ToString()}</a>.";
-                    }
-                case EventKind.TokenCreate:
-                    {
-                        var symbol = nativeEvent.GetContent<string>();
-                        var token = _context.Tokens.Single(t => t.Symbol.Equals(symbol));
-                        return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
-                    }
-                case EventKind.GasEscrow:
-                    {
-                        var gasEvent = nativeEvent.GetContent<GasEventData>();
-                        var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
-                        var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
-                        return $"{amount} {PlatformName} tokens escrowed for contract gas, with price of {price} per gas unit";
-                    }
-                case EventKind.GasPayment:
-                    {
-                        var gasEvent = nativeEvent.GetContent<GasEventData>();
-                        var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
-                        var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
-                        return $"{amount} {PlatformName} tokens paid for contract gas, with price of {price} per gas unit";
-
-                    }
-                case EventKind.TokenMint:
-                case EventKind.TokenBurn:
-                case EventKind.TokenSend:
-                case EventKind.TokenEscrow:
-                case EventKind.TokenReceive:
-                    {
-                        var data = Serialization.Unserialize<TokenEventData>(nativeEvent.Data);
-                        var token = _context.Tokens.Single(t => t.Symbol.Equals(data.symbol));
-                        string action;
-
-                        switch (evt.EventKind)
-                        {
-                            case EventKind.TokenMint: action = "minted"; break;
-                            case EventKind.TokenBurn: action = "burned"; break;
-                            case EventKind.TokenSend: action = "sent"; break;
-                            case EventKind.TokenReceive: action = "received"; break;
-                            case EventKind.TokenEscrow: action = "escrowed"; break;
-
-                            default: action = "???"; break;
-                        }
-
-                        string chainText;
-
-                        if (data.chainAddress.ToString() != block.ChainAddress)
-                        {
-                            Address srcAddress, dstAddress;
-
-                            if (evt.EventKind == EventKind.TokenReceive)
-                            {
-                                srcAddress = data.chainAddress;
-                                dstAddress = Address.FromText(block.ChainAddress);
-                            }
-                            else
-                            {
-                                srcAddress = Address.FromText(block.ChainAddress);
-                                dstAddress = data.chainAddress;
-                            }
-
-                            chainText = $"from <a href=\"/chain/{srcAddress}\">{GetChainName(srcAddress.ToString())} chain</a> to <a href=\"/chain/{dstAddress}\">{GetChainName(dstAddress.ToString())} chain";
-                        }
-                        else
-                        {
-                            chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(data.chainAddress.ToString())} chain";
-                        }
-
-                        string fromAt = action == "sent" ? "from" : "at";
-                        return $"{TokenUtils.ToDecimal(data.value, (int)token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{nativeEvent.Address}\">{nativeEvent.Address}</a> {chainText}.";
-                    }
-
-                default: return "Nothing.";
-            }
-        }
-
-        private string GetChainName(string address)
-        {
-            return _context.Chains.Single(p => p.Address.Equals(address)).Name;
         }
     }
 }

@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Phantasma.Explorer.Application.Queries;
+﻿using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance;
+using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -17,7 +18,7 @@ namespace Phantasma.Explorer.ViewModels
             return new EventViewModel
             {
                 Kind = evt.EventKind,
-                Content = new TransactionQueries(context).GetEventContent(tx.Block, evt)
+                Content = TransactionUtils.GetEventContent(tx.Block, evt, context.Chains.ToList(), context.Tokens.ToList()) //todo improve
             };
         }
     }
