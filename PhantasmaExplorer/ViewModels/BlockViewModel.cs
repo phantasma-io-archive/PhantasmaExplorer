@@ -31,7 +31,7 @@ namespace Phantasma.Explorer.ViewModels
                 Hash = block.Hash,
                 ParentHash = block.PreviousHash,
                 ValidatorAddress = block.ValidatorAddress,
-                ChainName = block.Chain.Name.ToTitleCase(),
+                ChainName = block.ChainName.ToTitleCase(),
                 ChainAddress = block.ChainAddress,
                 Reward = block.Reward,
                 Txs = new List<TransactionViewModel>()

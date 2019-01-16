@@ -52,7 +52,7 @@ namespace Phantasma.Explorer
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
-                    await ExplorerSync.StartSync();
+                    await ExplorerSync.StartSync(); //todo this does not work
                 }
             }).Start();
 

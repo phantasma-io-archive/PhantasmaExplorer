@@ -18,13 +18,15 @@ namespace Phantasma.Explorer.ViewModels
     public class TransactionViewModel
     {
         public string Hash { get; set; }
-        //public BlockViewModel Block { get; set; }
         public DateTime Date { get; set; }
         public string ChainName { get; set; }
         public string ChainAddress { get; set; }
+        public string Description { get; set; }
+        public string BlockHash { get; set; }
+        public uint BlockHeight { get; set; }
+
         public IEnumerable<EventViewModel> Events { get; set; }
         public IEnumerable<Instruction> Instructions { get; set; }
-        public string Description { get; set; }
 
         // in case of transfer
         public decimal AmountTransfer { get; set; }
@@ -41,9 +43,10 @@ namespace Phantasma.Explorer.ViewModels
 
             string description = GetTxDescription(vm, tx, context.Chains.ToList(), context.Tokens.ToList());
 
-            //vm.Block = blockVm;//BlockViewModel.FromBlock(tx.Block);
             vm.ChainAddress = tx.Block.ChainAddress;
-            vm.ChainName = tx.Block.Chain.Name;
+            vm.ChainName = tx.Block.ChainName;
+            vm.BlockHeight = tx.Block.Height;
+            vm.BlockHash = tx.BlockHash;
             vm.Date = new Timestamp(tx.Block.Timestamp);
             vm.Hash = tx.Hash;
             vm.Events = tx.Events.Select(evt => EventViewModel.FromEvent(tx, evt));

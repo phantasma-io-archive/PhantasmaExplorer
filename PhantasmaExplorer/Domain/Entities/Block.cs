@@ -11,6 +11,7 @@ namespace Phantasma.Explorer.Domain.Entities
 
         public string Hash { get; set; }
         public string ChainAddress { get; set; }
+        public string ChainName { get; set; }
         public string PreviousHash { get; set; }
         public uint Timestamp { get; set; }
         public uint Height { get; set; }

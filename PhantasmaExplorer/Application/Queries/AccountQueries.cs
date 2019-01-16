@@ -59,7 +59,7 @@ namespace Phantasma.Explorer.Application.Queries
                 .Include(p => p.AccountTransactions)
                 .ThenInclude(p => p.Transaction)
                 .ThenInclude(p => p.Block)
-                .ThenInclude(p => p.Chain)//todo revisit this, so much fk stuff -.-
+                .ThenInclude(p => p.Chain)//todo revisit this, 1so much fk stuff -.-
                 .SingleOrDefault(p => p.Address.Equals(address));
         }
 

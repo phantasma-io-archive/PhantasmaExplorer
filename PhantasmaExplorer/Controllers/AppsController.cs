@@ -18,7 +18,7 @@ namespace Phantasma.Explorer.Controllers
             foreach (var appInfo in apps)
             {
                 var chain = chainQuery.QueryChain(appInfo.Id);
-                var txCount = txQuery.QueryAddressTransactionCount(chain.Address);
+                var txCount = txQuery.QueryTotalChainTransactionCount(chain.Address);
                 var vm = AppViewModel.FromApp(appInfo);
                 vm.TxCount = txCount;
 

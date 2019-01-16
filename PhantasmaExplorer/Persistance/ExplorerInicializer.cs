@@ -102,6 +102,7 @@ namespace Phantasma.Explorer.Persistance
                     ParentAddress = chainDto.ParentAddress
                 };
 
+                context.Accounts.Add(new Account { Address = chain.Address });
                 context.Chains.Add(chain);
 
                 await SeedBlocks(context, chain);
@@ -122,6 +123,7 @@ namespace Phantasma.Explorer.Persistance
                 var block = new Block
                 {
                     Chain = chain,
+                    ChainName = chain.Name,
                     Hash = blockDto.Hash,
                     PreviousHash = blockDto.PreviousHash,
                     Timestamp = blockDto.Timestamp,

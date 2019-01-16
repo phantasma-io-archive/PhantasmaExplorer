@@ -25,7 +25,6 @@ namespace Phantasma.Explorer.Application.Queries
                     .OrderByDescending(p => p.Timestamp)
                     .Take(amount)
                     .Include(p => p.Transactions)
-                    .Include(p => p.Chain)
                     .ToList();
             }
 
@@ -39,7 +38,9 @@ namespace Phantasma.Explorer.Application.Queries
 
         public Block QueryBlock(string blockHash)
         {
-            return _context.Blocks.Include(p => p.Chain).SingleOrDefault(p => p.Hash.Equals(blockHash));
+            return _context.Blocks
+                .Include(p => p.Transactions)
+                .SingleOrDefault(p => p.Hash.Equals(blockHash));
         }
 
         public Block QueryBlock(int height, string chain)

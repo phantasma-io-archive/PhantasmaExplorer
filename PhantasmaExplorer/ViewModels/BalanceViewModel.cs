@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Phantasma.Blockchain.Tokens;
+﻿using Phantasma.Blockchain.Tokens;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Token = Phantasma.Explorer.Domain.Entities.Token;
