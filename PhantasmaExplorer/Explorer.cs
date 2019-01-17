@@ -41,7 +41,7 @@ namespace Phantasma.Explorer
             viewsRenderer.SetupControllers();
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
-
+            server.Run();
             new Thread(async () =>
             {
                 Thread.CurrentThread.IsBackground = true;
@@ -58,8 +58,6 @@ namespace Phantasma.Explorer
 
 
             Console.WriteLine("READY");
-
-            server.Run();
         }
         //L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N
 
