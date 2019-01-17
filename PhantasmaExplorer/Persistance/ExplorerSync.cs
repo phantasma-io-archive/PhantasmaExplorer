@@ -7,6 +7,7 @@ using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.RpcClient.DTOs;
 using Phantasma.RpcClient.Interfaces;
+using TokenFlags = Phantasma.Explorer.Domain.Entities.TokenFlags;
 
 namespace Phantasma.Explorer.Persistance
 {
@@ -130,7 +131,7 @@ namespace Phantasma.Explorer.Persistance
             foreach (var tokenBalance in accountBalance.Tokens)
             {
                 var token = context.Tokens.Find(tokenBalance.Symbol);
-                if (token.Fungible)
+                if ((token.Flags & TokenFlags.Fungible) != 0)
                 {
                     UpdateTokenBalance(account, tokenBalance);
                 }

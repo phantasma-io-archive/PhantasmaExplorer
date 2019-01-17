@@ -20,6 +20,8 @@ namespace Phantasma.Explorer.Persistance
 
         public async Task SeedEverythingAsync(ExplorerDbContext context)
         {
+            var sw = new Stopwatch();
+            sw.Start();
             context.Database.EnsureCreated();
             _phantasmaRpcService = (IPhantasmaRpcService)Explorer.AppServices.GetService(typeof(IPhantasmaRpcService));
 
@@ -43,6 +45,8 @@ namespace Phantasma.Explorer.Persistance
             {
                 await SeedAccountsBalance(context);
             }
+            sw.Stop();
+            Console.WriteLine("Elapsed={0}", sw.Elapsed);
         }
 
         private async Task SeedApps(ExplorerDbContext context)
@@ -213,7 +217,7 @@ namespace Phantasma.Explorer.Persistance
                 {
                     var token = context.Tokens.Find(tokenBalance.Symbol);
 
-                    if (token.Fungible)
+                    if ((token.Flags & TokenFlags.Fungible) != 0)
                     {
                         account.TokenBalance.Add(new FBalance
                         {

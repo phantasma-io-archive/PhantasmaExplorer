@@ -6,6 +6,7 @@ using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
+using TokenFlags = Phantasma.Explorer.Domain.Entities.TokenFlags;
 
 namespace Phantasma.Explorer.Controllers
 {
@@ -70,7 +71,7 @@ namespace Phantasma.Explorer.Controllers
 
             if (token != null)
             {
-                if (token.Fungible)
+                if ((token.Flags & TokenFlags.Fungible) != 0)
                 {
                     foreach (var account in accountQuery.QueryRichList(symbol, 30))
                     {

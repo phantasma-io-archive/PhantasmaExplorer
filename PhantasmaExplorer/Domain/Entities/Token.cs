@@ -10,7 +10,6 @@
         public string Symbol { get; set; }
         public string Name { get; set; }
         public uint Decimals { get; set; }
-        public bool Fungible { get; set; }
         public string CurrentSupply { get; set; }
         public string MaxSupply { get; set; }
         public string OwnerAddress { get; set; }
