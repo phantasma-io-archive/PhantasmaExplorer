@@ -140,7 +140,8 @@ namespace Phantasma.Explorer.Persistance
                         Block = block,
                         Hash = transactionDto.Txid,
                         Timestamp = transactionDto.Timestamp,
-                        Script = transactionDto.Script
+                        Script = transactionDto.Script,
+                        Result = transactionDto.Result
                     };
 
                     //Events

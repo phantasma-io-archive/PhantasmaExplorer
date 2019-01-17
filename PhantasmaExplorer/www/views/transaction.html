@@ -35,6 +35,12 @@
                                         <td>{{transaction.Hash}}</td>
                                     </tr>
 
+                                    {{#if transaction.Result}}
+                                    <tr>
+                                        <td>Result</td>
+                                        <td>{{transaction.Result}}</td>
+                                    </tr>
+                                    {{/if}}
                                     <tr>
                                         <td>Chain</td>
                                         <td><a href="/chain/{{transaction.ChainAddress}}">{{transaction.ChainName}}</a></td>
@@ -49,7 +55,7 @@
                                         <td>Block Height</td>
                                         <td>{{transaction.BlockHeight}}</td>
                                     </tr>
-								</tbody>
+                                </tbody>
                             </table>
                         </div>
                     </div>

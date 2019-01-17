@@ -15,6 +15,7 @@ namespace Phantasma.Explorer.Domain.Entities
         public string BlockHash { get; set; }
         public uint Timestamp { get; set; }
         public string Script { get; set; }
+        public string Result { get; set; }
 
         public Block Block { get; set; }
         public ICollection<Event> Events { get; set; }

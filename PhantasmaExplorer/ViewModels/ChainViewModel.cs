@@ -2,6 +2,7 @@
 using System.Linq;
 using Phantasma.Core.Utils;
 using Phantasma.Explorer.Domain.Entities;
+using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -28,21 +29,9 @@ namespace Phantasma.Explorer.ViewModels
                 Transactions = chain.Blocks.Select(p => p.Transactions.Count).Sum(),
                 Height = chain.Height,
                 Blocks = lastBlocksVm,
-                ParentChain = chain.ParentAddress ?? ""
+                ParentChain = chain.ParentAddress ?? "",
+                ChildChains = ChainUtils.SetupChainChildren(chains, chain.Address)
             };
-
-            if (chains != null && chains.Any())
-            {
-                vm.ChildChains = new Dictionary<string, string>();
-
-                foreach (var repoChain in chains)
-                {
-                    if (repoChain.ParentAddress.Equals(chain.Address))
-                    {
-                        vm.ChildChains[repoChain.Name] = repoChain.Address;
-                    }
-                }
-            }
 
             return vm;
         }

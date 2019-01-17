@@ -31,7 +31,7 @@ namespace Phantasma.Explorer.Controllers
             var context = Explorer.AppServices.GetService<ExplorerDbContext>();
 
             var chainQuery = new ChainQueries(context);
-            var repoChain = chainQuery.QueryChain(chainInput);
+            var repoChain = chainQuery.QueryChainIncludeBlocksAndTxs(chainInput);
             var chainList = chainQuery.QueryChains().ToList();
 
             if (repoChain == null) return null;

@@ -24,10 +24,23 @@ namespace Phantasma.Explorer.Application.Queries
             return _context.Chains.ToList();
         }
 
+        public ICollection<Chain> QueryChainIncludeBlocksAndTxs()
+        {
+            return _context.Chains.Include(p => p.Blocks).ThenInclude(p => p.Transactions).ToList();
+        }
+
         public Chain QueryChain(string input)
         {
             return _context.Chains
                 .Include(p => p.Blocks)
+                .SingleOrDefault(p => p.Address.Equals(input) || p.Name.Equals(input));
+        }
+
+        public Chain QueryChainIncludeBlocksAndTxs(string input)
+        {
+            return _context.Chains
+                .Include(p => p.Blocks)
+                .ThenInclude(p => p.Transactions)
                 .SingleOrDefault(p => p.Address.Equals(input) || p.Name.Equals(input));
         }
 

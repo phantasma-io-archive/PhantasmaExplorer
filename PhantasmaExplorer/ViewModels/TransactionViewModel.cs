@@ -19,6 +19,7 @@ namespace Phantasma.Explorer.ViewModels
         public string Description { get; set; }
         public string BlockHash { get; set; }
         public uint BlockHeight { get; set; }
+        public string Result { get; set; }
 
         public IEnumerable<EventViewModel> Events { get; set; }
         public IEnumerable<Instruction> Instructions { get; set; }
@@ -38,6 +39,7 @@ namespace Phantasma.Explorer.ViewModels
 
             string description = TransactionUtils.GetTxDescription(tx, context.Chains.ToList(), context.Tokens.ToList(), vm);
 
+
             vm.ChainAddress = tx.Block.ChainAddress;
             vm.ChainName = tx.Block.ChainName;
             vm.BlockHeight = tx.Block.Height;
@@ -47,6 +49,7 @@ namespace Phantasma.Explorer.ViewModels
             vm.Events = tx.Events.Select(evt => EventViewModel.FromEvent(tx, evt));
             vm.Description = description;
             vm.Instructions = disasm.Instructions;
+            vm.Result = tx.Result;
             return vm;
         }
     }
