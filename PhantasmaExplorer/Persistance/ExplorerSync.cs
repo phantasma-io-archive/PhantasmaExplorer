@@ -20,14 +20,26 @@ namespace Phantasma.Explorer.Persistance
             _phantasmaRpcService = Explorer.AppServices.GetService<IPhantasmaRpcService>();
         }
 
-        public static async Task StartSync()
+        public static void StartSync()
         {
             var explorerSync = new ExplorerSync();
-            while (true)
+            new Thread(async () =>
             {
-                Thread.Sleep(2000);
-                await explorerSync.Sync();
-            }
+                Thread.CurrentThread.IsBackground = true;
+                try
+                {
+                    while (true)
+                    {
+                        await explorerSync.Sync();
+                        Thread.Sleep(2000);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    StartSync(); //todo this does not work
+                }
+            }).Start();
         }
 
         public async Task Sync()
@@ -35,17 +47,21 @@ namespace Phantasma.Explorer.Persistance
             var context = Explorer.AppServices.GetService<ExplorerDbContext>();
             foreach (var chain in context.Chains)
             {
-                var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
-                if (height > chain.Height)
+                var remoteHeight = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
+                var localHeight = chain.Height;
+                while (remoteHeight >= localHeight)
                 {
-                    Console.WriteLine($"NEW BLOCK: Chain: {chain.Name}, block: {height}");
-                    var block = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, height);
-                    await SyncBlockAsync(context, chain, block);
+                    Console.WriteLine($"NEW BLOCK: Chain: {chain.Name}, block: {remoteHeight}");
+                    var block = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, (int)(localHeight + 1));
+                    await SyncBlock(context, chain, block); //todo this is throwing duplicated block key exception
+
+                    //need to fetch height again bc context may not be updated
+                    localHeight = chain.Height;
                 }
             }
         }
 
-        public async Task SyncBlockAsync(ExplorerDbContext context, Chain chain, BlockDto blockDto)
+        public async Task SyncBlock(ExplorerDbContext context, Chain chain, BlockDto blockDto)
         {
             Console.WriteLine($"Seeding block {blockDto.Height}");
 
@@ -93,7 +109,7 @@ namespace Phantasma.Explorer.Persistance
             Console.WriteLine($"Finished seeding block {blockDto.Height}");
             Console.WriteLine("****************************************");
 
-            await context.SaveChangesAsync();
+            context.SaveChanges();
         }
 
         private async Task UpdateAccount(ExplorerDbContext context, Transaction transaction, string eventDtoEventAddress)
@@ -141,7 +157,7 @@ namespace Phantasma.Explorer.Persistance
                 }
             }
 
-            await context.SaveChangesAsync();
+            context.SaveChanges();
         }
 
         private void UpdateTokenBalance(Account account, BalanceSheetDto tokenBalance)

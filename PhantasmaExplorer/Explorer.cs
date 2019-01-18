@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +31,9 @@ namespace Phantasma.Explorer
             Console.WriteLine("Initializing db...");
             await ExplorerInicializer.Initialize(context);
             Console.WriteLine("Finished initializing db...");
-
+            Console.WriteLine();
+            Console.WriteLine("START sync");
+            ExplorerSync.StartSync();
 
             var server = HostBuilder.CreateServer(args);
 
@@ -41,23 +42,9 @@ namespace Phantasma.Explorer
             viewsRenderer.SetupControllers();
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
-            server.Run();
-            new Thread(async () =>
-            {
-                Thread.CurrentThread.IsBackground = true;
-                try
-                {
-                    await ExplorerSync.StartSync();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    await ExplorerSync.StartSync(); //todo this does not work
-                }
-            }).Start();
-
-
+            
             Console.WriteLine("READY");
+            server.Run();
         }
         //L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N
 

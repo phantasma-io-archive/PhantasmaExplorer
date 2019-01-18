@@ -20,9 +20,9 @@ namespace Phantasma.Explorer.Controllers
             return APIUtils.FromAPIResult(_api.GetAccount(addressText));
         }
 
-        public DataNode GetAddressTransactions(string addressText, int amount)
+        public DataNode GetAddressTransactions(string addressText)
         {
-            return APIUtils.FromAPIResult(_api.GetAddressTransactions(addressText, amount));
+            return APIUtils.FromAPIResult(_api.GetAddressTransactions(addressText));
         }
 
         public DataNode GetApps()
@@ -90,9 +90,9 @@ namespace Phantasma.Explorer.Controllers
             return APIUtils.FromAPIResult(_api.GetTokenBalance(address, tokenSymbol, chain));
         }
 
-        public DataNode GetTokenTransfers(string tokenSymbol, int amount)
+        public DataNode GetTokenTransfers(string tokenSymbol)
         {
-            return APIUtils.FromAPIResult(_api.GetTokenTransfers(tokenSymbol, amount));
+            return APIUtils.FromAPIResult(_api.GetTokenTransfers(tokenSymbol));
         }
 
         public DataNode GetTokenTransferCount(string tokenSymbol)

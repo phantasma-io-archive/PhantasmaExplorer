@@ -440,11 +440,10 @@ namespace Phantasma.Explorer.Site
                 return ApiController.GetAccount(address);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_account_txs/{{address}}/{{amount}}", request =>
+            TemplateEngine.Server.Get($"{urlAPI}/get_account_txs/{{address}}", request =>
             {
                 var address = request.GetVariable("address");
-                var amount = int.Parse(request.GetVariable("amount"));
-                return ApiController.GetAddressTransactions(address, amount);
+                return ApiController.GetAddressTransactions(address);
             });
 
             TemplateEngine.Server.Get($"{urlAPI}/get_apps", request => ApiController.GetApps());
