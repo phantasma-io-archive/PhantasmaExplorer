@@ -26,5 +26,8 @@ namespace Phantasma.Explorer.Domain.Entities
         FriendRemove,
         GasEscrow,
         GasPayment,
+        AuctionCreated,
+        AuctionCancelled,
+        AuctionFilled,
     }
 }

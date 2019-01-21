@@ -197,7 +197,11 @@ namespace Phantasma.Explorer.Utils
                         var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
                         var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
                         return $"{amount} {PlatformName} tokens paid for contract gas, with price of {price} per gas unit";
-
+                    }
+                case EventKind.AddressRegister:
+                    {
+                        var name = nativeEvent.GetContent<string>();
+                        return $"{nativeEvent.Address} registered account name: {name}";
                     }
                 case EventKind.TokenMint:
                 case EventKind.TokenBurn:

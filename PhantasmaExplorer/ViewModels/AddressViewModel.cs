@@ -33,6 +33,7 @@ namespace Phantasma.Explorer.ViewModels
 
             var soulTokens = account.TokenBalance.Where(p => p.TokenSymbol.Equals("SOUL"));
             var otherTokens = account.TokenBalance.Where(p => !p.TokenSymbol.Equals("SOUL"));
+            var nftTokens = account.NonFungibleTokens;
 
             foreach (var balance in soulTokens)
             {
@@ -48,6 +49,18 @@ namespace Phantasma.Explorer.ViewModels
                 vm.TokenBalance.Add(BalanceViewModel.FromAccountBalance(account,
                     balance,
                     phantasmaTokens.SingleOrDefault(p => p.Symbol.Equals(balance.TokenSymbol))));
+            }
+
+            foreach (var nonFungibleToken in nftTokens)
+            {
+                vm.TokenBalance.Add(new BalanceViewModel
+                {
+                    Address = nonFungibleToken.AccountAddress,
+                    Balance = nftTokens.Count(p => p.TokenSymbol.Equals(nonFungibleToken.TokenSymbol)),
+                    Token = new TokenViewModel { Symbol = nonFungibleToken.TokenSymbol },
+                    ChainName = nonFungibleToken.Chain,
+                    Value = 0,
+                });
             }
 
             return vm;

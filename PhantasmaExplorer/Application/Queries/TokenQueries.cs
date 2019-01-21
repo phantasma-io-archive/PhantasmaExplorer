@@ -23,9 +23,14 @@ namespace Phantasma.Explorer.Application.Queries
             return _context.Tokens.ToList();
         }
 
-        public ICollection<NonFungibleToken> QueryNfTokens()
+        public ICollection<NonFungibleToken> QueryAllNonFungibleTokens(string tokenSymbol, string chain = null)
         {
-            return _context.NonFungibleTokens.ToList();
+            if (string.IsNullOrEmpty(chain))
+            {
+                return _context.NonFungibleTokens.ToList();
+            }
+
+            return _context.NonFungibleTokens.Where(p => p.Chain.Equals(chain)).ToList();
         }
 
         public Token QueryToken(string tokenSymbol)

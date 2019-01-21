@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
+using Phantasma.Cryptography;
 using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
@@ -60,6 +61,11 @@ namespace Phantasma.Explorer.Controllers
                 SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
                 CalculateAddressSoulValue(new List<AddressViewModel> { addressVm });
                 return addressVm;
+            }
+
+            if (Address.IsValidAddress(addressText))
+            {
+                return new AddressViewModel { Address = addressText, Balance = 0, Name = "anonymous", Value = 0 };
             }
 
             return null;

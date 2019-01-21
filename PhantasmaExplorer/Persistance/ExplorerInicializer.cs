@@ -40,11 +40,6 @@ namespace Phantasma.Explorer.Persistance
                 await SeedChains(context);
             }
 
-            // account balances
-            if (context.Accounts.Any())
-            {
-                await SeedAccountsBalance(context);
-            }
             sw.Stop();
             Console.WriteLine("Elapsed={0}", sw.Elapsed);
         }
@@ -158,7 +153,7 @@ namespace Phantasma.Explorer.Persistance
                             EventKind = (EventKind)eventDto.EvtKind,
                         });
 
-                        await UpdateAccount(context, transaction, eventDto.EventAddress);
+                        await UpdateAccount(context, transaction, eventDto.EventAddress);//todo some address are not getting saved
                     }
 
                     block.Transactions.Add(transaction);
@@ -170,7 +165,7 @@ namespace Phantasma.Explorer.Persistance
                 Console.WriteLine("****************************************");
             }
 
-            //await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
 
         private async Task UpdateAccount(ExplorerDbContext context, Transaction transaction, string eventDtoEventAddress)
@@ -201,51 +196,6 @@ namespace Phantasma.Explorer.Persistance
                 account.AccountTransactions.Add(new AccountTransaction { Account = account, Transaction = transaction });
 
                 context.Accounts.Add(account);
-            }
-
-            await context.SaveChangesAsync();
-        }
-
-        private async Task SeedAccountsBalance(ExplorerDbContext context)
-        {
-            foreach (var account in context.Accounts)
-            {
-                var accountDto = await _phantasmaRpcService.GetAccount.SendRequestAsync(account.Address);
-                account.Name = accountDto.Name;
-
-                foreach (var tokenBalance in accountDto.Tokens)
-                {
-                    var token = context.Tokens.Find(tokenBalance.Symbol);
-
-                    if ((token.Flags & TokenFlags.Fungible) != 0)
-                    {
-                        account.TokenBalance.Add(new FBalance
-                        {
-                            Chain = tokenBalance.ChainName,
-                            TokenSymbol = tokenBalance.Symbol,
-                            Amount = tokenBalance.Amount
-                        });
-                    }
-                    else
-                    {
-                        foreach (var id in tokenBalance.Ids)
-                        {
-                            if (account.NonFungibleTokens.SingleOrDefault(p => p.Id.Equals(id)) != null)
-                            {
-                                var nftoken = new NonFungibleToken
-                                {
-                                    Chain = tokenBalance.ChainName,
-                                    TokenSymbol = tokenBalance.Symbol,
-                                    Id = id,
-                                    Account = account,
-                                };
-                                account.NonFungibleTokens.Add(nftoken);
-                            }
-                        }
-                    }
-                }
-
-                context.Accounts.Update(account);
             }
 
             await context.SaveChangesAsync();

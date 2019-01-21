@@ -92,7 +92,19 @@ namespace Phantasma.Explorer.Controllers
                 }
                 else
                 {
-                    //todo nft holder list
+                    var nftList = tokenQuery.QueryAllNonFungibleTokens(symbol);
+                    foreach (var nonFungibleToken in nftList)
+                    {
+                        var vm = new BalanceViewModel
+                        {
+                            ChainName = nonFungibleToken.Chain,
+                            //Balance = integer.Count(),
+                            Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl),
+                            Address = nonFungibleToken.AccountAddress
+                        };
+                        vm.Balance = nftList.Count(p => p.AccountAddress.Equals(vm.Address));
+                        balances.Add(vm);
+                    }
                 }
             }
 

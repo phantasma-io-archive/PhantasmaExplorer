@@ -9,18 +9,18 @@ namespace Phantasma.Explorer.Controllers
 {
     public class ChainsController
     {
-        public List<ChainViewModel> GetChains()
+        public List<SimpleChainViewModel> GetChains()
         {
             var context = Explorer.AppServices.GetService<ExplorerDbContext>();
 
             var chainQuery = new ChainQueries(context);
-            var chainVmList = new List<ChainViewModel>();
+            var chainVmList = new List<SimpleChainViewModel>();
 
-            var allChains = chainQuery.QueryChains().ToList();
+            var allChains = chainQuery.SimpleQueryChains().ToList();
 
             foreach (var chain in allChains)
             {
-                chainVmList.Add(ChainViewModel.FromChain(allChains, chain));
+                chainVmList.Add(chain);
             }
 
             return chainVmList;

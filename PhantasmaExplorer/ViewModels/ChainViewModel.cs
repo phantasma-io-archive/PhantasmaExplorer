@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Phantasma.Core.Utils;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Utils;
@@ -34,6 +36,30 @@ namespace Phantasma.Explorer.ViewModels
             };
 
             return vm;
+        }
+    }
+
+    public class SimpleChainViewModel
+    {
+        public string Address { get; set; }
+        public string Name { get; set; }
+        public int Transactions { get; set; }
+        public string ParentChain { get; set; }
+        public uint Height { get; set; }
+
+        public static Expression<Func<Chain, SimpleChainViewModel>> Projection
+        {
+            get
+            {
+                return x => new SimpleChainViewModel()
+                {
+                    Address = x.Address,
+                    Name = x.Name,
+                    ParentChain = x.ParentAddress ?? "",
+                    Height = x.Height,
+                    Transactions = x.Blocks.Select(p => p.Transactions.Count).Sum()
+                };
+            }
         }
     }
 }

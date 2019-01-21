@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Persistance;
-using Phantasma.RpcClient.DTOs;
+using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Application.Queries
 {
@@ -24,9 +24,9 @@ namespace Phantasma.Explorer.Application.Queries
             return _context.Chains.ToList();
         }
 
-        public ICollection<Chain> QueryChainIncludeBlocksAndTxs()
+        public ICollection<SimpleChainViewModel> SimpleQueryChains()
         {
-            return _context.Chains.Include(p => p.Blocks).ThenInclude(p => p.Transactions).ToList();
+            return _context.Chains.Select(SimpleChainViewModel.Projection).ToList();
         }
 
         public Chain QueryChain(string input)
@@ -42,27 +42,6 @@ namespace Phantasma.Explorer.Application.Queries
                 .Include(p => p.Blocks)
                 .ThenInclude(p => p.Transactions)
                 .SingleOrDefault(p => p.Address.Equals(input) || p.Name.Equals(input));
-        }
-
-        public IEnumerable<string> QueryChainNames()
-        {
-            return _context.Chains.Select(p => p.Name);
-        }
-
-        public string QueryChainName(string chainAddress)
-        {
-            return _context.Chains.SingleOrDefault(p => p.Address.Equals(chainAddress))?.Name;
-        }
-
-        public IEnumerable<ChainDto> QueryChainInfo() //todo remove dto
-        {
-            return _context.Chains.Select(p => new ChainDto
-            {
-                Address = p.Address,
-                Name = p.Name,
-                Height = p.Height,
-                ParentAddress = p.ParentAddress
-            });
         }
     }
 }
