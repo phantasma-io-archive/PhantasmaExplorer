@@ -15,7 +15,6 @@ namespace Phantasma.Explorer.Application.Queries
         public TokenQueries(ExplorerDbContext context)
         {
             _context = context;
-            _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public ICollection<Token> QueryTokens()

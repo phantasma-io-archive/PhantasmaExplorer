@@ -18,12 +18,14 @@ namespace Phantasma.Explorer.Controllers
             return blockQuery.QueryBlocksCount(chain);
         }
 
-        public List<BlockViewModel> GetBlocks(int currentPage, int pageSize = 20, string chain = null)
+        public List<BlockListViewModel> GetBlocks(int currentPage, int pageSize = 20, string chain = null)
         {
             var blockQuery = new BlockQueries(_context);
             var query = blockQuery.QueryBlocks(chain).Skip((currentPage - 1) * pageSize).Take(pageSize);
 
-            return query.AsEnumerable().Select(BlockViewModel.FromBlock).ToList();
+            return query.AsEnumerable()
+                .Select(p => BlockListViewModel.FromBlock(p, blockQuery.QueryBlockTxsCount(p.Hash)))
+                .ToList();
         }
 
         public BlockViewModel GetBlock(string input)

@@ -12,7 +12,6 @@ namespace Phantasma.Explorer.Application.Queries
         public AppQueries(ExplorerDbContext context)
         {
             _context = context;
-            _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public ICollection<Domain.Entities.App> QueryApps()

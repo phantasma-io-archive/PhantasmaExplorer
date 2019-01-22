@@ -41,4 +41,27 @@ namespace Phantasma.Explorer.ViewModels
             return vm;
         }
     }
+
+    public class BlockListViewModel
+    {
+        public DateTime Timestamp { get; set; }
+        public int? Transactions { get; set; }
+        public string Hash { get; set; }
+        public string ChainName { get; set; }
+        public string ChainAddress { get; set; }
+
+        public static BlockListViewModel FromBlock(Block block, int? txsCount)
+        {
+            var vm = new BlockListViewModel
+            {
+                Timestamp = new Timestamp(block.Timestamp),
+                Transactions = txsCount,
+                Hash = block.Hash,
+                ChainName = block.ChainName.ToTitleCase(),
+                ChainAddress = block.ChainAddress,
+            };
+
+            return vm;
+        }
+    }
 }

@@ -21,7 +21,7 @@ namespace Phantasma.Explorer.ViewModels
                 Title = info.Title,
                 Url = info.Url,
                 Description = info.Description,
-                // Icon = info.Icon,
+                // Icon = info.Icon, todo
                 Icon = AppSettings.MockLogoUrl
             };
         }

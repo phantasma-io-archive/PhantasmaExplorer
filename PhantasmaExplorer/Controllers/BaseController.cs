@@ -1,4 +1,5 @@
-﻿using Phantasma.Explorer.Persistance;
+﻿using Microsoft.EntityFrameworkCore;
+using Phantasma.Explorer.Persistance;
 
 namespace Phantasma.Explorer.Controllers
 {
@@ -9,6 +10,7 @@ namespace Phantasma.Explorer.Controllers
         protected BaseController(ExplorerDbContext context)
         {
             _context = context;
+            _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
     }
 }

@@ -15,7 +15,6 @@ namespace Phantasma.Explorer.Application.Queries
         public TransactionQueries(ExplorerDbContext context)
         {
             _context = context;
-            _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public IQueryable<Transaction> QueryTransactions(string chain)

@@ -14,7 +14,6 @@ namespace Phantasma.Explorer.Application.Queries
         public AccountQueries(ExplorerDbContext context)
         {
             _context = context;
-            _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public ICollection<Account> QueryRichList(string tokenSymbol = null, int numberOfAddresses = 20)

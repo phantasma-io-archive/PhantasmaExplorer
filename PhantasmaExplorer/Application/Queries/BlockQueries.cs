@@ -14,22 +14,31 @@ namespace Phantasma.Explorer.Application.Queries
         public BlockQueries(ExplorerDbContext context)
         {
             _context = context;
-            _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public IQueryable<Block> QueryBlocks(string chain)
         {
+            var query = _context.Blocks.OrderByDescending(p => p.Timestamp);
             if (!string.IsNullOrEmpty(chain))
             {
-                return _context.Blocks.Where(p => p.ChainAddress.Equals(chain) || p.ChainName.Equals(chain))
-                    .IncludeTransactions();
+                return query.Where(p => p.ChainAddress.Equals(chain) || p.ChainName.Equals(chain))
+                    .Select(p => new Block
+                    {
+                        ChainAddress = p.ChainAddress,
+                        ChainName = p.ChainName,
+                        Hash = p.Hash,
+                        Timestamp = p.Timestamp
+                    });
             }
 
-            return _context.Blocks
-                .OrderByDescending(p => p.Timestamp)
-                .IncludeTransactions();
+            return query.Select(p => new Block
+            {
+                ChainAddress = p.ChainAddress,
+                ChainName = p.ChainName,
+                Hash = p.Hash,
+                Timestamp = p.Timestamp
+            });
         }
-
 
         public ICollection<Block> QueryLastBlocks(string chain = null, int amount = 20)
         {
@@ -69,6 +78,11 @@ namespace Phantasma.Explorer.Application.Queries
             return string.IsNullOrEmpty(chain)
                 ? _context.Blocks.Count()
                 : _context.Blocks.Count(p => p.ChainName.Equals(chain) || p.ChainAddress.Equals(chain));
+        }
+
+        public int? QueryBlockTxsCount(string blockHash)
+        {
+            return _context.Blocks.IncludeTransactions().SingleOrDefault(p => p.Hash.Equals(blockHash))?.Transactions.Count;
         }
     }
 }

@@ -14,7 +14,6 @@ namespace Phantasma.Explorer.Application.Queries
         public ChainQueries(ExplorerDbContext context)
         {
             _context = context;
-            _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public int QueryChainCount => _context.Chains.Count();
