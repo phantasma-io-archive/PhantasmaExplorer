@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
@@ -8,19 +9,21 @@ namespace Phantasma.Explorer.Controllers
 {
     public class BlocksController
     {
-        public List<BlockViewModel> GetLatestBlocks()
+        public int GetBlocksCount(string chain = null)
+        {
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+            var blockQuery = new BlockQueries(context);
+            return blockQuery.QueryBlocksCount(chain);
+        }
+
+        public List<BlockViewModel> GetBlocks(int currentPage, int pageSize = 20, string chain = null)
         {
             var context = Explorer.AppServices.GetService<ExplorerDbContext>();
 
             var blockQuery = new BlockQueries(context);
-            var blockList = new List<BlockViewModel>();
+            var query = blockQuery.QueryBlocks(chain).Skip((currentPage - 1) * pageSize).Take(pageSize);
 
-            foreach (var block in blockQuery.QueryBlocks())
-            {
-                blockList.Add(BlockViewModel.FromBlock(block));
-            }
-
-            return blockList;
+            return query.AsEnumerable().Select(BlockViewModel.FromBlock).ToList();
         }
 
         public BlockViewModel GetBlock(string input)

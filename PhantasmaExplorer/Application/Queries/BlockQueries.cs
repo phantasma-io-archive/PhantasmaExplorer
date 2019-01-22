@@ -17,7 +17,21 @@ namespace Phantasma.Explorer.Application.Queries
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
-        public ICollection<Block> QueryBlocks(string chain = null, int amount = 20)
+        public IQueryable<Block> QueryBlocks(string chain = null)
+        {
+            if (!string.IsNullOrEmpty(chain))
+            {
+                return _context.Blocks.Where(p => p.Chain.Address.Equals(chain) || p.ChainAddress.Equals(chain))
+                    .IncludeTransactions();
+            }
+
+            return _context.Blocks
+                .OrderByDescending(p => p.Timestamp)
+                .IncludeTransactions();
+        }
+
+
+        public ICollection<Block> QueryLastBlocks(string chain = null, int amount = 20)
         {
             if (string.IsNullOrEmpty(chain)) //get last x blocks from all chains
             {
@@ -48,6 +62,13 @@ namespace Phantasma.Explorer.Application.Queries
             return _context.Blocks
                 .Where(p => p.Chain.Name.Equals(chain) || p.ChainAddress.Equals(chain))
                 .SingleOrDefault(c => c.Height == height);
+        }
+
+        public int QueryBlocksCount(string chain)
+        {
+            return string.IsNullOrEmpty(chain)
+                ? _context.Blocks.Count()
+                : _context.Blocks.Count(p => p.Chain.Name.Equals(chain) || p.ChainAddress.Equals(chain));
         }
     }
 }

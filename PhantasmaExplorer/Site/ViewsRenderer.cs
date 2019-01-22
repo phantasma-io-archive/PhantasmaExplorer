@@ -30,12 +30,12 @@ namespace Phantasma.Explorer.Site
         {
             _menus = new List<MenuContext>
             {
-                new MenuContext {Text = "Transactions", Url = urlTransactions, Active = true},
-                new MenuContext {Text = "Chains", Url = urlChains, Active = false},
-                new MenuContext {Text = "Blocks", Url = urlBlocks, Active = false},
-                new MenuContext {Text = "Tokens", Url = urlTokens, Active = false},
-                new MenuContext {Text = "Addresses", Url = urlAddresses, Active = false},
-                new MenuContext {Text = "Apps", Url = urlApps, Active = false},
+                new MenuContext {Text = "Transactions", Url = AppSettings.UrlTransactions, Active = true},
+                new MenuContext {Text = "Chains", Url = AppSettings.UrlChains, Active = false},
+                new MenuContext {Text = "Blocks", Url = AppSettings.UrlBlocks, Active = false},
+                new MenuContext {Text = "Tokens", Url = AppSettings.UrlTokens, Active = false},
+                new MenuContext {Text = "Addresses", Url = AppSettings.UrlAddresses, Active = false},
+                new MenuContext {Text = "Apps", Url = AppSettings.UrlApps, Active = false},
             };
             SetupTags();
         }
@@ -76,17 +76,17 @@ namespace Phantasma.Explorer.Site
 
         public void SetupHandlers() //todo separate each call
         {
-            TemplateEngine.Server.Get("/", request => HTTPResponse.Redirect(urlHome));
+            TemplateEngine.Server.Get("/", request => HTTPResponse.Redirect(AppSettings.UrlHome));
 
-            TemplateEngine.Server.Get(urlHome, RouteHome);
+            TemplateEngine.Server.Get(AppSettings.UrlHome, RouteHome);
 
-            TemplateEngine.Server.Post(urlHome, RouteSearch);
+            TemplateEngine.Server.Post(AppSettings.UrlHome, RouteSearch);
 
-            TemplateEngine.Server.Get(urlError, RouteError);
+            TemplateEngine.Server.Get(AppSettings.UrlError, RouteError);
 
-            TemplateEngine.Server.Get(urlTokens, RouteTokens);
+            TemplateEngine.Server.Get(AppSettings.UrlTokens, RouteTokens);
 
-            TemplateEngine.Server.Get($"{urlTokens}/{{input}}", RouteTokensNft);
+            TemplateEngine.Server.Get($"{AppSettings.UrlTokens}/{{input}}", RouteTokensNft);
 
             TemplateEngine.Server.Get("/marketcap", request =>
             {
@@ -103,27 +103,28 @@ namespace Phantasma.Explorer.Site
                 return html;
             });
 
-            TemplateEngine.Server.Get($"{urlToken}/{{input}}", RouteToken);
+            TemplateEngine.Server.Get($"{AppSettings.UrlToken}/{{input}}", RouteToken);
 
-            TemplateEngine.Server.Get(urlTransactions, RouteTransactions);
+            TemplateEngine.Server.Get(AppSettings.UrlTransactions, RouteTransactions);
 
-            TemplateEngine.Server.Get($"{urlTransaction}/{{input}}", RouteTransaction);
+            TemplateEngine.Server.Get($"{AppSettings.UrlTransaction}/{{input}}", RouteTransaction);
 
-            TemplateEngine.Server.Get($"{urlAddresses}", RouteAddresses);
+            TemplateEngine.Server.Get($"{AppSettings.UrlAddresses}", RouteAddresses);
 
-            TemplateEngine.Server.Get($"{urlAddress}/{{input}}", RouteAddress);
+            TemplateEngine.Server.Get($"{AppSettings.UrlAddress}/{{input}}", RouteAddress);
 
-            TemplateEngine.Server.Get($"{urlBlocks}", RouteBlocks);
+            TemplateEngine.Server.Get($"{AppSettings.UrlBlocks}", RouteBlocks);
+            TemplateEngine.Server.Get($"{AppSettings.UrlBlocks}?p={{page}}", RouteBlocks);
 
-            TemplateEngine.Server.Get($"{urlBlock}/{{input}}", RouteBlock);
+            TemplateEngine.Server.Get($"{AppSettings.UrlBlock}/{{input}}", RouteBlock);
 
-            TemplateEngine.Server.Get($"{urlChains}", RouteChains);
+            TemplateEngine.Server.Get($"{AppSettings.UrlChains}", RouteChains);
 
-            TemplateEngine.Server.Get($"{urlChain}/{{input}}", RouteChain);
+            TemplateEngine.Server.Get($"{AppSettings.UrlChain}/{{input}}", RouteChain);
 
-            TemplateEngine.Server.Get($"{urlApps}", RouteApps);
+            TemplateEngine.Server.Get($"{AppSettings.UrlApps}", RouteApps);
 
-            TemplateEngine.Server.Get($"{urlApp}/{{input}}", RouteApp);
+            TemplateEngine.Server.Get($"{AppSettings.UrlApp}/{{input}}", RouteApp);
 
             //SetupAPIHandlers(); todo
         }
@@ -133,9 +134,9 @@ namespace Phantasma.Explorer.Site
         {
             var context = GetSessionContext(request);
             var blocksAndTxs = HomeController.GetLastestInfo();
-            context[menuContext] = _menus;
-            context[homeContext] = blocksAndTxs;
-            return RendererView(context, "layout", homeContext);
+            context[AppSettings.MenuContext] = _menus;
+            context[AppSettings.HomeContext] = blocksAndTxs;
+            return RendererView(context, "layout", AppSettings.HomeContext);
         }
 
         private object RouteSearch(HTTPRequest request)
@@ -151,15 +152,15 @@ namespace Phantasma.Explorer.Site
                         return HTTPResponse.Redirect(url);
                     }
                 }
-                return HTTPResponse.Redirect(urlHome);
+                return HTTPResponse.Redirect(AppSettings.UrlHome);
             }
             catch (Exception ex)
             {
                 _errorContextInstance.ErrorCode = ex.Message;
                 _errorContextInstance.ErrorDescription = ex.StackTrace;
-                request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+                request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-                return HTTPResponse.Redirect(urlError);
+                return HTTPResponse.Redirect(AppSettings.UrlError);
             }
         }
 
@@ -167,9 +168,9 @@ namespace Phantasma.Explorer.Site
         {
             var error = request.session.GetStruct<ErrorContext>("error");
             var context = GetSessionContext(request);
-            context[menuContext] = _menus;
-            context[errorContext] = error;
-            return RendererView(context, (new[] { "layout", errorContext }));
+            context[AppSettings.MenuContext] = _menus;
+            context[AppSettings.ErrorContext] = error;
+            return RendererView(context, (new[] { "layout", AppSettings.ErrorContext }));
         }
 
         private object RouteTokens(HTTPRequest request)
@@ -180,17 +181,17 @@ namespace Phantasma.Explorer.Site
             tokensList.Remove(temp);
             if (tokensList.Any())
             {
-                ActivateMenuItem(urlTokens);
+                ActivateMenuItem(AppSettings.UrlTokens);
 
-                context[menuContext] = _menus;
-                context[tokensContext] = tokensList;
-                return RendererView(context, "layout", tokensContext);
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.TokensContext] = tokensList;
+                return RendererView(context, "layout", AppSettings.TokensContext);
             }
             _errorContextInstance.ErrorCode = "token error";
             _errorContextInstance.ErrorDescription = "Tokens not found";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteTokensNft(HTTPRequest request)
@@ -200,16 +201,16 @@ namespace Phantasma.Explorer.Site
             var context = GetSessionContext(request);
             if (nftList != null && nftList.Any())
             {
-                context[menuContext] = _menus;
-                context[nftTokensContext] = nftList;
-                return RendererView(context, "layout", nftTokensContext);
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.NftTokensContext] = nftList;
+                return RendererView(context, "layout", AppSettings.NftTokensContext);
             }
 
             _errorContextInstance.ErrorCode = "nft error";
             _errorContextInstance.ErrorDescription = $"no nfts found for this {address} address";
-            context[errorContext] = _errorContextInstance;
+            context[AppSettings.ErrorContext] = _errorContextInstance;
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteToken(HTTPRequest request)
@@ -222,17 +223,17 @@ namespace Phantasma.Explorer.Site
                 var holders = TokensController.GetHolders(token.Symbol);
                 var transfers = TokensController.GetTransfers(token.Symbol);
 
-                context[menuContext] = _menus;
-                context[tokenContext] = token;
-                context[holdersContext] = holders;
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.TokenContext] = token;
+                context[AppSettings.HoldersContext] = holders;
                 context["transfers"] = transfers;
-                return RendererView(context, "layout", tokenContext, holdersContext, "transfers");
+                return RendererView(context, "layout", AppSettings.TokenContext, AppSettings.HoldersContext, "transfers");
             }
             _errorContextInstance.ErrorCode = "token error";
             _errorContextInstance.ErrorDescription = "Token not found";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteTransactions(HTTPRequest request)
@@ -241,18 +242,18 @@ namespace Phantasma.Explorer.Site
             var context = GetSessionContext(request);
             if (txList.Count > 0)
             {
-                ActivateMenuItem(urlTransactions);
+                ActivateMenuItem(AppSettings.UrlTransactions);
 
-                context[menuContext] = _menus;
-                context[txsContext] = txList;
-                return RendererView(context, "layout", txsContext);
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.TxsContext] = txList;
+                return RendererView(context, "layout", AppSettings.TxsContext);
             }
 
             _errorContextInstance.ErrorCode = "txs error";
             _errorContextInstance.ErrorDescription = "No transactions found";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteTransaction(HTTPRequest request)
@@ -262,19 +263,19 @@ namespace Phantasma.Explorer.Site
             var context = GetSessionContext(request);
             if (tx != null)
             {
-                ActivateMenuItem(urlTransaction);
+                ActivateMenuItem(AppSettings.UrlTransaction);
 
-                context[menuContext] = _menus;
-                context[txContext] = tx;
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.TxContext] = tx;
 
-                return RendererView(context, "layout", txContext);
+                return RendererView(context, "layout", AppSettings.TxContext);
             }
 
             _errorContextInstance.ErrorCode = "txs error";
             _errorContextInstance.ErrorDescription = $"Transaction {txHash} not found";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteAddresses(HTTPRequest request)
@@ -283,57 +284,71 @@ namespace Phantasma.Explorer.Site
             var context = GetSessionContext(request);
             if (addressList != null && addressList.Any())
             {
-                ActivateMenuItem(urlAddresses);
-                context[menuContext] = _menus;
-                context[addressesContext] = addressList;
+                ActivateMenuItem(AppSettings.UrlAddresses);
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.AddressesContext] = addressList;
 
-                return RendererView(context, "layout", addressesContext);
+                return RendererView(context, "layout", AppSettings.AddressesContext);
             }
 
             _errorContextInstance.ErrorCode = "Address error";
             _errorContextInstance.ErrorDescription = $"No addresses";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteAddress(HTTPRequest request)
         {
-
             var addressText = request.GetVariable("input");
             var address = AddressesController.GetAddress(addressText);
             var context = GetSessionContext(request);
             if (address != null)
             {
-                context[menuContext] = _menus;
-                context[addressContext] = address;
-                return RendererView(context, "layout", addressContext);
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.AddressContext] = address;
+                return RendererView(context, "layout", AppSettings.AddressContext);
             }
 
             _errorContextInstance.ErrorCode = "Address error";
             _errorContextInstance.ErrorDescription = $"Invalid address";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteBlocks(HTTPRequest request)
         {
-            var blocksList = BlocksController.GetLatestBlocks();
+            var input = request.GetVariable("p"); //todo ask this
+            if (!int.TryParse(input, out int pageNumber))
+            {
+                pageNumber = 1;
+            }
+
+            var pageModel = new PaginationModel
+            {
+                Count = BlocksController.GetBlocksCount(),
+                CurrentPage = pageNumber,
+                PageSize = 20,
+            };
+
+            var blocksList = BlocksController.GetBlocks(pageNumber);
             var context = GetSessionContext(request);
+
             if (blocksList.Count > 0)
             {
-                ActivateMenuItem(urlBlocks);
-                context[menuContext] = _menus;
-                context[blocksContext] = blocksList;
-                return RendererView(context, "layout", blocksContext);
+                ActivateMenuItem(AppSettings.UrlBlocks);
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.BlocksContext] = blocksList;
+                context[AppSettings.PaginationContext] = pageModel;
+                return RendererView(context, "layout", AppSettings.BlocksContext);
             }
 
             _errorContextInstance.ErrorCode = "blocks error";
             _errorContextInstance.ErrorDescription = "No blocks found";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteBlock(HTTPRequest request)
@@ -343,16 +358,16 @@ namespace Phantasma.Explorer.Site
             var context = GetSessionContext(request);
             if (block != null)
             {
-                context[menuContext] = _menus;
-                context[blockContext] = block;
-                return RendererView(context, "layout", blockContext);
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.BlockContext] = block;
+                return RendererView(context, "layout", AppSettings.BlockContext);
             }
 
             _errorContextInstance.ErrorCode = "blocks error";
             _errorContextInstance.ErrorDescription = $"No block found with this {input} input";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteChains(HTTPRequest request)
@@ -361,17 +376,17 @@ namespace Phantasma.Explorer.Site
             var context = GetSessionContext(request);
             if (chainList.Count > 0)
             {
-                ActivateMenuItem(urlChains);
-                context[menuContext] = _menus;
-                context[chainsContext] = chainList;
+                ActivateMenuItem(AppSettings.UrlChains);
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.ChainsContext] = chainList;
 
-                return RendererView(context, "layout", chainsContext);
+                return RendererView(context, "layout", AppSettings.ChainsContext);
             }
             _errorContextInstance.ErrorCode = "chains error";
             _errorContextInstance.ErrorDescription = "No chains found";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteChain(HTTPRequest request)
@@ -381,17 +396,17 @@ namespace Phantasma.Explorer.Site
             var context = GetSessionContext(request);
             if (chain != null)
             {
-                context[menuContext] = _menus;
-                context[chainContext] = chain;
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.ChainContext] = chain;
 
-                return RendererView(context, "layout", chainContext);
+                return RendererView(context, "layout", AppSettings.ChainContext);
             }
 
             _errorContextInstance.ErrorCode = "chains error";
             _errorContextInstance.ErrorDescription = $"No chain found with this {addressText} address";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteApps(HTTPRequest request)
@@ -400,15 +415,15 @@ namespace Phantasma.Explorer.Site
             var context = GetSessionContext(request);
             if (appList.Count > 0)
             {
-                context[menuContext] = _menus;
-                context[appsContext] = appList;
-                return RendererView(context, "layout", appsContext);
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.AppsContext] = appList;
+                return RendererView(context, "layout", AppSettings.AppsContext);
             }
             _errorContextInstance.ErrorCode = "apps error";
             _errorContextInstance.ErrorDescription = "No apps found";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
         private object RouteApp(HTTPRequest request)
         {
@@ -417,124 +432,87 @@ namespace Phantasma.Explorer.Site
             var context = GetSessionContext(request);
             if (app != null)
             {
-                context[menuContext] = _menus;
-                context[appContext] = app;
+                context[AppSettings.MenuContext] = _menus;
+                context[AppSettings.AppContext] = app;
 
-                return RendererView(context, "layout", appContext);
+                return RendererView(context, "layout", AppSettings.AppContext);
             }
 
             _errorContextInstance.ErrorCode = "apps error";
             _errorContextInstance.ErrorDescription = $"No app with {appId} found";
-            request.session.SetStruct<ErrorContext>(errorContext, _errorContextInstance);
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
-            return HTTPResponse.Redirect(urlError);
+            return HTTPResponse.Redirect(AppSettings.UrlError);
         }
         #endregion
 
         #region API
         private void SetupAPIHandlers()
         {
-            TemplateEngine.Server.Get($"{urlAPI}/get_account/{{address}}", request =>
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_account/{{address}}", request =>
             {
                 var address = request.GetVariable("address");
                 return ApiController.GetAccount(address);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_account_txs/{{address}}", request =>
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_account_txs/{{address}}", request =>
             {
                 var address = request.GetVariable("address");
                 return ApiController.GetAddressTransactions(address);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_apps", request => ApiController.GetApps());
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_apps", request => ApiController.GetApps());
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_block_height/{{chain}}", request =>
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block_height/{{chain}}", request =>
             {
                 var chain = request.GetVariable("chain");
                 return ApiController.GetBlockHeight(chain);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_block/{{blockHash}}", request =>
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block/{{blockHash}}", request =>
             {
                 var address = request.GetVariable("blockHash");
                 return ApiController.GetBlockByHash(address);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_block/{{chain}}/{{height}}", request =>
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block/{{chain}}/{{height}}", request =>
             {
                 var chain = request.GetVariable("chain");
                 var height = (uint.Parse(request.GetVariable("height")));
                 return ApiController.GetBlockByHeight(chain, height);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_block_tx_count_by_hash/{{blockHash}}", request =>
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block_tx_count_by_hash/{{blockHash}}", request =>
             {
                 var block = request.GetVariable("blockHash");
                 return ApiController.GetBlockTransactionCountByHash(block);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_confirmations/{{txHash}}", request =>
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_confirmations/{{txHash}}", request =>
             {
                 var txHash = request.GetVariable("txHash");
                 return ApiController.GetConfirmations(txHash);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_tx_by_block_hash_index/{{block}}/{{index}}", request =>
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_tx_by_block_hash_index/{{block}}/{{index}}", request =>
             {
                 var block = request.GetVariable("block");
                 var index = int.Parse(request.GetVariable("index"));
                 return ApiController.GetTransactionByBlockHashAndIndex(block, index);
             });
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_chains", request => ApiController.GetChains());
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_chains", request => ApiController.GetChains());
 
-            TemplateEngine.Server.Get($"{urlAPI}/get_tokens", request => ApiController.GetTokens());
+            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_tokens", request => ApiController.GetTokens());
 
             //todo confirm this
-            TemplateEngine.Server.Post($"{urlAPI}/send_raw_tx/{{signedTx}}", request =>
+            TemplateEngine.Server.Post($"{AppSettings.UrlApi}/send_raw_tx/{{signedTx}}", request =>
             {
                 var signedTx = request.GetVariable("signedTx");
                 return ApiController.SendRawTransaction(signedTx);
             });
         }
-
         #endregion
-
-        #region URL&CONTEXT
-
-        private readonly string urlHome = "/home";
-        private readonly string urlTokens = "/tokens";
-        private readonly string urlToken = "/token";
-        private readonly string urlTransactions = "/transactions";
-        private readonly string urlTransaction = "/tx";
-        private readonly string urlChains = "/chains";
-        private readonly string urlChain = "/chain";
-        private readonly string urlBlocks = "/blocks";
-        private readonly string urlBlock = "/block";
-        private readonly string urlAddresses = "/addresses";
-        private readonly string urlAddress = "/address";
-        private readonly string urlApps = "/apps";
-        private readonly string urlApp = "/app";
-        private readonly string urlError = "/error";
-        private readonly string urlAPI = "/api";
-
-        private readonly string homeContext = "home";
-        private readonly string menuContext = "menu";
-        private readonly string tokensContext = "tokens";
-        private readonly string nftTokensContext = "nftTokens";
-        private readonly string tokenContext = "token";
-        private readonly string txContext = "transaction";
-        private readonly string txsContext = "transactions";
-        private readonly string addressesContext = "addresses";
-        private readonly string addressContext = "address";
-        private readonly string blocksContext = "blocks";
-        private readonly string blockContext = "block";
-        private readonly string chainsContext = "chains";
-        private readonly string chainContext = "chain";
-        private readonly string appsContext = "apps";
-        private readonly string appContext = "app";
-        private readonly string errorContext = "error";
-        private readonly string holdersContext = "holders";
 
         public class MenuContext
         {
@@ -555,8 +533,6 @@ namespace Phantasma.Explorer.Site
             var menu = _menus.SingleOrDefault(p => p.Url == url);
             if (menu != null) menu.Active = true;
         }
-
-        #endregion
 
         #region Controllers
 
