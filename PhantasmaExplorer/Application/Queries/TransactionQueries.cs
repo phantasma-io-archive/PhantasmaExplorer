@@ -18,7 +18,22 @@ namespace Phantasma.Explorer.Application.Queries
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
-        public ICollection<Transaction> QueryTransactions(string chain = null, int amount = 20)
+        public IQueryable<Transaction> QueryTransactions(string chain)
+        {
+            if (!string.IsNullOrEmpty(chain))
+            {
+                return _context.Transactions
+                    .Where(p => p.Block.ChainAddress.Equals(chain) || p.Block.ChainName.Equals(chain))
+                    .OrderByDescending(p => p.Timestamp)
+                    .Include(p => p.Block);
+            }
+
+            return _context.Transactions
+                .OrderByDescending(p => p.Timestamp)
+                .Include(p => p.Block);
+        }
+
+        public ICollection<Transaction> QueryLastTransactions(string chain = null, int amount = 20)
         {
             if (string.IsNullOrEmpty(chain)) //no specific chain
             {

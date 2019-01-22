@@ -23,30 +23,18 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-sm-6">
-            <ul class="pagination">
+        <div class="col-sm-12">
+            <ul class="pager">
                 {{#if pagination.ShowPrevious}}
-                <li class="page-item active">
-                    <a class="page-link" href="#" tabindex="-1">Previous</a>
-                </li>
+                <li class="previous"><a href="/blocks/{{pagination.PreviousPage}}"><span aria-hidden="true">&larr;</span> Previous</a></li>
                 {{#else}}
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Previous</a>
-                </li>
+                <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Previous</a></li>
                 {{/if}}
-                <!--<li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item active">
-                    <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>-->
+
                 {{#if pagination.ShowNext}}
-                <li class="page-item active">
-                    <a class="page-link" href="#" tabindex="-1">Next</a>
-                </li>
+                <li class="next"><a href="/blocks/{{pagination.NextPage}}">Next <span aria-hidden="true">&rarr;</span></a></li>
                 {{#else}}
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Next</a>
-                </li>
+                <li class="previous disabled"><a><span aria-hidden="true">&larr;</span>Next </a></li>
                 {{/if}}
             </ul>
         </div>

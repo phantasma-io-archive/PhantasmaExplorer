@@ -207,7 +207,7 @@ namespace Phantasma.Explorer.Site
 
         public LinkAppTag(Document doc, string key) : base(doc)
         {
-            this._key = RenderingKey.Parse(key, RenderingType.String);
+            _key = RenderingKey.Parse(key, RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)

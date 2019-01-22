@@ -23,5 +23,20 @@
                 </tbody>
             </table>
         </div>
+        <div class="col-sm-12">
+            <ul class="pager">
+                {{#if pagination.ShowPrevious}}
+                <li class="previous"><a href="/transactions/{{pagination.PreviousPage}}"><span aria-hidden="true">&larr;</span> Previous</a></li>
+                {{#else}}
+                <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Previous</a></li>
+                {{/if}}
+
+                {{#if pagination.ShowNext}}
+                <li class="next"><a href="/transactions/{{pagination.NextPage}}">Next <span aria-hidden="true">&rarr;</span></a></li>
+                {{#else}}
+                <li class="previous disabled"><a><span aria-hidden="true">&larr;</span>Next </a></li>
+                {{/if}}
+            </ul>
+        </div>
     </div>
 </div>

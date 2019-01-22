@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
-using Microsoft.EntityFrameworkCore;
 using Phantasma.Core;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Controllers;
-using Phantasma.Explorer.Infrastructure.Interfaces;
-using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer.Site
@@ -22,9 +19,9 @@ namespace Phantasma.Explorer.Site
         }
 
         public TemplateEngine TemplateEngine { get; set; }
-
         private ErrorContext _errorContextInstance;
         private List<MenuContext> _menus;
+        private Dictionary<string, object> GetSessionContext(HTTPRequest request) => request.session.Data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         public void Init()
         {
@@ -60,20 +57,6 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Compiler.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
         }
 
-        public void SetupControllers() //todo this should be done by other class
-        {
-            HomeController = new HomeController();
-            AddressesController = new AddressesController();
-            BlocksController = new BlocksController();
-            ChainsController = new ChainsController();
-            TransactionsController = new TransactionsController();
-            TokensController = new TokensController();
-            AppsController = new AppsController();
-            ApiController = new ApiController();
-        }
-
-        private Dictionary<string, object> GetSessionContext(HTTPRequest request) => request.session.Data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
         public void SetupHandlers() //todo separate each call
         {
             TemplateEngine.Server.Get("/", request => HTTPResponse.Redirect(AppSettings.UrlHome));
@@ -99,13 +82,14 @@ namespace Phantasma.Explorer.Site
             {
                 var coins = HomeController.GetRateInfo();
 
-                var html = TemplateEngine.Render(coins, new[] { "rates" });
+                var html = TemplateEngine.Render(coins, "rates");
                 return html;
             });
 
             TemplateEngine.Server.Get($"{AppSettings.UrlToken}/{{input}}", RouteToken);
 
-            TemplateEngine.Server.Get(AppSettings.UrlTransactions, RouteTransactions);
+            TemplateEngine.Server.Get($"{AppSettings.UrlTransactions}", RouteTransactions);
+            TemplateEngine.Server.Get($"{AppSettings.UrlTransactions}/{{page}}", RouteTransactions);
 
             TemplateEngine.Server.Get($"{AppSettings.UrlTransaction}/{{input}}", RouteTransaction);
 
@@ -114,7 +98,7 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Server.Get($"{AppSettings.UrlAddress}/{{input}}", RouteAddress);
 
             TemplateEngine.Server.Get($"{AppSettings.UrlBlocks}", RouteBlocks);
-            TemplateEngine.Server.Get($"{AppSettings.UrlBlocks}?p={{page}}", RouteBlocks);
+            TemplateEngine.Server.Get($"{AppSettings.UrlBlocks}/{{page}}", RouteBlocks);
 
             TemplateEngine.Server.Get($"{AppSettings.UrlBlock}/{{input}}", RouteBlock);
 
@@ -133,7 +117,7 @@ namespace Phantasma.Explorer.Site
         private object RouteHome(HTTPRequest request)
         {
             var context = GetSessionContext(request);
-            var blocksAndTxs = HomeController.GetLastestInfo();
+            var blocksAndTxs = HomeControllerInstance.GetLastestInfo();
             context[AppSettings.MenuContext] = _menus;
             context[AppSettings.HomeContext] = blocksAndTxs;
             return RendererView(context, "layout", AppSettings.HomeContext);
@@ -146,7 +130,7 @@ namespace Phantasma.Explorer.Site
                 var searchInput = request.GetVariable("searchInput").Trim();
                 if (!string.IsNullOrEmpty(searchInput))
                 {
-                    var url = HomeController.SearchCommand(searchInput);
+                    var url = HomeControllerInstance.SearchCommand(searchInput);
                     if (!string.IsNullOrEmpty(url))
                     {
                         return HTTPResponse.Redirect(url);
@@ -175,7 +159,7 @@ namespace Phantasma.Explorer.Site
 
         private object RouteTokens(HTTPRequest request)
         {
-            var tokensList = TokensController.GetTokens();
+            var tokensList = TokensControllerInstance.GetTokens();
             var temp = tokensList.SingleOrDefault(t => t.Name == "Trophy");
             var context = GetSessionContext(request);
             tokensList.Remove(temp);
@@ -197,7 +181,7 @@ namespace Phantasma.Explorer.Site
         private object RouteTokensNft(HTTPRequest request)
         {
             var address = request.GetVariable("input");
-            var nftList = TokensController.GetNftListByAddress(address);
+            var nftList = TokensControllerInstance.GetNftListByAddress(address);
             var context = GetSessionContext(request);
             if (nftList != null && nftList.Any())
             {
@@ -216,12 +200,13 @@ namespace Phantasma.Explorer.Site
         private object RouteToken(HTTPRequest request)
         {
             var tokenSymbol = request.GetVariable("input");
-            var token = TokensController.GetToken(tokenSymbol);
+            var controller = TokensControllerInstance;
+            var token = controller.GetToken(tokenSymbol);
             var context = GetSessionContext(request);
             if (token != null)
             {
-                var holders = TokensController.GetHolders(token.Symbol);
-                var transfers = TokensController.GetTransfers(token.Symbol);
+                var holders = controller.GetHolders(token.Symbol);
+                var transfers = controller.GetTransfers(token.Symbol);
 
                 context[AppSettings.MenuContext] = _menus;
                 context[AppSettings.TokenContext] = token;
@@ -238,14 +223,30 @@ namespace Phantasma.Explorer.Site
 
         private object RouteTransactions(HTTPRequest request)
         {
-            var txList = TransactionsController.GetLastTransactions();
+            var input = request.GetVariable("page");
+            if (!int.TryParse(input, out int pageNumber))
+            {
+                pageNumber = 1;
+            }
+
+            var controller = TransactionsControllerInstance;
+            var pageModel = new PaginationModel
+            {
+                Count = controller.GetTransactionsCount(),
+                CurrentPage = pageNumber,
+                PageSize = AppSettings.PageSize,
+            };
+
+            var txList = controller.GetTransactions(pageModel.CurrentPage, pageModel.PageSize);
             var context = GetSessionContext(request);
+
             if (txList.Count > 0)
             {
                 ActivateMenuItem(AppSettings.UrlTransactions);
 
                 context[AppSettings.MenuContext] = _menus;
                 context[AppSettings.TxsContext] = txList;
+                context[AppSettings.PaginationContext] = pageModel;
                 return RendererView(context, "layout", AppSettings.TxsContext);
             }
 
@@ -259,7 +260,7 @@ namespace Phantasma.Explorer.Site
         private object RouteTransaction(HTTPRequest request)
         {
             var txHash = request.GetVariable("input");
-            var tx = TransactionsController.GetTransaction(txHash);
+            var tx = TransactionsControllerInstance.GetTransaction(txHash);
             var context = GetSessionContext(request);
             if (tx != null)
             {
@@ -280,7 +281,8 @@ namespace Phantasma.Explorer.Site
 
         private object RouteAddresses(HTTPRequest request)
         {
-            var addressList = AddressesController.GetAddressList();
+            var addressList = AddressesControllerInstance.GetAddressList();
+
             var context = GetSessionContext(request);
             if (addressList != null && addressList.Any())
             {
@@ -301,7 +303,7 @@ namespace Phantasma.Explorer.Site
         private object RouteAddress(HTTPRequest request)
         {
             var addressText = request.GetVariable("input");
-            var address = AddressesController.GetAddress(addressText);
+            var address = AddressesControllerInstance.GetAddress(addressText);
             var context = GetSessionContext(request);
             if (address != null)
             {
@@ -319,20 +321,21 @@ namespace Phantasma.Explorer.Site
 
         private object RouteBlocks(HTTPRequest request)
         {
-            var input = request.GetVariable("p"); //todo ask this
+            var input = request.GetVariable("page"); //todo ask this
             if (!int.TryParse(input, out int pageNumber))
             {
                 pageNumber = 1;
             }
 
+            var controller = BlocksControllerInstance;
             var pageModel = new PaginationModel
             {
-                Count = BlocksController.GetBlocksCount(),
+                Count = controller.GetBlocksCount(),
                 CurrentPage = pageNumber,
-                PageSize = 20,
+                PageSize = AppSettings.PageSize,
             };
 
-            var blocksList = BlocksController.GetBlocks(pageNumber);
+            var blocksList = controller.GetBlocks(pageModel.CurrentPage, pageModel.PageSize);
             var context = GetSessionContext(request);
 
             if (blocksList.Count > 0)
@@ -354,7 +357,7 @@ namespace Phantasma.Explorer.Site
         private object RouteBlock(HTTPRequest request)
         {
             var input = request.GetVariable("input");
-            var block = BlocksController.GetBlock(input);
+            var block = BlocksControllerInstance.GetBlock(input);
             var context = GetSessionContext(request);
             if (block != null)
             {
@@ -372,7 +375,7 @@ namespace Phantasma.Explorer.Site
 
         private object RouteChains(HTTPRequest request)
         {
-            var chainList = ChainsController.GetChains();
+            var chainList = ChainsControllerInstance.GetChains();
             var context = GetSessionContext(request);
             if (chainList.Count > 0)
             {
@@ -392,7 +395,7 @@ namespace Phantasma.Explorer.Site
         private object RouteChain(HTTPRequest request)
         {
             var addressText = request.GetVariable("input");
-            var chain = ChainsController.GetChain(addressText);
+            var chain = ChainsControllerInstance.GetChain(addressText);
             var context = GetSessionContext(request);
             if (chain != null)
             {
@@ -411,7 +414,8 @@ namespace Phantasma.Explorer.Site
 
         private object RouteApps(HTTPRequest request)
         {
-            var appList = AppsController.GetAllApps();
+            var controller = AppsControllerInstance;
+            var appList = controller.GetAllApps();
             var context = GetSessionContext(request);
             if (appList.Count > 0)
             {
@@ -428,7 +432,8 @@ namespace Phantasma.Explorer.Site
         private object RouteApp(HTTPRequest request)
         {
             var appId = request.GetVariable("input");
-            var app = AppsController.GetApp(appId);
+            var controller = AppsControllerInstance;
+            var app = controller.GetApp(appId);
             var context = GetSessionContext(request);
             if (app != null)
             {
@@ -446,73 +451,73 @@ namespace Phantasma.Explorer.Site
         }
         #endregion
 
-        #region API
-        private void SetupAPIHandlers()
-        {
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_account/{{address}}", request =>
-            {
-                var address = request.GetVariable("address");
-                return ApiController.GetAccount(address);
-            });
+        //#region API
+        //private void SetupAPIHandlers()
+        //{
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_account/{{address}}", request =>
+        //    {
+        //        var address = request.GetVariable("address");
+        //        return ApiControllerInstance.GetAccount(address);
+        //    });
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_account_txs/{{address}}", request =>
-            {
-                var address = request.GetVariable("address");
-                return ApiController.GetAddressTransactions(address);
-            });
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_account_txs/{{address}}", request =>
+        //    {
+        //        var address = request.GetVariable("address");
+        //        return ApiControllerInstance.GetAddressTransactions(address);
+        //    });
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_apps", request => ApiController.GetApps());
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_apps", request => ApiControllerInstance.GetApps());
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block_height/{{chain}}", request =>
-            {
-                var chain = request.GetVariable("chain");
-                return ApiController.GetBlockHeight(chain);
-            });
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block_height/{{chain}}", request =>
+        //    {
+        //        var chain = request.GetVariable("chain");
+        //        return ApiControllerInstance.GetBlockHeight(chain);
+        //    });
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block/{{blockHash}}", request =>
-            {
-                var address = request.GetVariable("blockHash");
-                return ApiController.GetBlockByHash(address);
-            });
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block/{{blockHash}}", request =>
+        //    {
+        //        var address = request.GetVariable("blockHash");
+        //        return ApiControllerInstance.GetBlockByHash(address);
+        //    });
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block/{{chain}}/{{height}}", request =>
-            {
-                var chain = request.GetVariable("chain");
-                var height = (uint.Parse(request.GetVariable("height")));
-                return ApiController.GetBlockByHeight(chain, height);
-            });
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block/{{chain}}/{{height}}", request =>
+        //    {
+        //        var chain = request.GetVariable("chain");
+        //        var height = (uint.Parse(request.GetVariable("height")));
+        //        return ApiControllerInstance.GetBlockByHeight(chain, height);
+        //    });
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block_tx_count_by_hash/{{blockHash}}", request =>
-            {
-                var block = request.GetVariable("blockHash");
-                return ApiController.GetBlockTransactionCountByHash(block);
-            });
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block_tx_count_by_hash/{{blockHash}}", request =>
+        //    {
+        //        var block = request.GetVariable("blockHash");
+        //        return ApiControllerInstance.GetBlockTransactionCountByHash(block);
+        //    });
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_confirmations/{{txHash}}", request =>
-            {
-                var txHash = request.GetVariable("txHash");
-                return ApiController.GetConfirmations(txHash);
-            });
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_confirmations/{{txHash}}", request =>
+        //    {
+        //        var txHash = request.GetVariable("txHash");
+        //        return ApiControllerInstance.GetConfirmations(txHash);
+        //    });
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_tx_by_block_hash_index/{{block}}/{{index}}", request =>
-            {
-                var block = request.GetVariable("block");
-                var index = int.Parse(request.GetVariable("index"));
-                return ApiController.GetTransactionByBlockHashAndIndex(block, index);
-            });
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_tx_by_block_hash_index/{{block}}/{{index}}", request =>
+        //    {
+        //        var block = request.GetVariable("block");
+        //        var index = int.Parse(request.GetVariable("index"));
+        //        return ApiControllerInstance.GetTransactionByBlockHashAndIndex(block, index);
+        //    });
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_chains", request => ApiController.GetChains());
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_chains", request => ApiControllerInstance.GetChains());
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_tokens", request => ApiController.GetTokens());
+        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_tokens", request => ApiControllerInstance.GetTokens());
 
-            //todo confirm this
-            TemplateEngine.Server.Post($"{AppSettings.UrlApi}/send_raw_tx/{{signedTx}}", request =>
-            {
-                var signedTx = request.GetVariable("signedTx");
-                return ApiController.SendRawTransaction(signedTx);
-            });
-        }
-        #endregion
+        //    //todo confirm this
+        //    TemplateEngine.Server.Post($"{AppSettings.UrlApi}/send_raw_tx/{{signedTx}}", request =>
+        //    {
+        //        var signedTx = request.GetVariable("signedTx");
+        //        return ApiControllerInstance.SendRawTransaction(signedTx);
+        //    });
+        //}
+        //#endregion
 
         public class MenuContext
         {
@@ -535,16 +540,14 @@ namespace Phantasma.Explorer.Site
         }
 
         #region Controllers
-
-        private HomeController HomeController { get; set; }
-        private AddressesController AddressesController { get; set; }
-        private BlocksController BlocksController { get; set; }
-        private ChainsController ChainsController { get; set; }
-        private TransactionsController TransactionsController { get; set; }
-        private TokensController TokensController { get; set; }
-        private AppsController AppsController { get; set; }
-        private ApiController ApiController { get; set; }
-
+        private HomeController HomeControllerInstance => new HomeController();
+        private AddressesController AddressesControllerInstance => new AddressesController();
+        private BlocksController BlocksControllerInstance => new BlocksController();
+        private ChainsController ChainsControllerInstance => new ChainsController();
+        private TransactionsController TransactionsControllerInstance => new TransactionsController();
+        private TokensController TokensControllerInstance => new TokensController();
+        private AppsController AppsControllerInstance => new AppsController();
+        //private ApiController ApiControllerInstance => new ApiController();
         #endregion
     }
 }

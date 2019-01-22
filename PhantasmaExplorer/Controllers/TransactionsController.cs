@@ -7,24 +7,29 @@ using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
 {
-    public class TransactionsController
+    public class TransactionsController : BaseController
     {
-        public List<TransactionViewModel> GetLastTransactions()
+        public TransactionsController() : base(Explorer.AppServices.GetService<ExplorerDbContext>()) { }
+
+        public int GetTransactionsCount(string chain = null)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+            var txQuery = new TransactionQueries(_context);
 
-            var txQuery = new TransactionQueries(context);
+            return txQuery.QueryTotalChainTransactionCount(chain);
+        }
 
-            var repoTx = txQuery.QueryTransactions();
+        public List<TransactionViewModel> GetTransactions(int currentPage, int pageSize = 20, string chain = null)
+        {
+            var txQuery = new TransactionQueries(_context);
 
-            return repoTx.Select(TransactionViewModel.FromTransaction).ToList();
+            var query = txQuery.QueryTransactions(chain).Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+            return query.AsEnumerable().Select(TransactionViewModel.FromTransaction).ToList();
         }
 
         public TransactionViewModel GetTransaction(string txHash)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var txQuery = new TransactionQueries(context);
+            var txQuery = new TransactionQueries(_context);
             var transaction = txQuery.QueryTransaction(txHash);
 
             if (transaction == null) return null;

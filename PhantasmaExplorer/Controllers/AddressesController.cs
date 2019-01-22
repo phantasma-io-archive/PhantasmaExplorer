@@ -9,16 +9,16 @@ using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
 {
-    public class AddressesController
+    public class AddressesController : BaseController
     {
         private decimal SoulRate { get; set; }
 
+        public AddressesController() : base(Explorer.AppServices.GetService<ExplorerDbContext>()) { }
+
         public List<AddressViewModel> GetAddressList()
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var addressQueries = new AccountQueries(context);
-            var tokenQueries = new TokenQueries(context);
+            var addressQueries = new AccountQueries(_context);
+            var tokenQueries = new TokenQueries(_context);
 
             var addressList = new List<AddressViewModel>();
 
@@ -38,11 +38,9 @@ namespace Phantasma.Explorer.Controllers
 
         public AddressViewModel GetAddress(string addressText)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var addressQueries = new AccountQueries(context);
-            var tokenQueries = new TokenQueries(context);
-            var transactionQueries = new TransactionQueries(context);
+            var addressQueries = new AccountQueries(_context);
+            var tokenQueries = new TokenQueries(_context);
+            var transactionQueries = new TransactionQueries(_context);
 
             var account = addressQueries.QueryAccount(addressText);
 

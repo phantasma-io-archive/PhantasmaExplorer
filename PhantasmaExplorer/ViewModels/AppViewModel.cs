@@ -1,4 +1,5 @@
-﻿using Phantasma.Explorer.Domain.Entities;
+﻿using Phantasma.Explorer.Application;
+using Phantasma.Explorer.Domain.Entities;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -20,8 +21,8 @@ namespace Phantasma.Explorer.ViewModels
                 Title = info.Title,
                 Url = info.Url,
                 Description = info.Description,
-               // Icon = info.Icon,
-                Icon = Explorer.MockLogoUrl
+                // Icon = info.Icon,
+                Icon = AppSettings.MockLogoUrl
             };
         }
     }

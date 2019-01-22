@@ -14,5 +14,8 @@ namespace Phantasma.Explorer.Application
         public bool ShowNext => CurrentPage < TotalPages;
         public bool ShowFirst => CurrentPage != 1;
         public bool ShowLast => CurrentPage != TotalPages;
+
+        public int NextPage => CurrentPage + 1;
+        public int PreviousPage => CurrentPage - 1;
     }
 }

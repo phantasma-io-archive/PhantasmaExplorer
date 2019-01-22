@@ -7,15 +7,15 @@ using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
 {
-    public class AppsController
+    public class AppsController : BaseController
     {
+        public AppsController() : base(Explorer.AppServices.GetService<ExplorerDbContext>()) { }
+
         public List<AppViewModel> GetAllApps()
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var appQuery = new AppQueries(context);
-            var chainQuery = new ChainQueries(context);
-            var txQuery = new TransactionQueries(context);
+            var appQuery = new AppQueries(_context);
+            var chainQuery = new ChainQueries(_context);
+            var txQuery = new TransactionQueries(_context);
 
             List<AppViewModel> appsList = new List<AppViewModel>();
 
@@ -43,9 +43,7 @@ namespace Phantasma.Explorer.Controllers
 
         public AppViewModel GetApp(string appId)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var appQuery = new AppQueries(context);
+            var appQuery = new AppQueries(_context);
             var app = appQuery.QueryApp(appId);
             return AppViewModel.FromApp(app);
         }

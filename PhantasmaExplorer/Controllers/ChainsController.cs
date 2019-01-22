@@ -7,13 +7,13 @@ using Phantasma.Explorer.ViewModels;
 
 namespace Phantasma.Explorer.Controllers
 {
-    public class ChainsController
+    public class ChainsController:BaseController
     {
+        public ChainsController() : base(Explorer.AppServices.GetService<ExplorerDbContext>()) { }
+
         public List<SimpleChainViewModel> GetChains()
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var chainQuery = new ChainQueries(context);
+            var chainQuery = new ChainQueries(_context);
             var chainVmList = new List<SimpleChainViewModel>();
 
             var allChains = chainQuery.SimpleQueryChains().ToList();
@@ -28,9 +28,7 @@ namespace Phantasma.Explorer.Controllers
 
         public ChainViewModel GetChain(string chainInput)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var chainQuery = new ChainQueries(context);
+            var chainQuery = new ChainQueries(_context);
             var repoChain = chainQuery.QueryChainIncludeBlocksAndTxs(chainInput);
             var chainList = chainQuery.QueryChains().ToList();
 

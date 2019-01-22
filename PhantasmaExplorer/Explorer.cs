@@ -39,15 +39,11 @@ namespace Phantasma.Explorer
 
             Console.WriteLine("Setup UI stuff db...");
             var viewsRenderer = new ViewsRenderer(server, "views");
-            viewsRenderer.SetupControllers();
             viewsRenderer.Init();
             viewsRenderer.SetupHandlers();
             
             Console.WriteLine("READY");
             server.Run();
         }
-        //L2G1vuxtVRPvC6uZ1ZL8i7Dbqxk9VPXZMGvZu9C3LXpxKK51x41N
-
-        public static string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
     }
 }

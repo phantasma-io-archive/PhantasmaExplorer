@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Blockchain.Tokens;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
@@ -10,15 +11,15 @@ using TokenFlags = Phantasma.Explorer.Domain.Entities.TokenFlags;
 
 namespace Phantasma.Explorer.Controllers
 {
-    public class TokensController
+    public class TokensController : BaseController
     {
         private decimal SoulRate { get; set; }
 
+        public TokensController() : base(Explorer.AppServices.GetService<ExplorerDbContext>()) { }
+
         public TokenViewModel GetToken(string symbol)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var tokenQuery = new TokenQueries(context);
+            var tokenQuery = new TokenQueries(_context);
             var token = tokenQuery.QueryToken(symbol);
             var tranfers = GetTransactionCount(symbol);
 
@@ -27,7 +28,7 @@ namespace Phantasma.Explorer.Controllers
                 SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
 
                 return TokenViewModel.FromToken(token,
-                    Explorer.MockLogoUrl,
+                    AppSettings.MockLogoUrl,
                     tranfers,
                     SoulRate);
             }
@@ -37,9 +38,7 @@ namespace Phantasma.Explorer.Controllers
 
         public List<TokenViewModel> GetTokens()
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var tokenQuery = new TokenQueries(context);
+            var tokenQuery = new TokenQueries(_context);
             var tokenList = tokenQuery.QueryTokens();
             var tokensList = new List<TokenViewModel>();
 
@@ -50,7 +49,7 @@ namespace Phantasma.Explorer.Controllers
                 var tranfers = GetTransactionCount(token.Symbol);
                 SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
                 tokensList.Add(TokenViewModel.FromToken(token,
-                    Explorer.MockLogoUrl,
+                    AppSettings.MockLogoUrl,
                     tranfers,
                     SoulRate));
             }
@@ -60,10 +59,8 @@ namespace Phantasma.Explorer.Controllers
 
         public List<BalanceViewModel> GetHolders(string symbol) //todo
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var accountQuery = new AccountQueries(context);
-            var tokenQuery = new TokenQueries(context);
+            var accountQuery = new AccountQueries(_context);
+            var tokenQuery = new TokenQueries(_context);
 
             var token = tokenQuery.QueryToken(symbol);
 
@@ -83,7 +80,7 @@ namespace Phantasma.Explorer.Controllers
                             {
                                 ChainName = balance.Chain,
                                 Balance = TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals),
-                                Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl),
+                                Token = TokenViewModel.FromToken(token, AppSettings.MockLogoUrl),
                                 Address = account.Address
                             };
                             balances.Add(vm);
@@ -99,7 +96,7 @@ namespace Phantasma.Explorer.Controllers
                         {
                             ChainName = nonFungibleToken.Chain,
                             //Balance = integer.Count(),
-                            Token = TokenViewModel.FromToken(token, Explorer.MockLogoUrl),
+                            Token = TokenViewModel.FromToken(token, AppSettings.MockLogoUrl),
                             Address = nonFungibleToken.AccountAddress
                         };
                         vm.Balance = nftList.Count(p => p.AccountAddress.Equals(vm.Address));
@@ -113,9 +110,7 @@ namespace Phantasma.Explorer.Controllers
 
         public List<TransactionViewModel> GetTransfers(string symbol)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var txsQuery = new TransactionQueries(context);
+            var txsQuery = new TransactionQueries(_context);
             var transfers = txsQuery.QueryLastTokenTransactions(symbol, 100);
 
             var temp = transfers.Select(TransactionViewModel.FromTransaction).ToList();
@@ -125,16 +120,12 @@ namespace Phantasma.Explorer.Controllers
 
         public int GetTransactionCount(string symbol)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            return new TokenQueries(context).QueryTokenTransfersCount(symbol);
+            return new TokenQueries(_context).QueryTokenTransfersCount(symbol);
         }
 
         public List<NftViewModel> GetNftListByAddress(string inputAddress) //todo test this
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-
-            var accountQuery = new AccountQueries(context);
+            var accountQuery = new AccountQueries(_context);
             var account = accountQuery.QueryAccount(inputAddress);
             var nftList = new List<NftViewModel>();
 

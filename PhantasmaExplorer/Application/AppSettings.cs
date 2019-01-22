@@ -2,6 +2,9 @@
 {
     internal static class AppSettings
     {
+        internal const int PageSize = 20;
+        internal const string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
+
         #region URL&CONTEXT
         internal const string UrlHome = "/home";
         internal const string UrlTokens = "/tokens";

@@ -17,11 +17,11 @@ namespace Phantasma.Explorer.Application.Queries
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
-        public IQueryable<Block> QueryBlocks(string chain = null)
+        public IQueryable<Block> QueryBlocks(string chain)
         {
             if (!string.IsNullOrEmpty(chain))
             {
-                return _context.Blocks.Where(p => p.Chain.Address.Equals(chain) || p.ChainAddress.Equals(chain))
+                return _context.Blocks.Where(p => p.ChainAddress.Equals(chain) || p.ChainName.Equals(chain))
                     .IncludeTransactions();
             }
 
@@ -43,7 +43,7 @@ namespace Phantasma.Explorer.Application.Queries
             }
 
             return _context.Blocks
-                .Where(p => p.Chain.Address.Equals(chain) || p.ChainAddress.Equals(chain))
+                .Where(p => p.ChainAddress.Equals(chain) || p.ChainName.Equals(chain))
                 .OrderByDescending(p => p.Height)
                 .Take(amount)
                 .IncludeTransactions()
@@ -60,7 +60,7 @@ namespace Phantasma.Explorer.Application.Queries
         public Block QueryBlock(int height, string chain)
         {
             return _context.Blocks
-                .Where(p => p.Chain.Name.Equals(chain) || p.ChainAddress.Equals(chain))
+                .Where(p => p.ChainName.Equals(chain) || p.ChainAddress.Equals(chain))
                 .SingleOrDefault(c => c.Height == height);
         }
 
@@ -68,7 +68,7 @@ namespace Phantasma.Explorer.Application.Queries
         {
             return string.IsNullOrEmpty(chain)
                 ? _context.Blocks.Count()
-                : _context.Blocks.Count(p => p.Chain.Name.Equals(chain) || p.ChainAddress.Equals(chain));
+                : _context.Blocks.Count(p => p.ChainName.Equals(chain) || p.ChainAddress.Equals(chain));
         }
     }
 }

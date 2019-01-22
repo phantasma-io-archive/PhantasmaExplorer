@@ -387,3 +387,7 @@ form {
 .td-bottom-border {
     border-bottom: 1px solid #DEDEDE;
 }
+
+.pager li > a {
+    color: #17b0e7;
+}
