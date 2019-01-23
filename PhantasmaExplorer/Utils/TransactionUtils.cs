@@ -19,8 +19,8 @@ namespace Phantasma.Explorer.Utils
         public static string GetTxDescription(Transaction tx, TransactionViewModel vm = null)
         {
             var context = (ExplorerDbContext)Explorer.AppServices.GetService(typeof(ExplorerDbContext)); //Todo fix me
-            var phantasmaChains = context.Chains.ToList();
-            var phantasmaTokens = context.Tokens.ToList();
+            var phantasmaChains = context.Chains;
+            var phantasmaTokens = context.Tokens;
             string description = null;
 
             string senderToken = null;
@@ -142,8 +142,8 @@ namespace Phantasma.Explorer.Utils
         public static string GetEventContent(Block block, Event evt) //todo remove Native event dependency and move this
         {
             var context = Explorer.AppServices.GetService<ExplorerDbContext>();
-            var phantasmaChains = context.Chains.ToList();
-            var phantasmaTokens = context.Tokens.ToList();
+            var phantasmaChains = context.Chains;
+            var phantasmaTokens = context.Tokens;
 
             string PlatformName = "Phantasma";
             int NativeTokenDecimals = 8;
@@ -234,12 +234,12 @@ namespace Phantasma.Explorer.Utils
             }
         }
 
-        public static bool IsTransferEvent(Event txEvent)
+        public static bool IsTransferEvent(Event txEvent)//todo confirm this
         {
             return txEvent.EventKind == EventKind.TokenSend || txEvent.EventKind == EventKind.TokenReceive;
         }
 
-        private static string GetChainName(string address, List<Chain> phantasmaChains)
+        private static string GetChainName(string address, IEnumerable<Chain> phantasmaChains)
         {
             return phantasmaChains.Single(p => p.Address.Equals(address)).Name;
         }

@@ -60,19 +60,25 @@ namespace Phantasma.Explorer.Controllers
 
             var token = tokenQuery.QueryToken(symbol);
 
-            List<BalanceViewModel> balances = new List<BalanceViewModel>();
+            var balances = new List<BalanceViewModel>();
 
-            if (token != null)
+            if (token == null) return balances;
+
+            if ((token.Flags & TokenFlags.Fungible) != 0)
             {
-                if ((token.Flags & TokenFlags.Fungible) != 0)
+                foreach (var account in accountQuery.QueryRichList(symbol, 30))
                 {
-                    foreach (var account in accountQuery.QueryRichList(symbol, 30))
-                    {
-                        var accountTokenBalanceList = accountQuery.QueryAccountTokenBalanceList(account.Address, symbol);
+                    var accountTokenBalanceList = accountQuery.QueryAccountTokenBalanceList(account.Address, symbol);
 
-                        foreach (var balance in accountTokenBalanceList)
+                    foreach (var balance in accountTokenBalanceList)
+                    {
+                        var existingEntry = balances.SingleOrDefault(p => p.Address.Equals(account.Address));
+                        if (existingEntry != null)
                         {
-                            
+                            existingEntry.Balance += TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals);
+                        }
+                        else
+                        {
                             var vm = new BalanceViewModel
                             {
                                 ChainName = balance.Chain,
@@ -84,20 +90,20 @@ namespace Phantasma.Explorer.Controllers
                         }
                     }
                 }
-                else
+            }
+            else
+            {
+                var nftList = tokenQuery.QueryAllNonFungibleTokens(symbol);
+                foreach (var nonFungibleToken in nftList)
                 {
-                    var nftList = tokenQuery.QueryAllNonFungibleTokens(symbol);
-                    foreach (var nonFungibleToken in nftList)
+                    var vm = new BalanceViewModel
                     {
-                        var vm = new BalanceViewModel
-                        {
-                            ChainName = nonFungibleToken.Chain,
-                            Token = TokenViewModel.FromToken(token, AppSettings.MockLogoUrl),
-                            Address = nonFungibleToken.AccountAddress
-                        };
-                        vm.Balance = nftList.Count(p => p.AccountAddress.Equals(vm.Address));
-                        balances.Add(vm);
-                    }
+                        ChainName = nonFungibleToken.Chain,
+                        Token = TokenViewModel.FromToken(token, AppSettings.MockLogoUrl),
+                        Address = nonFungibleToken.AccountAddress
+                    };
+                    vm.Balance = nftList.Count(p => p.AccountAddress.Equals(vm.Address));
+                    balances.Add(vm);
                 }
             }
 
@@ -112,11 +118,6 @@ namespace Phantasma.Explorer.Controllers
             var temp = transfers.Select(TransactionViewModel.FromTransaction).ToList();
 
             return new List<TransactionViewModel>(temp.Where(p => p.AmountTransfer > 0).Take(20));
-        }
-
-        public int GetTransactionCount(string symbol)
-        {
-            return new TokenQueries(_context).QueryTokenTransfersCount(symbol);
         }
 
         public List<NftViewModel> GetNftListByAddress(string inputAddress) //todo test this
