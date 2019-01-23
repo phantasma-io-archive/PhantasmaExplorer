@@ -32,6 +32,7 @@ namespace Phantasma.Explorer
             await ExplorerInicializer.Initialize(context);
             Console.WriteLine("Finished initializing db...");
             Console.WriteLine();
+
             Console.WriteLine("START sync");
             ExplorerSync.StartSync();
 

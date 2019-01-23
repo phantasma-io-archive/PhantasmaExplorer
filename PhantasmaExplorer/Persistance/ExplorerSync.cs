@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.RpcClient.DTOs;
@@ -38,12 +39,24 @@ namespace Phantasma.Explorer.Persistance
                     if (_retries >= MaxRetries)
                     {
                         Console.WriteLine("Something went wrong with synchronization");
-                        return;
+                        Console.WriteLine("Press 'S' to try again, or enter to continue without sync");
+                        while (!Console.ReadKey().KeyChar.Equals('s') || !Console.ReadKey().KeyChar.Equals((char)ConsoleKey.Enter))
+                        {
+                            char keyPressed = Console.ReadKey().KeyChar;
+                            if (keyPressed.Equals('s'))
+                            {
+                                StartSync();
+                            }
+                            else
+                            {
+                                return;
+                            }
+                        }
                     }
                     while (true)
                     {
                         await explorerSync.Sync();
-                        Thread.Sleep(6000);
+                        Thread.Sleep(AppSettings.SyncTime);
                     }
                 }
                 catch (Exception e)
@@ -70,9 +83,62 @@ namespace Phantasma.Explorer.Persistance
             }
             //todo find smarter way to do this
             await UpdateAccountBalances(context);
+
+            Console.WriteLine("Sync new chains?");
+            await SyncChains(context);
+
+            Console.WriteLine("Sync new apps?");
+            await SyncApps(context);
         }
 
-        public async Task SyncBlock(ExplorerDbContext context, Chain chain, BlockDto blockDto)
+        private async Task SyncChains(ExplorerDbContext context)
+        {
+            var chainsDto = await _phantasmaRpcService.GetChains.SendRequestAsync();
+
+            foreach (var chainDto in chainsDto)
+            {
+                if (context.Chains.SingleOrDefault(p => p.Address.Equals(chainDto.Address)) == null)
+                {
+                    var chain = new Chain
+                    {
+                        Address = chainDto.Address,
+                        Name = chainDto.Name,
+                        Height = chainDto.Height,
+                        ParentAddress = chainDto.ParentAddress
+                    };
+
+                    await context.Accounts.AddAsync(new Account { Address = chain.Address });
+                    await context.Chains.AddAsync(chain);
+
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
+
+
+        private async Task SyncApps(ExplorerDbContext context)
+        {
+            var appsDto = await _phantasmaRpcService.GetApplications.SendRequestAsync();
+
+            foreach (var dto in appsDto)
+            {
+                if (context.Apps.SingleOrDefault(p => p.Id.Equals(dto.Id)) == null)
+                {
+                    context.Apps.Add(new App
+                    {
+                        Id = dto.Id,
+                        Url = dto.Url,
+                        Description = dto.Description,
+                        Title = dto.Title,
+                        Icon = dto.Icon
+                    });
+                }
+
+                await context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SyncBlock(ExplorerDbContext context, Chain chain, BlockDto blockDto)
         {
             Console.WriteLine($"Seeding block {blockDto.Height}");
 
@@ -112,7 +178,7 @@ namespace Phantasma.Explorer.Persistance
                     });
 
                     AddToUpdateList(eventDto.EventAddress);
-                    UpdateAccount(context, transaction, eventDto.EventAddress);
+                    await UpdateAccount(context, transaction, eventDto.EventAddress);
                 }
             }
 
@@ -126,7 +192,7 @@ namespace Phantasma.Explorer.Persistance
             Console.WriteLine();
         }
 
-        private void UpdateAccount(ExplorerDbContext context, Transaction transaction, string eventDtoEventAddress)
+        private async Task UpdateAccount(ExplorerDbContext context, Transaction transaction, string eventDtoEventAddress)
         {
             var account = context.Accounts.SingleOrDefault(p => p.Address.Equals(eventDtoEventAddress));
 
@@ -150,6 +216,8 @@ namespace Phantasma.Explorer.Persistance
                 };
 
                 account.AccountTransactions.Add(new AccountTransaction { Account = account, Transaction = transaction });
+
+                await context.Accounts.AddAsync(account);
             }
         }
 
@@ -172,8 +240,7 @@ namespace Phantasma.Explorer.Persistance
 
                     foreach (var tokenBalance in accountBalance.Tokens)
                     {
-                        var token = context.Tokens.Find(tokenBalance.Symbol);
-
+                        var token = context.Tokens.Find(tokenBalance.Symbol) ?? await SyncToken(context, tokenBalance.Symbol);
                         if ((token.Flags & TokenFlags.Fungible) != 0)
                         {
                             account.TokenBalance.Add(new FBalance
@@ -194,6 +261,34 @@ namespace Phantasma.Explorer.Persistance
             }
 
             _addressChanged.Clear();
+        }
+
+        private async Task<Token> SyncToken(ExplorerDbContext context, string symbol)
+        {
+            var tokensDto = await _phantasmaRpcService.GetTokens.SendRequestAsync();
+
+            var tokenDto = tokensDto.SingleOrDefault(p => p.Symbol.Equals(symbol));
+
+            if (tokenDto != null)
+            {
+                Token token = new Token
+                {
+                    Name = tokenDto.Name,
+                    Symbol = tokenDto.Symbol,
+                    Decimals = (uint)tokenDto.Decimals,
+                    Flags = (TokenFlags)tokenDto.Flags,
+                    MaxSupply = tokenDto.MaxSupply,
+                    CurrentSupply = tokenDto.CurrentSupply,
+                    OwnerAddress = tokenDto.OwnerAddress
+                };
+
+                await context.Tokens.AddAsync(token);
+
+                await context.SaveChangesAsync();
+                return token;
+            }
+
+            return null;
         }
 
         private void UpdateNfTokenBalance(ExplorerDbContext context, Account account, BalanceSheetDto tokenBalance)

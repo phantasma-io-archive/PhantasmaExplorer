@@ -54,11 +54,11 @@ namespace Phantasma.Explorer.ViewModels
         public string ChainAddress { get; set; }
         public string Description { get; set; }
 
-        public static TransactionHomeViewModel FromTransaction(Transaction tx, ExplorerDbContext context)
+        public static TransactionHomeViewModel FromTransaction(Transaction tx)
         {
             return new TransactionHomeViewModel
             {
-                Description = TransactionUtils.GetTxDescription(tx, context.Chains.ToList(), context.Tokens.ToList()),
+                Description = TransactionUtils.GetTxDescription(tx),
                 ChainName = tx.Block.ChainName,
                 ChainAddress = tx.Block.ChainAddress,
                 Date = new Timestamp(tx.Timestamp),

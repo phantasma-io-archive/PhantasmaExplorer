@@ -26,7 +26,7 @@ namespace Phantasma.Explorer.Controllers
             var transactions = txsQuery.QueryLastTransactions();
             var blocksVm = blocks.Select(BlockHomeViewModel.FromBlock).ToList();
 
-            var txsVm = transactions.Select(transaction => TransactionHomeViewModel.FromTransaction(transaction, _context)).ToList();
+            var txsVm = transactions.Select(TransactionHomeViewModel.FromTransaction).ToList();
 
             // tx history chart calculation
             var repTxs = txsQuery.QueryLastTransactions(null, 1000);

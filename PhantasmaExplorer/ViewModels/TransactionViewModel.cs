@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Core.Types;
 using Phantasma.Explorer.Domain.Entities;
-using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Numerics;
 using Phantasma.VM;
@@ -35,10 +34,8 @@ namespace Phantasma.Explorer.ViewModels
             var vm = new TransactionViewModel();
 
             var disasm = new Disassembler(tx.Script.Decode()); //Todo fix me
-            var context = (ExplorerDbContext)Explorer.AppServices.GetService(typeof(ExplorerDbContext)); //Todo fix me
 
-            string description = TransactionUtils.GetTxDescription(tx, context.Chains.ToList(), context.Tokens.ToList(), vm);
-
+            string description = TransactionUtils.GetTxDescription(tx, vm);
 
             vm.ChainAddress = tx.Block.ChainAddress;
             vm.ChainName = tx.Block.ChainName;

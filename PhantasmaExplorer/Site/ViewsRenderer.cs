@@ -159,18 +159,26 @@ namespace Phantasma.Explorer.Site
 
         private object RouteTokens(HTTPRequest request)
         {
-            var tokensList = TokensControllerInstance.GetTokens();
-            var temp = tokensList.SingleOrDefault(t => t.Name == "Trophy");
-            var context = GetSessionContext(request);
-            tokensList.Remove(temp);
-            if (tokensList.Any())
+            try
             {
-                ActivateMenuItem(AppSettings.UrlTokens);
+                var tokensList = TokensControllerInstance.GetTokens();
+                var temp = tokensList.SingleOrDefault(t => t.Name == "Trophy");
+                var context = GetSessionContext(request);
+                tokensList.Remove(temp);
+                if (tokensList.Any())
+                {
+                    ActivateMenuItem(AppSettings.UrlTokens);
 
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.TokensContext] = tokensList;
-                return RendererView(context, "layout", AppSettings.TokensContext);
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.TokensContext] = tokensList;
+                    return RendererView(context, "layout", AppSettings.TokensContext);
+                }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             _errorContextInstance.ErrorCode = "token error";
             _errorContextInstance.ErrorDescription = "Tokens not found";
             request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
@@ -181,39 +189,54 @@ namespace Phantasma.Explorer.Site
         private object RouteTokensNft(HTTPRequest request)
         {
             var address = request.GetVariable("input");
-            var nftList = TokensControllerInstance.GetNftListByAddress(address);
-            var context = GetSessionContext(request);
-            if (nftList != null && nftList.Any())
+            try
             {
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.NftTokensContext] = nftList;
-                return RendererView(context, "layout", AppSettings.NftTokensContext);
+                var nftList = TokensControllerInstance.GetNftListByAddress(address);
+                var context = GetSessionContext(request);
+                if (nftList != null && nftList.Any())
+                {
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.NftTokensContext] = nftList;
+                    return RendererView(context, "layout", AppSettings.NftTokensContext);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
             _errorContextInstance.ErrorCode = "nft error";
             _errorContextInstance.ErrorDescription = $"no nfts found for this {address} address";
-            context[AppSettings.ErrorContext] = _errorContextInstance;
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
         private object RouteToken(HTTPRequest request)
         {
-            var tokenSymbol = request.GetVariable("input");
-            var controller = TokensControllerInstance;
-            var token = controller.GetToken(tokenSymbol);
-            var context = GetSessionContext(request);
-            if (token != null)
+            try
             {
-                var holders = controller.GetHolders(token.Symbol);
-                var transfers = controller.GetTransfers(token.Symbol);
+                var tokenSymbol = request.GetVariable("input");
+                var controller = TokensControllerInstance;
+                var token = controller.GetToken(tokenSymbol);
+                var context = GetSessionContext(request);
+                if (token != null)
+                {
+                    var holders = controller.GetHolders(token.Symbol);
+                    var transfers = controller.GetTransfers(token.Symbol);
 
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.TokenContext] = token;
-                context[AppSettings.HoldersContext] = holders;
-                context["transfers"] = transfers;
-                return RendererView(context, "layout", AppSettings.TokenContext, AppSettings.HoldersContext, "transfers");
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.TokenContext] = token;
+                    context[AppSettings.HoldersContext] = holders;
+                    context["transfers"] = transfers;
+                    return RendererView(context, "layout", AppSettings.TokenContext, AppSettings.HoldersContext, "transfers");
+                }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             _errorContextInstance.ErrorCode = "token error";
             _errorContextInstance.ErrorDescription = "Token not found";
             request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
@@ -223,31 +246,38 @@ namespace Phantasma.Explorer.Site
 
         private object RouteTransactions(HTTPRequest request)
         {
-            var input = request.GetVariable("page");
-            if (!int.TryParse(input, out int pageNumber))
+            try
             {
-                pageNumber = 1;
+                var input = request.GetVariable("page");
+                if (!int.TryParse(input, out int pageNumber))
+                {
+                    pageNumber = 1;
+                }
+
+                var controller = TransactionsControllerInstance;
+                var pageModel = new PaginationModel
+                {
+                    Count = controller.GetTransactionsCount(),
+                    CurrentPage = pageNumber,
+                    PageSize = AppSettings.PageSize,
+                };
+
+                var txList = controller.GetTransactions(pageModel.CurrentPage, pageModel.PageSize);
+                var context = GetSessionContext(request);
+
+                if (txList?.Count > 0)
+                {
+                    ActivateMenuItem(AppSettings.UrlTransactions);
+
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.TxsContext] = txList;
+                    context[AppSettings.PaginationContext] = pageModel;
+                    return RendererView(context, "layout", AppSettings.TxsContext);
+                }
             }
-
-            var controller = TransactionsControllerInstance;
-            var pageModel = new PaginationModel
+            catch (Exception e)
             {
-                Count = controller.GetTransactionsCount(),
-                CurrentPage = pageNumber,
-                PageSize = AppSettings.PageSize,
-            };
-
-            var txList = controller.GetTransactions(pageModel.CurrentPage, pageModel.PageSize);
-            var context = GetSessionContext(request);
-
-            if (txList.Count > 0)
-            {
-                ActivateMenuItem(AppSettings.UrlTransactions);
-
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.TxsContext] = txList;
-                context[AppSettings.PaginationContext] = pageModel;
-                return RendererView(context, "layout", AppSettings.TxsContext);
+                Console.WriteLine(e);
             }
 
             _errorContextInstance.ErrorCode = "txs error";
@@ -260,16 +290,23 @@ namespace Phantasma.Explorer.Site
         private object RouteTransaction(HTTPRequest request)
         {
             var txHash = request.GetVariable("input");
-            var tx = TransactionsControllerInstance.GetTransaction(txHash);
-            var context = GetSessionContext(request);
-            if (tx != null)
+            try
             {
-                ActivateMenuItem(AppSettings.UrlTransaction);
+                var tx = TransactionsControllerInstance.GetTransaction(txHash);
+                var context = GetSessionContext(request);
+                if (tx != null)
+                {
+                    ActivateMenuItem(AppSettings.UrlTransaction);
 
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.TxContext] = tx;
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.TxContext] = tx;
 
-                return RendererView(context, "layout", AppSettings.TxContext);
+                    return RendererView(context, "layout", AppSettings.TxContext);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
             _errorContextInstance.ErrorCode = "txs error";
@@ -281,16 +318,23 @@ namespace Phantasma.Explorer.Site
 
         private object RouteAddresses(HTTPRequest request)
         {
-            var addressList = AddressesControllerInstance.GetAddressList();
-
-            var context = GetSessionContext(request);
-            if (addressList != null && addressList.Any())
+            try
             {
-                ActivateMenuItem(AppSettings.UrlAddresses);
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.AddressesContext] = addressList;
+                var addressList = AddressesControllerInstance.GetAddressList();
 
-                return RendererView(context, "layout", AppSettings.AddressesContext);
+                var context = GetSessionContext(request);
+                if (addressList != null && addressList.Any())
+                {
+                    ActivateMenuItem(AppSettings.UrlAddresses);
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.AddressesContext] = addressList;
+
+                    return RendererView(context, "layout", AppSettings.AddressesContext);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
             _errorContextInstance.ErrorCode = "Address error";
@@ -302,14 +346,21 @@ namespace Phantasma.Explorer.Site
 
         private object RouteAddress(HTTPRequest request)
         {
-            var addressText = request.GetVariable("input");
-            var address = AddressesControllerInstance.GetAddress(addressText);
-            var context = GetSessionContext(request);
-            if (address != null)
+            try
             {
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.AddressContext] = address;
-                return RendererView(context, "layout", AppSettings.AddressContext);
+                var addressText = request.GetVariable("input");
+                var address = AddressesControllerInstance.GetAddress(addressText);
+                var context = GetSessionContext(request);
+                if (address != null)
+                {
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.AddressContext] = address;
+                    return RendererView(context, "layout", AppSettings.AddressContext);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
             _errorContextInstance.ErrorCode = "Address error";
@@ -321,30 +372,37 @@ namespace Phantasma.Explorer.Site
 
         private object RouteBlocks(HTTPRequest request)
         {
-            var input = request.GetVariable("page"); //todo ask this
-            if (!int.TryParse(input, out int pageNumber))
+            try
             {
-                pageNumber = 1;
+                var input = request.GetVariable("page"); //todo ask this
+                if (!int.TryParse(input, out int pageNumber))
+                {
+                    pageNumber = 1;
+                }
+
+                var controller = BlocksControllerInstance;
+                var pageModel = new PaginationModel
+                {
+                    Count = controller.GetBlocksCount(),
+                    CurrentPage = pageNumber,
+                    PageSize = AppSettings.PageSize,
+                };
+
+                var blocksList = controller.GetBlocks(pageModel.CurrentPage, pageModel.PageSize);
+                var context = GetSessionContext(request);
+
+                if (blocksList.Count > 0)
+                {
+                    ActivateMenuItem(AppSettings.UrlBlocks);
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.BlocksContext] = blocksList;
+                    context[AppSettings.PaginationContext] = pageModel;
+                    return RendererView(context, "layout", AppSettings.BlocksContext);
+                }
             }
-
-            var controller = BlocksControllerInstance;
-            var pageModel = new PaginationModel
+            catch (Exception e)
             {
-                Count = controller.GetBlocksCount(),
-                CurrentPage = pageNumber,
-                PageSize = AppSettings.PageSize,
-            };
-
-            var blocksList = controller.GetBlocks(pageModel.CurrentPage, pageModel.PageSize);
-            var context = GetSessionContext(request);
-
-            if (blocksList.Count > 0)
-            {
-                ActivateMenuItem(AppSettings.UrlBlocks);
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.BlocksContext] = blocksList;
-                context[AppSettings.PaginationContext] = pageModel;
-                return RendererView(context, "layout", AppSettings.BlocksContext);
+                Console.WriteLine(e);
             }
 
             _errorContextInstance.ErrorCode = "blocks error";
@@ -357,13 +415,20 @@ namespace Phantasma.Explorer.Site
         private object RouteBlock(HTTPRequest request)
         {
             var input = request.GetVariable("input");
-            var block = BlocksControllerInstance.GetBlock(input);
-            var context = GetSessionContext(request);
-            if (block != null)
+            try
             {
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.BlockContext] = block;
-                return RendererView(context, "layout", AppSettings.BlockContext);
+                var block = BlocksControllerInstance.GetBlock(input);
+                var context = GetSessionContext(request);
+                if (block != null)
+                {
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.BlockContext] = block;
+                    return RendererView(context, "layout", AppSettings.BlockContext);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
             _errorContextInstance.ErrorCode = "blocks error";
@@ -375,16 +440,24 @@ namespace Phantasma.Explorer.Site
 
         private object RouteChains(HTTPRequest request)
         {
-            var chainList = ChainsControllerInstance.GetChains();
-            var context = GetSessionContext(request);
-            if (chainList.Count > 0)
+            try
             {
-                ActivateMenuItem(AppSettings.UrlChains);
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.ChainsContext] = chainList;
+                var chainList = ChainsControllerInstance.GetChains();
+                var context = GetSessionContext(request);
+                if (chainList.Count > 0)
+                {
+                    ActivateMenuItem(AppSettings.UrlChains);
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.ChainsContext] = chainList;
 
-                return RendererView(context, "layout", AppSettings.ChainsContext);
+                    return RendererView(context, "layout", AppSettings.ChainsContext);
+                }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             _errorContextInstance.ErrorCode = "chains error";
             _errorContextInstance.ErrorDescription = "No chains found";
             request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
@@ -395,14 +468,21 @@ namespace Phantasma.Explorer.Site
         private object RouteChain(HTTPRequest request)
         {
             var addressText = request.GetVariable("input");
-            var chain = ChainsControllerInstance.GetChain(addressText);
-            var context = GetSessionContext(request);
-            if (chain != null)
+            try
             {
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.ChainContext] = chain;
+                var chain = ChainsControllerInstance.GetChain(addressText);
+                var context = GetSessionContext(request);
+                if (chain != null)
+                {
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.ChainContext] = chain;
 
-                return RendererView(context, "layout", AppSettings.ChainContext);
+                    return RendererView(context, "layout", AppSettings.ChainContext);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
             _errorContextInstance.ErrorCode = "chains error";
@@ -414,15 +494,23 @@ namespace Phantasma.Explorer.Site
 
         private object RouteApps(HTTPRequest request)
         {
-            var controller = AppsControllerInstance;
-            var appList = controller.GetAllApps();
-            var context = GetSessionContext(request);
-            if (appList.Count > 0)
+            try
             {
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.AppsContext] = appList;
-                return RendererView(context, "layout", AppSettings.AppsContext);
+                var controller = AppsControllerInstance;
+                var appList = controller.GetAllApps();
+                var context = GetSessionContext(request);
+                if (appList.Count > 0)
+                {
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.AppsContext] = appList;
+                    return RendererView(context, "layout", AppSettings.AppsContext);
+                }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             _errorContextInstance.ErrorCode = "apps error";
             _errorContextInstance.ErrorDescription = "No apps found";
             request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
@@ -432,15 +520,22 @@ namespace Phantasma.Explorer.Site
         private object RouteApp(HTTPRequest request)
         {
             var appId = request.GetVariable("input");
-            var controller = AppsControllerInstance;
-            var app = controller.GetApp(appId);
-            var context = GetSessionContext(request);
-            if (app != null)
+            try
             {
-                context[AppSettings.MenuContext] = _menus;
-                context[AppSettings.AppContext] = app;
+                var controller = AppsControllerInstance;
+                var app = controller.GetApp(appId);
+                var context = GetSessionContext(request);
+                if (app != null)
+                {
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.AppContext] = app;
 
-                return RendererView(context, "layout", AppSettings.AppContext);
+                    return RendererView(context, "layout", AppSettings.AppContext);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
             _errorContextInstance.ErrorCode = "apps error";

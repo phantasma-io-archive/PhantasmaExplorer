@@ -20,28 +20,37 @@ namespace Phantasma.Explorer.Persistance
 
         public async Task SeedEverythingAsync(ExplorerDbContext context)
         {
-            var sw = new Stopwatch();
-            sw.Start();
-            context.Database.EnsureCreated();
-            _phantasmaRpcService = (IPhantasmaRpcService)Explorer.AppServices.GetService(typeof(IPhantasmaRpcService));
-
-            if (!context.Apps.Any())
+            try
             {
-                await SeedApps(context);
-            }
+                var sw = new Stopwatch();
+                sw.Start();
+                context.Database.EnsureCreated();
+                _phantasmaRpcService = (IPhantasmaRpcService)Explorer.AppServices.GetService(typeof(IPhantasmaRpcService));
 
-            if (!context.Tokens.Any())
+                if (!context.Apps.Any())
+                {
+                    await SeedApps(context);
+                }
+
+                if (!context.Tokens.Any())
+                {
+                    await SeedTokens(context);
+                }
+
+                if (!context.Chains.Any())
+                {
+                    await SeedChains(context);
+                }
+
+                sw.Stop();
+                Console.WriteLine("Elapsed time to initializing db = {0}", sw.Elapsed);
+            }
+            catch (Exception e)
             {
-                await SeedTokens(context);
+                Console.WriteLine(e);
+                Console.WriteLine("Exception occurred during DB initialization, explorer cannot start");
+                throw;
             }
-
-            if (!context.Chains.Any())
-            {
-                await SeedChains(context);
-            }
-
-            sw.Stop();
-            Console.WriteLine("Elapsed={0}", sw.Elapsed);
         }
 
         private async Task SeedApps(ExplorerDbContext context)

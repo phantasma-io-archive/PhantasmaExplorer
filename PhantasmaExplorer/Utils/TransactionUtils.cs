@@ -1,26 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Domain.Entities;
+using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
 using Phantasma.IO;
 using Phantasma.Numerics;
 using EventKind = Phantasma.Explorer.Domain.Entities.EventKind;
-using Token = Phantasma.Explorer.Domain.Entities.Token;
 
 namespace Phantasma.Explorer.Utils
 {
     public static class TransactionUtils
     {
-        public static string GetTxDescription(Transaction tx,
-                List<Chain> phantasmaChains,
-                List<Token> phantasmaTokens,
-                TransactionViewModel vm = null)
+        public static string GetTxDescription(Transaction tx, TransactionViewModel vm = null)
         //todo revisit
         {
+            var context = (ExplorerDbContext)Explorer.AppServices.GetService(typeof(ExplorerDbContext)); //Todo fix me
+            var phantasmaChains = context.Chains.ToList();
+            var phantasmaTokens = context.Tokens.ToList();
             string description = null;
 
             string senderToken = null;
@@ -73,7 +74,7 @@ namespace Phantasma.Explorer.Utils
                             var data = nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
                             var amountDecimal = TokenUtils.ToDecimal(amount, (int)
-                                phantasmaTokens.SingleOrDefault(p => p.Symbol == data.symbol).Decimals);
+                                phantasmaTokens.Single(p => p.Symbol == data.symbol).Decimals);
                             receiverAddress = nativeEvent.Address;
                             receiverChain = data.chainAddress;
                             var chain = GetChainName(receiverChain.Text, phantasmaChains);
@@ -110,7 +111,7 @@ namespace Phantasma.Explorer.Utils
                     senderToken != null && senderToken == receiverToken)
                 {
                     var amountDecimal = TokenUtils.ToDecimal(amount, (int)
-                        phantasmaTokens.SingleOrDefault(p => p.Symbol == senderToken).Decimals);
+                        phantasmaTokens.Single(p => p.Symbol == senderToken).Decimals);
 
                     if (vm != null)
                     {
@@ -126,7 +127,7 @@ namespace Phantasma.Explorer.Utils
                 else if (amount > 0 && receiverAddress != Address.Null && receiverToken != null)
                 {
                     var amountDecimal = TokenUtils.ToDecimal(amount, (int)
-                        phantasmaTokens.SingleOrDefault(p => p.Symbol == receiverToken).Decimals);
+                        phantasmaTokens.Single(p => p.Symbol == receiverToken).Decimals);
 
                     if (vm != null)
                     {
@@ -151,10 +152,12 @@ namespace Phantasma.Explorer.Utils
             return description;
         }
 
-        public static string GetEventContent(Block block, Domain.ValueObjects.Event evt,
-            List<Chain> phantasmaChains,
-            List<Token> phantasmaTokens) //todo remove Native event dependency and move this
+        public static string GetEventContent(Block block, Domain.ValueObjects.Event evt) //todo remove Native event dependency and move this
         {
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+            var phantasmaChains = context.Chains.ToList();
+            var phantasmaTokens = context.Tokens.ToList();
+
             Event nativeEvent;
             if (evt.Data != null)
             {
