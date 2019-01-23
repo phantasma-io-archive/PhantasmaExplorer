@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using Phantasma.Blockchain.Contracts;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Domain.Entities;
+using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
 using Phantasma.IO;
@@ -17,7 +17,6 @@ namespace Phantasma.Explorer.Utils
     public static class TransactionUtils
     {
         public static string GetTxDescription(Transaction tx, TransactionViewModel vm = null)
-        //todo revisit
         {
             var context = (ExplorerDbContext)Explorer.AppServices.GetService(typeof(ExplorerDbContext)); //Todo fix me
             var phantasmaChains = context.Chains.ToList();
@@ -34,36 +33,24 @@ namespace Phantasma.Explorer.Utils
 
             BigInteger amount = 0;
 
-            foreach (var evt in tx.Events) //todo move this
+            foreach (var evt in tx.Events)
             {
-                Event nativeEvent;
-                if (evt.Data != null)
-                {
-                    nativeEvent = new Event((Blockchain.Contracts.EventKind)evt.EventKind,
-                        Address.FromText(evt.EventAddress), evt.Data.Decode());
-                }
-                else
-                {
-                    nativeEvent =
-                        new Event((Blockchain.Contracts.EventKind)evt.EventKind, Address.FromText(evt.EventAddress));
-                }
-
                 switch (evt.EventKind)
                 {
                     case EventKind.TokenSend:
                         {
-                            var data = nativeEvent.GetContent<TokenEventData>();
+                            var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());  //nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
-                            senderAddress = nativeEvent.Address;
+                            senderAddress = Address.FromText(evt.EventAddress);//nativeEvent.Address;
                             senderToken = data.symbol;
                         }
                         break;
 
                     case EventKind.TokenReceive:
                         {
-                            var data = nativeEvent.GetContent<TokenEventData>();
+                            var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode()); //nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
-                            receiverAddress = nativeEvent.Address;
+                            receiverAddress = Address.FromText(evt.EventAddress);
                             receiverChain = data.chainAddress;
                             receiverToken = data.symbol;
                         }
@@ -71,11 +58,11 @@ namespace Phantasma.Explorer.Utils
 
                     case EventKind.TokenEscrow:
                         {
-                            var data = nativeEvent.GetContent<TokenEventData>();
+                            var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode()); //nativeEvent.GetContent<TokenEventData>();
                             amount = data.value;
                             var amountDecimal = TokenUtils.ToDecimal(amount, (int)
                                 phantasmaTokens.Single(p => p.Symbol == data.symbol).Decimals);
-                            receiverAddress = nativeEvent.Address;
+                            receiverAddress = Address.FromText(evt.EventAddress);
                             receiverChain = data.chainAddress;
                             var chain = GetChainName(receiverChain.Text, phantasmaChains);
                             description =
@@ -84,22 +71,22 @@ namespace Phantasma.Explorer.Utils
                         break;
                     case EventKind.AddressRegister:
                         {
-                            var name = nativeEvent.GetContent<string>();
-                            description = $"{nativeEvent.Address.ToString()} registered the name '{name}'";
+                            var name = Serialization.Unserialize<string>(evt.Data.Decode()); //nativeEvent.GetContent<string>();
+                            description = $"{evt.EventAddress} registered the name '{name}'";
                         }
                         break;
 
                     case EventKind.FriendAdd:
                         {
-                            var address = nativeEvent.GetContent<Address>();
-                            description = $"{nativeEvent.Address} added '{address.ToString()} to friends.'";
+                            var address = Serialization.Unserialize<Address>(evt.Data.Decode()); //nativeEvent.GetContent<Address>();
+                            description = $"{evt.EventAddress} added '{address.ToString()} to friends.'";
                         }
                         break;
 
                     case EventKind.FriendRemove:
                         {
-                            var address = nativeEvent.GetContent<Address>();
-                            description = $"{nativeEvent.Address} removed '{address.ToString()} from friends.'";
+                            var address = Serialization.Unserialize<Address>(evt.Data.Decode());// nativeEvent.GetContent<Address>();
+                            description = $"{evt.EventAddress} removed '{address.ToString()} from friends.'";
                         }
                         break;
                 }
@@ -122,7 +109,7 @@ namespace Phantasma.Explorer.Utils
                     }
 
                     description =
-                        $"{amountDecimal} {senderToken} sent from {senderAddress.Text} to {receiverAddress.Text}";
+                        $"{amountDecimal} {senderToken} sent from {senderAddress.ToString()} to {receiverAddress.ToString()}";
                 }
                 else if (amount > 0 && receiverAddress != Address.Null && receiverToken != null)
                 {
@@ -152,23 +139,11 @@ namespace Phantasma.Explorer.Utils
             return description;
         }
 
-        public static string GetEventContent(Block block, Domain.ValueObjects.Event evt) //todo remove Native event dependency and move this
+        public static string GetEventContent(Block block, Event evt) //todo remove Native event dependency and move this
         {
             var context = Explorer.AppServices.GetService<ExplorerDbContext>();
             var phantasmaChains = context.Chains.ToList();
             var phantasmaTokens = context.Tokens.ToList();
-
-            Event nativeEvent;
-            if (evt.Data != null)
-            {
-                nativeEvent = new Event((Blockchain.Contracts.EventKind)evt.EventKind,
-                    Address.FromText(evt.EventAddress), evt.Data.Decode());
-            }
-            else
-            {
-                nativeEvent =
-                    new Event((Blockchain.Contracts.EventKind)evt.EventKind, Address.FromText(evt.EventAddress));
-            }
 
             string PlatformName = "Phantasma";
             int NativeTokenDecimals = 8;
@@ -177,34 +152,34 @@ namespace Phantasma.Explorer.Utils
             {
                 case EventKind.ChainCreate:
                     {
-                        var tokenData = nativeEvent.GetContent<Address>();
+                        var tokenData = Serialization.Unserialize<Address>(evt.Data.Decode());/* nativeEvent.GetContent<Address>();*/
                         var chainName = block.Chain.Name;
                         return $"{chainName} chain created at address <a href=\"/chain/{tokenData.ToString()}\">{tokenData.ToString()}</a>.";
                     }
                 case EventKind.TokenCreate:
                     {
-                        var symbol = nativeEvent.GetContent<string>();
+                        var symbol = Serialization.Unserialize<string>(evt.Data.Decode()); /* nativeEvent.GetContent<string>();*/
                         var token = phantasmaTokens.Single(t => t.Symbol.Equals(symbol));
                         return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
                     }
                 case EventKind.GasEscrow:
-                    {
-                        var gasEvent = nativeEvent.GetContent<GasEventData>();
-                        var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
-                        var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
-                        return $"{amount} {PlatformName} tokens escrowed for contract gas, with price of {price} per gas unit";
-                    }
                 case EventKind.GasPayment:
                     {
-                        var gasEvent = nativeEvent.GetContent<GasEventData>();
+                        var gasEvent = Serialization.Unserialize<GasEventData>(evt.Data.Decode());// nativeEvent.GetContent<GasEventData>();
                         var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
                         var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
+
+                        if (evt.EventKind == EventKind.GasEscrow)
+                        {
+                            return $"{amount} {PlatformName} tokens escrowed for contract gas, with price of {price} per gas unit";
+                        }
+
                         return $"{amount} {PlatformName} tokens paid for contract gas, with price of {price} per gas unit";
                     }
                 case EventKind.AddressRegister:
                     {
-                        var name = nativeEvent.GetContent<string>();
-                        return $"{nativeEvent.Address} registered account name: {name}";
+                        var name = Serialization.Unserialize<string>(evt.Data.Decode()); //nativeEvent.GetContent<string>();
+                        return $"{evt.EventAddress} registered account name: {name}";
                     }
                 case EventKind.TokenMint:
                 case EventKind.TokenBurn:
@@ -212,7 +187,7 @@ namespace Phantasma.Explorer.Utils
                 case EventKind.TokenEscrow:
                 case EventKind.TokenReceive:
                     {
-                        var data = Serialization.Unserialize<TokenEventData>(nativeEvent.Data);
+                        var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());
                         var token = phantasmaTokens.Single(t => t.Symbol.Equals(data.symbol));
                         string action;
 
@@ -252,16 +227,26 @@ namespace Phantasma.Explorer.Utils
                         }
 
                         string fromAt = action == "sent" ? "from" : "at";
-                        return $"{TokenUtils.ToDecimal(data.value, (int)token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{nativeEvent.Address}\">{nativeEvent.Address}</a> {chainText}.";
+                        return $"{TokenUtils.ToDecimal(data.value, (int)token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{evt.EventAddress}\">{evt.EventAddress}</a> {chainText}.";
                     }
 
                 default: return "Nothing.";
             }
         }
 
+        public static bool IsTransferEvent(Event txEvent)
+        {
+            return txEvent.EventKind == EventKind.TokenSend || txEvent.EventKind == EventKind.TokenReceive;
+        }
+
         private static string GetChainName(string address, List<Chain> phantasmaChains)
         {
             return phantasmaChains.Single(p => p.Address.Equals(address)).Name;
+        }
+
+        public static string GetTokenSymbolFromEvent(Event txEvent)
+        {
+            return Serialization.Unserialize<TokenEventData>(txEvent.Data.Decode()).symbol;
         }
     }
 }

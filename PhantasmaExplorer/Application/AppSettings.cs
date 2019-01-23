@@ -26,6 +26,7 @@
         internal const string HomeContext = "home";
         internal const string MenuContext = "menu";
         internal const string TokensContext = "tokens";
+        internal const string TokenTransfersContext = "transfers";
         internal const string NftTokensContext = "nftTokens";
         internal const string TokenContext = "token";
         internal const string TxContext = "transaction";

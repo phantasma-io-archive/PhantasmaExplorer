@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
+using Phantasma.Explorer.Utils;
 using Phantasma.RpcClient.DTOs;
 using Phantasma.RpcClient.Interfaces;
 using TokenFlags = Phantasma.Explorer.Domain.Entities.TokenFlags;
@@ -169,15 +170,21 @@ namespace Phantasma.Explorer.Persistance
                 //Events
                 foreach (var eventDto in transactionDto.Events)
                 {
-                    transaction.Events.Add(new Event
+                    var domainEvent = new Event
                     {
                         Data = eventDto.Data,
                         EventAddress = eventDto.EventAddress,
                         EventKind = (EventKind)eventDto.EvtKind,
-                    });
+                    };
+                    transaction.Events.Add(domainEvent);
 
                     AddToUpdateList(eventDto.EventAddress);
                     await UpdateAccount(context, transaction, eventDto.EventAddress);
+                    if (TransactionUtils.IsTransferEvent(domainEvent))
+                    {
+                        var tokenSymbol = TransactionUtils.GetTokenSymbolFromEvent(domainEvent);
+                        AddToTokenTxCounter(context, tokenSymbol);
+                    }
                 }
             }
 
@@ -321,6 +328,15 @@ namespace Phantasma.Explorer.Persistance
             if (!_addressChanged.Contains(address))
             {
                 _addressChanged.Add(address);
+            }
+        }
+
+        private void AddToTokenTxCounter(ExplorerDbContext context, string tokenDataSymbol)
+        {
+            var token = context.Tokens.SingleOrDefault(p => p.Symbol.Equals(tokenDataSymbol));
+            if (token != null)
+            {
+                token.TransactionCount++;
             }
         }
     }

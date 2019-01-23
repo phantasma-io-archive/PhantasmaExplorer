@@ -1,4 +1,5 @@
 ﻿using Phantasma.Blockchain.Tokens;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Token = Phantasma.Explorer.Domain.Entities.Token;
@@ -19,7 +20,7 @@ namespace Phantasma.Explorer.ViewModels
             return new BalanceViewModel
             {
                 Address = account.Address,
-                Token = TokenViewModel.FromToken(token, "todo"), //todo
+                Token = TokenViewModel.FromToken(token, AppSettings.MockLogoUrl),
                 Value = 0,
                 Balance = TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals),
                 ChainName = balance.Chain,

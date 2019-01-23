@@ -21,7 +21,6 @@ namespace Phantasma.Explorer.Controllers
         {
             var tokenQuery = new TokenQueries(_context);
             var token = tokenQuery.QueryToken(symbol);
-            var tranfers = GetTransactionCount(symbol);
 
             if (token != null)
             {
@@ -29,7 +28,6 @@ namespace Phantasma.Explorer.Controllers
 
                 return TokenViewModel.FromToken(token,
                     AppSettings.MockLogoUrl,
-                    tranfers,
                     SoulRate);
             }
 
@@ -46,11 +44,9 @@ namespace Phantasma.Explorer.Controllers
 
             foreach (var token in tokenList)
             {
-                var tranfers = GetTransactionCount(token.Symbol);
                 SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
                 tokensList.Add(TokenViewModel.FromToken(token,
                     AppSettings.MockLogoUrl,
-                    tranfers,
                     SoulRate));
             }
 
@@ -76,6 +72,7 @@ namespace Phantasma.Explorer.Controllers
 
                         foreach (var balance in accountTokenBalanceList)
                         {
+                            
                             var vm = new BalanceViewModel
                             {
                                 ChainName = balance.Chain,
@@ -95,7 +92,6 @@ namespace Phantasma.Explorer.Controllers
                         var vm = new BalanceViewModel
                         {
                             ChainName = nonFungibleToken.Chain,
-                            //Balance = integer.Count(),
                             Token = TokenViewModel.FromToken(token, AppSettings.MockLogoUrl),
                             Address = nonFungibleToken.AccountAddress
                         };

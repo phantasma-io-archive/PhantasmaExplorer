@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Persistance;
 using Phantasma.IO;
@@ -39,22 +39,22 @@ namespace Phantasma.Explorer.Application.Queries
 
         public int QueryTokenTransfersCount(string tokenSymbol)
         {
-            int count = 0;
-            var eventList = _context.Transactions.OrderByDescending(p => p.Timestamp);
-            foreach (var tx in eventList) //todo move this to share
-            {
-                foreach (var txEvent in tx.Events)
-                {
-                    var symbol = Serialization.Unserialize<string>(txEvent.Data.Decode()); //todo remove serialization dependency
-                    if (symbol.Equals(tokenSymbol))
-                    {
-                        count++;
-                        break;
-                    }
-                }
-            }
+            var eventList = _context.Transactions;
+            //foreach (var tx in eventList) //todo test speed against linq
+            //{
+            //    var tokenSendEvent = tx.Events.SingleOrDefault(p => p.EventKind.Equals(EventKind.TokenSend));
+            //    if (tokenSendEvent == null) continue;
+            //    TokenEventData eventData = Serialization.Unserialize<TokenEventData>(tokenSendEvent.Data.Decode()); //todo remove serialization dependency
+            //    if (!eventData.symbol.Equals(tokenSymbol)) continue;
+            //    count++;
+            //}
 
-            return count;
+            return (from tx in eventList
+                    select tx.Events.SingleOrDefault(p => p.EventKind.Equals(EventKind.TokenSend))
+                into tokenSendEvent
+                    where tokenSendEvent != null
+                    select Serialization.Unserialize<TokenEventData>(tokenSendEvent.Data.Decode()))
+                    .Count(eventData => eventData.symbol.Equals(tokenSymbol));
         }
     }
 }

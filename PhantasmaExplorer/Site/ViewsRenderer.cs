@@ -228,7 +228,7 @@ namespace Phantasma.Explorer.Site
                     context[AppSettings.MenuContext] = _menus;
                     context[AppSettings.TokenContext] = token;
                     context[AppSettings.HoldersContext] = holders;
-                    context["transfers"] = transfers;
+                    context[AppSettings.TokenTransfersContext] = transfers;
                     return RendererView(context, "layout", AppSettings.TokenContext, AppSettings.HoldersContext, "transfers");
                 }
             }

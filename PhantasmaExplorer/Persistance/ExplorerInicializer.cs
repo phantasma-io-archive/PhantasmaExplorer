@@ -4,7 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
+using Phantasma.Explorer.Utils;
 using Phantasma.RpcClient.Interfaces;
+using Token = Phantasma.Explorer.Domain.Entities.Token;
+using TokenFlags = Phantasma.Explorer.Domain.Entities.TokenFlags;
 
 namespace Phantasma.Explorer.Persistance
 {
@@ -155,14 +158,20 @@ namespace Phantasma.Explorer.Persistance
                     //Events
                     foreach (var eventDto in transactionDto.Events)
                     {
-                        transaction.Events.Add(new Event
+                        var domainEvent = new Event
                         {
                             Data = eventDto.Data,
                             EventAddress = eventDto.EventAddress,
                             EventKind = (EventKind)eventDto.EvtKind,
-                        });
+                        };
+                        transaction.Events.Add(domainEvent);
 
-                        await UpdateAccount(context, transaction, eventDto.EventAddress);//todo some address are not getting saved
+                        await UpdateAccount(context, transaction, domainEvent);
+                        if (TransactionUtils.IsTransferEvent(domainEvent))
+                        {
+                            var tokenSymbol = TransactionUtils.GetTokenSymbolFromEvent(domainEvent);
+                            AddToTokenTxCounter(context, tokenSymbol);
+                        }
                     }
 
                     block.Transactions.Add(transaction);
@@ -177,9 +186,9 @@ namespace Phantasma.Explorer.Persistance
             await context.SaveChangesAsync();
         }
 
-        private async Task UpdateAccount(ExplorerDbContext context, Transaction transaction, string eventDtoEventAddress)
+        private async Task UpdateAccount(ExplorerDbContext context, Transaction transaction, Event txEvent)
         {
-            var account = context.Accounts.SingleOrDefault(p => p.Address.Equals(eventDtoEventAddress));
+            var account = context.Accounts.SingleOrDefault(p => p.Address.Equals(txEvent.EventAddress));
 
             if (account != null)
             {
@@ -199,7 +208,7 @@ namespace Phantasma.Explorer.Persistance
             {
                 account = new Account
                 {
-                    Address = eventDtoEventAddress
+                    Address = txEvent.EventAddress
                 };
 
                 account.AccountTransactions.Add(new AccountTransaction { Account = account, Transaction = transaction });
@@ -208,6 +217,15 @@ namespace Phantasma.Explorer.Persistance
             }
 
             await context.SaveChangesAsync();
+        }
+
+        private void AddToTokenTxCounter(ExplorerDbContext context, string tokenDataSymbol)
+        {
+            var token = context.Tokens.SingleOrDefault(p => p.Symbol.Equals(tokenDataSymbol));
+            if (token != null)
+            {
+                token.TransactionCount++;
+            }
         }
     }
 }
