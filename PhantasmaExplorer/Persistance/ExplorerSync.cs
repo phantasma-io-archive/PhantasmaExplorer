@@ -115,7 +115,6 @@ namespace Phantasma.Explorer.Persistance
             }
         }
 
-
         private async Task SyncApps(ExplorerDbContext context)
         {
             var appsDto = await _phantasmaRpcService.GetApplications.SendRequestAsync();
@@ -215,10 +214,12 @@ namespace Phantasma.Explorer.Persistance
                     Address = eventDtoEventAddress
                 };
 
-                account.AccountTransactions.Add(new AccountTransaction { Account = account, Transaction = transaction });
-
                 await context.Accounts.AddAsync(account);
+
+                account.AccountTransactions.Add(new AccountTransaction { Account = account, Transaction = transaction });
             }
+
+            await context.SaveChangesAsync();
         }
 
         private async Task UpdateAccountBalances(ExplorerDbContext context)
@@ -263,6 +264,30 @@ namespace Phantasma.Explorer.Persistance
             _addressChanged.Clear();
         }
 
+        private void UpdateNfTokenBalance(ExplorerDbContext context, Account account, BalanceSheetDto tokenBalance)
+        {
+            foreach (var tokenId in tokenBalance.Ids)
+            {
+                var existingToken = context.NonFungibleTokens.SingleOrDefault(p => p.Id.Equals(tokenId));
+                if (existingToken == null)
+                {
+                    var nftoken = new NonFungibleToken
+                    {
+                        Chain = tokenBalance.ChainName,
+                        TokenSymbol = tokenBalance.Symbol,
+                        Id = tokenId,
+                        Account = account,
+                    };
+
+                    account.NonFungibleTokens.Add(nftoken);
+                }
+                else
+                {
+                    existingToken.Account = account;
+                }
+            }
+        }
+
         private async Task<Token> SyncToken(ExplorerDbContext context, string symbol)
         {
             var tokensDto = await _phantasmaRpcService.GetTokens.SendRequestAsync();
@@ -289,30 +314,6 @@ namespace Phantasma.Explorer.Persistance
             }
 
             return null;
-        }
-
-        private void UpdateNfTokenBalance(ExplorerDbContext context, Account account, BalanceSheetDto tokenBalance)
-        {
-            foreach (var tokenId in tokenBalance.Ids)
-            {
-                var existingToken = context.NonFungibleTokens.SingleOrDefault(p => p.Id.Equals(tokenId));
-                if (existingToken == null)
-                {
-                    var nftoken = new NonFungibleToken
-                    {
-                        Chain = tokenBalance.ChainName,
-                        TokenSymbol = tokenBalance.Symbol,
-                        Id = tokenId,
-                        Account = account,
-                    };
-
-                    account.NonFungibleTokens.Add(nftoken);
-                }
-                else
-                {
-                    existingToken.Account = account;
-                }
-            }
         }
 
         private void AddToUpdateList(string address)
