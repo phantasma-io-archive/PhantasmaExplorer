@@ -9,21 +9,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Core", "..\Phanta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Blockchain", "..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj", "{974F9761-3388-48AA-9DF6-EA5A85F5C168}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.VM", "..\PhantasmaChain\Phantasma.VM\Phantasma.VM.csproj", "{62963BDD-80CB-4C4C-8800-5BE507289F26}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.IO", "..\PhantasmaChain\Phantasma.IO\Phantasma.IO.csproj", "{C156B6F9-0D50-4B7B-A885-5867398A8734}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Numerics", "..\PhantasmaChain\Phantasma.Numerics\Phantasma.Numerics.csproj", "{9A3237AA-DA5F-42F7-8C22-144D8CFA1CC3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Cryptography", "..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj", "{6706C489-8BD6-44C9-A546-ABDFE7E79158}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Storage", "..\PhantasmaChain\Phantasma.Storage\Phantasma.Storage.csproj", "{E3E744ED-212E-430F-B948-A543E1BC1EE7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.API", "..\PhantasmaChain\Phantasma.API\Phantasma.API.csproj", "{294589E4-C6F4-4DD6-90DD-C46902BC6486}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.RpcClient", "..\PhantasmaRpcClient\Phantasma.RpcClient\Phantasma.RpcClient.csproj", "{BDCD7A3E-D4E7-4308-916F-F48AE8C28B06}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.P2P", "..\PhantasmaChain\Phantasma.P2P\Phantasma.P2P.csproj", "{39881376-2DC8-4CB8-B888-B3F736BF61D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.VM", "..\PhantasmaChain\Phantasma.VM\Phantasma.VM.csproj", "{FF48C065-15E1-485B-A0AF-383AAED85B70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,10 +37,6 @@ Global
 		{974F9761-3388-48AA-9DF6-EA5A85F5C168}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{974F9761-3388-48AA-9DF6-EA5A85F5C168}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{974F9761-3388-48AA-9DF6-EA5A85F5C168}.Release|Any CPU.Build.0 = Release|Any CPU
-		{62963BDD-80CB-4C4C-8800-5BE507289F26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62963BDD-80CB-4C4C-8800-5BE507289F26}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{62963BDD-80CB-4C4C-8800-5BE507289F26}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{62963BDD-80CB-4C4C-8800-5BE507289F26}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C156B6F9-0D50-4B7B-A885-5867398A8734}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C156B6F9-0D50-4B7B-A885-5867398A8734}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C156B6F9-0D50-4B7B-A885-5867398A8734}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -59,22 +49,14 @@ Global
 		{6706C489-8BD6-44C9-A546-ABDFE7E79158}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6706C489-8BD6-44C9-A546-ABDFE7E79158}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6706C489-8BD6-44C9-A546-ABDFE7E79158}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E3E744ED-212E-430F-B948-A543E1BC1EE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E3E744ED-212E-430F-B948-A543E1BC1EE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E3E744ED-212E-430F-B948-A543E1BC1EE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E3E744ED-212E-430F-B948-A543E1BC1EE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{294589E4-C6F4-4DD6-90DD-C46902BC6486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{294589E4-C6F4-4DD6-90DD-C46902BC6486}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{294589E4-C6F4-4DD6-90DD-C46902BC6486}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{294589E4-C6F4-4DD6-90DD-C46902BC6486}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BDCD7A3E-D4E7-4308-916F-F48AE8C28B06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BDCD7A3E-D4E7-4308-916F-F48AE8C28B06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BDCD7A3E-D4E7-4308-916F-F48AE8C28B06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BDCD7A3E-D4E7-4308-916F-F48AE8C28B06}.Release|Any CPU.Build.0 = Release|Any CPU
-		{39881376-2DC8-4CB8-B888-B3F736BF61D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{39881376-2DC8-4CB8-B888-B3F736BF61D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{39881376-2DC8-4CB8-B888-B3F736BF61D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{39881376-2DC8-4CB8-B888-B3F736BF61D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF48C065-15E1-485B-A0AF-383AAED85B70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF48C065-15E1-485B-A0AF-383AAED85B70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF48C065-15E1-485B-A0AF-383AAED85B70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF48C065-15E1-485B-A0AF-383AAED85B70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
