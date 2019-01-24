@@ -16,12 +16,13 @@ namespace Phantasma.Explorer.Persistance
 {
     public class ExplorerSync
     {
+        private static int _retries;
+        private const int MaxRetries = 5;
+
         private readonly IPhantasmaRpcService _phantasmaRpcService;
         private readonly List<string> _addressChanged;
 
-        private static int _retries;
-
-        private const int MaxRetries = 5;
+        public static bool ContinueSync { get; set; } = true;
 
         public ExplorerSync()
         {
@@ -40,25 +41,19 @@ namespace Phantasma.Explorer.Persistance
                     if (_retries >= MaxRetries)
                     {
                         Console.WriteLine("Something went wrong with synchronization");
-                        Console.WriteLine("Press 'S' to try again, or enter to continue without sync");
-                        while (!Console.ReadKey().KeyChar.Equals('s') || !Console.ReadKey().KeyChar.Equals((char)ConsoleKey.Enter))
-                        {
-                            char keyPressed = Console.ReadKey().KeyChar;
-                            if (keyPressed.Equals('s'))
-                            {
-                                StartSync();
-                            }
-                            else
-                            {
-                                return;
-                            }
-                        }
+                        return;
                     }
-                    while (true)
+                    while (ContinueSync)
                     {
+                        Console.WriteLine("Remember, to stop sync process safely, press 3");
+                        Console.WriteLine("It may take a while to stop");
+                        Console.WriteLine("\n\n");
+
                         await explorerSync.Sync();
                         Thread.Sleep(AppSettings.SyncTime);
                     }
+
+                    Console.WriteLine("Sync has stopped");
                 }
                 catch (Exception e)
                 {
@@ -220,6 +215,8 @@ namespace Phantasma.Explorer.Persistance
                 if (account.AccountTransactions.Any(t => t.Transaction.Hash == transaction.Hash)) return;
 
                 account.AccountTransactions.Add(accountTx);
+
+                context.Accounts.Update(account);
             }
             else
             {

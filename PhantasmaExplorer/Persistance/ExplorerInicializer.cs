@@ -15,10 +15,17 @@ namespace Phantasma.Explorer.Persistance
     {
         private IPhantasmaRpcService _phantasmaRpcService;
 
-        public static async Task Initialize(ExplorerDbContext context)
+        public static async Task<bool> Initialize(ExplorerDbContext context)
         {
+            if (context.Chains.Any())
+            {
+                return false;
+            }
+
             var initializer = new ExplorerInicializer();
             await initializer.SeedEverythingAsync(context);
+
+            return true;
         }
 
         public async Task SeedEverythingAsync(ExplorerDbContext context)
@@ -211,9 +218,9 @@ namespace Phantasma.Explorer.Persistance
                     Address = txEvent.EventAddress
                 };
 
-                account.AccountTransactions.Add(new AccountTransaction { Account = account, Transaction = transaction });
+                await context.Accounts.AddAsync(account);
 
-                context.Accounts.Add(account);
+                account.AccountTransactions.Add(new AccountTransaction { Account = account, Transaction = transaction });
             }
 
             await context.SaveChangesAsync();
