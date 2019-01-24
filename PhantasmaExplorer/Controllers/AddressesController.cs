@@ -36,11 +36,16 @@ namespace Phantasma.Explorer.Controllers
             return addressList;
         }
 
-        public AddressViewModel GetAddress(string addressText)
+        public bool IsAddressStored(string address)
+        {
+            var addressQueries = new AccountQueries(_context);
+            return addressQueries.AddressExists(address);
+        }
+
+        public AddressViewModel GetAddress(string addressText, int currentPage, int pageSize = 20)
         {
             var addressQueries = new AccountQueries(_context);
             var tokenQueries = new TokenQueries(_context);
-            var transactionQueries = new TransactionQueries(_context);
 
             var account = addressQueries.QueryAccount(addressText);
 
@@ -49,11 +54,11 @@ namespace Phantasma.Explorer.Controllers
                 SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
                 var addressVm = AddressViewModel.FromAddress(account, tokenQueries.QueryTokens().ToList());
 
+                addressVm.Transactions = GetAddressTransactions(addressVm.Address, currentPage, pageSize);
+
                 foreach (var addressVmNativeBalance in addressVm.NativeBalances)
                 {
-                    addressVmNativeBalance.TxnCount =
-                        transactionQueries.QueryAddressTransactionCount(addressVm.Address,
-                            addressVmNativeBalance.ChainName);
+                    addressVmNativeBalance.TxnCount = GetTransactionCount(addressVm.Address);
                 }
 
                 SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
@@ -69,7 +74,22 @@ namespace Phantasma.Explorer.Controllers
             return null;
         }
 
-        private void CalculateAddressSoulValue(List<AddressViewModel> list) //todo
+        private List<TransactionViewModel> GetAddressTransactions(string address, int currentPage, int pageSize = 20, string chain = null)
+        {
+            var txQuery = new AccountQueries(_context);
+
+            var query = txQuery.QueryAddressTransactions(address, chain).Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+            return query.AsEnumerable().Select(TransactionViewModel.FromTransaction).ToList();
+        }
+
+        public int GetTransactionCount(string address, string chain = null)
+        {
+            var addressQueries = new AccountQueries(_context);
+            return addressQueries.QueryAddressTransactionCount(address, chain);
+        }
+
+        private void CalculateAddressSoulValue(List<AddressViewModel> list)
         {
             SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
             foreach (var address in list)

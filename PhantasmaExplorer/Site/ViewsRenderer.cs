@@ -96,6 +96,7 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Server.Get($"{AppSettings.UrlAddresses}", RouteAddresses);
 
             TemplateEngine.Server.Get($"{AppSettings.UrlAddress}/{{input}}", RouteAddress);
+            TemplateEngine.Server.Get($"{AppSettings.UrlAddress}/{{input}}/{{page}}", RouteAddress);
 
             TemplateEngine.Server.Get($"{AppSettings.UrlBlocks}", RouteBlocks);
             TemplateEngine.Server.Get($"{AppSettings.UrlBlocks}/{{page}}", RouteBlocks);
@@ -349,12 +350,26 @@ namespace Phantasma.Explorer.Site
             try
             {
                 var addressText = request.GetVariable("input");
-                var address = AddressesControllerInstance.GetAddress(addressText);
                 var context = GetSessionContext(request);
-                if (address != null)
+                if (AddressesControllerInstance.IsAddressStored(addressText))
                 {
+                    var input = request.GetVariable("page"); //todo ask this
+                    if (!int.TryParse(input, out int pageNumber))
+                    {
+                        pageNumber = 1;
+                    }
+                    var controller = AddressesControllerInstance;
+
+                    var pageModel = new PaginationModel
+                    {
+                        Count = controller.GetTransactionCount(addressText),
+                        CurrentPage = pageNumber,
+                        PageSize = AppSettings.PageSize,
+                    };
+                    var addressVm = AddressesControllerInstance.GetAddress(addressText, pageModel.CurrentPage, pageModel.PageSize);
                     context[AppSettings.MenuContext] = _menus;
-                    context[AppSettings.AddressContext] = address;
+                    context[AppSettings.AddressContext] = addressVm;
+                    context[AppSettings.PaginationContext] = pageModel;
                     return RendererView(context, "layout", AppSettings.AddressContext);
                 }
             }

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Phantasma.Core.Types;
 using Phantasma.Explorer.Domain.Entities;
-using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer.ViewModels

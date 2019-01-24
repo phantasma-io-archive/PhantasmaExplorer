@@ -23,12 +23,7 @@ namespace Phantasma.Explorer.ViewModels
                 Name = account.Name,
                 Value = 0,
                 NativeBalances = new List<BalanceViewModel>(),
-                TokenBalance = new List<BalanceViewModel>(),
-                Transactions = account.AccountTransactions
-                    .OrderByDescending(p => p.Transaction.Timestamp)
-                    .Take(20)
-                    .Select(p => TransactionViewModel.FromTransaction(p.Transaction))
-                    .ToList(),
+                TokenBalance = new List<BalanceViewModel>()
             };
 
             var soulTokens = account.TokenBalance.Where(p => p.TokenSymbol.Equals("SOUL"));

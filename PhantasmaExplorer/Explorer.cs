@@ -62,6 +62,7 @@ namespace Phantasma.Explorer
                 switch (option)
                 {
                     case '1':
+                        ExplorerSync.ContinueSync = false;
                         Console.Clear();
                         Thread.Sleep(2000);
                         Console.WriteLine("Initializing db...");
@@ -81,11 +82,13 @@ namespace Phantasma.Explorer
                         break;
 
                     case '4':
+                        ExplorerSync.ContinueSync = false;
                         Console.Clear();
                         EnsureNoMissingBlocks(context);
 
                         break;
                     case '5':
+                        ExplorerSync.ContinueSync = false;
                         Console.Clear();
                         await DropDb(context);
                         break;

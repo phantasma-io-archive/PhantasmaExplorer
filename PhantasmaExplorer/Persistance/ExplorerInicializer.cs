@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
+using Phantasma.Explorer.Persistance.Infrastructure;
 using Phantasma.Explorer.Utils;
+using Phantasma.RpcClient.DTOs;
 using Phantasma.RpcClient.Interfaces;
 using Token = Phantasma.Explorer.Domain.Entities.Token;
 using TokenFlags = Phantasma.Explorer.Domain.Entities.TokenFlags;
@@ -39,17 +42,24 @@ namespace Phantasma.Explorer.Persistance
 
                 if (!context.Apps.Any())
                 {
-                    await SeedApps(context);
+                    var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
+                    await SyncUtils.SyncApps(context, appList);
                 }
 
                 if (!context.Tokens.Any())
                 {
-                    await SeedTokens(context);
+                    var tokenList = await _phantasmaRpcService.GetTokens.SendRequestAsync();
+                    await SeedTokens(context, tokenList);
                 }
 
                 if (!context.Chains.Any())
                 {
                     await SeedChains(context);
+                }
+
+                if (!context.Blocks.Any())
+                {
+                    await SeedBlocks(context);
                 }
 
                 sw.Stop();
@@ -63,29 +73,8 @@ namespace Phantasma.Explorer.Persistance
             }
         }
 
-        private async Task SeedApps(ExplorerDbContext context)
+        private async Task SeedTokens(ExplorerDbContext context, IList<TokenDto> tokenList)
         {
-            var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
-
-            foreach (var dto in appList)
-            {
-                context.Apps.Add(new App
-                {
-                    Id = dto.Id,
-                    Url = dto.Url,
-                    Description = dto.Description,
-                    Title = dto.Title,
-                    Icon = dto.Icon
-                });
-            }
-
-            await context.SaveChangesAsync();
-        }
-
-        private async Task SeedTokens(ExplorerDbContext context)
-        {
-            var tokenList = await _phantasmaRpcService.GetTokens.SendRequestAsync();
-
             foreach (var tokenDto in tokenList)
             {
                 context.Tokens.Add(new Token
@@ -105,30 +94,19 @@ namespace Phantasma.Explorer.Persistance
 
         private async Task SeedChains(ExplorerDbContext context)
         {
-            var chains = await _phantasmaRpcService.GetChains.SendRequestAsync();
-
-            foreach (var chainDto in chains)
-            {
-                Console.WriteLine($"Seeding chain {chainDto.Name}");
-
-                var chain = new Chain
-                {
-                    Address = chainDto.Address,
-                    Name = chainDto.Name,
-                    Height = chainDto.Height,
-                    ParentAddress = chainDto.ParentAddress
-                };
-
-                context.Accounts.Add(new Account { Address = chain.Address });
-                context.Chains.Add(chain);
-
-                await SeedBlocks(context, chain);
-            }
-
-            await context.SaveChangesAsync();
+            var chainsDto = await _phantasmaRpcService.GetChains.SendRequestAsync();
+            await SyncUtils.SyncChains(chainsDto, context);
         }
 
-        private async Task SeedBlocks(ExplorerDbContext context, Chain chain)
+        private async Task SeedBlocks(ExplorerDbContext context)
+        {
+            foreach (var chain in context.Chains)
+            {
+                await SeedBlocksByChain(context, chain);
+            }
+        }
+
+        private async Task SeedBlocksByChain(ExplorerDbContext context, Chain chain)
         {
             var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
 
@@ -173,11 +151,12 @@ namespace Phantasma.Explorer.Persistance
                         };
                         transaction.Events.Add(domainEvent);
 
-                        await UpdateAccount(context, transaction, domainEvent);
+                        await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
+
                         if (TransactionUtils.IsTransferEvent(domainEvent))
                         {
                             var tokenSymbol = TransactionUtils.GetTokenSymbolFromEvent(domainEvent);
-                            AddToTokenTxCounter(context, tokenSymbol);
+                            SyncUtils.AddToTokenTxCounter(context, tokenSymbol);
                         }
                     }
 
@@ -191,48 +170,6 @@ namespace Phantasma.Explorer.Persistance
             }
 
             await context.SaveChangesAsync();
-        }
-
-        private async Task UpdateAccount(ExplorerDbContext context, Transaction transaction, Event txEvent)
-        {
-            var account = context.Accounts.SingleOrDefault(p => p.Address.Equals(txEvent.EventAddress));
-
-            if (account != null)
-            {
-                var accountTx = new AccountTransaction
-                {
-                    Account = account,
-                    Transaction = transaction
-                };
-
-                if (account.AccountTransactions.Any(t => t.Transaction.Hash == transaction.Hash)) return;
-
-                account.AccountTransactions.Add(accountTx);
-
-                context.Accounts.Update(account);
-            }
-            else
-            {
-                account = new Account
-                {
-                    Address = txEvent.EventAddress
-                };
-
-                await context.Accounts.AddAsync(account);
-
-                account.AccountTransactions.Add(new AccountTransaction { Account = account, Transaction = transaction });
-            }
-
-            await context.SaveChangesAsync();
-        }
-
-        private void AddToTokenTxCounter(ExplorerDbContext context, string tokenDataSymbol)
-        {
-            var token = context.Tokens.SingleOrDefault(p => p.Symbol.Equals(tokenDataSymbol));
-            if (token != null)
-            {
-                token.TransactionCount++;
-            }
         }
     }
 }

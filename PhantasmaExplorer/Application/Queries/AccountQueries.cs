@@ -51,13 +51,13 @@ namespace Phantasma.Explorer.Application.Queries
             return addressList;
         }
 
+
         public Account QueryAccount(string address)
         {
             return _context.Accounts
                 .Include(p => p.AccountTransactions)
                 .ThenInclude(p => p.Transaction)
                 .ThenInclude(p => p.Block)
-                .ThenInclude(p => p.Chain)//todo revisit this, 1so much fk stuff -.-
                 .SingleOrDefault(p => p.Address.Equals(address));
         }
 
@@ -96,6 +96,59 @@ namespace Phantasma.Explorer.Application.Queries
             }
 
             return nonFungibleTokens?.ToList();
+        }
+
+        public IQueryable<Transaction> QueryAddressTransactions(string address, string chain = null)
+        {
+            if (!string.IsNullOrEmpty(chain))
+            {
+                return _context.Accounts
+                    .Include(p => p.AccountTransactions)
+                    .ThenInclude(p => p.Transaction)
+                    .ThenInclude(p=>p.Block)
+                    .SingleOrDefault(p => p.Address.Equals(address))?
+                    .AccountTransactions
+                    .Where(p => p.Transaction.Block.ChainName.Equals(chain) ||
+                                p.Transaction.Block.ChainAddress.Equals(chain))
+                    .Select(c => c.Transaction)
+                    .OrderByDescending(p=>p.Timestamp)
+                    .AsQueryable();
+            }
+
+            return _context.Accounts.Include(p => p.AccountTransactions)
+                .ThenInclude(p => p.Transaction)
+                .ThenInclude(p => p.Block)
+                .SingleOrDefault(p => p.Address.Equals(address))?
+                .AccountTransactions
+                .Select(c => c.Transaction)
+                .OrderByDescending(p => p.Timestamp)
+                .AsQueryable();
+        }
+
+
+        public int QueryAddressTransactionCount(string address, string chain = null)
+        {
+            var account = _context.Accounts
+                .Include(p => p.AccountTransactions)
+                .ThenInclude(p => p.Transaction)
+                .ThenInclude(p => p.Block)
+                .SingleOrDefault(p => p.Address.Equals(address));
+
+            if (account == null) return 0;
+
+            if (string.IsNullOrEmpty(chain))
+            {
+                return account.AccountTransactions.Count;
+            }
+
+            return account.AccountTransactions
+                .Count(p => p.Transaction.Block.ChainAddress.Equals(chain)
+                            || p.Transaction.Block.ChainName.Equals(chain));
+        }
+
+        public bool AddressExists(string address)
+        {
+            return _context.Accounts.SingleOrDefault(p => p.Address.Equals(address)) != null;
         }
     }
 }

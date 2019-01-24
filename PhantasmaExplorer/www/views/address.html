@@ -69,6 +69,21 @@
                                     {{/each}}
                                 </tbody>
                             </table>
+                            <div class="col-sm-12">
+                                <ul class="pager">
+                                    {{#if pagination.ShowPrevious}}
+                                    <li class="previous"><a href="/address/{{address.Address}}/{{pagination.PreviousPage}}"><span aria-hidden="true">&larr;</span> Previous</a></li>
+                                    {{#else}}
+                                    <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Previous</a></li>
+                                    {{/if}}
+
+                                    {{#if pagination.ShowNext}}
+                                    <li class="next"><a href="/address/{{address.Address}}/{{pagination.NextPage}}">Next <span aria-hidden="true">&rarr;</span></a></li>
+                                    {{#else}}
+                                    <li class="next disabled"><a>Next <span aria-hidden="true">&rarr;</span></a></li>
+                                    {{/if}}
+                                </ul>
+                            </div>
                             {{#else}}
                             Nothing here...
                             {{/if}}

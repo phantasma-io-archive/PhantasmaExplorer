@@ -51,41 +51,12 @@ namespace Phantasma.Explorer.Application.Queries
                 .ToList();
         }
 
-        public ICollection<Transaction> QueryAddressTransactions(string address, int amount = 20)
-        {
-            return _context.Accounts.SingleOrDefault(p => p.Address.Equals(address))?
-                .AccountTransactions
-                .Select(c => c.Transaction)
-                .ToList();
-        }
-
         public Transaction QueryTransaction(string hash)
         {
             return _context.Transactions
                 .Include(p => p.Block)
                 .Include(p => p.Block.Chain)
                 .SingleOrDefault(p => p.Hash.Equals(hash));
-        }
-
-        public int QueryAddressTransactionCount(string address, string chain = null)
-        {
-            var account = _context.Accounts
-                .Include(p => p.AccountTransactions)
-                .ThenInclude(p => p.Transaction)
-                .ThenInclude(p => p.Block)
-                .ThenInclude(p => p.Chain)
-                .SingleOrDefault(p => p.Address.Equals(address));
-
-            if (account == null) return 0;
-
-            if (string.IsNullOrEmpty(chain))
-            {
-                return account.AccountTransactions.Count;
-            }
-
-            return account.AccountTransactions
-                .Count(p => p.Transaction.Block.Chain.Address.Equals(chain)
-                            || p.Transaction.Block.Chain.Name.Equals(chain));
         }
 
         public int QueryTotalChainTransactionCount(string chain = null)
