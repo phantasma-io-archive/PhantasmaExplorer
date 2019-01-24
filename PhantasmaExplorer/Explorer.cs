@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ namespace Phantasma.Explorer
             IServiceCollection serviceCollection = new ServiceCollection();
             _app = new AppServices(serviceCollection);
 
+
             Console.WriteLine("Setting up server and UI");
             var server = HostBuilder.CreateServer(args);
             var viewsRenderer = new ViewsRenderer(server, "views");
@@ -44,6 +46,7 @@ namespace Phantasma.Explorer
         private static async Task StartMenu()
         {
             bool exit = false;
+            var context = AppServices.GetService<ExplorerDbContext>();
             while (!exit)
             {
                 Console.WriteLine();
@@ -51,20 +54,25 @@ namespace Phantasma.Explorer
                 Console.WriteLine("1 - Init DB");
                 Console.WriteLine("2 - Sync DB");
                 Console.WriteLine("3 - Stop sync");
-                Console.WriteLine("4 - Delete DB");
-                Console.WriteLine("5 - Exit");
+                Console.WriteLine("4 - Ensure no missing blocks");
+                Console.WriteLine("5 - Delete DB");
+                Console.WriteLine("6 - Exit");
                 var option = Console.ReadKey().KeyChar;
 
                 switch (option)
                 {
                     case '1':
-                        await InitDb();
+                        Console.Clear();
+                        Thread.Sleep(2000);
+                        Console.WriteLine("Initializing db...");
+                        await InitDb(context);
                         break;
 
                     case '2':
                         Console.Clear();
                         Thread.Sleep(2000);
                         ExplorerSync.ContinueSync = true;
+                        Console.WriteLine("Starting sync process");
                         ExplorerSync.StartSync();
                         break;
 
@@ -73,28 +81,57 @@ namespace Phantasma.Explorer
                         break;
 
                     case '4':
-                        DropDb();
+                        Console.Clear();
+                        EnsureNoMissingBlocks(context);
+
                         break;
                     case '5':
+                        Console.Clear();
+                        await DropDb(context);
+                        break;
+
+                    case '6':
                         exit = true;
                         break;
                 }
             }
-
         }
 
-        private static void DropDb()
+        private static void EnsureNoMissingBlocks(ExplorerDbContext context)
         {
-            throw new NotImplementedException();
+            foreach (var chain in context.Chains.Include(p => p.Blocks))
+            {
+                Console.WriteLine($"Checking {chain.Name} chain blocks...");
+                int heightCounter = 0;
+                foreach (var chainBlock in chain.Blocks.OrderBy(p => p.Height))
+                {
+                    heightCounter++;
+                    if (heightCounter != chainBlock.Height)
+                    {
+                        Console.WriteLine($"Chain {chain.Name} has missing blocks!");
+                        Console.WriteLine("Please delete DB and start over the initialization process.");
+                        return;
+                    }
+                }
+            }
+            Console.WriteLine("No blocks missing. Success!");
         }
 
-        private static async Task InitDb()
+        private static async Task DropDb(ExplorerDbContext context)
         {
-            var context = AppServices.GetService<ExplorerDbContext>();
+            if (await context.Database.EnsureDeletedAsync())
+            {
+                Console.WriteLine("Database deleted with success");
+            }
+            else
+            {
+                Console.WriteLine("Error while deleting database");
+            }
+        }
 
+        private static async Task InitDb(ExplorerDbContext context)
+        {
             context.Database.Migrate();
-
-            Console.WriteLine("Initializing db...");
             if (!await ExplorerInicializer.Initialize(context))
             {
                 Console.WriteLine("DB is already initialized");
