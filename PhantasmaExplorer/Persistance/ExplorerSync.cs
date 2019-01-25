@@ -54,6 +54,7 @@ namespace Phantasma.Explorer.Persistance
                         Thread.Sleep(AppSettings.SyncTime);
                     }
 
+                    _retries = 0;
                     Console.WriteLine("Sync has stopped");
                 }
                 catch (Exception e)
@@ -65,6 +66,18 @@ namespace Phantasma.Explorer.Persistance
             }).Start();
         }
 
+        public static void UpdateAllAddressBalances()
+        {
+            var explorerSync = new ExplorerSync();
+            new Thread(async () =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+
+                await explorerSync.UpdateAccountBalances(context);
+            }).Start();
+        }
+
         public async Task Sync()
         {
             var context = Explorer.AppServices.GetService<ExplorerDbContext>();
@@ -72,10 +85,13 @@ namespace Phantasma.Explorer.Persistance
             {
                 while (await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address) > chain.Height)
                 {
-                    Console.WriteLine($"NEW BLOCK: Chain: {chain.Name}, block: {chain.Height + 1}");
-                    var block = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, (int)(chain.Height + 1));
+                    if (ContinueSync)
+                    {
+                        Console.WriteLine($"NEW BLOCK: Chain: {chain.Name}, block: {chain.Height + 1}");
+                        var block = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, (int)(chain.Height + 1));
 
-                    await SyncBlock(context, chain, block);
+                        await SyncBlock(context, chain, block);
+                    }
                 }
             }
             //todo find smarter way to do this
@@ -97,6 +113,8 @@ namespace Phantasma.Explorer.Persistance
 
         private async Task SyncBlock(ExplorerDbContext context, Chain chain, BlockDto blockDto)
         {
+            if (context.Blocks.FirstOrDefault(p => p.Hash.Equals(blockDto.Hash)) != null) return;
+
             Console.WriteLine($"Seeding block {blockDto.Height}");
 
             var block = new Block

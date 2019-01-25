@@ -66,11 +66,8 @@ namespace Phantasma.Explorer.Application.Queries
                 return _context.Transactions.Count();
             }
 
-            var contextChain = _context.Chains.SingleOrDefault(p => p.Address.Equals(chain) || p.Name.Equals(chain));
-
-            if (contextChain == null) return 0;
-
-            return contextChain.Blocks.Select(p => p.Transactions.Count).Sum();
+            return _context.Transactions
+                .Count(p => p.Block.ChainAddress.Equals(chain) || p.Block.ChainName.Equals(chain));
         }
 
         public ICollection<Transaction> QueryLastTokenTransactions(string tokenSymbol, int amount = 20)

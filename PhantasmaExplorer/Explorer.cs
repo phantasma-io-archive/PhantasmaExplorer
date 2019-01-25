@@ -55,8 +55,9 @@ namespace Phantasma.Explorer
                 Console.WriteLine("2 - Sync DB");
                 Console.WriteLine("3 - Stop sync");
                 Console.WriteLine("4 - Ensure no missing blocks");
-                Console.WriteLine("5 - Delete DB");
-                Console.WriteLine("6 - Exit");
+                Console.WriteLine("5 - Update all address balances");
+                Console.WriteLine("6 - Delete DB");
+                Console.WriteLine("7 - Exit");
                 var option = Console.ReadKey().KeyChar;
 
                 switch (option)
@@ -85,15 +86,17 @@ namespace Phantasma.Explorer
                         ExplorerSync.ContinueSync = false;
                         Console.Clear();
                         EnsureNoMissingBlocks(context);
-
                         break;
                     case '5':
+                        ExplorerSync.UpdateAllAddressBalances();
+                        break;
+                    case '6':
                         ExplorerSync.ContinueSync = false;
                         Console.Clear();
                         await DropDb(context);
                         break;
 
-                    case '6':
+                    case '7':
                         exit = true;
                         break;
                 }
