@@ -163,6 +163,7 @@ namespace Phantasma.Explorer.Persistance
                     block.Transactions.Add(transaction);
                 }
 
+                chain.Height = block.Height;
                 chain.Blocks.Add(block);
 
                 Console.WriteLine($"Finished seeding block {blockDto.Height}");

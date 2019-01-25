@@ -55,7 +55,6 @@ namespace Phantasma.Explorer.Persistance
                     }
 
                     _retries = 0;
-                    Console.WriteLine("Sync has stopped");
                 }
                 catch (Exception e)
                 {
@@ -91,6 +90,11 @@ namespace Phantasma.Explorer.Persistance
                         var block = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, (int)(chain.Height + 1));
 
                         await SyncBlock(context, chain, block);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Sync has stopped");
+                        return;
                     }
                 }
             }

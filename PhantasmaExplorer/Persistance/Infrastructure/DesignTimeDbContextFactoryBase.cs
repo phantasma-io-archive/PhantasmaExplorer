@@ -9,7 +9,7 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
     public abstract class DesignTimeDbContextFactoryBase<TContext> :
         IDesignTimeDbContextFactory<TContext> where TContext : DbContext
     {
-        private const string ConnectionStringName = "PhantasmaExplorerDatabase";
+        private const string ConnectionStringName = "Sqlite";
         private const string AspNetCoreEnvironment = "ASPNETCORE_ENVIRONMENT";
 
         public TContext CreateDbContext(string[] args)
@@ -49,7 +49,7 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
 
             var optionsBuilder = new DbContextOptionsBuilder<TContext>();
 
-            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseSqlite(connectionString);
 
             return CreateNewInstance(optionsBuilder.Options);
         }
