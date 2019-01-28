@@ -73,7 +73,9 @@ namespace Phantasma.Explorer.Persistance
                 Thread.CurrentThread.IsBackground = true;
                 var context = Explorer.AppServices.GetService<ExplorerDbContext>();
 
-                await explorerSync.UpdateAccountBalances(context);
+                await explorerSync.UpdateAccountBalances(context, context.Accounts.Select(p => p.Address).ToList());
+
+                Console.WriteLine("Account balances are updated");
             }).Start();
         }
 
@@ -99,7 +101,8 @@ namespace Phantasma.Explorer.Persistance
                 }
             }
             //todo find smarter way to do this
-            await UpdateAccountBalances(context);
+            await UpdateAccountBalances(context, _addressChanged);
+            _addressChanged.Clear();
 
             Console.WriteLine("Sync new chains?");
             await SyncChains(context);
@@ -184,12 +187,12 @@ namespace Phantasma.Explorer.Persistance
             Console.WriteLine();
         }
 
-        private async Task UpdateAccountBalances(ExplorerDbContext context)
+        private async Task UpdateAccountBalances(ExplorerDbContext context, List<string> addressList)
         {
             Console.WriteLine("*********************************");
             Console.WriteLine("Updating account balances");
 
-            foreach (var address in _addressChanged)
+            foreach (var address in addressList)
             {
                 var account = context.Accounts.Find(address);
 
@@ -222,8 +225,6 @@ namespace Phantasma.Explorer.Persistance
                     }
                 }
             }
-
-            _addressChanged.Clear();
         }
 
         private void UpdateNfTokenBalance(ExplorerDbContext context, Account account, BalanceSheetDto tokenBalance)

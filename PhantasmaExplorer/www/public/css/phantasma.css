@@ -9,7 +9,7 @@
     }
 
     .home-title {
-        color: #17B0E7 !important; 
+        color: #17B0E7 !important;
     }
 }
 
@@ -201,6 +201,10 @@ form {
     overflow: auto;
 }
 
+.table-responsive {
+    padding: 1px;
+}
+
 .home-tx-table {
     table-layout: fixed;
 }
@@ -257,7 +261,7 @@ form {
 
     .table-general tbody tr {
         border: 1px solid #17B0E7 !important;
-        border-left: 1px solid #17B0E7 !important;
+        /*border-left: 2px solid #17B0E7 !important;*/
     }
 
     .table-general th {
