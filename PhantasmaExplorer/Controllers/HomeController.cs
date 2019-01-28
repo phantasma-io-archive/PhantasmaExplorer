@@ -146,8 +146,7 @@ namespace Phantasma.Explorer.Controllers
                 }
 
                 //hash
-                var hash = Hash.Parse(input);
-                if (hash != null)
+                if (Hash.TryParse(input, out var hash))
                 {
                     var tx = new TransactionQueries(_context).QueryTransaction(input);
                     if (tx != null)

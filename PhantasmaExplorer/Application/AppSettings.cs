@@ -22,6 +22,7 @@
         internal const string UrlApp = "/app";
         internal const string UrlError = "/error";
         internal const string UrlApi = "/api";
+        internal const string UrlMarketplace = "/marketplace";
 
         internal const string HomeContext = "home";
         internal const string MenuContext = "menu";
@@ -42,6 +43,7 @@
         internal const string ErrorContext = "error";
         internal const string HoldersContext = "holders";
         internal const string PaginationContext = "pagination";
+        internal const string MarketplaceContext = "marketplace";
 
         #endregion
     }

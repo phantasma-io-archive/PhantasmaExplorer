@@ -19,14 +19,31 @@ namespace Phantasma.Explorer.Application.Queries
             return _context.Tokens.ToList();
         }
 
-        public ICollection<NonFungibleToken> QueryAllNonFungibleTokens(string tokenSymbol, string chain = null)
+        public ICollection<NonFungibleToken> QueryAllNonFungibleTokens(string tokenSymbol = null, string chain = null)
         {
-            if (string.IsNullOrEmpty(chain))
+            var query = _context.NonFungibleTokens;
+
+            if (string.IsNullOrEmpty(tokenSymbol) && string.IsNullOrEmpty(chain))
             {
-                return _context.NonFungibleTokens.ToList();
+                return query.ToList();
             }
 
-            return _context.NonFungibleTokens.Where(p => p.Chain.Equals(chain)).ToList();
+            if (!string.IsNullOrEmpty(tokenSymbol) && string.IsNullOrEmpty(chain))
+            {
+                return _context.NonFungibleTokens.Where(p => p.TokenSymbol.Equals(tokenSymbol)).ToList();
+            }
+
+            if (string.IsNullOrEmpty(tokenSymbol) && !string.IsNullOrEmpty(chain))
+            {
+                return _context.NonFungibleTokens.Where(p => p.Chain.Equals(chain)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(tokenSymbol) && !string.IsNullOrEmpty(chain))
+            {
+                return _context.NonFungibleTokens.Where(p => p.Chain.Equals(chain) && p.TokenSymbol.Equals(tokenSymbol)).ToList();
+            }
+
+            return _context.NonFungibleTokens.Where(p => p.Chain.Equals(chain) && p.TokenSymbol.Equals(tokenSymbol)).ToList();
         }
 
         public Token QueryToken(string tokenSymbol)

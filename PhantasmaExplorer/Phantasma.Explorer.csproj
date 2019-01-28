@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
+    <None Remove="www\views\marketplace.html" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +28,7 @@
     <Content Include="www\public\img\logo.png" />
     <Content Include="www\public\img\old_background.png" />
     <Content Include="www\public\img\phantasma_logo.png" />
+    <Content Include="www\views\marketplace.html" />
     <Content Include="www\views\address.html" />
     <Content Include="www\views\addresses.html" />
     <Content Include="www\views\app.html" />

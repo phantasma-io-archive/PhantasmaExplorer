@@ -33,6 +33,7 @@ namespace Phantasma.Explorer.Site
                 new MenuContext {Text = "Tokens", Url = AppSettings.UrlTokens, Active = false},
                 new MenuContext {Text = "Addresses", Url = AppSettings.UrlAddresses, Active = false},
                 new MenuContext {Text = "Apps", Url = AppSettings.UrlApps, Active = false},
+                new MenuContext {Text = "Marketplace", Url = AppSettings.UrlMarketplace, Active = false}
             };
             SetupTags();
         }
@@ -111,8 +112,11 @@ namespace Phantasma.Explorer.Site
 
             TemplateEngine.Server.Get($"{AppSettings.UrlApp}/{{input}}", RouteApp);
 
+            TemplateEngine.Server.Get($"{AppSettings.UrlMarketplace}", RouteMarketplace);
+
             //SetupAPIHandlers(); todo
         }
+
         #region ROUTES
 
         private object RouteHome(HTTPRequest request)
@@ -559,6 +563,32 @@ namespace Phantasma.Explorer.Site
 
             return HTTPResponse.Redirect(AppSettings.UrlError);
         }
+
+        private object RouteMarketplace(HTTPRequest request)
+        {
+            try
+            {
+                var controller = MarketplaceControllerInstance;
+                var marketVm = controller.GetAllAuctions().Result;
+                var context = GetSessionContext(request);
+                if (marketVm.TotalAuctions > 0)
+                {
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.MarketplaceContext] = marketVm;
+                    return RendererView(context, "layout", AppSettings.MarketplaceContext);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            _errorContextInstance.ErrorCode = "Marketplace error";
+            _errorContextInstance.ErrorDescription = "No active auctions found";
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(AppSettings.UrlError);
+        }
         #endregion
 
         //#region API
@@ -657,6 +687,7 @@ namespace Phantasma.Explorer.Site
         private TransactionsController TransactionsControllerInstance => new TransactionsController();
         private TokensController TokensControllerInstance => new TokensController();
         private AppsController AppsControllerInstance => new AppsController();
+        private MarketplaceController MarketplaceControllerInstance => new MarketplaceController();
         //private ApiController ApiControllerInstance => new ApiController();
         #endregion
     }

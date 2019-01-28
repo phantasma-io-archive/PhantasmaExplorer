@@ -1,0 +1,26 @@
+<div class="row">
+    <div class="col-md-4">
+        {{#if marketplace.AuctionsList}}
+        {{#each marketplace.AuctionsList}}
+        <div class="card" style="min-width: 18rem; max-width: 18rem;">
+            <!--card-->
+            <a href="#">
+                <!--link a tocar em toda a car-->
+                <div class="card-body">
+                    <img class="card-img-top" src="https://placehold.it/140x280/abc" alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">{{TokenId}}</h5>
+                        <p class="card-text">Description.</p>
+                        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{/each}}
+        {{#else}}
+        Nothing here...
+        {{/if}}
+
+    </div>
+</div>
+
