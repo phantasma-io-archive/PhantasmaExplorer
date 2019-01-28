@@ -10,6 +10,8 @@ namespace Phantasma.Explorer.Domain.Entities
         Fungible = 1 << 1,
         Finite = 1 << 2,
         Divisible = 1 << 3,
+        Native = 1 << 4,
+        External = 1 << 5,
     }
 
     public enum EventKind //todo maybe replace this with original enum

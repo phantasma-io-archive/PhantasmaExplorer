@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance.Infrastructure;
@@ -87,6 +88,11 @@ namespace Phantasma.Explorer.Persistance
                     CurrentSupply = tokenDto.CurrentSupply,
                     OwnerAddress = tokenDto.OwnerAddress
                 });
+
+                if ((tokenDto.Flags & RpcClient.DTOs.TokenFlags.Native) != 0)
+                {
+                    AppSettings.NativeSymbol = tokenDto.Symbol;
+                }
             }
 
             await context.SaveChangesAsync();

@@ -18,7 +18,7 @@ namespace Phantasma.Explorer.Application.Queries
 
         public ICollection<Account> QueryRichList(string tokenSymbol = null, int numberOfAddresses = 20)
         {
-            var symbol = string.IsNullOrEmpty(tokenSymbol) ? "SOUL" : tokenSymbol;
+            var symbol = string.IsNullOrEmpty(tokenSymbol) ? AppSettings.NativeSymbol : tokenSymbol;
 
             var addressList = new List<Account>();
             var temp = new Dictionary<string, decimal>();

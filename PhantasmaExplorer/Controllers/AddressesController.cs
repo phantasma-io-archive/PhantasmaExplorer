@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Cryptography;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
@@ -94,7 +95,7 @@ namespace Phantasma.Explorer.Controllers
             SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
             foreach (var address in list)
             {
-                var soulBalances = address.NativeBalances.Where(b => b.Token.Symbol == "SOUL");
+                var soulBalances = address.NativeBalances.Where(b => b.Token.Symbol == AppSettings.NativeSymbol);
                 foreach (var balanceViewModel in soulBalances)
                 {
                     balanceViewModel.Value = balanceViewModel.Balance * SoulRate;

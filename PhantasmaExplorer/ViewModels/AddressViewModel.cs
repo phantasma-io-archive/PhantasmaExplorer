@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 
 namespace Phantasma.Explorer.ViewModels
@@ -26,8 +27,8 @@ namespace Phantasma.Explorer.ViewModels
                 TokenBalance = new List<BalanceViewModel>()
             };
 
-            var soulTokens = account.TokenBalance.Where(p => p.TokenSymbol.Equals("SOUL"));
-            var otherTokens = account.TokenBalance.Where(p => !p.TokenSymbol.Equals("SOUL"));
+            var soulTokens = account.TokenBalance.Where(p => p.TokenSymbol.Equals(AppSettings.NativeSymbol));
+            var otherTokens = account.TokenBalance.Where(p => !p.TokenSymbol.Equals(AppSettings.NativeSymbol));
             var nftTokens = account.NonFungibleTokens;
 
             foreach (var balance in soulTokens)
