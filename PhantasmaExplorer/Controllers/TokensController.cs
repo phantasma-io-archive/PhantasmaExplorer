@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using Phantasma.Blockchain.Tokens;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
-using TokenFlags = Phantasma.Explorer.Domain.Entities.TokenFlags;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Controllers
 {
@@ -75,14 +74,14 @@ namespace Phantasma.Explorer.Controllers
                         var existingEntry = balances.SingleOrDefault(p => p.Address.Equals(account.Address));
                         if (existingEntry != null)
                         {
-                            existingEntry.Balance += TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals);
+                            existingEntry.Balance += Blockchain.Tokens.TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals);
                         }
                         else
                         {
                             var vm = new BalanceViewModel
                             {
                                 ChainName = balance.Chain,
-                                Balance = TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals),
+                                Balance = Blockchain.Tokens.TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals),
                                 Token = TokenViewModel.FromToken(token, AppSettings.MockLogoUrl),
                                 Address = account.Address
                             };

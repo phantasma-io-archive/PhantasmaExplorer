@@ -10,7 +10,7 @@ using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
 using Phantasma.IO;
 using Phantasma.Numerics;
-using EventKind = Phantasma.Explorer.Domain.Entities.EventKind;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Utils
 {
@@ -158,7 +158,7 @@ namespace Phantasma.Explorer.Utils
                     }
                 case EventKind.TokenCreate:
                     {
-                        var symbol = Serialization.Unserialize<string>(evt.Data.Decode()); 
+                        var symbol = Serialization.Unserialize<string>(evt.Data.Decode());
                         var token = phantasmaTokens.Single(t => t.Symbol.Equals(symbol));
                         return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
                     }

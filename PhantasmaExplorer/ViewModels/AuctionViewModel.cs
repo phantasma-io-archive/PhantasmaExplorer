@@ -1,6 +1,5 @@
 ﻿using System;
 using Phantasma.Core.Types;
-using Phantasma.Explorer.Domain.Entities;
 using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
@@ -15,7 +14,8 @@ namespace Phantasma.Explorer.ViewModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        public NftViewModel NftVm { get; set; }
+        public string ViewerUrl { get; set; }
+        public string InfoUrl { get; set; }
 
         public static AuctionViewModel FromAuction(AuctionDto auction, decimal calculatedPrice)
         {
@@ -27,7 +27,9 @@ namespace Phantasma.Explorer.ViewModels
                 Price = calculatedPrice,
                 EndDate = new Timestamp(auction.StartDate),
                 StartDate = new Timestamp(auction.StartDate),
-                TokenId = auction.TokenId
+                TokenId = auction.TokenId,
+                ViewerUrl = $"https://nacho.men/luchador/body/{auction.TokenId}", //todo
+                InfoUrl = $"https://nacho.men/luchador/{auction.TokenId}"
             };
         }
     }

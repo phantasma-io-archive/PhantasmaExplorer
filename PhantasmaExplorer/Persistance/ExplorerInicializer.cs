@@ -11,7 +11,6 @@ using Phantasma.Explorer.Utils;
 using Phantasma.RpcClient.DTOs;
 using Phantasma.RpcClient.Interfaces;
 using Token = Phantasma.Explorer.Domain.Entities.Token;
-using TokenFlags = Phantasma.Explorer.Domain.Entities.TokenFlags;
 
 namespace Phantasma.Explorer.Persistance
 {
@@ -83,13 +82,13 @@ namespace Phantasma.Explorer.Persistance
                     Name = tokenDto.Name,
                     Symbol = tokenDto.Symbol,
                     Decimals = (uint)tokenDto.Decimals,
-                    Flags = (TokenFlags)tokenDto.Flags,
+                    Flags = tokenDto.Flags,
                     MaxSupply = tokenDto.MaxSupply,
                     CurrentSupply = tokenDto.CurrentSupply,
                     OwnerAddress = tokenDto.OwnerAddress
                 });
 
-                if ((tokenDto.Flags & RpcClient.DTOs.TokenFlags.Native) != 0)
+                if ((tokenDto.Flags & TokenFlags.Native) != 0)
                 {
                     AppSettings.NativeSymbol = tokenDto.Symbol;
                 }
@@ -154,7 +153,7 @@ namespace Phantasma.Explorer.Persistance
                         {
                             Data = eventDto.Data,
                             EventAddress = eventDto.EventAddress,
-                            EventKind = (EventKind)eventDto.EvtKind,
+                            EventKind = eventDto.EventKind,
                         };
                         transaction.Events.Add(domainEvent);
 

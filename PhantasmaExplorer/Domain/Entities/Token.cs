@@ -1,4 +1,6 @@
-﻿namespace Phantasma.Explorer.Domain.Entities
+﻿using Phantasma.RpcClient.DTOs;
+
+namespace Phantasma.Explorer.Domain.Entities
 {
     public class Token
     {

@@ -666,7 +666,7 @@ namespace Phantasma.Explorer.Site
             public bool Active { get; set; }
         }
 
-        public struct ErrorContext //todo more info?
+        public struct ErrorContext
         {
             public string ErrorDescription;
             public string ErrorCode;
