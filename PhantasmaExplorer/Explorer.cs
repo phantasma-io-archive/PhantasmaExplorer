@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application;
+using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Site;
 
@@ -18,7 +19,7 @@ namespace Phantasma.Explorer
 
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Initializing Phantasma Block Explorer....");
+            Console.WriteLine("Initializing Phantasma Block Explorer on port 7072....");
 
             var curPath = Directory.GetCurrentDirectory();
             Console.WriteLine("Current path: " + curPath);
@@ -47,6 +48,12 @@ namespace Phantasma.Explorer
         {
             bool exit = false;
             var context = AppServices.GetService<ExplorerDbContext>();
+
+            if (context != null && context.Tokens.Any())
+            {
+                AppSettings.NativeSymbol = new TokenQueries(context).QueryNativeTokenName();//todo move this
+            }
+
             while (!exit)
             {
                 Console.WriteLine();

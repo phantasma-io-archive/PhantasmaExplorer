@@ -2,6 +2,7 @@
 using System.Linq;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Persistance;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Application.Queries
 {
@@ -49,6 +50,11 @@ namespace Phantasma.Explorer.Application.Queries
         public Token QueryToken(string tokenSymbol)
         {
             return _context.Tokens.SingleOrDefault(p => p.Symbol.Equals(tokenSymbol));
+        }
+
+        public string QueryNativeTokenName()
+        {
+            return _context.Tokens.SingleOrDefault(p => (p.Flags & TokenFlags.Native) != 0)?.Symbol;
         }
     }
 }

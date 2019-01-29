@@ -23,7 +23,7 @@ namespace Phantasma.Explorer.Controllers
             var chainQuery = new ChainQueries(_context);
 
             var blocks = blockQuery.QueryLastBlocks();
-            var transactions = txsQuery.QueryLastTransactions();
+            var transactions = txsQuery.QueryLastTransactions(amount: 15);
             var blocksVm = blocks.Select(BlockHomeViewModel.FromBlock).ToList();
 
             var txsVm = transactions.Select(TransactionHomeViewModel.FromTransaction).ToList();

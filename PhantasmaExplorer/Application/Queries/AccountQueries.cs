@@ -58,6 +58,7 @@ namespace Phantasma.Explorer.Application.Queries
                 .Include(p => p.AccountTransactions)
                 .ThenInclude(p => p.Transaction)
                 .ThenInclude(p => p.Block)
+                .Include(p => p.NonFungibleTokens)
                 .SingleOrDefault(p => p.Address.Equals(address));
         }
 
