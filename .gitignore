@@ -6,7 +6,7 @@ PhantasmaExplorer/www/netcore*
 PhantasmaExplorer/www/bin/netcore*
 PhantasmaExplorer/publish/*
 *.user
-
+\*.db
 PhantasmaExplorer/www/nacho_addresses\.txt
 
 PhantasmaExplorer/www/vm_dump\.txt
