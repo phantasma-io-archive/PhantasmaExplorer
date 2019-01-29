@@ -33,8 +33,7 @@ namespace Phantasma.Explorer.ViewModels
 
             foreach (var balance in soulTokens)
             {
-                vm.NativeBalances.Add(BalanceViewModel.FromAccountBalance(account,
-                    balance,
+                vm.NativeBalances.Add(BalanceViewModel.FromAccountBalance(account, balance,
                     phantasmaTokens.SingleOrDefault(p => p.Symbol.Equals(balance.TokenSymbol))));
             }
 

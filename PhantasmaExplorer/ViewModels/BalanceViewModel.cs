@@ -24,7 +24,7 @@ namespace Phantasma.Explorer.ViewModels
                 Value = 0,
                 Balance = TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals),
                 ChainName = balance.Chain,
-                TxnCount = account.AccountTransactions.Count//todo
+                TxnCount = 0//todo remove this stat
             };
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Phantasma.Core.Types;
+using Phantasma.Explorer.Domain.Entities;
 using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
@@ -14,7 +15,7 @@ namespace Phantasma.Explorer.ViewModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        public NftViewModel NftViewModel { get; set; }
+        public NftViewModel NftVm { get; set; }
 
         public static AuctionViewModel FromAuction(AuctionDto auction, decimal calculatedPrice)
         {

@@ -53,7 +53,7 @@ namespace Phantasma.Explorer.Controllers
             return tokensList;
         }
 
-        public List<BalanceViewModel> GetHolders(string symbol) //todo
+        public List<BalanceViewModel> GetHolders(string symbol)
         {
             var accountQuery = new AccountQueries(_context);
             var tokenQuery = new TokenQueries(_context);
@@ -120,7 +120,7 @@ namespace Phantasma.Explorer.Controllers
             return new List<TransactionViewModel>(temp.Where(p => p.AmountTransfer > 0).Take(20));
         }
 
-        public List<NftViewModel> GetNftListByAddress(string inputAddress) //todo test this
+        public List<NftViewModel> GetNftListByAddress(string inputAddress) //todo redo this after rpc stuff
         {
             var accountQuery = new AccountQueries(_context);
             var account = accountQuery.QueryAccount(inputAddress);
@@ -164,17 +164,6 @@ namespace Phantasma.Explorer.Controllers
             }
 
             return nftList;
-        }
-
-        //todo
-        public string GetViewerUrl(string symbol)
-        {
-            if (symbol == "NACHO")
-            {
-                return "https://nacho.men/luchador/body/";
-            }
-
-            return string.Empty;
         }
     }
 }

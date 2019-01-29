@@ -146,6 +146,7 @@ namespace Phantasma.Explorer.Persistance
                         Result = transactionDto.Result
                     };
 
+                    bool counterIncremented = false;
                     //Events
                     foreach (var eventDto in transactionDto.Events)
                     {
@@ -159,10 +160,14 @@ namespace Phantasma.Explorer.Persistance
 
                         await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
 
-                        if (TransactionUtils.IsTransferEvent(domainEvent))
+                        if (!counterIncremented)
                         {
-                            var tokenSymbol = TransactionUtils.GetTokenSymbolFromEvent(domainEvent);
-                            SyncUtils.AddToTokenTxCounter(context, tokenSymbol);
+                            if (TransactionUtils.IsTransferEvent(domainEvent))
+                            {
+                                var tokenSymbol = TransactionUtils.GetTokenSymbolFromEvent(domainEvent);
+                                SyncUtils.AddToTokenTxCounter(context, tokenSymbol);
+                                counterIncremented = true;
+                            }
                         }
                     }
 

@@ -105,13 +105,13 @@ namespace Phantasma.Explorer.Application.Queries
                 return _context.Accounts
                     .Include(p => p.AccountTransactions)
                     .ThenInclude(p => p.Transaction)
-                    .ThenInclude(p=>p.Block)
+                    .ThenInclude(p => p.Block)
                     .SingleOrDefault(p => p.Address.Equals(address))?
                     .AccountTransactions
                     .Where(p => p.Transaction.Block.ChainName.Equals(chain) ||
                                 p.Transaction.Block.ChainAddress.Equals(chain))
                     .Select(c => c.Transaction)
-                    .OrderByDescending(p=>p.Timestamp)
+                    .OrderByDescending(p => p.Timestamp)
                     .AsQueryable();
             }
 
@@ -136,14 +136,20 @@ namespace Phantasma.Explorer.Application.Queries
 
             if (account == null) return 0;
 
+
             if (string.IsNullOrEmpty(chain))
             {
                 return account.AccountTransactions.Count;
             }
 
-            return account.AccountTransactions
-                .Count(p => p.Transaction.Block.ChainAddress.Equals(chain)
-                            || p.Transaction.Block.ChainName.Equals(chain));
+            if (!string.IsNullOrEmpty(chain))
+            {
+                return account.AccountTransactions
+                    .Count(p => p.Transaction.Block.ChainAddress.Equals(chain)
+                                || p.Transaction.Block.ChainName.Equals(chain));
+            }
+
+            return 0;
         }
 
         public bool AddressExists(string address)

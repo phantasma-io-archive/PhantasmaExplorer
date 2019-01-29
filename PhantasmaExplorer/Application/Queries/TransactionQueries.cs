@@ -80,7 +80,7 @@ namespace Phantasma.Explorer.Application.Queries
                 .Include(p => p.Block.Chain)
                 .ToList();
 
-            foreach (var tx in eventList) //todo move this to share
+            foreach (var tx in eventList)
             {
                 foreach (var txEvent in tx.Events)
                 {

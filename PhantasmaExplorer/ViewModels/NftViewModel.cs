@@ -8,6 +8,8 @@ namespace Phantasma.Explorer.ViewModels
         public string Address { get; set; }
         public List<NftInfoViewModel> InfoList { get; set; } = new List<NftInfoViewModel>();
         public bool HasViewerUrl => InfoList.Count > 0 && !string.IsNullOrEmpty(InfoList[0].ViewerUrl);
+
+
     }
 
     public class NftInfoViewModel

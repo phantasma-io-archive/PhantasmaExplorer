@@ -357,7 +357,7 @@ namespace Phantasma.Explorer.Site
                 var context = GetSessionContext(request);
                 if (AddressesControllerInstance.IsAddressStored(addressText))
                 {
-                    var input = request.GetVariable("page"); //todo ask this
+                    var input = request.GetVariable("page");
                     if (!int.TryParse(input, out int pageNumber))
                     {
                         pageNumber = 1;
@@ -393,7 +393,7 @@ namespace Phantasma.Explorer.Site
         {
             try
             {
-                var input = request.GetVariable("page"); //todo ask this
+                var input = request.GetVariable("page");
                 if (!int.TryParse(input, out int pageNumber))
                 {
                     pageNumber = 1;
