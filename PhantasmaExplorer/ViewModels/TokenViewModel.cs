@@ -1,6 +1,5 @@
-﻿using Phantasma.Blockchain.Tokens;
-using Token = Phantasma.Explorer.Domain.Entities.Token;
-using TokenFlags = Phantasma.Explorer.Domain.Entities.TokenFlags;
+﻿using Phantasma.Explorer.Domain.Entities;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -22,8 +21,8 @@ namespace Phantasma.Explorer.ViewModels
             {
                 Symbol = token.Symbol,
                 Name = token.Name,
-                MaxSupply = TokenUtils.ToDecimal(token.MaxSupply, (int)token.Decimals),
-                CurrentSupply = TokenUtils.ToDecimal(token.CurrentSupply, (int)token.Decimals),
+                MaxSupply = Blockchain.Tokens.TokenUtils.ToDecimal(token.MaxSupply, (int)token.Decimals),
+                CurrentSupply = Blockchain.Tokens.TokenUtils.ToDecimal(token.CurrentSupply, (int)token.Decimals),
                 Decimals = token.Decimals,
                 Price = price,
                 Transfers = token.TransactionCount,

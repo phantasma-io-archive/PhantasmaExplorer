@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Phantasma.Explorer.Domain.Entities;
+using Phantasma.RpcClient.DTOs;
 using Phantasma.Explorer.Domain.Infrastructure;
 
 namespace Phantasma.Explorer.Domain.ValueObjects
