@@ -159,6 +159,11 @@ namespace Phantasma.Explorer.Persistance
 
                         await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
 
+                        //if (domainEvent.EventKind == EventKind.Metadata) todo add metadata to token info
+                        //{
+
+                        //}
+
                         if (!counterIncremented)
                         {
                             if (TransactionUtils.IsTransferEvent(domainEvent))

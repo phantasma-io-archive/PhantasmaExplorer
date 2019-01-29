@@ -21,7 +21,7 @@ namespace Phantasma.Explorer.Controllers
             var tokenQueries = new TokenQueries(_context);
             var tokenList = tokenQueries.QueryTokens();
 
-            var auctions = await _phantasmaRpcService.GetAuctions.SendRequestAsync("NACHO");//todo remove NACHO whn bug fixed
+            var auctions = await _phantasmaRpcService.GetAuctions.SendRequestAsync("NACHO"); //todo remove NACHO whn bug fixed
 
             return MarketplaceViewModel.FromAuctionList(auctions, tokenList);
         }

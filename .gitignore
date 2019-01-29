@@ -10,3 +10,4 @@ PhantasmaExplorer/publish/*
 PhantasmaExplorer/www/nacho_addresses\.txt
 
 PhantasmaExplorer/www/vm_dump\.txt
+*.db
