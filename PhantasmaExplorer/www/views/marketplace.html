@@ -1,21 +1,23 @@
-<div class="row">
-
+<div class="row justify-content-center">
+    <h1 class="page-title">NFT Marketplace</h1>
     {{#if marketplace.AuctionsList}}
     {{#each marketplace.AuctionsList}}
-    <div class="col-sm-4">
-        <div class="card" style="min-width: 18rem; max-width: 18rem;">
+    <div class="col-sm-3 text-center" style="margin-bottom: 20px;">
+        <div class="card">
             <!--card-->
-            <a href="#">
-                <!--link a tocar em toda a car-->
-                <div class="card-body">
-                    <img class="card-img-top" src="https://placehold.it/140x280/abc" alt="Card image cap">
-                    <div class="card-body">
-                        <h5 class="card-title">{{TokenId}}</h5>
-                        <p class="card-text">Description.</p>
-                        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                    </div>
-                </div>
-            </a>
+            <div class="view overlay">
+                <a href="#">
+                    <img class="card-img-top" src="https://placehold.it/160x160/abc" alt="Card image cap">
+                </a>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Token ID: {{TokenId}}</h5>
+                <p class="card-text">Started: {{StartDate}}</p>
+                <p class="card-text">Ends: {{EndDate}}</p>
+                <p class="card-text">Price: {{Price}} {{QuoteSymbol}}</p>
+
+                <a href="https://nacho.men/luchador/{{TokenId}}" target="_blank" rel="noopener noreferrer" class="btn btn-indigo btn-rounded btn-md">See details</a>
+            </div>
         </div>
     </div>
     {{/each}}

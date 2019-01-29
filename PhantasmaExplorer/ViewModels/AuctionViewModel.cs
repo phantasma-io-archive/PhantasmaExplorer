@@ -6,13 +6,15 @@ namespace Phantasma.Explorer.ViewModels
 {
     public class AuctionViewModel
     {
-        public string CreatorAddress;
-        public string QuoteSymbol;
-        public string BaseSymbol;
-        public string TokenId;
-        public decimal Price;
-        public DateTime StartDate;
-        public DateTime EndDate;
+        public string CreatorAddress { get; set; }
+        public string QuoteSymbol { get; set; }
+        public string BaseSymbol { get; set; }
+        public string TokenId { get; set; }
+        public decimal Price { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+
+        public NftViewModel NftViewModel { get; set; }
 
         public static AuctionViewModel FromAuction(AuctionDto auction, decimal calculatedPrice)
         {

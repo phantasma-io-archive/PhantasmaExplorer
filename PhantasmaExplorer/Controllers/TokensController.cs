@@ -130,7 +130,7 @@ namespace Phantasma.Explorer.Controllers
             {
                 foreach (var nfToken in account.NonFungibleTokens)
                 {
-                    var viewerURL = ""; //todo invoke contracts appChain.InvokeContract("apps", "GetTokenViewer", nfToken.Symbol).ToString();
+                    var viewerURL = "https://nacho.men/luchador/$ID"; //todo invoke contracts appChain.InvokeContract("apps", "GetTokenViewer", nfToken.Symbol).ToString();
 
                     var existingVm = nftList.SingleOrDefault(vm => vm.Symbol == nfToken.TokenSymbol);
                     if (existingVm != null)
