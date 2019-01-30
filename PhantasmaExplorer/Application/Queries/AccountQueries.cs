@@ -16,7 +16,7 @@ namespace Phantasma.Explorer.Application.Queries
             _context = context;
         }
 
-        public ICollection<Account> QueryRichList(string tokenSymbol = null, int numberOfAddresses = 20)
+        public ICollection<Account> QueryRichList(string tokenSymbol = null, int numberOfAddresses = AppSettings.PageSize)
         {
             var symbol = string.IsNullOrEmpty(tokenSymbol) ? AppSettings.NativeSymbol : tokenSymbol;
 

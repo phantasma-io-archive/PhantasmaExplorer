@@ -17,7 +17,7 @@ namespace Phantasma.Explorer.ViewModels
         public string ViewerUrl { get; set; }
         public string InfoUrl { get; set; }
 
-        public static AuctionViewModel FromAuction(AuctionDto auction, decimal calculatedPrice)
+        public static AuctionViewModel FromAuction(AuctionDto auction, decimal calculatedPrice, string viewerUrl, string infoUrl)
         {
             return new AuctionViewModel
             {
@@ -28,8 +28,8 @@ namespace Phantasma.Explorer.ViewModels
                 EndDate = new Timestamp(auction.StartDate),
                 StartDate = new Timestamp(auction.StartDate),
                 TokenId = auction.TokenId,
-                ViewerUrl = $"https://nacho.men/luchador/body/{auction.TokenId}", //todo
-                InfoUrl = $"https://nacho.men/luchador/{auction.TokenId}"
+                ViewerUrl = viewerUrl,
+                InfoUrl = infoUrl
             };
         }
     }

@@ -43,7 +43,7 @@ namespace Phantasma.Explorer.Controllers
             return addressQueries.AddressExists(address);
         }
 
-        public AddressViewModel GetAddress(string addressText, int currentPage, int pageSize = 20)
+        public AddressViewModel GetAddress(string addressText, int currentPage, int pageSize = AppSettings.PageSize)
         {
             var addressQueries = new AccountQueries(_context);
             var tokenQueries = new TokenQueries(_context);
@@ -75,7 +75,7 @@ namespace Phantasma.Explorer.Controllers
             return null;
         }
 
-        private List<TransactionViewModel> GetAddressTransactions(string address, int currentPage, int pageSize = 20, string chain = null)
+        private List<TransactionViewModel> GetAddressTransactions(string address, int currentPage, int pageSize = AppSettings.PageSize, string chain = null)
         {
             var txQuery = new AccountQueries(_context);
 

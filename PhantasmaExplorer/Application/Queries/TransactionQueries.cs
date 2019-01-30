@@ -32,7 +32,7 @@ namespace Phantasma.Explorer.Application.Queries
                 .Include(p => p.Block);
         }
 
-        public ICollection<Transaction> QueryLastTransactions(string chain = null, int amount = 20)
+        public ICollection<Transaction> QueryLastTransactions(string chain = null, int amount = AppSettings.PageSize)
         {
             if (string.IsNullOrEmpty(chain)) //no specific chain
             {
@@ -70,7 +70,7 @@ namespace Phantasma.Explorer.Application.Queries
                 .Count(p => p.Block.ChainAddress.Equals(chain) || p.Block.ChainName.Equals(chain));
         }
 
-        public ICollection<Transaction> QueryLastTokenTransactions(string tokenSymbol, int amount = 20)
+        public ICollection<Transaction> QueryLastTokenTransactions(string tokenSymbol, int amount = AppSettings.PageSize)
         {
             var txList = new List<Transaction>();
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
@@ -18,7 +19,7 @@ namespace Phantasma.Explorer.Controllers
             return txQuery.QueryTotalChainTransactionCount(chain);
         }
 
-        public List<TransactionViewModel> GetTransactions(int currentPage, int pageSize = 20, string chain = null)
+        public List<TransactionViewModel> GetTransactions(int currentPage, int pageSize = AppSettings.PageSize, string chain = null)
         {
             var txQuery = new TransactionQueries(_context);
 

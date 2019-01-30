@@ -109,14 +109,14 @@ namespace Phantasma.Explorer.Controllers
             return balances;
         }
 
-        public List<TransactionViewModel> GetTransfers(string symbol)
+        public List<TransactionViewModel> GetTransfers(string symbol, int amount = AppSettings.PageSize)
         {
             var txsQuery = new TransactionQueries(_context);
             var transfers = txsQuery.QueryLastTokenTransactions(symbol, 100);
 
             var temp = transfers.Select(TransactionViewModel.FromTransaction).ToList();
 
-            return new List<TransactionViewModel>(temp.Where(p => p.AmountTransfer > 0).Take(20));
+            return new List<TransactionViewModel>(temp.Where(p => p.AmountTransfer > 0).Take(amount));
         }
 
         public List<NftViewModel> GetNftListByAddress(string inputAddress) //todo redo this after rpc stuff

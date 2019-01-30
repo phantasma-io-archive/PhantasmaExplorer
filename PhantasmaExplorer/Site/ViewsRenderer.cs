@@ -568,13 +568,29 @@ namespace Phantasma.Explorer.Site
         {
             try
             {
+                var input = request.GetVariable("page");
+                if (!int.TryParse(input, out int pageNumber))
+                {
+                    pageNumber = 1;
+                }
+
                 var controller = MarketplaceControllerInstance;
-                var marketVm = controller.GetAllAuctions().Result;
+
+                var pageModel = new PaginationModel
+                {
+                    Count = controller.GetAuctionsCount().Result,
+                    CurrentPage = pageNumber,
+                    PageSize = AppSettings.PageSize,
+                };
+
+                var marketVm = controller.GetAuctions(pageModel.CurrentPage, pageModel.PageSize).Result;
                 var context = GetSessionContext(request);
+
                 if (marketVm.TotalAuctions > 0)
                 {
                     context[AppSettings.MenuContext] = _menus;
                     context[AppSettings.MarketplaceContext] = marketVm;
+                    context[AppSettings.PaginationContext] = pageModel;
                     return RendererView(context, "layout", AppSettings.MarketplaceContext);
                 }
             }

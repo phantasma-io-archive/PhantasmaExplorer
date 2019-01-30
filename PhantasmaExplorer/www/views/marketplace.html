@@ -6,8 +6,8 @@
         <div class="card">
             <!--card-->
             <div class="view overlay">
-                <a href="#">
-                    <img class="card-img-top" src="https://placehold.it/160x160/abc" alt="Card image cap">
+                <a href="{{InfoUrl}}/{{TokenId}}">
+                    <img class="card-img-top" src="{{ViewerUrl}}/{{TokenId}}" alt="Card image cap">
                 </a>
             </div>
             <div class="card-body">
@@ -16,11 +16,26 @@
                 <p class="card-text">Ends: {{EndDate}}</p>
                 <p class="card-text">Price: {{Price}} {{QuoteSymbol}}</p>
 
-                <a href="https://nacho.men/luchador/{{TokenId}}" target="_blank" rel="noopener noreferrer" class="btn btn-indigo btn-rounded btn-md">See details</a>
+                <a href="{{InfoUrl}}/{{TokenId}}" target="_blank" rel="noopener noreferrer" class="btn btn-indigo btn-rounded btn-md">See details</a>
             </div>
         </div>
     </div>
     {{/each}}
+    <div class="col-sm-12">
+        <ul class="pager">
+            {{#if pagination.ShowPrevious}}
+            <li class="previous"><a href="/blocks/{{pagination.PreviousPage}}"><span aria-hidden="true">&larr;</span> Previous</a></li>
+            {{#else}}
+            <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Previous</a></li>
+            {{/if}}
+
+            {{#if pagination.ShowNext}}
+            <li class="next"><a href="/blocks/{{pagination.NextPage}}">Next <span aria-hidden="true">&rarr;</span></a></li>
+            {{#else}}
+            <li class="next disabled"><a>Next <span aria-hidden="true">&rarr;</span></a></li>
+            {{/if}}
+        </ul>
+    </div>
     {{#else}}
     Nothing here...
     {{/if}}

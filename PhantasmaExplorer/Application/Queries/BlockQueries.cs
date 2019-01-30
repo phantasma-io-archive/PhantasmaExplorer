@@ -40,7 +40,7 @@ namespace Phantasma.Explorer.Application.Queries
             });
         }
 
-        public ICollection<Block> QueryLastBlocks(string chain = null, int amount = 20)
+        public ICollection<Block> QueryLastBlocks(string chain = null, int amount = AppSettings.PageSize)
         {
             if (string.IsNullOrEmpty(chain)) //get last x blocks from all chains
             {
