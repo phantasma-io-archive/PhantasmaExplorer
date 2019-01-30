@@ -48,7 +48,7 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
             {
                 if (context.Chains.SingleOrDefault(p => p.Address.Equals(chainDto.Address)) == null)
                 {
-                    Console.WriteLine($"Seeding chain {chainDto.Name}");
+                    Console.WriteLine($"Sync {chainDto.Name} chain info");
 
                     var chain = new Chain
                     {
