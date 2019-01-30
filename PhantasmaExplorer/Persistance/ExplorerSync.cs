@@ -9,6 +9,7 @@ using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance.Infrastructure;
 using Phantasma.Explorer.Utils;
+using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
 using Phantasma.RpcClient.Interfaces;
 
@@ -168,7 +169,7 @@ namespace Phantasma.Explorer.Persistance
                     {
                         if (TransactionUtils.IsTransferEvent(domainEvent))
                         {
-                            var tokenSymbol = TransactionUtils.GetTokenSymbolFromEvent(domainEvent);
+                            var tokenSymbol = TransactionUtils.GetTokenSymbolFromTokenEventData(domainEvent);
                             SyncUtils.AddToTokenTxCounter(context, tokenSymbol);
                             counterIncremented = true;
                         }
@@ -269,9 +270,22 @@ namespace Phantasma.Explorer.Persistance
                     OwnerAddress = tokenDto.OwnerAddress
                 };
 
+                if (tokenDto.MetadataList != null)
+                {
+                    foreach (var metadataDto in tokenDto.MetadataList)
+                    {
+                        token.MetadataList.Add(new TokenMetadata
+                        {
+                            Key = metadataDto.Key,
+                            Value = metadataDto.Value.Decode()
+                        });
+                    }
+                }
+
                 await context.Tokens.AddAsync(token);
 
                 await context.SaveChangesAsync();
+
                 return token;
             }
 

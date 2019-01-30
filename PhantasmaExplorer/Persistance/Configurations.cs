@@ -14,6 +14,7 @@ namespace Phantasma.Explorer.Persistance
                 a.HasForeignKey("Address");
                 a.Property(ca => ca.Chain);
                 a.Property(ca => ca.TokenSymbol);
+                a.Property(ca => ca.Amount);
                 a.HasKey("Address", "Chain", "TokenSymbol", "Amount");
             });
         }
@@ -65,6 +66,14 @@ namespace Phantasma.Explorer.Persistance
         public void Configure(EntityTypeBuilder<Token> builder)
         {
             builder.HasKey(e => e.Symbol);
+
+            builder.OwnsMany(p => p.MetadataList, a =>
+            {
+                a.HasForeignKey("Symbol");
+                a.Property(ca => ca.Key);
+                a.Property(ca => ca.Value);
+                a.HasKey("Symbol", "Key", "Value");
+            });
         }
     }
 

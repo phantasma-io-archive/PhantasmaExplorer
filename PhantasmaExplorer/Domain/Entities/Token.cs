@@ -1,4 +1,6 @@
-﻿using Phantasma.RpcClient.DTOs;
+﻿using System.Collections.Generic;
+using Phantasma.Explorer.Domain.ValueObjects;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Domain.Entities
 {
@@ -7,6 +9,7 @@ namespace Phantasma.Explorer.Domain.Entities
         public Token()
         {
             Flags = TokenFlags.None;
+            MetadataList = new List<TokenMetadata>();
         }
 
         public string Symbol { get; set; }
@@ -17,6 +20,7 @@ namespace Phantasma.Explorer.Domain.Entities
         public string MaxSupply { get; set; }
         public string OwnerAddress { get; set; }
 
+        public List<TokenMetadata> MetadataList { get; set; }
         public TokenFlags Flags { get; set; }
     }
 }

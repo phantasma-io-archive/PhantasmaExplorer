@@ -8,6 +8,7 @@ using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance.Infrastructure;
 using Phantasma.Explorer.Utils;
+using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
 using Phantasma.RpcClient.Interfaces;
 using Token = Phantasma.Explorer.Domain.Entities.Token;
@@ -77,7 +78,7 @@ namespace Phantasma.Explorer.Persistance
         {
             foreach (var tokenDto in tokenList)
             {
-                context.Tokens.Add(new Token
+                var contextToken = new Token
                 {
                     Name = tokenDto.Name,
                     Symbol = tokenDto.Symbol,
@@ -85,8 +86,23 @@ namespace Phantasma.Explorer.Persistance
                     Flags = tokenDto.Flags,
                     MaxSupply = tokenDto.MaxSupply,
                     CurrentSupply = tokenDto.CurrentSupply,
-                    OwnerAddress = tokenDto.OwnerAddress
-                });
+                    OwnerAddress = tokenDto.OwnerAddress,
+                };
+
+                if (tokenDto.MetadataList != null)
+                {
+                    foreach (var metadataDto in tokenDto.MetadataList)
+                    {
+                        contextToken.MetadataList.Add(new TokenMetadata
+                        {
+                            Key = metadataDto.Key,
+                            Value = metadataDto.Value.Decode()
+                        });
+                    }
+                }
+
+
+                context.Tokens.Add(contextToken);
 
                 if ((tokenDto.Flags & TokenFlags.Native) != 0)
                 {
@@ -159,16 +175,11 @@ namespace Phantasma.Explorer.Persistance
 
                         await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
 
-                        //if (domainEvent.EventKind == EventKind.Metadata) todo add metadata to token info
-                        //{
-
-                        //}
-
                         if (!counterIncremented)
                         {
                             if (TransactionUtils.IsTransferEvent(domainEvent))
                             {
-                                var tokenSymbol = TransactionUtils.GetTokenSymbolFromEvent(domainEvent);
+                                var tokenSymbol = TransactionUtils.GetTokenSymbolFromTokenEventData(domainEvent);
                                 SyncUtils.AddToTokenTxCounter(context, tokenSymbol);
                                 counterIncremented = true;
                             }

@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Phantasma.Explorer.Migrations
 {
-    public partial class initial : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -131,6 +132,25 @@ namespace Phantasma.Explorer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TokenMetadata",
+                columns: table => new
+                {
+                    Key = table.Column<string>(nullable: false),
+                    Value = table.Column<byte[]>(nullable: false),
+                    Symbol = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TokenMetadata", x => new { x.Symbol, x.Key, x.Value });
+                    table.ForeignKey(
+                        name: "FK_TokenMetadata_Tokens_Symbol",
+                        column: x => x.Symbol,
+                        principalTable: "Tokens",
+                        principalColumn: "Symbol",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Transactions",
                 columns: table => new
                 {
@@ -234,13 +254,16 @@ namespace Phantasma.Explorer.Migrations
                 name: "NonFungibleTokens");
 
             migrationBuilder.DropTable(
-                name: "Tokens");
+                name: "TokenMetadata");
 
             migrationBuilder.DropTable(
                 name: "Transactions");
 
             migrationBuilder.DropTable(
                 name: "Accounts");
+
+            migrationBuilder.DropTable(
+                name: "Tokens");
 
             migrationBuilder.DropTable(
                 name: "Blocks");

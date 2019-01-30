@@ -48,11 +48,12 @@ namespace Phantasma.Explorer
         {
             bool exit = false;
             var context = AppServices.GetService<ExplorerDbContext>();
+            await context.Database.EnsureCreatedAsync();
 
-            if (context != null && context.Tokens.Any())
-            {
-                AppSettings.NativeSymbol = new TokenQueries(context).QueryNativeTokenName();//todo move this
-            }
+            //if (context.Tokens.Any())
+            //{
+            //    AppSettings.NativeSymbol = new TokenQueries(context).QueryNativeTokenName();//todo move this
+            //}
 
             while (!exit)
             {

@@ -18,7 +18,7 @@ namespace Phantasma.Explorer.Utils
     {
         public static string GetTxDescription(Transaction tx, TransactionViewModel vm = null)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>(); //Todo fix me
+            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
             var phantasmaChains = context.Chains;
             var phantasmaTokens = context.Tokens;
             string description = null;
@@ -244,7 +244,7 @@ namespace Phantasma.Explorer.Utils
             return phantasmaChains.Single(p => p.Address.Equals(address)).Name;
         }
 
-        public static string GetTokenSymbolFromEvent(Event txEvent)
+        public static string GetTokenSymbolFromTokenEventData(Event txEvent)
         {
             return Serialization.Unserialize<TokenEventData>(txEvent.Data.Decode()).symbol;
         }
