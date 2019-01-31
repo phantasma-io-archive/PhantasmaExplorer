@@ -22,14 +22,14 @@ namespace Phantasma.Explorer.Controllers
             var tokenQueries = new TokenQueries(_context);
             var tokenList = tokenQueries.QueryTokens();
 
-            var auctions = await _phantasmaRpcService.GetAuctions.SendRequestAsync(currentPage, pageSize, "NACHO"); //todo remove NACHO whn bug fixed
+            var auctions = await _phantasmaRpcService.GetAuctions.SendRequestAsync(currentPage, pageSize); //todo remove NACHO whn bug fixed
 
             return MarketplaceViewModel.FromAuctionList(auctions.AuctionsList, tokenList);
         }
 
         public async Task<int> GetAuctionsCount(string tokenSymbol = null)
         {
-            return await _phantasmaRpcService.GetAuctionCount.SendRequestAsync("NACHO"); //todo remove
+            return await _phantasmaRpcService.GetAuctionCount.SendRequestAsync(); //todo remove
         }
     }
 }
