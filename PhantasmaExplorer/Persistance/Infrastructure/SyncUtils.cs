@@ -182,12 +182,19 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
 
         private static bool IsTokenMetadataEqual(TokenDto tokenDto, Token token)
         {
-            foreach (var tokenMetadataDto in tokenDto.MetadataList)
+            if (tokenDto.MetadataList == null)
             {
-                if (token.MetadataList.SingleOrDefault(p =>
-                    p.Key.Equals(tokenMetadataDto.Key) && p.Value.Equals(tokenMetadataDto.Value.Decode())) != null)
+                if (!token.MetadataList.Any()) return true;
+            }
+            else
+            {
+                foreach (var tokenMetadataDto in tokenDto.MetadataList)
                 {
-                    return false;
+                    if (token.MetadataList.SingleOrDefault(p =>
+                            p.Key.Equals(tokenMetadataDto.Key) && p.Value.Equals(tokenMetadataDto.Value.Decode())) != null)
+                    {
+                        return false;
+                    }
                 }
             }
 

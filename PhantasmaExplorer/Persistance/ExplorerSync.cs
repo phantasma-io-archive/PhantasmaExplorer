@@ -55,6 +55,8 @@ namespace Phantasma.Explorer.Persistance
                         Thread.Sleep(AppSettings.SyncTime);
                     }
 
+                    Console.WriteLine("Sync has stopped!");
+
                     _retries = 0;
                 }
                 catch (Exception e)
