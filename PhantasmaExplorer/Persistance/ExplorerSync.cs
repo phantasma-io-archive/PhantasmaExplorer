@@ -43,6 +43,7 @@ namespace Phantasma.Explorer.Persistance
                     if (_retries >= MaxRetries)
                     {
                         Console.WriteLine("Something went wrong with synchronization");
+                        _retries = 0;
                         return;
                     }
                     while (ContinueSync)
