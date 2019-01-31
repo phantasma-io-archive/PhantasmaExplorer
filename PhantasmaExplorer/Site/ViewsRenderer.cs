@@ -113,6 +113,7 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Server.Get($"{AppSettings.UrlApp}/{{input}}", RouteApp);
 
             TemplateEngine.Server.Get($"{AppSettings.UrlMarketplace}", RouteMarketplace);
+            TemplateEngine.Server.Get($"{AppSettings.UrlMarketplace}/{{page}}", RouteMarketplace);
 
             //SetupAPIHandlers(); todo
         }
