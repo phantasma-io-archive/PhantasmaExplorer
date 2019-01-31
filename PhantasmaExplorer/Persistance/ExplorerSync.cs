@@ -19,11 +19,12 @@ namespace Phantasma.Explorer.Persistance
     {
         private static int _retries;
         private const int MaxRetries = 5;
+        public static bool ContinueSync { get; set; } = true;
+
+        private int SyncAdditionalDataCounter { get; set; }
 
         private readonly IPhantasmaRpcService _phantasmaRpcService;
         private readonly List<string> _addressChanged;
-
-        public static bool ContinueSync { get; set; } = true;
 
         public ExplorerSync()
         {
@@ -31,7 +32,7 @@ namespace Phantasma.Explorer.Persistance
             _addressChanged = new List<string>();
         }
 
-        public static void StartSync()
+        public static void StartSync(ExplorerDbContext context)
         {
             var explorerSync = new ExplorerSync();
             new Thread(async () =>
@@ -50,7 +51,7 @@ namespace Phantasma.Explorer.Persistance
                         Console.WriteLine("It may take a while to stop");
                         Console.WriteLine("\n\n");
 
-                        await explorerSync.Sync();
+                        await explorerSync.Sync(context);
                         Thread.Sleep(AppSettings.SyncTime);
                     }
 
@@ -59,7 +60,7 @@ namespace Phantasma.Explorer.Persistance
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
-                    StartSync();
+                    StartSync(context);
                     _retries++;
                 }
             }).Start();
@@ -79,9 +80,10 @@ namespace Phantasma.Explorer.Persistance
             }).Start();
         }
 
-        public async Task Sync()
+        public async Task Sync(ExplorerDbContext context)
         {
-            var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+            SyncAdditionalDataCounter++;
+
             foreach (var chain in context.Chains)
             {
                 while (await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address) > chain.Height)
@@ -104,12 +106,21 @@ namespace Phantasma.Explorer.Persistance
             await UpdateAccountBalances(context, _addressChanged);
             _addressChanged.Clear();
 
-            Console.WriteLine("Sync new chains?");
-            await SyncChains(context);
+            if (SyncAdditionalDataCounter >= 5)
+            {
+                Console.WriteLine("Sync new chains?");
+                await SyncChains(context);
 
-            Console.WriteLine("Sync new apps?");
-            var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
-            await SyncUtils.SyncApps(context, appList);
+                Console.WriteLine("Sync new apps?");
+                var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
+                await SyncUtils.SyncApps(context, appList);
+
+                Console.WriteLine("Sync new tokens?");
+                var tokenList = await _phantasmaRpcService.GetTokens.SendRequestAsync();
+                await SyncUtils.SyncToken(context, tokenList);
+
+                SyncAdditionalDataCounter = 0;
+            }
         }
 
         private async Task SyncChains(ExplorerDbContext context)

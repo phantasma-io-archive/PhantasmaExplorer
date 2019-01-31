@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance.Infrastructure;
 using Phantasma.Explorer.Site;
 using Phantasma.Explorer.Utils;
-using Phantasma.Numerics;
-using Phantasma.RpcClient.DTOs;
 using Phantasma.RpcClient.Interfaces;
-using Token = Phantasma.Explorer.Domain.Entities.Token;
 
 namespace Phantasma.Explorer.Persistance
 {
@@ -51,7 +46,7 @@ namespace Phantasma.Explorer.Persistance
                 if (!context.Tokens.Any())
                 {
                     var tokenList = await _phantasmaRpcService.GetTokens.SendRequestAsync();
-                    await SeedTokens(context, tokenList);
+                    await SyncUtils.SyncToken(context, tokenList);
                 }
 
                 if (!context.Chains.Any())
@@ -73,44 +68,6 @@ namespace Phantasma.Explorer.Persistance
                 Console.WriteLine("Exception occurred during DB initialization, explorer cannot start");
                 throw;
             }
-        }
-
-        private async Task SeedTokens(ExplorerDbContext context, IList<TokenDto> tokenList)
-        {
-            foreach (var tokenDto in tokenList)
-            {
-                var contextToken = new Token
-                {
-                    Name = tokenDto.Name,
-                    Symbol = tokenDto.Symbol,
-                    Decimals = (uint)tokenDto.Decimals,
-                    Flags = tokenDto.Flags,
-                    MaxSupply = tokenDto.MaxSupply,
-                    CurrentSupply = tokenDto.CurrentSupply,
-                    OwnerAddress = tokenDto.OwnerAddress,
-                };
-
-                if (tokenDto.MetadataList != null)
-                {
-                    foreach (var metadataDto in tokenDto.MetadataList)
-                    {
-                        contextToken.MetadataList.Add(new TokenMetadata
-                        {
-                            Key = metadataDto.Key,
-                            Value = metadataDto.Value.Decode()
-                        });
-                    }
-                }
-
-                context.Tokens.Add(contextToken);
-
-                if ((tokenDto.Flags & TokenFlags.Native) != 0)
-                {
-                    AppSettings.NativeSymbol = tokenDto.Symbol;
-                }
-            }
-
-            await context.SaveChangesAsync();
         }
 
         private async Task SeedChains(ExplorerDbContext context)
@@ -136,7 +93,7 @@ namespace Phantasma.Explorer.Persistance
                 for (int i = 1; i <= height; i++)
                 {
                     progress.Report((double)i / height);
-                   
+
                     var blockDto = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, i);
                     var block = new Block
                     {

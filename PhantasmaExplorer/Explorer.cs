@@ -9,6 +9,7 @@ using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Site;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer
 {
@@ -47,14 +48,6 @@ namespace Phantasma.Explorer
         private static async Task StartMenu()
         {
             bool exit = false;
-            var context = AppServices.GetService<ExplorerDbContext>();
-            await context.Database.EnsureCreatedAsync();
-
-            //if (context.Tokens.Any())
-            //{
-            //    AppSettings.NativeSymbol = new TokenQueries(context).QueryNativeTokenName();//todo move this
-            //}
-
             while (!exit)
             {
                 Console.WriteLine();
@@ -73,17 +66,15 @@ namespace Phantasma.Explorer
                     case '1':
                         ExplorerSync.ContinueSync = false;
                         Console.Clear();
-                        Thread.Sleep(2000);
                         Console.WriteLine("Initializing db...");
-                        await InitDb(context);
+                        await InitDb();
                         break;
 
                     case '2':
                         Console.Clear();
-                        Thread.Sleep(2000);
                         ExplorerSync.ContinueSync = true;
                         Console.WriteLine("Starting sync process");
-                        ExplorerSync.StartSync();
+                        Sync();
                         break;
 
                     case '3':
@@ -93,15 +84,18 @@ namespace Phantasma.Explorer
                     case '4':
                         ExplorerSync.ContinueSync = false;
                         Console.Clear();
-                        EnsureNoMissingBlocks(context);
+                        EnsureNoMissingBlocks();
                         break;
+
                     case '5':
+                        Console.Clear();
                         ExplorerSync.UpdateAllAddressBalances();
                         break;
+
                     case '6':
                         ExplorerSync.ContinueSync = false;
                         Console.Clear();
-                        await DropDb(context);
+                        await DropDb();
                         break;
 
                     case '7':
@@ -111,8 +105,10 @@ namespace Phantasma.Explorer
             }
         }
 
-        private static void EnsureNoMissingBlocks(ExplorerDbContext context)
+        private static void EnsureNoMissingBlocks()
         {
+            var context = AppServices.GetService<ExplorerDbContext>();
+
             foreach (var chain in context.Chains.Include(p => p.Blocks))
             {
                 Console.WriteLine($"Checking {chain.Name} chain blocks...");
@@ -131,8 +127,10 @@ namespace Phantasma.Explorer
             Console.WriteLine("No blocks missing. Success!");
         }
 
-        private static async Task DropDb(ExplorerDbContext context)
+        private static async Task DropDb()
         {
+            var context = AppServices.GetService<ExplorerDbContext>();
+
             if (await context.Database.EnsureDeletedAsync())
             {
                 Console.WriteLine("Database deleted with success");
@@ -143,9 +141,13 @@ namespace Phantasma.Explorer
             }
         }
 
-        private static async Task InitDb(ExplorerDbContext context)
+        private static async Task InitDb()
         {
-            context.Database.Migrate();
+            var context = AppServices.GetService<ExplorerDbContext>();
+            await context.Database.EnsureCreatedAsync();
+
+            //context.Database.Migrate(); todo investigate
+
             if (!await ExplorerInicializer.Initialize(context))
             {
                 Console.WriteLine("DB is already initialized");
@@ -154,6 +156,12 @@ namespace Phantasma.Explorer
             {
                 Console.WriteLine("Finished initializing db...");
             }
+        }
+
+        private static void Sync()
+        {
+            var context = AppServices.GetService<ExplorerDbContext>();
+            ExplorerSync.StartSync(context);
         }
     }
 }
