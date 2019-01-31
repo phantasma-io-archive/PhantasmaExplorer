@@ -20,6 +20,8 @@ namespace Phantasma.Explorer
 
         static async Task Main(string[] args)
         {
+            PrintASCII();
+            Console.WriteLine("\n");
             Console.WriteLine("Initializing Phantasma Block Explorer on port 7072....");
 
             var curPath = Directory.GetCurrentDirectory();
@@ -103,6 +105,35 @@ namespace Phantasma.Explorer
                         break;
                 }
             }
+        }
+
+        private static void PrintASCII()
+        {
+            Console.Write(@"dyo/ommmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmo/ohm
+./yyo---::::::::::::::::::::::::::::::::::---oyyo/
+.-:::++++++++++++++++++++++++++++++++++++++++::-..
+-:/ooooooooooooooooooooooooooooooooooooooooooo+/:-
+/+oooooooooooooooooooooooooooooooooooooooooooooo+/
++oooooooooooooooooooooooooooooooooooooooooooooooo+
+ooooooooooooo+///+oooooooooooooo+///+ooooooooooooo
+ooooooooooo:-.---../+oooooooo+/-.---`-:ooooooooooo
+ooooooooo+/`-/ooo/-./+oooooo+/`:/ooo/-./+ooooooooo
+ooooooooo/:.:oooso+.:+oooooo+:`/+ooss/-:/ooooooooo
+ooooooooo++`-:+oo/:./oooooooo/.-:+oo/-.++ooooooooo
+ooooooooooo+:-----:+oooooooooo+:-----:+ooooooooooo
+oooooooooooooo+++oooooooooooooooo+++oooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooo
+oooooooooooooooooooooooooooooooooooooooooooooooooo
+ooooo+ooooo+ooooooooooooooo+oooooooooo+ooooo+ooooo
+o+++osooosoo++oooooooosooooooooooooo++oossooso+++o
+yyyyhmddMmdyso+++ooosydmNNNmysoo++++osymmNddmhyyyy
+dhhhddhdMmdyhdo++osdhhdNMNmdhhds+++odhymNMdhddhhhd
+NNmmNMMMMMMmdhmmmmmymNMMMMMMNmymmmmmoymMMMMMMNmmNN");
         }
 
         private static void EnsureNoMissingBlocks()
