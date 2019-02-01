@@ -23,7 +23,7 @@ namespace Phantasma.Explorer.Controllers
 
             var addressList = new List<AddressViewModel>();
 
-            var list = addressQueries.QueryRichList(numberOfAddresses: 30);
+            var list = addressQueries.QueryRichList(30);
 
             foreach (var account in list)
             {

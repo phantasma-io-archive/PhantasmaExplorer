@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Persistance;
 using Phantasma.IO;
 using Phantasma.Numerics;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Application.Queries
 {
@@ -32,7 +34,7 @@ namespace Phantasma.Explorer.Application.Queries
                 .Include(p => p.Block);
         }
 
-        public ICollection<Transaction> QueryLastTransactions(string chain = null, int amount = AppSettings.PageSize)
+        public ICollection<Transaction> QueryLastTransactions(int amount, string chain = null)
         {
             if (string.IsNullOrEmpty(chain)) //no specific chain
             {
@@ -70,7 +72,7 @@ namespace Phantasma.Explorer.Application.Queries
                 .Count(p => p.Block.ChainAddress.Equals(chain) || p.Block.ChainName.Equals(chain));
         }
 
-        public ICollection<Transaction> QueryLastTokenTransactions(string tokenSymbol, int amount = AppSettings.PageSize)
+        public ICollection<Transaction> QueryLastTokenTransactions(string tokenSymbol, int amount)
         {
             var txList = new List<Transaction>();
 
@@ -82,13 +84,23 @@ namespace Phantasma.Explorer.Application.Queries
 
             foreach (var tx in eventList)
             {
-                foreach (var txEvent in tx.Events)
+                if (tx.Events != null)
                 {
-                    var symbol = Serialization.Unserialize<string>(txEvent.Data.Decode()); //todo remove serialization dependency
-                    if (symbol.Equals(tokenSymbol))
+                    foreach (var txEvent in tx.Events)
                     {
-                        txList.Add(tx);
-                        break;
+                        if (txEvent.EventKind == EventKind.TokenSend
+                            || txEvent.EventKind == EventKind.TokenReceive
+                            || txEvent.EventKind == EventKind.TokenEscrow
+                            || txEvent.EventKind == EventKind.TokenMint
+                            || txEvent.EventKind == EventKind.TokenBurn
+                            || txEvent.EventKind == EventKind.TokenStake
+                            || txEvent.EventKind == EventKind.TokenUnstake)
+                        {
+                            var tokenEvent = Serialization.Unserialize<TokenEventData>(txEvent.Data.Decode());
+                            if (!tokenEvent.symbol.Equals(tokenSymbol)) continue;
+                            txList.Add(tx);
+                            break;
+                        }
                     }
                 }
             }

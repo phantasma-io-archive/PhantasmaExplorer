@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
@@ -22,14 +23,14 @@ namespace Phantasma.Explorer.Controllers
             var txsQuery = new TransactionQueries(_context);
             var chainQuery = new ChainQueries(_context);
 
-            var blocks = blockQuery.QueryLastBlocks();
-            var transactions = txsQuery.QueryLastTransactions(amount: 15);
+            var blocks = blockQuery.QueryLastBlocks(AppSettings.PageSize);
+            var transactions = txsQuery.QueryLastTransactions(15);
             var blocksVm = blocks.Select(BlockHomeViewModel.FromBlock).ToList();
 
             var txsVm = transactions.Select(TransactionHomeViewModel.FromTransaction).ToList();
 
             // tx history chart calculation
-            var repTxs = txsQuery.QueryLastTransactions(null, 1000);
+            var repTxs = txsQuery.QueryLastTransactions(1000, null);
 
             var chart = new Dictionary<string, uint>();
 

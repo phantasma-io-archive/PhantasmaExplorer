@@ -65,7 +65,7 @@ namespace Phantasma.Explorer.Controllers
 
             if ((token.Flags & TokenFlags.Fungible) != 0)
             {
-                foreach (var account in accountQuery.QueryRichList(symbol, 30))
+                foreach (var account in accountQuery.QueryRichList(30, symbol))
                 {
                     var accountTokenBalanceList = accountQuery.QueryAccountTokenBalanceList(account.Address, symbol);
 
@@ -112,7 +112,7 @@ namespace Phantasma.Explorer.Controllers
         public List<TransactionViewModel> GetTransfers(string symbol, int amount = AppSettings.PageSize)
         {
             var txsQuery = new TransactionQueries(_context);
-            var transfers = txsQuery.QueryLastTokenTransactions(symbol, 100);
+            var transfers = txsQuery.QueryLastTokenTransactions(symbol, amount);
 
             var temp = transfers.Select(TransactionViewModel.FromTransaction).ToList();
 
