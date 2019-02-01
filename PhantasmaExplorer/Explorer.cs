@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application;
-using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Site;
-using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer
 {
@@ -20,7 +18,7 @@ namespace Phantasma.Explorer
 
         static async Task Main(string[] args)
         {
-            PrintASCII();
+            PrintAscii();
             Console.WriteLine("\n");
             Console.WriteLine("Initializing Phantasma Block Explorer on port 7072....");
 
@@ -57,10 +55,11 @@ namespace Phantasma.Explorer
                 Console.WriteLine("1 - Init DB");
                 Console.WriteLine("2 - Sync DB");
                 Console.WriteLine("3 - Stop sync");
-                Console.WriteLine("4 - Ensure no missing blocks");
-                Console.WriteLine("5 - Update all address balances");
-                Console.WriteLine("6 - Delete DB");
-                Console.WriteLine("7 - Exit");
+                Console.WriteLine("4 - Change RPC server");
+                Console.WriteLine("5 - Ensure no missing blocks");
+                Console.WriteLine("6 - Update all address balances");
+                Console.WriteLine("7 - Delete DB");
+                Console.WriteLine("8 - Exit");
                 var option = Console.ReadKey().KeyChar;
 
                 switch (option)
@@ -76,7 +75,7 @@ namespace Phantasma.Explorer
                         Console.Clear();
                         ExplorerSync.ContinueSync = true;
                         Console.WriteLine("Starting sync process");
-                        Sync();
+                        await Sync();
                         break;
 
                     case '3':
@@ -84,30 +83,36 @@ namespace Phantasma.Explorer
                         break;
 
                     case '4':
+                        Console.Clear();
+                        exit = true;
+                        await ChangeRpcServer();
+                        break;
+
+                    case '5':
                         ExplorerSync.ContinueSync = false;
                         Console.Clear();
                         EnsureNoMissingBlocks();
                         break;
 
-                    case '5':
+                    case '6':
+                        ExplorerSync.ContinueSync = false;
                         Console.Clear();
                         ExplorerSync.UpdateAllAddressBalances();
                         break;
 
-                    case '6':
+                    case '7':
                         ExplorerSync.ContinueSync = false;
                         Console.Clear();
                         await DropDb();
                         break;
-
-                    case '7':
+                    case '8':
                         exit = true;
                         break;
                 }
             }
         }
 
-        private static void PrintASCII()
+        private static void PrintAscii()
         {
             Console.Write(@"dyo/ommmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmo/ohm
 ./yyo---::::::::::::::::::::::::::::::::::---oyyo/
@@ -189,10 +194,30 @@ NNmmNMMMMMMmdhmmmmmymNMMMMMMNmymmmmmoymMMMMMMNmmNN");
             }
         }
 
-        private static void Sync()
+        private static async Task Sync()
         {
             var context = AppServices.GetService<ExplorerDbContext>();
+            await context.Database.EnsureCreatedAsync();
             ExplorerSync.StartSync(context);
+        }
+
+        private static async Task ChangeRpcServer()
+        {
+            Console.WriteLine($"Current Rpc server URL: {AppSettings.RpcServerUrl}\n");
+
+            Console.WriteLine("Type the new URL:");
+            var url = Console.ReadLine();
+            if (Uri.TryCreate(url, UriKind.Absolute, out var uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            {
+                AppSettings.RpcServerUrl = url;
+                Console.WriteLine($"Rpc client URL changed with success to {uriResult.AbsoluteUri}.");
+            }
+            else
+            {
+                Console.WriteLine("Provided URL is invalid.");
+            }
+
+            await StartMenu();
         }
     }
 }

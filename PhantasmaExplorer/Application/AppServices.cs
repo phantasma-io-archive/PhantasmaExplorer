@@ -22,10 +22,11 @@ namespace Phantasma.Explorer.Application
         private void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddEntityFrameworkSqlite().AddDbContext<ExplorerDbContext>(options => options
-               .UseSqlite("Data Source=PhantasmaExplorerDatabase.db;")
-                , ServiceLifetime.Transient);
+                .UseSqlite("Data Source=PhantasmaExplorerDatabase.db;"), ServiceLifetime.Transient);
+                //ServiceLifetime.Scoped);//todo test scoped performance
 
-            serviceCollection.AddScoped<IPhantasmaRpcService>(provider => new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri("http://localhost:7077/rpc"), httpClientHandler: new HttpClientHandler
+            serviceCollection.AddScoped<IPhantasmaRpcService>(provider => 
+                new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri(AppSettings.RpcServerUrl), httpClientHandler: new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             })));

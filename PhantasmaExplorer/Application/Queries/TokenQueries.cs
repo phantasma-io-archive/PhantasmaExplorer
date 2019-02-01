@@ -54,7 +54,7 @@ namespace Phantasma.Explorer.Application.Queries
 
         public string QueryNativeTokenName()
         {
-            return _context.Tokens.SingleOrDefault(p => (p.Flags & TokenFlags.Native) != 0)?.Symbol;
+            return _context.Tokens.SingleOrDefault(p => (p.Flags & TokenFlags.Fuel) != 0)?.Symbol;
         }
     }
 }

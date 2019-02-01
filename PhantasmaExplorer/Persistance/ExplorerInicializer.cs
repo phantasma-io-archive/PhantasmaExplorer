@@ -66,7 +66,6 @@ namespace Phantasma.Explorer.Persistance
             {
                 Console.WriteLine(e);
                 Console.WriteLine("Exception occurred during DB initialization, explorer cannot start");
-                throw;
             }
         }
 

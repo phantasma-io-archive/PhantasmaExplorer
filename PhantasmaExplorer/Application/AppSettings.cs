@@ -6,6 +6,7 @@
         internal const int SyncTime = 6000;
         internal const string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
 
+        internal static string RpcServerUrl = "http://localhost:7077/rpc";
         internal static string NativeSymbol = "ALMA";
 
         #region URL&CONTEXT
