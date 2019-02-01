@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance;
@@ -146,7 +147,8 @@ namespace Phantasma.Explorer.Utils
             var phantasmaTokens = context.Tokens;
 
             string PlatformName = "Phantasma";
-            int NativeTokenDecimals = 8;
+            int nativeTokenDecimals = (int)
+                context.Tokens.Single(p => p.Symbol.Equals(AppSettings.NativeSymbol)).Decimals;
 
             switch (evt.EventKind)
             {
@@ -166,8 +168,8 @@ namespace Phantasma.Explorer.Utils
                 case EventKind.GasPayment:
                     {
                         var gasEvent = Serialization.Unserialize<GasEventData>(evt.Data.Decode());
-                        var amount = TokenUtils.ToDecimal(gasEvent.amount, NativeTokenDecimals);
-                        var price = TokenUtils.ToDecimal(gasEvent.price, NativeTokenDecimals);
+                        var amount = TokenUtils.ToDecimal(gasEvent.amount, nativeTokenDecimals);
+                        var price = TokenUtils.ToDecimal(gasEvent.price, nativeTokenDecimals);
 
                         if (evt.EventKind == EventKind.GasEscrow)
                         {

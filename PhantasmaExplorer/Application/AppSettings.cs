@@ -7,7 +7,8 @@
         internal const string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
 
         internal static string RpcServerUrl = "http://localhost:7077/rpc";
-        internal static string NativeSymbol = "ALMA";
+        internal static string NativeSymbol = "ALMA"; //default value
+        internal static string StableSymbol = "";
 
         #region URL&CONTEXT
         internal const string UrlHome = "/home";

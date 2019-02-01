@@ -164,6 +164,11 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
                 {
                     AppSettings.NativeSymbol = tokenDto.Symbol;
                 }
+
+                if (((tokenDto.Flags & TokenFlags.Stable) != 0))
+                {
+                    AppSettings.StableSymbol = tokenDto.Symbol;
+                }
             }
 
             await context.SaveChangesAsync();
