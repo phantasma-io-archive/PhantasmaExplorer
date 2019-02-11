@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Phantasma.Blockchain.Tokens;
+using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
 using Token = Phantasma.Explorer.Domain.Entities.Token;
 
@@ -19,7 +19,7 @@ namespace Phantasma.Explorer.ViewModels
             {
                 var token = tokenList.Single(p => p.Symbol.Equals(auctionDto.BaseSymbol));
                 var quoteToken = tokenList.Single(p => p.Symbol.Equals(auctionDto.QuoteSymbol));
-                var price = TokenUtils.ToDecimal(auctionDto.Price, (int)quoteToken.Decimals);
+                var price = UnitConversion.ToDecimal(auctionDto.Price, (int)quoteToken.Decimals);
 
                 var auctionViewModel = AuctionViewModel.FromAuction(auctionDto, price, GetMetadata(token, "viewer"),
                     GetMetadata(token, "details"));

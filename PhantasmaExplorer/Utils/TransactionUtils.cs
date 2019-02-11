@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Blockchain.Contracts.Native;
-using Phantasma.Blockchain.Tokens;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
@@ -61,7 +60,7 @@ namespace Phantasma.Explorer.Utils
                         {
                             var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());
                             amount = data.value;
-                            var amountDecimal = TokenUtils.ToDecimal(amount, (int)
+                            var amountDecimal = UnitConversion.ToDecimal(amount, (int)
                                 phantasmaTokens.Single(p => p.Symbol == data.symbol).Decimals);
                             receiverAddress = Address.FromText(evt.EventAddress);
                             receiverChain = data.chainAddress;
@@ -98,7 +97,7 @@ namespace Phantasma.Explorer.Utils
                 if (amount > 0 && senderAddress != Address.Null && receiverAddress != Address.Null &&
                     senderToken != null && senderToken == receiverToken)
                 {
-                    var amountDecimal = TokenUtils.ToDecimal(amount, (int)
+                    var amountDecimal = UnitConversion.ToDecimal(amount, (int)
                         phantasmaTokens.Single(p => p.Symbol == senderToken).Decimals);
 
                     if (vm != null)
@@ -114,7 +113,7 @@ namespace Phantasma.Explorer.Utils
                 }
                 else if (amount > 0 && receiverAddress != Address.Null && receiverToken != null)
                 {
-                    var amountDecimal = TokenUtils.ToDecimal(amount, (int)
+                    var amountDecimal = UnitConversion.ToDecimal(amount, (int)
                         phantasmaTokens.Single(p => p.Symbol == receiverToken).Decimals);
 
                     if (vm != null)
@@ -168,8 +167,8 @@ namespace Phantasma.Explorer.Utils
                 case EventKind.GasPayment:
                     {
                         var gasEvent = Serialization.Unserialize<GasEventData>(evt.Data.Decode());
-                        var amount = TokenUtils.ToDecimal(gasEvent.amount, nativeTokenDecimals);
-                        var price = TokenUtils.ToDecimal(gasEvent.price, nativeTokenDecimals);
+                        var amount = UnitConversion.ToDecimal(gasEvent.amount, nativeTokenDecimals);
+                        var price = UnitConversion.ToDecimal(gasEvent.price, nativeTokenDecimals);
 
                         if (evt.EventKind == EventKind.GasEscrow)
                         {
@@ -229,7 +228,7 @@ namespace Phantasma.Explorer.Utils
                         }
 
                         string fromAt = action == "sent" ? "from" : "at";
-                        return $"{TokenUtils.ToDecimal(data.value, (int)token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{evt.EventAddress}\">{evt.EventAddress}</a> {chainText}.";
+                        return $"{UnitConversion.ToDecimal(data.value, (int)token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{evt.EventAddress}\">{evt.EventAddress}</a> {chainText}.";
                     }
 
                 default: return "Nothing.";

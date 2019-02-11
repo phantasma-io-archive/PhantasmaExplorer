@@ -6,6 +6,7 @@ using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
+using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Controllers
@@ -74,14 +75,14 @@ namespace Phantasma.Explorer.Controllers
                         var existingEntry = balances.SingleOrDefault(p => p.Address.Equals(account.Address));
                         if (existingEntry != null)
                         {
-                            existingEntry.Balance += Blockchain.Tokens.TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals);
+                            existingEntry.Balance += UnitConversion.ToDecimal(balance.Amount, (int)token.Decimals);
                         }
                         else
                         {
                             var vm = new BalanceViewModel
                             {
                                 ChainName = balance.Chain,
-                                Balance = Blockchain.Tokens.TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals),
+                                Balance = UnitConversion.ToDecimal(balance.Amount, (int)token.Decimals),
                                 Token = TokenViewModel.FromToken(token, AppSettings.MockLogoUrl),
                                 Address = account.Address
                             };

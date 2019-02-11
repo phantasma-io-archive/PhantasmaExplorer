@@ -1,7 +1,7 @@
-﻿using Phantasma.Blockchain.Tokens;
-using Phantasma.Explorer.Application;
+﻿using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
+using Phantasma.Numerics;
 using Token = Phantasma.Explorer.Domain.Entities.Token;
 
 namespace Phantasma.Explorer.ViewModels
@@ -22,7 +22,7 @@ namespace Phantasma.Explorer.ViewModels
                 Address = account.Address,
                 Token = TokenViewModel.FromToken(token, AppSettings.MockLogoUrl),
                 Value = 0,
-                Balance = TokenUtils.ToDecimal(balance.Amount, (int)token.Decimals),
+                Balance = UnitConversion.ToDecimal(balance.Amount, (int)token.Decimals),
                 ChainName = balance.Chain,
                 TxnCount = 0//todo remove this stat
             };
