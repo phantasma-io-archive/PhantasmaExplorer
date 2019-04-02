@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Phantasma.Core.Utils;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Site;
@@ -18,6 +19,10 @@ namespace Phantasma.Explorer
 
         static async Task Main(string[] args)
         {
+            var settings = new Arguments(args);
+            string rpcUrl = settings.GetString("rpc", "http://localhost:7077/rpc");
+            AppSettings.RpcServerUrl = rpcUrl;
+
             PrintAscii();
             Console.WriteLine("\n");
             Console.WriteLine("Initializing Phantasma Block Explorer on port 7072....");
