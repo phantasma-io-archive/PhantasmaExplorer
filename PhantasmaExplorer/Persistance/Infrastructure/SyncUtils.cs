@@ -27,8 +27,6 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
                 if (account.AccountTransactions.Any(t => t.Transaction.Hash == transaction.Hash)) return;
 
                 account.AccountTransactions.Add(accountTx);
-
-                context.Accounts.Update(account);
             }
             else
             {

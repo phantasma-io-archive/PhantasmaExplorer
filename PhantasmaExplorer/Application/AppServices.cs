@@ -22,7 +22,7 @@ namespace Phantasma.Explorer.Application
         private void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddEntityFrameworkSqlite().AddDbContext<ExplorerDbContext>(options => options
-                .UseSqlite("Data Source=PhantasmaExplorerDatabase.db;"), ServiceLifetime.Transient);
+                .UseSqlite("Data Source=PhantasmaExplorerDatabase.db;").EnableSensitiveDataLogging(), ServiceLifetime.Transient);
 
             serviceCollection.AddScoped<IPhantasmaRpcService>(provider =>
                 new PhantasmaRpcService(new RpcClient.Client.RpcClient(new Uri(AppSettings.RpcServerUrl), httpClientHandler: new HttpClientHandler

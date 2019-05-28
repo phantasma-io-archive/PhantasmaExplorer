@@ -187,6 +187,7 @@ NNmmNMMMMMMmdhmmmmmymNMMMMMMNmymmmmmoymMMMMMMNmmNN");
             var context = AppServices.GetService<ExplorerDbContext>();
             await context.Database.EnsureCreatedAsync();
 
+
             //context.Database.Migrate(); todo investigate
 
             if (!await ExplorerInicializer.Initialize(context))

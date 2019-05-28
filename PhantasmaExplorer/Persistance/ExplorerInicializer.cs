@@ -86,73 +86,82 @@ namespace Phantasma.Explorer.Persistance
 
         private async Task SeedBlocksByChain(ExplorerDbContext context, Chain chain)
         {
-            var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
-            using (var progress = new ProgressBar())
+            try
             {
-                for (int i = 1; i <= height; i++)
+                var height = await _phantasmaRpcService.GetBlockHeight.SendRequestAsync(chain.Address);
+                using (var progress = new ProgressBar())
                 {
-                    progress.Report((double)i / height);
-
-                    var blockDto = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, i);
-                    var block = new Block
+                    for (int i = 1; i <= height; i++)
                     {
-                        Chain = chain,
-                        ChainName = chain.Name,
-                        Hash = blockDto.Hash,
-                        PreviousHash = blockDto.PreviousHash,
-                        Timestamp = blockDto.Timestamp,
-                        Height = blockDto.Height,
-                        Payload = blockDto.Payload,
-                        Reward = blockDto.Reward,
-                        ValidatorAddress = blockDto.ValidatorAddress
-                    };
+                        progress.Report((double)i / height);
 
-                    //Transactions
-                    foreach (var transactionDto in blockDto.Txs)
-                    {
-                        var transaction = new Transaction
+                        var blockDto = await _phantasmaRpcService.GetBlockByHeight.SendRequestAsync(chain.Address, i);
+                        var block = new Block
                         {
-                            Block = block,
-                            Hash = transactionDto.Txid,
-                            Timestamp = transactionDto.Timestamp,
-                            Script = transactionDto.Script,
-                            Result = transactionDto.Result
+                            Chain = chain,
+                            ChainName = chain.Name,
+                            Hash = blockDto.Hash,
+                            PreviousHash = blockDto.PreviousHash,
+                            Timestamp = blockDto.Timestamp,
+                            Height = blockDto.Height,
+                            Payload = blockDto.Payload,
+                            Reward = blockDto.Reward,
+                            ValidatorAddress = blockDto.ValidatorAddress
                         };
 
-                        bool counterIncremented = false;
-                        //Events
-                        foreach (var eventDto in transactionDto.Events)
+                        //Transactions
+                        foreach (var transactionDto in blockDto.Txs)
                         {
-                            var domainEvent = new Event
+                            var transaction = new Transaction
                             {
-                                Data = eventDto.Data,
-                                EventAddress = eventDto.EventAddress,
-                                EventKind = eventDto.EventKind,
+                                Block = block,
+                                Hash = transactionDto.Txid,
+                                Timestamp = transactionDto.Timestamp,
+                                Script = transactionDto.Script,
+                                Result = transactionDto.Result
                             };
-                            transaction.Events.Add(domainEvent);
 
-                            await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
-
-                            if (!counterIncremented)
+                            bool counterIncremented = false;
+                            //Events
+                            foreach (var eventDto in transactionDto.Events)
                             {
-                                if (TransactionUtils.IsTransferEvent(domainEvent))
+                                var domainEvent = new Event
                                 {
-                                    var tokenSymbol = TransactionUtils.GetTokenSymbolFromTokenEventData(domainEvent);
-                                    SyncUtils.AddToTokenTxCounter(context, tokenSymbol);
-                                    counterIncremented = true;
+                                    Data = eventDto.Data,
+                                    EventAddress = eventDto.EventAddress,
+                                    EventKind = eventDto.EventKind,
+                                };
+
+                                transaction.Events.Add(domainEvent);
+
+                                await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
+
+                                if (!counterIncremented)
+                                {
+                                    if (TransactionUtils.IsTransferEvent(domainEvent))
+                                    {
+                                        var tokenSymbol = TransactionUtils.GetTokenSymbolFromTokenEventData(domainEvent);
+                                        SyncUtils.AddToTokenTxCounter(context, tokenSymbol);
+                                        counterIncremented = true;
+                                    }
                                 }
                             }
+
+                            block.Transactions.Add(transaction);
                         }
 
-                        block.Transactions.Add(transaction);
+                        chain.Height = block.Height;
+                        chain.Blocks.Add(block);
                     }
-
-                    chain.Height = block.Height;
-                    chain.Blocks.Add(block);
                 }
+
+                await context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
             }
 
-            await context.SaveChangesAsync();
         }
     }
 }
