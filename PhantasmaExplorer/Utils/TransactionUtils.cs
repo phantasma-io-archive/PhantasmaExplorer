@@ -8,9 +8,9 @@ using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
-using Phantasma.IO;
 using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
+using Phantasma.Storage;
 
 namespace Phantasma.Explorer.Utils
 {
