@@ -28,7 +28,7 @@
     }
 }
 
-@media(min-width:961px) {
+@media(min-width:991px) {
     header .navbar {
         display: none;
     }
