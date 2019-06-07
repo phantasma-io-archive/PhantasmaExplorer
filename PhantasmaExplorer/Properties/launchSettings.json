@@ -2,7 +2,7 @@
   "profiles": {
     "Phantasma.Explorer": {
       "commandName": "Project",
-      "commandLineArgs": "--path=. --port=7072 -rpc=http://localhost:7077/rpc",
+      "commandLineArgs": "--path=. --port=7072 -rpc=http://45.76.88.140:7077/rpc",
       "workingDirectory": "www"
     }
   }

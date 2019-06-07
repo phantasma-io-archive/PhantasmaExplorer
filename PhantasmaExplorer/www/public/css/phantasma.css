@@ -1,19 +1,34 @@
 /* change navbar background on collapse */
-@media(max-width:767px) {
+@media(max-width:990px) {
     header .breadcrumb {
         display: none;
     }
 
+    /*.navbar-header {
+        float: none;
+    }*/
+
     nav.navbar {
-        background: #17B0E7;
+        background: transparent;
+    }
+
+    nav .navbar-nav {
+        background-color: #0ea4db !important;
+        border-radius: 5px;
+    }
+
+    body {
+        background-image: url('../img/new_background.png') !important;
     }
 
     .home-title {
         color: #17B0E7 !important;
+        font-size: 26px !important;
+        padding-top: 26px !important;
     }
 }
 
-@media(min-width:768px) {
+@media(min-width:961px) {
     header .navbar {
         display: none;
     }
@@ -23,15 +38,17 @@
 body {
     font-family: Open Sans;
     font-size: 14px;
-    background-image: url('../img/background.png');
+    z-index: -1;
+    background-image: url('../img/HeaderTest.png');
     background-repeat: no-repeat;
     background-color: white;
     background-size: 100%;
-    
 }
 /* Footer */
 footer {
-    color: white;
+    width: 100%;
+    height: 200px;
+    color: white
 }
 
     footer h3 {
