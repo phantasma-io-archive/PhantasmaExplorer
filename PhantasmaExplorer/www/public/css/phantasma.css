@@ -4,9 +4,9 @@
         display: none;
     }
 
-    /*.navbar-header {
+    .navbar-header {
         float: none;
-    }*/
+    }
 
     nav.navbar {
         background: transparent;
@@ -18,7 +18,7 @@
     }
 
     body {
-        background-image: url('../img/new_background.png') !important;
+        background-image: url('../img/teste02.png') !important;
     }
 
     .home-title {
@@ -39,7 +39,7 @@ body {
     font-family: Open Sans;
     font-size: 14px;
     z-index: -1;
-    background-image: url('../img/HeaderTest.png');
+    background-image: url('../img/teste02.png');
     background-repeat: no-repeat;
     background-color: white;
     background-size: 100%;
