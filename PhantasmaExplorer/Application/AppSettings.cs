@@ -1,4 +1,6 @@
-﻿namespace Phantasma.Explorer.Application
+﻿using Phantasma.Blockchain;
+
+namespace Phantasma.Explorer.Application
 {
     internal static class AppSettings
     {
@@ -7,8 +9,9 @@
         internal const string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
 
         internal static string RpcServerUrl = "http://localhost:7077/rpc";
-        internal static string NativeSymbol = "ALMA"; //default value
-        internal static string StableSymbol = "";
+        internal static string FuelSymbol = Nexus.FuelTokenSymbol; //default value
+        internal static string NativeSymbol = Nexus.StakingTokenSymbol;
+        internal static string StableSymbol = Nexus.StableTokenSymbol;
 
         #region URL&CONTEXT
         internal const string UrlHome = "/home";
