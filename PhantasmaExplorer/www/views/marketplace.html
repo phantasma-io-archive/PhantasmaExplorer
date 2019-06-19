@@ -1,6 +1,18 @@
 <div class="row">
     <div class="col-sm-12">
-        <h1 class="page-title" >Marketplace</h1>
+        <h1 class="page-title">Marketplace</h1>
+
+        {{#if marketChains}}
+        <div>
+            <select id="chainSelector" class="option-input" onchange="changeChain()">
+                {{#each marketChains}}
+                <option value="{{this}}">
+                    {{this}}
+                </option>
+                {{/each}}
+            </select>
+        </div>
+
         {{#if marketplace.AuctionsList}}
         {{#each marketplace.AuctionsList}}
 
@@ -9,8 +21,8 @@
                 <!--card-->
                 <div class="card-header">Token ID: <b>{{TokenId}}</b></div>
 
-                <a href="{{ViewerUrl}}/{{TokenId}}" style="text-align: center;">
-                    <img class="card-img-top card-image" src="{{ViewerUrl}}/{{TokenId}}" alt="Card image cap">
+                <a href="{{ViewerUrl}}" style="text-align: center;">
+                    <img class="card-img-top card-image" src="{{ViewerUrl}}" alt="nft image" height="100" width="100">
                 </a>
 
                 <div class="card-body">
@@ -18,9 +30,9 @@
                         <p class="item-date">Started: {{StartDate}}</p>
                         <p class="item-date">Ends: {{EndDate}}</p>
                     </div>
-                 
-                    <p class="card-text price-text" >Price: <b>{{Price}} {{QuoteSymbol}}</b></p>
-                    <a href="{{InfoUrl}}/{{TokenId}}" target="_blank" rel="noopener noreferrer"
+
+                    <p class="card-text price-text">Price: <b>{{Price}} {{QuoteSymbol}}</b></p>
+                    <a href="{{InfoUrl}}{{TokenId}}" target="_blank" rel="noopener noreferrer"
                        class="btn btn-primary btn-block card-button">Details</a>
                 </div>
             </div>
@@ -29,13 +41,13 @@
         <div class="col-sm-12">
             <ul class="pager">
                 {{#if pagination.ShowPrevious}}
-                <li class="previous"><a href="/blocks/{{pagination.PreviousPage}}"><span aria-hidden="true">&larr;</span> Previous</a></li>
+                <li class="previous"><a href="/marketplace/{{selectedChain}}/{{pagination.PreviousPage}}"><span aria-hidden="true">&larr;</span> Previous</a></li>
                 {{#else}}
                 <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Previous</a></li>
                 {{/if}}
 
                 {{#if pagination.ShowNext}}
-                <li class="next"><a href="/blocks/{{pagination.NextPage}}">Next <span aria-hidden="true">&rarr;</span></a></li>
+                <li class="next"><a href="/marketplace/{{selectedChain}}/{{pagination.NextPage}}">Next <span aria-hidden="true">&rarr;</span></a></li>
                 {{#else}}
                 <li class="next disabled"><a>Next <span aria-hidden="true">&rarr;</span></a></li>
                 {{/if}}
@@ -44,7 +56,16 @@
     </div>
 
     {{#else}}
-    Nothing here...
+    <div class="text-center">
+        No active auctions on {{selectedChain}} chain ...
+    </div>
+
     {{/if}}
 </div>
+<script>
 
+    function changeChain() {
+        var x = document.getElementById("chainSelector").value;
+        window.location.replace('/marketplace/' + x + "/1");
+    }
+</script>

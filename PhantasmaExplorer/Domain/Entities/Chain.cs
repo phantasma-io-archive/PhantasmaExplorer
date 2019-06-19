@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Phantasma.Explorer.Domain.Entities
 {
@@ -13,6 +14,9 @@ namespace Phantasma.Explorer.Domain.Entities
         public string Address { get; set; }
         public string ParentAddress { get; set; }
         public uint Height { get; set; }
+
+
+        public string[] Contracts { get; set; }
 
         public ICollection<Block> Blocks { get; }
     }

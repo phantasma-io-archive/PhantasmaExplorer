@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Phantasma.Explorer.Domain.Entities;
+using System;
 
 namespace Phantasma.Explorer.Persistance
 {
@@ -18,6 +19,10 @@ namespace Phantasma.Explorer.Persistance
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ExplorerDbContext).Assembly);
+            modelBuilder.Entity<Chain>().Property(e => e.Contracts)
+            .HasConversion(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries));
         }
     }
 }

@@ -775,7 +775,7 @@ form {
     background: -o-linear-gradient(0deg, rgba(4,187,255,1) 0%, rgba(3,164,224,1) 100%); /* opera 11.10+ */
     background: -ms-linear-gradient(0deg, rgba(4,187,255,1) 0%, rgba(3,164,224,1) 100%); /* ie10+ */
     background: linear-gradient(90deg, rgba(4,187,255,1) 0%, rgba(3,164,224,1) 100%); /* w3c */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#04BBFF', endColorstr='#03A4E0',GradientType=1 ); /* ie6-9 */ 
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#04BBFF', endColorstr='#03A4E0',GradientType=1 ); /* ie6-9 */
     color: white;
     text-align: center;
     border: 0px;
@@ -805,4 +805,19 @@ form {
     margin-top: 15px;
     color: #17b0e7;
     font-weight: 500;
+}
+
+.option-input {
+    margin-bottom: 20px;
+    width: 20%;
+    padding-left: 17px;
+    padding-right: 17px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 12px;
+    line-height: 14px;
+    color: #1bafe5;
+    background-color: white;
+    border: 1px #7C95AB;
+    border-radius: 5px;
 }

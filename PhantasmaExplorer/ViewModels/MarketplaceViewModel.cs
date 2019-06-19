@@ -10,6 +10,7 @@ namespace Phantasma.Explorer.ViewModels
     {
         public List<AuctionViewModel> AuctionsList { get; set; } = new List<AuctionViewModel>();
         public int TotalAuctions => AuctionsList.Count;
+        public string Chain;
 
         public static MarketplaceViewModel FromAuctionList(IList<AuctionDto> auctions, ICollection<Token> tokenList)
         {
@@ -32,9 +33,16 @@ namespace Phantasma.Explorer.ViewModels
 
         private static string GetMetadata(Token token, string key)
         {
-            return System.Text.Encoding.UTF8
-                .GetString(token.MetadataList.SingleOrDefault(p => p.Key.Equals(key))?.Value)
-                .Trim('*');//todo is this necessary?
+            var meta = token.MetadataList.SingleOrDefault(p => p.Key.Equals(key))?.Value;
+
+            if (meta == null)
+            {
+                return "";
+            }
+            else
+            {
+                return System.Text.Encoding.UTF8.GetString(meta).Trim('*');
+            }
         }
     }
 }

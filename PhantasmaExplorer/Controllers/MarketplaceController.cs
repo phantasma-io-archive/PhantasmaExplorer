@@ -1,9 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Application.Queries;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.ViewModels;
+using Phantasma.RpcClient.DTOs;
 using Phantasma.RpcClient.Interfaces;
 
 namespace Phantasma.Explorer.Controllers
@@ -17,19 +20,42 @@ namespace Phantasma.Explorer.Controllers
             _phantasmaRpcService = Explorer.AppServices.GetService<IPhantasmaRpcService>();
         }
 
-        public async Task<MarketplaceViewModel> GetAuctions(int currentPage, int pageSize = AppSettings.PageSize, string tokenSymbol = null)
+        public async Task<MarketplaceViewModel> GetAuctions(string chain, int currentPage, int pageSize = AppSettings.PageSize, string tokenSymbol = null)
         {
             var tokenQueries = new TokenQueries(_context);
+            var chainQueries = new ChainQueries(_context);
             var tokenList = tokenQueries.QueryTokens();
 
-            var auctions = await _phantasmaRpcService.GetAuctions.SendRequestAsync(currentPage, pageSize); //todo remove NACHO whn bug fixed
+            var chains = chainQueries.QueryChains();
+            List<AuctionDto> auctions = new List<AuctionDto>();
 
-            return MarketplaceViewModel.FromAuctionList(auctions.AuctionsList, tokenList);
+            var auction = await _phantasmaRpcService.GetAuctions.SendRequestAsync(chain, "", currentPage, pageSize);
+            auctions.AddRange(auction.AuctionsList);
+
+            return MarketplaceViewModel.FromAuctionList(auctions, tokenList);
         }
 
-        public async Task<int> GetAuctionsCount(string tokenSymbol = null)
+        public async Task<int> GetAuctionsCount(string chain = null)
         {
-            return await _phantasmaRpcService.GetAuctionCount.SendRequestAsync(); //todo remove
+            return await _phantasmaRpcService.GetAuctionCount.SendRequestAsync(chain);
+        }
+
+        public async Task<List<string>> GetChainsWithMarketsAndActiveAuctions()
+        {
+            var chainQueries = new ChainQueries(_context);
+            var chainsWithMarket = chainQueries.QueryChains()
+                .Where(p => p.Contracts.Any(c => c == "market"))
+                .Select(p => p.Name).ToList();
+
+            List<string> chainList = new List<string>();
+
+            foreach (var chain in chainsWithMarket) //check if they have auctions
+            {
+                var auctions = await _phantasmaRpcService.GetAuctionCount.SendRequestAsync(chain);
+                if (auctions > 0) chainList.Add(chain);
+            }
+
+            return chainList;
         }
     }
 }

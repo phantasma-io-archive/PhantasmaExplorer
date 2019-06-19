@@ -113,7 +113,7 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Server.Get($"{AppSettings.UrlApp}/{{input}}", RouteApp);
 
             TemplateEngine.Server.Get($"{AppSettings.UrlMarketplace}", RouteMarketplace);
-            TemplateEngine.Server.Get($"{AppSettings.UrlMarketplace}/{{page}}", RouteMarketplace);
+            TemplateEngine.Server.Get($"{AppSettings.UrlMarketplace}/{{chain}}/{{page}}", RouteMarketplace);
 
             //SetupAPIHandlers(); todo
         }
@@ -575,22 +575,33 @@ namespace Phantasma.Explorer.Site
                     pageNumber = 1;
                 }
 
+                var selectedChain = request.GetVariable("chain");
+
+
                 var controller = MarketplaceControllerInstance;
+                var chainsWithMarkets = controller.GetChainsWithMarketsAndActiveAuctions().Result;
+
+                if (string.IsNullOrEmpty(selectedChain) && chainsWithMarkets.Any())
+                {
+                    selectedChain = chainsWithMarkets[0]; //default
+                }
 
                 var pageModel = new PaginationModel
                 {
-                    Count = controller.GetAuctionsCount().Result,
+                    Count = controller.GetAuctionsCount(selectedChain).Result,
                     CurrentPage = pageNumber,
                     PageSize = AppSettings.PageSize,
                 };
 
-                var marketVm = controller.GetAuctions(pageModel.CurrentPage, pageModel.PageSize).Result;
+                var marketVm = controller.GetAuctions(selectedChain, pageModel.CurrentPage, pageModel.PageSize).Result;
                 var context = GetSessionContext(request);
 
-                if (marketVm.TotalAuctions > 0)
+                if (marketVm.TotalAuctions >= 0)
                 {
                     context[AppSettings.MenuContext] = _menus;
                     context[AppSettings.MarketplaceContext] = marketVm;
+                    context["marketChains"] = chainsWithMarkets;
+                    context["selectedChain"] = selectedChain;
                     context[AppSettings.PaginationContext] = pageModel;
                     return RendererView(context, "layout", AppSettings.MarketplaceContext);
                 }
@@ -608,73 +619,6 @@ namespace Phantasma.Explorer.Site
         }
         #endregion
 
-        //#region API
-        //private void SetupAPIHandlers()
-        //{
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_account/{{address}}", request =>
-        //    {
-        //        var address = request.GetVariable("address");
-        //        return ApiControllerInstance.GetAccount(address);
-        //    });
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_account_txs/{{address}}", request =>
-        //    {
-        //        var address = request.GetVariable("address");
-        //        return ApiControllerInstance.GetAddressTransactions(address);
-        //    });
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_apps", request => ApiControllerInstance.GetApps());
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block_height/{{chain}}", request =>
-        //    {
-        //        var chain = request.GetVariable("chain");
-        //        return ApiControllerInstance.GetBlockHeight(chain);
-        //    });
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block/{{blockHash}}", request =>
-        //    {
-        //        var address = request.GetVariable("blockHash");
-        //        return ApiControllerInstance.GetBlockByHash(address);
-        //    });
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block/{{chain}}/{{height}}", request =>
-        //    {
-        //        var chain = request.GetVariable("chain");
-        //        var height = (uint.Parse(request.GetVariable("height")));
-        //        return ApiControllerInstance.GetBlockByHeight(chain, height);
-        //    });
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_block_tx_count_by_hash/{{blockHash}}", request =>
-        //    {
-        //        var block = request.GetVariable("blockHash");
-        //        return ApiControllerInstance.GetBlockTransactionCountByHash(block);
-        //    });
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_confirmations/{{txHash}}", request =>
-        //    {
-        //        var txHash = request.GetVariable("txHash");
-        //        return ApiControllerInstance.GetConfirmations(txHash);
-        //    });
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_tx_by_block_hash_index/{{block}}/{{index}}", request =>
-        //    {
-        //        var block = request.GetVariable("block");
-        //        var index = int.Parse(request.GetVariable("index"));
-        //        return ApiControllerInstance.GetTransactionByBlockHashAndIndex(block, index);
-        //    });
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_chains", request => ApiControllerInstance.GetChains());
-
-        //    TemplateEngine.Server.Get($"{AppSettings.UrlApi}/get_tokens", request => ApiControllerInstance.GetTokens());
-
-        //    //todo confirm this
-        //    TemplateEngine.Server.Post($"{AppSettings.UrlApi}/send_raw_tx/{{signedTx}}", request =>
-        //    {
-        //        var signedTx = request.GetVariable("signedTx");
-        //        return ApiControllerInstance.SendRawTransaction(signedTx);
-        //    });
-        //}
-        //#endregion
 
         public class MenuContext
         {

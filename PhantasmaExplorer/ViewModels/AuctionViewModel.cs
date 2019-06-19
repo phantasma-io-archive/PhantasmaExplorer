@@ -19,7 +19,7 @@ namespace Phantasma.Explorer.ViewModels
 
         public static AuctionViewModel FromAuction(AuctionDto auction, decimal calculatedPrice, string viewerUrl, string infoUrl)
         {
-            return new AuctionViewModel
+            var vm = new AuctionViewModel
             {
                 BaseSymbol = auction.BaseSymbol,
                 QuoteSymbol = auction.QuoteSymbol,
@@ -28,9 +28,13 @@ namespace Phantasma.Explorer.ViewModels
                 EndDate = new Timestamp(auction.StartDate),
                 StartDate = new Timestamp(auction.StartDate),
                 TokenId = auction.TokenId,
-                ViewerUrl = viewerUrl,
                 InfoUrl = infoUrl
             };
+
+            if (string.IsNullOrEmpty(viewerUrl)) vm.ViewerUrl = "/img/stock_nft.png";
+            else vm.ViewerUrl = viewerUrl + vm.TokenId;
+
+            return vm;
         }
     }
 }

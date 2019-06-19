@@ -75,7 +75,7 @@ namespace Phantasma.Explorer.Controllers
             var rates = Task.WhenAll(tasks).GetAwaiter().GetResult();
 
             int days = 15;
-            var soulData = CoinUtils.GetChartForCoin("SOUL*", "USD", days);
+            var soulData = CoinUtils.GetChartForCoin("SOUL", "USD", days);
 
             var coins = new List<CoinRateViewModel>();
             for (int i = 0; i < rates.Length; i++)

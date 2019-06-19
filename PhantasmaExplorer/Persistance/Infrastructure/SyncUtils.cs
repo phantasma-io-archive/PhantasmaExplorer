@@ -56,7 +56,8 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
                         Address = chainDto.Address,
                         Name = chainDto.Name,
                         Height = chainDto.Height,
-                        ParentAddress = chainDto.ParentAddress
+                        ParentAddress = chainDto.ParentAddress,
+                        Contracts = chainDto.Contracts.ToArray()
                     };
 
                     await context.Accounts.AddAsync(new Account { Address = chain.Address });
