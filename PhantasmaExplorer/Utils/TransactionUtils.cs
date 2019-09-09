@@ -242,7 +242,8 @@ namespace Phantasma.Explorer.Utils
 
         private static string GetChainName(string address, IEnumerable<Chain> phantasmaChains)
         {
-            return phantasmaChains.Single(p => p.Address.Equals(address)).Name;
+            var name = phantasmaChains.SingleOrDefault(p => p.Address.Equals(address))?.Name;
+            return name;
         }
 
         public static string GetTokenSymbolFromTokenEventData(Event txEvent)

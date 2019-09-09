@@ -9,9 +9,9 @@ namespace Phantasma.Explorer.Application
         internal const string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
 
         internal static string RpcServerUrl = "http://localhost:7077/rpc";
-        internal static string FuelSymbol = Nexus.FuelTokenSymbol; //default value
+        internal static string FuelSymbol = Nexus.FuelTokenSymbol;
         internal static string NativeSymbol = Nexus.StakingTokenSymbol;
-        internal static string StableSymbol = Nexus.StableTokenSymbol;
+        internal static string StableSymbol = Nexus.FiatTokenSymbol;
 
         #region URL&CONTEXT
         internal const string UrlHome = "/home";
