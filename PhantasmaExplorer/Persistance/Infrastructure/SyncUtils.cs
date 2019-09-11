@@ -166,7 +166,7 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
 
                 if (((tokenDto.Flags & TokenFlags.Stable) != 0))
                 {
-                    AppSettings.StableSymbol = tokenDto.Symbol;
+                    AppSettings.FiatSymbol = tokenDto.Symbol;
                 }
             }
 

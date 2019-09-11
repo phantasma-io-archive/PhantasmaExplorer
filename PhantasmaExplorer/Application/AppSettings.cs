@@ -11,7 +11,7 @@ namespace Phantasma.Explorer.Application
         internal static string RpcServerUrl = "http://localhost:7077/rpc";
         internal static string FuelSymbol = Nexus.FuelTokenSymbol; //default value
         internal static string NativeSymbol = Nexus.StakingTokenSymbol;
-        internal static string StableSymbol = Nexus.StableTokenSymbol;
+        internal static string FiatSymbol = Nexus.FiatTokenSymbol;
 
         #region URL&CONTEXT
         internal const string UrlHome = "/home";
