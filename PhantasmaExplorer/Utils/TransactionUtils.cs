@@ -76,14 +76,14 @@ namespace Phantasma.Explorer.Utils
                         }
                         break;
 
-                    case EventKind.AddFriend:
+                    case EventKind.AddressLink:
                         {
                             var address = Serialization.Unserialize<Address>(evt.Data.Decode());
                             description = $"{evt.EventAddress} added '{address.ToString()} to friends.'";
                         }
                         break;
 
-                    case EventKind.RemoveFriend:
+                    case EventKind.AddressUnlink:
                         {
                             var address = Serialization.Unserialize<Address>(evt.Data.Decode());
                             description = $"{evt.EventAddress} removed '{address.ToString()} from friends.'";

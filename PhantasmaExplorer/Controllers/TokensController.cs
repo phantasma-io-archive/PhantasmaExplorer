@@ -24,7 +24,7 @@ namespace Phantasma.Explorer.Controllers
 
             if (token != null)
             {
-                SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
+                SoulRate = Explorer.GetSoulPrice();
 
                 return TokenViewModel.FromToken(token,
                     AppSettings.MockLogoUrl,
@@ -40,11 +40,10 @@ namespace Phantasma.Explorer.Controllers
             var tokenList = tokenQuery.QueryTokens();
             var tokensList = new List<TokenViewModel>();
 
-            SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
+            SoulRate = Explorer.GetSoulPrice();
 
             foreach (var token in tokenList)
             {
-                SoulRate = token.Symbol == "SOUL" ? CoinUtils.GetCoinRate(CoinUtils.SoulId) : 0;
                 tokensList.Add(TokenViewModel.FromToken(token,
                     AppSettings.MockLogoUrl,
                     SoulRate));

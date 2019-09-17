@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,10 +10,11 @@ using Phantasma.Core.Utils;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Site;
+using Phantasma.Explorer.Utils;
 
 namespace Phantasma.Explorer
 {
-    public class Explorer
+    public static class Explorer
     {
         public static IServiceProvider AppServices => _app.Services;
         private static AppServices _app;
@@ -20,8 +22,7 @@ namespace Phantasma.Explorer
         static async Task Main(string[] args)
         {
             var settings = new Arguments(args);
-            string rpcUrl = settings.GetString("rpc", "http://localhost:7077/rpc");
-            AppSettings.RpcServerUrl = rpcUrl;
+            AppSettings.RpcServerUrl = settings.GetString("rpc", "http://localhost:7077/rpc");
 
             PrintAscii();
             Console.WriteLine("\n");
@@ -224,6 +225,13 @@ NNmmNMMMMMMmdhmmmmmymNMMMMMMNmymmmmmoymMMMMMMNmmNN");
             }
 
             await StartMenu();
+        }
+
+        public static decimal GetSoulPrice()
+        {
+            Func<string> test = () => CoinUtils.GetCoinPrice().GetAwaiter().GetResult();
+            var soulPrice = Caching.GetObjectFromCache("soulPrice", 3, test);
+            return decimal.Parse(soulPrice, CultureInfo.InvariantCulture);
         }
     }
 }

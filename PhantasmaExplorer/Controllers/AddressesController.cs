@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Cryptography;
 using Phantasma.Explorer.Application;
@@ -52,7 +55,7 @@ namespace Phantasma.Explorer.Controllers
 
             if (account != null)
             {
-                SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
+                SoulRate = Explorer.GetSoulPrice();
                 var addressVm = AddressViewModel.FromAddress(account, tokenQueries.QueryTokens().ToList());
 
                 addressVm.Transactions = GetAddressTransactions(addressVm.Address, currentPage, pageSize);
@@ -62,7 +65,6 @@ namespace Phantasma.Explorer.Controllers
                     addressVmNativeBalance.TxnCount = GetTransactionCount(addressVm.Address);
                 }
 
-                SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
                 CalculateAddressSoulValue(new List<AddressViewModel> { addressVm });
                 return addressVm;
             }
@@ -92,7 +94,7 @@ namespace Phantasma.Explorer.Controllers
 
         private void CalculateAddressSoulValue(List<AddressViewModel> list)
         {
-            SoulRate = CoinUtils.GetCoinRate(CoinUtils.SoulId);
+            SoulRate = Explorer.GetSoulPrice();
             foreach (var address in list)
             {
                 var soulBalances = address.NativeBalances.Where(b => b.Token.Symbol == AppSettings.NativeSymbol);

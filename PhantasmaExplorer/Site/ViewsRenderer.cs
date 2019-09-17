@@ -74,16 +74,15 @@ namespace Phantasma.Explorer.Site
 
             TemplateEngine.Server.Get("/marketcap", request =>
             {
-                var info = CoinUtils.GetCoinInfoAsync(CoinUtils.SoulId).Result;
-                var marketCap = info["quotes"]["USD"].GetDecimal("market_cap");
-                return $"${marketCap}";
+                var marketCap = CoinUtils.GetCoinMarketCap().GetAwaiter().GetResult();
+                return $"$ {marketCap}";
             });
 
             TemplateEngine.Server.Get("/rates", request =>
             {
-                var coins = HomeController.GetRateInfo();
+                //var coins = HomeController.GetRateInfo();
 
-                var html = TemplateEngine.Render(coins, "rates");
+                var html = TemplateEngine.Render("", "rates");
                 return html;
             });
 
