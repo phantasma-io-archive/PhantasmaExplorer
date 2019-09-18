@@ -15,6 +15,5 @@ namespace Phantasma.Explorer.ViewModels
         public string Info { get; set; }
         public string ViewerUrl { get; set; }
         public string Id { get; set; }
-        public string ComposeUrl => ViewerUrl.Replace("$ID", Id);
     }
 }

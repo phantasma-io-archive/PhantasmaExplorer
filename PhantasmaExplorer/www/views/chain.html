@@ -27,7 +27,7 @@
 
                                     <tr>
                                         <td>Address</td>
-                                        <td>{{#link-address chain.Address}}</td>
+                                        <td>{{chain.Address}}</td>
                                     </tr>
 
                                     <tr>
@@ -102,7 +102,7 @@
                                 {{#each chain.ChildChains}}
                                 <tr>
                                     <td><a href="/chain/{{Value}}">{{Key}}</a></td>
-                                    <td>{{#link-address Value}}</td>
+                                    <td>{{Value}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>

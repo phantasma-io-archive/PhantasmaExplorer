@@ -20,5 +20,7 @@ namespace Phantasma.Explorer.Domain.Entities
         public Block Block { get; set; }
         public ICollection<Event> Events { get; set; }
         public ICollection<AccountTransaction> AccountTransactions { get; set; }
+
+        public Token Token { get; set; }
     }
 }

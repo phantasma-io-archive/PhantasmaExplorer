@@ -2,12 +2,16 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance.Infrastructure;
 using Phantasma.Explorer.Site;
 using Phantasma.Explorer.Utils;
 using Phantasma.RpcClient.Interfaces;
+using Phantasma.Storage;
+using Phantasma.Numerics;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.Persistance
 {
@@ -120,8 +124,8 @@ namespace Phantasma.Explorer.Persistance
                                 Script = transactionDto.Script,
                                 Result = transactionDto.Result
                             };
+                            bool addedToTokenList = false;
 
-                            bool counterIncremented = false;
                             //Events
                             foreach (var eventDto in transactionDto.Events)
                             {
@@ -133,18 +137,30 @@ namespace Phantasma.Explorer.Persistance
                                 };
 
                                 transaction.Events.Add(domainEvent);
-
-                                await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
-
-                                if (!counterIncremented)
+                                if (!addedToTokenList)
                                 {
-                                    if (TransactionUtils.IsTransferEvent(domainEvent))
+                                    if (domainEvent.EventKind == EventKind.TokenBurn
+                                        || domainEvent.EventKind == EventKind.TokenSend
+                                        || domainEvent.EventKind == EventKind.TokenEscrow
+                                        || domainEvent.EventKind == EventKind.TokenStake
+                                        || domainEvent.EventKind == EventKind.TokenUnstake
+                                        || domainEvent.EventKind == EventKind.TokenReceive
+                                        || domainEvent.EventKind == EventKind.TokenClaim
+                                        || domainEvent.EventKind == EventKind.TokenMint
+                                        )
                                     {
-                                        var tokenSymbol = TransactionUtils.GetTokenSymbolFromTokenEventData(domainEvent);
-                                        SyncUtils.AddToTokenTxCounter(context, tokenSymbol);
-                                        counterIncremented = true;
+                                        var data = Serialization.Unserialize<TokenEventData>(eventDto.Data.Decode());
+                                        var token = context.Tokens.SingleOrDefault(p => p.Symbol == data.symbol);
+                                        if (token != null)
+                                        {
+                                            token.Transactions.Add(transaction);
+                                            addedToTokenList = true;
+                                            await context.SaveChangesAsync();
+                                        }
                                     }
                                 }
+
+                                await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
                             }
 
                             block.Transactions.Add(transaction);
@@ -159,7 +175,7 @@ namespace Phantasma.Explorer.Persistance
             }
             catch (Exception ex)
             {
-
+                Debug.WriteLine(ex.ToString());
             }
 
         }

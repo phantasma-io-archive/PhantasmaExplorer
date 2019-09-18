@@ -5,7 +5,7 @@ namespace Phantasma.Explorer.Domain.ValueObjects
 {
     public class FBalance : ValueObject
     {
-        public virtual string Amount { get; set; }
+        public string Amount { get; set; }
         public string TokenSymbol { get; set; }
         public string Chain { get; set; }
 

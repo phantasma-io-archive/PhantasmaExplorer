@@ -6,7 +6,7 @@ namespace Phantasma.Explorer.Domain.ValueObjects
     public class TokenMetadata : ValueObject
     {
         public string Key { get; set; }
-        public byte[] Value { get; set; }
+        public string Value { get; set; }
 
         protected override IEnumerable<object> GetAtomicValues()
         {

@@ -186,7 +186,10 @@ namespace Phantasma.Explorer.Utils
                 case EventKind.TokenBurn:
                 case EventKind.TokenSend:
                 case EventKind.TokenEscrow:
+                case EventKind.TokenStake:
+                case EventKind.TokenUnstake:
                 case EventKind.TokenReceive:
+                case EventKind.TokenClaim:
                     {
                         var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());
                         var token = phantasmaTokens.Single(t => t.Symbol.Equals(data.symbol));
@@ -198,7 +201,11 @@ namespace Phantasma.Explorer.Utils
                             case EventKind.TokenBurn: action = "burned"; break;
                             case EventKind.TokenSend: action = "sent"; break;
                             case EventKind.TokenReceive: action = "received"; break;
+                            case EventKind.TokenStake: action = "staked"; break;
+                            case EventKind.TokenUnstake: action = "unstaked"; break;
                             case EventKind.TokenEscrow: action = "escrowed"; break;
+                            case EventKind.TokenClaim: action = "claimed"; break;
+
 
                             default: action = "???"; break;
                         }
@@ -235,20 +242,10 @@ namespace Phantasma.Explorer.Utils
             }
         }
 
-        public static bool IsTransferEvent(Event txEvent)//todo confirm this
-        {
-            return txEvent.EventKind == EventKind.TokenSend || txEvent.EventKind == EventKind.TokenReceive;
-        }
-
         private static string GetChainName(string address, IEnumerable<Chain> phantasmaChains)
         {
             var name = phantasmaChains.SingleOrDefault(p => p.Address.Equals(address))?.Name;
             return name;
-        }
-
-        public static string GetTokenSymbolFromTokenEventData(Event txEvent)
-        {
-            return Serialization.Unserialize<TokenEventData>(txEvent.Data.Decode()).symbol;
         }
     }
 }

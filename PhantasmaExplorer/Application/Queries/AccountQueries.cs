@@ -22,7 +22,8 @@ namespace Phantasma.Explorer.Application.Queries
 
             var addressList = new List<Account>();
             var temp = new Dictionary<string, decimal>();
-            foreach (var account in _context.Accounts)
+            var accounts = _context.Accounts.Include(p => p.TokenBalance).ToList();
+            foreach (var account in accounts)
             {
                 decimal totalTokenBalance = 0;
                 var tokenbalance = account.TokenBalance.Where(p => p.TokenSymbol == symbol).ToList();

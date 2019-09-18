@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using LunarLabs.Templates;
 using Microsoft.Extensions.DependencyInjection;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Application.Queries;
+using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Persistance;
 using Phantasma.Explorer.Utils;
 using Phantasma.Explorer.ViewModels;
@@ -111,12 +114,12 @@ namespace Phantasma.Explorer.Controllers
 
         public List<TransactionViewModel> GetTransfers(string symbol, int amount = AppSettings.PageSize)
         {
-            var txsQuery = new TransactionQueries(_context);
-            var transfers = txsQuery.QueryLastTokenTransactions(symbol, amount);
+            var tokenQuery = new TokenQueries(_context);
+            var transfers = tokenQuery.QueryLastTokenTransactions(symbol, amount);
 
             var temp = transfers.Select(TransactionViewModel.FromTransaction).ToList();
-
-            return new List<TransactionViewModel>(temp.Where(p => p.AmountTransfer > 0).Take(amount));
+            return temp;
+            //return new List<TransactionViewModel>(temp.Where(p => p.AmountTransfer > 0).Take(amount));
         }
 
         public List<NftViewModel> GetNftListByAddress(string inputAddress) //todo redo this after rpc stuff
@@ -124,21 +127,30 @@ namespace Phantasma.Explorer.Controllers
             var accountQuery = new AccountQueries(_context);
             var account = accountQuery.QueryAccount(inputAddress);
             var nftList = new List<NftViewModel>();
+            var tokensQuery = new TokenQueries(_context);
+            var tokenList = tokensQuery.QueryTokens().ToList();
 
             if (account != null)
             {
                 foreach (var nfToken in account.NonFungibleTokens)
                 {
-                    var viewerURL = "https://nacho.men/luchador/$ID"; //todo invoke contracts appChain.InvokeContract("apps", "GetTokenViewer", nfToken.Symbol).ToString();
+                    string viewerUrl = string.Empty, detailsUrl = string.Empty;
+
+                    var tokenEntity = tokenList.SingleOrDefault(p => p.Symbol == nfToken.TokenSymbol);
+                    if (tokenEntity.MetadataList.Count > 0)
+                    {
+                        viewerUrl = GetViewerUrl(tokenEntity);
+                        detailsUrl = GetDetailsUrl(tokenEntity);
+                    }
 
                     var existingVm = nftList.SingleOrDefault(vm => vm.Symbol == nfToken.TokenSymbol);
                     if (existingVm != null)
                     {
                         existingVm.InfoList.Add(new NftInfoViewModel
                         {
-                            ViewerUrl = viewerURL,
+                            ViewerUrl = viewerUrl,
                             Id = nfToken.Id,
-                            Info = "Mock info: " + nfToken.Id + existingVm.Symbol
+                            Info = detailsUrl
                         });
                     }
                     else
@@ -151,18 +163,30 @@ namespace Phantasma.Explorer.Controllers
                                     {
                                         new NftInfoViewModel
                                         {
-                                            ViewerUrl = viewerURL,
+                                            ViewerUrl = viewerUrl,
                                             Id = nfToken.Id,
-                                            Info = "Test info: " + nfToken.Id + nfToken.TokenSymbol
+                                            Info = detailsUrl
                                         }
                                     }
                         };
+
                         nftList.Add(newVm);
                     }
                 }
             }
 
             return nftList;
+        }
+
+        //todo maybe move this
+        private string GetViewerUrl(Token token)
+        {
+            return token.MetadataList.SingleOrDefault(p => p.Key == "viewer")?.Value?.Trim('*');
+        }
+
+        private string GetDetailsUrl(Token token)
+        {
+            return token.MetadataList.SingleOrDefault(p => p.Key == "details")?.Value?.Trim('*');
         }
     }
 }

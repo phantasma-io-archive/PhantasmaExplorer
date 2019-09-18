@@ -82,18 +82,9 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
                         Title = dto.Title,
                         Icon = dto.Icon
                     });
+
+                    await context.SaveChangesAsync();
                 }
-
-                await context.SaveChangesAsync();
-            }
-        }
-
-        internal static void AddToTokenTxCounter(ExplorerDbContext context, string tokenDataSymbol)
-        {
-            var token = context.Tokens.SingleOrDefault(p => p.Symbol.Equals(tokenDataSymbol));
-            if (token != null)
-            {
-                token.TransactionCount++;
             }
         }
 
@@ -123,7 +114,7 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
                             contextToken.MetadataList.Add(new TokenMetadata
                             {
                                 Key = metadataDto.Key,
-                                Value = metadataDto.Value.Decode()
+                                Value = metadataDto.Value
                             });
                         }
                     }
@@ -151,7 +142,7 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
                             contextToken.MetadataList.Add(new TokenMetadata
                             {
                                 Key = metadataDto.Key,
-                                Value = metadataDto.Value.Decode()
+                                Value = metadataDto.Value
                             });
                         }
                     }

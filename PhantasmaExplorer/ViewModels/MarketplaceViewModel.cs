@@ -34,15 +34,7 @@ namespace Phantasma.Explorer.ViewModels
         private static string GetMetadata(Token token, string key)
         {
             var meta = token.MetadataList.SingleOrDefault(p => p.Key.Equals(key))?.Value;
-
-            if (meta == null)
-            {
-                return "";
-            }
-            else
-            {
-                return System.Text.Encoding.UTF8.GetString(meta).Trim('*');
-            }
+            return meta != null ? meta.Trim('*') : "";
         }
     }
 }

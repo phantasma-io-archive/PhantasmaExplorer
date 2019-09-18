@@ -72,40 +72,40 @@ namespace Phantasma.Explorer.Application.Queries
                 .Count(p => p.Block.ChainAddress.Equals(chain) || p.Block.ChainName.Equals(chain));
         }
 
-        public ICollection<Transaction> QueryLastTokenTransactions(string tokenSymbol, int amount)
-        {
-            var txList = new List<Transaction>();
+        //public ICollection<Transaction> QueryLastTokenTransactions(string tokenSymbol, int amount)
+        //{
+        //    var txList = new List<Transaction>();
 
-            var eventList = _context.Transactions
-                .OrderByDescending(p => p.Timestamp)
-                .Include(p => p.Block)
-                .Include(p => p.Block.Chain)
-                .ToList();
+        //    var eventList = _context.Transactions
+        //        .OrderByDescending(p => p.Timestamp)
+        //        .Include(p => p.Block)
+        //        .Include(p => p.Block.Chain)
+        //        .ToList();
 
-            foreach (var tx in eventList)
-            {
-                if (tx.Events != null)
-                {
-                    foreach (var txEvent in tx.Events)
-                    {
-                        if (txEvent.EventKind == EventKind.TokenSend
-                            || txEvent.EventKind == EventKind.TokenReceive
-                            || txEvent.EventKind == EventKind.TokenEscrow
-                            || txEvent.EventKind == EventKind.TokenMint
-                            || txEvent.EventKind == EventKind.TokenBurn
-                            || txEvent.EventKind == EventKind.TokenStake
-                            || txEvent.EventKind == EventKind.TokenUnstake)
-                        {
-                            var tokenEvent = Serialization.Unserialize<TokenEventData>(txEvent.Data.Decode());
-                            if (!tokenEvent.symbol.Equals(tokenSymbol)) continue;
-                            txList.Add(tx);
-                            break;
-                        }
-                    }
-                }
-            }
+        //    foreach (var tx in eventList)
+        //    {
+        //        if (tx.Events != null)
+        //        {
+        //            foreach (var txEvent in tx.Events)
+        //            {
+        //                if (txEvent.EventKind == EventKind.TokenSend
+        //                    || txEvent.EventKind == EventKind.TokenReceive
+        //                    || txEvent.EventKind == EventKind.TokenEscrow
+        //                    || txEvent.EventKind == EventKind.TokenMint
+        //                    || txEvent.EventKind == EventKind.TokenBurn
+        //                    || txEvent.EventKind == EventKind.TokenStake
+        //                    || txEvent.EventKind == EventKind.TokenUnstake)
+        //                {
+        //                    var tokenEvent = Serialization.Unserialize<TokenEventData>(txEvent.Data.Decode());
+        //                    if (!tokenEvent.symbol.Equals(tokenSymbol)) continue;
+        //                    txList.Add(tx);
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //    }
 
-            return txList.Take(amount).ToList();
-        }
+        //    return txList.Take(amount).ToList();
+        //}
     }
 }

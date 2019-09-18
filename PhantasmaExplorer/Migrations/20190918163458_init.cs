@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Phantasma.Explorer.Migrations
 {
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,7 +11,8 @@ namespace Phantasma.Explorer.Migrations
                 columns: table => new
                 {
                     Address = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: true),
+                    SoulStaked = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -41,7 +41,8 @@ namespace Phantasma.Explorer.Migrations
                     Address = table.Column<string>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     ParentAddress = table.Column<string>(nullable: true),
-                    Height = table.Column<uint>(nullable: false)
+                    Height = table.Column<uint>(nullable: false),
+                    Contracts = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -55,7 +56,6 @@ namespace Phantasma.Explorer.Migrations
                     Symbol = table.Column<string>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Decimals = table.Column<uint>(nullable: false),
-                    TransactionCount = table.Column<uint>(nullable: false),
                     CurrentSupply = table.Column<string>(nullable: true),
                     MaxSupply = table.Column<string>(nullable: true),
                     OwnerAddress = table.Column<string>(nullable: true),
@@ -136,7 +136,7 @@ namespace Phantasma.Explorer.Migrations
                 columns: table => new
                 {
                     Key = table.Column<string>(nullable: false),
-                    Value = table.Column<byte[]>(nullable: false),
+                    Value = table.Column<string>(nullable: false),
                     Symbol = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
@@ -158,7 +158,8 @@ namespace Phantasma.Explorer.Migrations
                     BlockHash = table.Column<string>(nullable: true),
                     Timestamp = table.Column<uint>(nullable: false),
                     Script = table.Column<string>(nullable: true),
-                    Result = table.Column<string>(nullable: true)
+                    Result = table.Column<string>(nullable: true),
+                    TokenSymbol = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -168,6 +169,12 @@ namespace Phantasma.Explorer.Migrations
                         column: x => x.BlockHash,
                         principalTable: "Blocks",
                         principalColumn: "Hash",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Transactions_Tokens_TokenSymbol",
+                        column: x => x.TokenSymbol,
+                        principalTable: "Tokens",
+                        principalColumn: "Symbol",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -234,6 +241,11 @@ namespace Phantasma.Explorer.Migrations
                 name: "IX_Transactions_BlockHash",
                 table: "Transactions",
                 column: "BlockHash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_TokenSymbol",
+                table: "Transactions",
+                column: "TokenSymbol");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -263,10 +275,10 @@ namespace Phantasma.Explorer.Migrations
                 name: "Accounts");
 
             migrationBuilder.DropTable(
-                name: "Tokens");
+                name: "Blocks");
 
             migrationBuilder.DropTable(
-                name: "Blocks");
+                name: "Tokens");
 
             migrationBuilder.DropTable(
                 name: "Chains");

@@ -120,8 +120,17 @@ namespace Phantasma.Explorer.Controllers
         {
             try
             {
+                var chain = new ChainQueries(_context).QueryChain(input);
+
+                //chain
+                if (chain != null)
+                {
+                    return $"chain/{chain.Address}";
+                }
+
                 if (Address.IsValidAddress(input)) //maybe is address
                 {
+                    //check if is a chain address
                     return $"address/{input}";
                 }
 
@@ -137,13 +146,6 @@ namespace Phantasma.Explorer.Controllers
                 if (app != null)
                 {
                     return $"app/{app.Id}";
-                }
-
-                //chain
-                var chain = new ChainQueries(_context).QueryChain(input);
-                if (chain != null)
-                {
-                    return $"chain/{chain.Address}";
                 }
 
                 //hash

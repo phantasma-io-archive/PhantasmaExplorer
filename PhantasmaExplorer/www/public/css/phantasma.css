@@ -43,6 +43,10 @@ body {
     background-color: white;
     background-size: 100%;
 }
+
+.container {
+    width: 80% !important;
+}
 /* Footer */
 footer {
     width: 100%;

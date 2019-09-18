@@ -163,8 +163,6 @@ namespace Phantasma.Explorer.Persistance
                     Result = transactionDto.Result
                 };
 
-
-                bool counterIncremented = false;
                 //Events
                 foreach (var eventDto in transactionDto.Events)
                 {
@@ -177,17 +175,7 @@ namespace Phantasma.Explorer.Persistance
                     transaction.Events.Add(domainEvent);
 
                     AddToUpdateList(eventDto.EventAddress);
-                    await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
-
-                    if (!counterIncremented)
-                    {
-                        if (TransactionUtils.IsTransferEvent(domainEvent))
-                        {
-                            var tokenSymbol = TransactionUtils.GetTokenSymbolFromTokenEventData(domainEvent);
-                            SyncUtils.AddToTokenTxCounter(context, tokenSymbol);
-                            counterIncremented = true;
-                        }
-                    }
+                    await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);                 
                 }
             }
 
@@ -237,6 +225,15 @@ namespace Phantasma.Explorer.Persistance
 
                         await context.SaveChangesAsync();
                     }
+                }
+                else
+                {
+                    account = new Account
+                    {
+                        Address = address
+                    };
+
+                    await context.Accounts.AddAsync(account);
                 }
             }
         }
@@ -291,7 +288,7 @@ namespace Phantasma.Explorer.Persistance
                         token.MetadataList.Add(new TokenMetadata
                         {
                             Key = metadataDto.Key,
-                            Value = metadataDto.Value.Decode()
+                            Value = metadataDto.Value
                         });
                     }
                 }

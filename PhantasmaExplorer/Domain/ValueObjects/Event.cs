@@ -11,7 +11,6 @@ namespace Phantasma.Explorer.Domain.ValueObjects
 
         public EventKind EventKind { get; set; }
 
-
         protected override IEnumerable<object> GetAtomicValues()
         {
             yield return EventAddress;
