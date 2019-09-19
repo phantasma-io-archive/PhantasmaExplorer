@@ -102,6 +102,8 @@ namespace Phantasma.Explorer.Application.Queries
 
         public IQueryable<Transaction> QueryAddressTransactions(string address, string chain = null)
         {
+            var account = _context.Accounts.SingleOrDefault(p => p.Address == address);
+
             if (!string.IsNullOrEmpty(chain))
             {
                 return _context.Accounts
@@ -116,6 +118,12 @@ namespace Phantasma.Explorer.Application.Queries
                     .OrderByDescending(p => p.Timestamp)
                     .AsQueryable();
             }
+
+            //return account
+            //    .AccountTransactions
+            //    .Select(p => p.Transaction)
+            //    .OrderByDescending(p => p.Timestamp)
+            //    .AsQueryable();
 
             return _context.Accounts.Include(p => p.AccountTransactions)
                 .ThenInclude(p => p.Transaction)

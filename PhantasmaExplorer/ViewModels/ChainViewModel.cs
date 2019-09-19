@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Internal;
+using Phantasma.Core;
 using Phantasma.Core.Utils;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Utils;
@@ -15,6 +17,7 @@ namespace Phantasma.Explorer.ViewModels
         public int Transactions { get; set; }
         public string ParentChain { get; set; }
         public uint Height { get; set; }
+        public string Contracts { get; set; }
 
         public List<BlockViewModel> Blocks { get; set; }
         public Dictionary<string, string> ChildChains { get; set; }
@@ -31,6 +34,7 @@ namespace Phantasma.Explorer.ViewModels
                 Transactions = chain.Blocks.Select(p => p.Transactions.Count).Sum(),
                 Height = chain.Height,
                 Blocks = lastBlocksVm,
+                Contracts = chain.Contracts.Join("; "),
                 ParentChain = chain.ParentAddress ?? "",
                 ChildChains = ChainUtils.SetupChainChildren(chains, chain.Address)
             };

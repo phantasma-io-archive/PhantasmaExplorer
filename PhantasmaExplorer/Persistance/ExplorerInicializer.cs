@@ -63,6 +63,9 @@ namespace Phantasma.Explorer.Persistance
                     await SeedBlocks(context);
                 }
 
+                await new ExplorerSync().UpdateAccountBalances(context, context.Accounts.Select(p => p.Address).ToList());
+                Console.WriteLine("Updating account balances.");
+
                 sw.Stop();
                 Console.WriteLine("Elapsed time to initializing db = {0}", sw.Elapsed);
             }

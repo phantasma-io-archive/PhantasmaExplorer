@@ -42,7 +42,7 @@ namespace Phantasma.Explorer.Persistance
                 {
                     if (_retries >= MaxRetries)
                     {
-                        Console.WriteLine("Something went wrong with synchronization");
+                        Console.WriteLine("There are no new blocks to sync.");
                         _retries = 0;
                         return;
                     }
@@ -189,7 +189,7 @@ namespace Phantasma.Explorer.Persistance
             Console.WriteLine();
         }
 
-        private async Task UpdateAccountBalances(ExplorerDbContext context, List<string> addressList)
+        internal async Task UpdateAccountBalances(ExplorerDbContext context, List<string> addressList)
         {
             Console.WriteLine("*********************************");
             Console.WriteLine("Updating account balances");
