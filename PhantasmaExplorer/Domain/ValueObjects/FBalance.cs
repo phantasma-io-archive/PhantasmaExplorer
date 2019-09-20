@@ -3,7 +3,7 @@ using Phantasma.Explorer.Domain.Infrastructure;
 
 namespace Phantasma.Explorer.Domain.ValueObjects
 {
-    public class FBalance : ValueObject
+    public class FungibleBalance : ValueObject
     {
         public string Amount { get; set; }
         public string TokenSymbol { get; set; }

@@ -63,9 +63,9 @@ namespace Phantasma.Explorer.Application.Queries
                 .SingleOrDefault(p => p.Address.Equals(address));
         }
 
-        public ICollection<FBalance> QueryAccountTokenBalanceList(string address, string tokenSymbol, string chainName = null)
+        public ICollection<FungibleBalance> QueryAccountTokenBalanceList(string address, string tokenSymbol, string chainName = null)
         {
-            IEnumerable<FBalance> fungibleTokens = null;
+            IEnumerable<FungibleBalance> fungibleTokens = null;
             var account = _context.Accounts.SingleOrDefault(p => p.Address.Equals(address));
 
             if (account != null)

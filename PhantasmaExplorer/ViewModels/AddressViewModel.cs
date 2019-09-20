@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
+using Phantasma.RpcClient.DTOs;
 
 namespace Phantasma.Explorer.ViewModels
 {
@@ -11,7 +13,9 @@ namespace Phantasma.Explorer.ViewModels
         public string Name { get; set; }
         public decimal Balance { get; set; }
         public decimal Value { get; set; }
+        public decimal StakedAmount { get; set; }
 
+        public List<InteropAccountDto> Interops { get; set; }
         public List<BalanceViewModel> NativeBalances { get; set; }
         public List<BalanceViewModel> TokenBalance { get; set; }
         public IEnumerable<TransactionViewModel> Transactions { get; set; }
@@ -24,7 +28,9 @@ namespace Phantasma.Explorer.ViewModels
                 Name = account.Name,
                 Value = 0,
                 NativeBalances = new List<BalanceViewModel>(),
-                TokenBalance = new List<BalanceViewModel>()
+                TokenBalance = new List<BalanceViewModel>(),
+                Interops = new List<InteropAccountDto>(),
+                StakedAmount = decimal.Parse(account.SoulStaked) / (decimal)Math.Pow(10d, AppSettings.StakingDecimals),
             };
 
             var soulTokens = account.TokenBalance.Where(p => p.TokenSymbol.Equals(AppSettings.NativeSymbol));
@@ -55,6 +61,17 @@ namespace Phantasma.Explorer.ViewModels
                     Token = new TokenViewModel { Symbol = nonFungibleToken.TokenSymbol },
                     ChainName = nonFungibleToken.Chain,
                     Value = 0,
+                });
+            }
+
+
+            foreach (var interop in account.Interops)
+            {
+                vm.Interops.Add(new InteropAccountDto
+                {
+                    Address = interop.Address,
+                    Platform = interop.Platform,
+                    InteropAddress = interop.InteropAddress,
                 });
             }
 

@@ -17,6 +17,15 @@ namespace Phantasma.Explorer.Persistance
                 a.Property(ca => ca.Amount);
                 a.HasKey("Address", "Chain", "TokenSymbol", "Amount");
             });
+
+            builder.OwnsMany(p => p.Interops, a =>
+            {
+                a.HasForeignKey("Address");
+                a.Property(p => p.InteropAddress);
+                a.Property(p => p.Platform);
+                a.Property(p => p.Address);
+                a.HasKey("Address", "InteropAddress", "Platform");
+            });
         }
     }
 

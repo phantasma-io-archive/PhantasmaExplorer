@@ -7,17 +7,20 @@ namespace Phantasma.Explorer.Domain.Entities
     {
         public Account()
         {
-            TokenBalance = new HashSet<FBalance>();
+            TokenBalance = new HashSet<FungibleBalance>();
             NonFungibleTokens = new HashSet<NonFungibleToken>();
             AccountTransactions = new HashSet<AccountTransaction>();
+            Interops = new HashSet<Interop>();
         }
 
         public string Address { get; set; }
         public string Name { get; set; }
         public string SoulStaked { get; set; }
+        public string Relay { get; set; } //todo test this relay
 
-        public ICollection<FBalance> TokenBalance { get; set; }
+        public ICollection<FungibleBalance> TokenBalance { get; set; }
         public ICollection<NonFungibleToken> NonFungibleTokens { get; set; }
         public ICollection<AccountTransaction> AccountTransactions { get; }
+        public ICollection<Interop> Interops { get; set; }
     }
 }

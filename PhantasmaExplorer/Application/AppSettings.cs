@@ -13,6 +13,10 @@ namespace Phantasma.Explorer.Application
         internal static string NativeSymbol = Nexus.StakingTokenSymbol;
         internal static string FiatSymbol = Nexus.FiatTokenSymbol;
 
+        internal static int FuelDecimals = Nexus.FuelTokenDecimals;
+        internal static int StakingDecimals = Nexus.StakingTokenDecimals;
+        internal static int FiatDecimals = Nexus.FiatTokenDecimals;
+
         #region URL&CONTEXT
         internal const string UrlHome = "/home";
         internal const string UrlTokens = "/tokens";

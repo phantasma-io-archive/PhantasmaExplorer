@@ -74,12 +74,20 @@ namespace Phantasma.Explorer.Persistance
             var explorerSync = new ExplorerSync();
             new Thread(async () =>
             {
-                Thread.CurrentThread.IsBackground = true;
-                var context = Explorer.AppServices.GetService<ExplorerDbContext>();
+                try
+                {
+                    Thread.CurrentThread.IsBackground = true;
+                    var context = Explorer.AppServices.GetService<ExplorerDbContext>();
 
-                await explorerSync.UpdateAccountBalances(context, context.Accounts.Select(p => p.Address).ToList());
+                    await explorerSync.UpdateAccountBalances(context, context.Accounts.Select(p => p.Address).ToList());
 
-                Console.WriteLine("Account balances are updated");
+                    Console.WriteLine("Account balances are updated");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+
             }).Start();
         }
 
@@ -171,11 +179,13 @@ namespace Phantasma.Explorer.Persistance
                         Data = eventDto.Data,
                         EventAddress = eventDto.EventAddress,
                         EventKind = eventDto.EventKind,
+                        Contract = eventDto.Contract
                     };
+
                     transaction.Events.Add(domainEvent);
 
                     AddToUpdateList(eventDto.EventAddress);
-                    await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);                 
+                    await SyncUtils.UpdateAccount(context, transaction, eventDto.EventAddress);
                 }
             }
 
@@ -200,18 +210,30 @@ namespace Phantasma.Explorer.Persistance
 
                 if (account != null)
                 {
-                    var accountBalance = await _phantasmaRpcService.GetAccount.SendRequestAsync(account.Address);
+                    var accountResult = await _phantasmaRpcService.GetAccount.SendRequestAsync(account.Address);
 
-                    account.Name = accountBalance.Name;
+                    account.Name = accountResult.Name;
+                    account.SoulStaked = accountResult.Stake;
                     account.TokenBalance.Clear();
                     account.NonFungibleTokens.Clear();
+                    account.Interops = new List<Interop>();
 
-                    foreach (var tokenBalance in accountBalance.Tokens)
+                    foreach (var interop in accountResult.Interops)
+                    {
+                        account.Interops.Add(new Interop
+                        {
+                            Address = interop.Address,
+                            Platform = interop.Platform,
+                            InteropAddress = interop.InteropAddress,
+                        });
+                    }
+
+                    foreach (var tokenBalance in accountResult.Tokens)
                     {
                         var token = context.Tokens.Find(tokenBalance.Symbol) ?? await SyncToken(context, tokenBalance.Symbol);
                         if ((token.Flags & TokenFlags.Fungible) != 0)
                         {
-                            account.TokenBalance.Add(new FBalance
+                            account.TokenBalance.Add(new FungibleBalance
                             {
                                 Chain = tokenBalance.ChainName,
                                 TokenSymbol = tokenBalance.Symbol,

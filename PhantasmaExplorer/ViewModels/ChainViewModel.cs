@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Internal;
-using Phantasma.Core;
 using Phantasma.Core.Utils;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Utils;

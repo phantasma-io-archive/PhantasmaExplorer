@@ -7,11 +7,11 @@ using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance.Infrastructure;
 using Phantasma.Explorer.Site;
-using Phantasma.Explorer.Utils;
 using Phantasma.RpcClient.Interfaces;
 using Phantasma.Storage;
 using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
+using Phantasma.Explorer.Application;
 
 namespace Phantasma.Explorer.Persistance
 {
@@ -137,6 +137,7 @@ namespace Phantasma.Explorer.Persistance
                                     Data = eventDto.Data,
                                     EventAddress = eventDto.EventAddress,
                                     EventKind = eventDto.EventKind,
+                                    Contract = eventDto.Contract
                                 };
 
                                 transaction.Events.Add(domainEvent);

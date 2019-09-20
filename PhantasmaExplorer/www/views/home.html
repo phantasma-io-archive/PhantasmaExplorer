@@ -54,7 +54,7 @@ function onStart(){
 
 	let options = {
 		fullWidth: true,
-		height: 365,
+		height: 230,
 		chartPadding: {
 			right: 40
 		}
@@ -88,7 +88,7 @@ function onStart(){
                                     Miner: <span class="thin-home-link">{{#link-address ValidatorAddress}}</span><br>
                                     Chain: <span class="thin-home-link"> <a href="/chain/{{ChainAddress}}">{{ChainName}}</a></span><br>
                                     <span class="bold-home-link"><a href="/block/{{Hash}}#tab_transactions">{{Transactions}} Txn</a></span><br>
-                                    Block reward: {{Reward}} SOUL
+                                    Block reward: {{Reward}} KCAL
                                 </td>
                             </tr>
                             {{/each}}

@@ -4,7 +4,7 @@
         <span>
             <p class="table-general" style="font-size: 14px;font-weight: 600;color: #7C95AB;">Account name:<span style="color: #17B0E7"> {{address.Name}}</span></p>
         </span>
-
+        {{#if address.StakedAmount}}
         {{#if address.NativeBalances}}
         <div class="table-responsive">
             <table class="table table-striped table-general">

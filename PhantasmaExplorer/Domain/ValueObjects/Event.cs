@@ -8,7 +8,7 @@ namespace Phantasma.Explorer.Domain.ValueObjects
     {
         public string EventAddress { get; set; }
         public string Data { get; set; }
-
+        public string Contract { get; set; }
         public EventKind EventKind { get; set; }
 
         protected override IEnumerable<object> GetAtomicValues()

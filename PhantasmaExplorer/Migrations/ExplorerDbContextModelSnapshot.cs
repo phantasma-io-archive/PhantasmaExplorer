@@ -22,6 +22,8 @@ namespace Phantasma.Explorer.Migrations
 
                     b.Property<string>("Name");
 
+                    b.Property<string>("Relay");
+
                     b.Property<string>("SoulStaked");
 
                     b.HasKey("Address");
@@ -75,7 +77,7 @@ namespace Phantasma.Explorer.Migrations
 
                     b.Property<string>("PreviousHash");
 
-                    b.Property<decimal>("Reward");
+                    b.Property<string>("Reward");
 
                     b.Property<uint>("Timestamp");
 
@@ -172,7 +174,7 @@ namespace Phantasma.Explorer.Migrations
 
             modelBuilder.Entity("Phantasma.Explorer.Domain.Entities.Account", b =>
                 {
-                    b.OwnsMany("Phantasma.Explorer.Domain.ValueObjects.FBalance", "TokenBalance", b1 =>
+                    b.OwnsMany("Phantasma.Explorer.Domain.ValueObjects.FungibleBalance", "TokenBalance", b1 =>
                         {
                             b1.Property<string>("Address");
 
@@ -184,10 +186,28 @@ namespace Phantasma.Explorer.Migrations
 
                             b1.HasKey("Address", "Chain", "TokenSymbol", "Amount");
 
-                            b1.ToTable("FBalance");
+                            b1.ToTable("FungibleBalance");
 
                             b1.HasOne("Phantasma.Explorer.Domain.Entities.Account")
                                 .WithMany("TokenBalance")
+                                .HasForeignKey("Address")
+                                .OnDelete(DeleteBehavior.Cascade);
+                        });
+
+                    b.OwnsMany("Phantasma.Explorer.Domain.ValueObjects.Interop", "Interops", b1 =>
+                        {
+                            b1.Property<string>("Address");
+
+                            b1.Property<string>("InteropAddress");
+
+                            b1.Property<string>("Platform");
+
+                            b1.HasKey("Address", "InteropAddress", "Platform");
+
+                            b1.ToTable("Interop");
+
+                            b1.HasOne("Phantasma.Explorer.Domain.Entities.Account")
+                                .WithMany("Interops")
                                 .HasForeignKey("Address")
                                 .OnDelete(DeleteBehavior.Cascade);
                         });
@@ -262,6 +282,8 @@ namespace Phantasma.Explorer.Migrations
                             b1.Property<string>("EventAddress");
 
                             b1.Property<int>("EventKind");
+
+                            b1.Property<string>("Contract");
 
                             b1.HasKey("Hash", "Data", "EventAddress", "EventKind");
 

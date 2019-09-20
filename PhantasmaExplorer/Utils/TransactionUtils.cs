@@ -206,7 +206,6 @@ namespace Phantasma.Explorer.Utils
                             case EventKind.TokenEscrow: action = "escrowed"; break;
                             case EventKind.TokenClaim: action = "claimed"; break;
 
-
                             default: action = "???"; break;
                         }
 

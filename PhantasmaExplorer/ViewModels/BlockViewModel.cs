@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Phantasma.Core.Types;
 using Phantasma.Core.Utils;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 
 namespace Phantasma.Explorer.ViewModels
@@ -25,7 +26,7 @@ namespace Phantasma.Explorer.ViewModels
         {
             var vm = new BlockViewModel
             {
-                Height = (int) block.Height,
+                Height = (int)block.Height,
                 Timestamp = new Timestamp(block.Timestamp),
                 Transactions = block.Transactions.Count,
                 Hash = block.Hash,
@@ -33,10 +34,9 @@ namespace Phantasma.Explorer.ViewModels
                 ValidatorAddress = block.ValidatorAddress,
                 ChainName = block.ChainName.ToTitleCase(),
                 ChainAddress = block.ChainAddress,
-                Reward = block.Reward,
+                Reward = int.Parse(block.Reward) / (decimal)Math.Pow(10d, AppSettings.FuelDecimals),
                 Txs = block.Transactions.Select(TransactionViewModel.FromTransaction).ToList(),
             };
-
 
             return vm;
         }

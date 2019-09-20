@@ -12,7 +12,8 @@ namespace Phantasma.Explorer.Migrations
                 {
                     Address = table.Column<string>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    SoulStaked = table.Column<string>(nullable: true)
+                    SoulStaked = table.Column<string>(nullable: true),
+                    Relay = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -67,7 +68,7 @@ namespace Phantasma.Explorer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FBalance",
+                name: "FungibleBalance",
                 columns: table => new
                 {
                     Amount = table.Column<string>(nullable: false),
@@ -77,9 +78,28 @@ namespace Phantasma.Explorer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FBalance", x => new { x.Address, x.Chain, x.TokenSymbol, x.Amount });
+                    table.PrimaryKey("PK_FungibleBalance", x => new { x.Address, x.Chain, x.TokenSymbol, x.Amount });
                     table.ForeignKey(
-                        name: "FK_FBalance_Accounts_Address",
+                        name: "FK_FungibleBalance_Accounts_Address",
+                        column: x => x.Address,
+                        principalTable: "Accounts",
+                        principalColumn: "Address",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Interop",
+                columns: table => new
+                {
+                    Platform = table.Column<string>(nullable: false),
+                    Address = table.Column<string>(nullable: false),
+                    InteropAddress = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Interop", x => new { x.Address, x.InteropAddress, x.Platform });
+                    table.ForeignKey(
+                        name: "FK_Interop_Accounts_Address",
                         column: x => x.Address,
                         principalTable: "Accounts",
                         principalColumn: "Address",
@@ -118,7 +138,7 @@ namespace Phantasma.Explorer.Migrations
                     Height = table.Column<uint>(nullable: false),
                     Payload = table.Column<string>(nullable: true),
                     ValidatorAddress = table.Column<string>(nullable: true),
-                    Reward = table.Column<decimal>(nullable: false)
+                    Reward = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -209,7 +229,8 @@ namespace Phantasma.Explorer.Migrations
                     EventAddress = table.Column<string>(nullable: false),
                     Data = table.Column<string>(nullable: false),
                     EventKind = table.Column<int>(nullable: false),
-                    Hash = table.Column<string>(nullable: false)
+                    Hash = table.Column<string>(nullable: false),
+                    Contract = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -260,7 +281,10 @@ namespace Phantasma.Explorer.Migrations
                 name: "Event");
 
             migrationBuilder.DropTable(
-                name: "FBalance");
+                name: "FungibleBalance");
+
+            migrationBuilder.DropTable(
+                name: "Interop");
 
             migrationBuilder.DropTable(
                 name: "NonFungibleTokens");

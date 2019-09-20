@@ -17,7 +17,7 @@ namespace Phantasma.Explorer.Domain.Entities
         public uint Height { get; set; }
         public string Payload { get; set; }
         public string ValidatorAddress { get; set; }
-        public decimal Reward { get; set; }
+        public string Reward { get; set; }
 
         public Chain Chain { get; set; }
         public ICollection<Transaction> Transactions { get; set; }

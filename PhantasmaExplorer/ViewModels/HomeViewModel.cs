@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Phantasma.Core.Types;
+using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Utils;
 
@@ -36,7 +37,7 @@ namespace Phantasma.Explorer.ViewModels
                 Hash = block.Hash,
                 ChainName = block.ChainName,
                 ChainAddress = block.ChainAddress,
-                Reward = block.Reward,
+                Reward = int.Parse(block.Reward) / (decimal)Math.Pow(10d, AppSettings.FuelDecimals),
                 ValidatorAddress = block.ValidatorAddress,
                 Transactions = block.Transactions.Count,
                 Timestamp = new Timestamp(block.Timestamp),

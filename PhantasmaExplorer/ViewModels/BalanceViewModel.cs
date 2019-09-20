@@ -15,7 +15,7 @@ namespace Phantasma.Explorer.ViewModels
         public int TxnCount { get; set; }
         public TokenViewModel Token { get; set; } = new TokenViewModel();
 
-        public static BalanceViewModel FromAccountBalance(Account account, FBalance balance, Token token)
+        public static BalanceViewModel FromAccountBalance(Account account, FungibleBalance balance, Token token)
         {
             return new BalanceViewModel
             {
