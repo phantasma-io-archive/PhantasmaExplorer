@@ -559,6 +559,7 @@ namespace Phantasma.Explorer.Site
                     Count = controller.GetSoulsMasterCount(),
                     CurrentPage = pageNumber,
                     PageSize = AppSettings.PageSize,
+                    
                 };
 
                 var soulMasterList = controller.GetSoulMasters(pageModel.CurrentPage, pageModel.PageSize);
@@ -567,6 +568,7 @@ namespace Phantasma.Explorer.Site
                 {
                     context[AppSettings.MenuContext] = _menus;
                     context[AppSettings.SoulMastersContext] = soulMasterList;
+                    context[AppSettings.PaginationContext] = pageModel;
                     return RendererView(context, "layout", AppSettings.SoulMastersContext);
                 }
             }
