@@ -8,7 +8,7 @@ namespace Phantasma.Explorer.Application
         internal const int SyncTime = 20000;
         internal const string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
 
-        internal static string RpcServerUrl = "http://localhost:7077/rpc";
+        internal static string RpcServerUrl = "http://45.76.88.140:7077/rpc";
         internal static string FuelSymbol = Nexus.FuelTokenSymbol;
         internal static string NativeSymbol = Nexus.StakingTokenSymbol;
         internal static string FiatSymbol = Nexus.FiatTokenSymbol;
@@ -34,6 +34,7 @@ namespace Phantasma.Explorer.Application
         internal const string UrlError = "/error";
         internal const string UrlApi = "/api";
         internal const string UrlMarketplace = "/marketplace";
+        internal const string UrlSoulMasters = "/soulmasters";
 
         internal const string HomeContext = "home";
         internal const string MenuContext = "menu";
@@ -51,6 +52,7 @@ namespace Phantasma.Explorer.Application
         internal const string ChainContext = "chain";
         internal const string AppsContext = "apps";
         internal const string AppContext = "app";
+        internal const string SoulMastersContext = "soulmasters";
         internal const string ErrorContext = "error";
         internal const string HoldersContext = "holders";
         internal const string PaginationContext = "pagination";

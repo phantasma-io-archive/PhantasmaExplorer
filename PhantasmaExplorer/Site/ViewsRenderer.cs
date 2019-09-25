@@ -31,8 +31,9 @@ namespace Phantasma.Explorer.Site
                 new MenuContext {Text = "Chains", Url = AppSettings.UrlChains, Active = false},
                 new MenuContext {Text = "Blocks", Url = AppSettings.UrlBlocks, Active = false},
                 new MenuContext {Text = "Tokens", Url = AppSettings.UrlTokens, Active = false},
-                new MenuContext {Text = "Addresses", Url = AppSettings.UrlAddresses, Active = false},
-                new MenuContext {Text = "Apps", Url = AppSettings.UrlApps, Active = false},
+                new MenuContext {Text = "Accounts", Url = AppSettings.UrlAddresses, Active = false},
+                //new MenuContext {Text = "Apps", Url = AppSettings.UrlApps, Active = false},
+                new MenuContext {Text = "Soul Masters", Url = AppSettings.UrlSoulMasters, Active = false},
                 new MenuContext {Text = "Marketplace", Url = AppSettings.UrlMarketplace, Active = false}
             };
             SetupTags();
@@ -108,6 +109,10 @@ namespace Phantasma.Explorer.Site
             TemplateEngine.Server.Get($"{AppSettings.UrlChain}/{{input}}", RouteChain);
 
             TemplateEngine.Server.Get($"{AppSettings.UrlApps}", RouteApps);
+
+            TemplateEngine.Server.Get($"{AppSettings.UrlSoulMasters}", RouteSoulMasters);
+            TemplateEngine.Server.Get($"{AppSettings.UrlSoulMasters}/{{page}}", RouteSoulMasters);
+
 
             TemplateEngine.Server.Get($"{AppSettings.UrlApp}/{{input}}", RouteApp);
 
@@ -536,6 +541,47 @@ namespace Phantasma.Explorer.Site
 
             return HTTPResponse.Redirect(AppSettings.UrlError);
         }
+
+        private object RouteSoulMasters(HTTPRequest request)
+        {
+            try
+            {
+                var input = request.GetVariable("page");
+                var controller = SoulMastersControllerInstance;
+
+                if (!int.TryParse(input, out int pageNumber))
+                {
+                    pageNumber = 1;
+                }
+
+                var pageModel = new PaginationModel
+                {
+                    Count = controller.GetSoulsMasterCount(),
+                    CurrentPage = pageNumber,
+                    PageSize = AppSettings.PageSize,
+                };
+
+                var soulMasterList = controller.GetSoulMasters(pageModel.CurrentPage, pageModel.PageSize);
+                var context = GetSessionContext(request);
+                if (soulMasterList.Count > 0)
+                {
+                    context[AppSettings.MenuContext] = _menus;
+                    context[AppSettings.SoulMastersContext] = soulMasterList;
+                    return RendererView(context, "layout", AppSettings.SoulMastersContext);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            _errorContextInstance.ErrorCode = "apps error";
+            _errorContextInstance.ErrorDescription = "No Soul Masters found";
+            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
+
+            return HTTPResponse.Redirect(AppSettings.UrlError);
+        }
+
         private object RouteApp(HTTPRequest request)
         {
             var appId = request.GetVariable("input");
@@ -647,6 +693,7 @@ namespace Phantasma.Explorer.Site
         private TransactionsController TransactionsControllerInstance => new TransactionsController();
         private TokensController TokensControllerInstance => new TokensController();
         private AppsController AppsControllerInstance => new AppsController();
+        private SoulMastersController SoulMastersControllerInstance => new SoulMastersController();
         private MarketplaceController MarketplaceControllerInstance => new MarketplaceController();
         //private ApiController ApiControllerInstance => new ApiController();
         #endregion

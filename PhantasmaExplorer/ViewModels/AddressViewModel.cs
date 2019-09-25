@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
@@ -19,6 +21,16 @@ namespace Phantasma.Explorer.ViewModels
         public List<BalanceViewModel> NativeBalances { get; set; }
         public List<BalanceViewModel> TokenBalance { get; set; }
         public IEnumerable<TransactionViewModel> Transactions { get; set; }
+
+        public static AddressViewModel FromSoulMaster(Account account)
+        {
+            return new AddressViewModel
+            {
+                Address = account.Address,
+                Name = account.Name,
+                StakedAmount = decimal.Parse(account.SoulStaked) / (decimal)Math.Pow(10d, AppSettings.StakingDecimals)
+            };
+        }
 
         public static AddressViewModel FromAddress(Account account, List<Token> phantasmaTokens)
         {

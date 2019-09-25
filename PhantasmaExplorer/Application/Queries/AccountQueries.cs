@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Phantasma.Explorer.Domain.Entities;
@@ -50,6 +51,12 @@ namespace Phantasma.Explorer.Application.Queries
             }
 
             return addressList;
+        }
+
+        public IQueryable<Account> QuerySoulMasters()
+        {
+            var accounts = _context.Accounts;
+            return accounts.Where(p => !string.IsNullOrEmpty(p.SoulStaked) && double.Parse(p.SoulStaked) >= 50000);
         }
 
 
