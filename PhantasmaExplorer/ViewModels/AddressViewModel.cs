@@ -17,7 +17,6 @@ namespace Phantasma.Explorer.ViewModels
         public decimal Value { get; set; }
         public decimal StakedAmount { get; set; }
 
-        public List<InteropAccountDto> Interops { get; set; }
         public List<BalanceViewModel> NativeBalances { get; set; }
         public List<BalanceViewModel> TokenBalance { get; set; }
         public IEnumerable<TransactionViewModel> Transactions { get; set; }
@@ -41,7 +40,6 @@ namespace Phantasma.Explorer.ViewModels
                 Value = 0,
                 NativeBalances = new List<BalanceViewModel>(),
                 TokenBalance = new List<BalanceViewModel>(),
-                Interops = new List<InteropAccountDto>(),
                 StakedAmount = decimal.Parse(account.SoulStaked) / (decimal)Math.Pow(10d, AppSettings.StakingDecimals),
             };
 
@@ -73,17 +71,6 @@ namespace Phantasma.Explorer.ViewModels
                     Token = new TokenViewModel { Symbol = nonFungibleToken.TokenSymbol },
                     ChainName = nonFungibleToken.Chain,
                     Value = 0,
-                });
-            }
-
-
-            foreach (var interop in account.Interops)
-            {
-                vm.Interops.Add(new InteropAccountDto
-                {
-                    Address = interop.Address,
-                    Platform = interop.Platform,
-                    InteropAddress = interop.InteropAddress,
                 });
             }
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29306.81
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.852
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Explorer", "PhantasmaExplorer\Phantasma.Explorer.csproj", "{50AA5885-09A8-4FDF-90D1-1B13DCF21DCE}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Storage", "..\PhantasmaChain\Phantasma.Storage\Phantasma.Storage.csproj", "{5E202A47-A0AA-4E00-9643-94E00E661452}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Domain", "..\PhantasmaChain\Phantasma.Domain\Phantasma.Domain.csproj", "{BA3F4B6F-7797-400C-A3A6-2A5A5DDA9531}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phantasma.Contracts", "..\PhantasmaChain\Phantasma.Contracts\Phantasma.Contracts.csproj", "{A0ABAB30-7D25-492C-B826-3BE7451E4D6E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{BA3F4B6F-7797-400C-A3A6-2A5A5DDA9531}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA3F4B6F-7797-400C-A3A6-2A5A5DDA9531}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA3F4B6F-7797-400C-A3A6-2A5A5DDA9531}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0ABAB30-7D25-492C-B826-3BE7451E4D6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0ABAB30-7D25-492C-B826-3BE7451E4D6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0ABAB30-7D25-492C-B826-3BE7451E4D6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0ABAB30-7D25-492C-B826-3BE7451E4D6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
