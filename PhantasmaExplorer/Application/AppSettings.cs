@@ -9,7 +9,12 @@ namespace Phantasma.Explorer.Application
         internal const int SyncTime = 20000;
         internal const string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
 
+#if DEBUG
+        internal static string RpcServerUrl = "http://localhost:7077/rpc";
+#else
         internal static string RpcServerUrl = "http://45.76.88.140:7077/rpc";
+#endif
+
         internal static string FuelSymbol = DomainSettings.FuelTokenSymbol;
         internal static string NativeSymbol = DomainSettings.StakingTokenSymbol;
         internal static string FiatSymbol = DomainSettings.FiatTokenSymbol;
@@ -18,7 +23,7 @@ namespace Phantasma.Explorer.Application
         internal static int StakingDecimals = DomainSettings.StakingTokenDecimals;
         internal static int FiatDecimals = DomainSettings.FiatTokenDecimals;
 
-        #region URL&CONTEXT
+#region URL&CONTEXT
         internal const string UrlHome = "/home";
         internal const string UrlTokens = "/tokens";
         internal const string UrlToken = "/token";
@@ -59,6 +64,6 @@ namespace Phantasma.Explorer.Application
         internal const string PaginationContext = "pagination";
         internal const string MarketplaceContext = "marketplace";
 
-        #endregion
+#endregion
     }
 }

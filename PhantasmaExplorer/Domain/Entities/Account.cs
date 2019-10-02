@@ -10,7 +10,6 @@ namespace Phantasma.Explorer.Domain.Entities
             TokenBalance = new HashSet<FungibleBalance>();
             NonFungibleTokens = new HashSet<NonFungibleToken>();
             AccountTransactions = new HashSet<AccountTransaction>();
-            Interops = new HashSet<Interop>();
         }
 
         public string Address { get; set; }
@@ -21,6 +20,5 @@ namespace Phantasma.Explorer.Domain.Entities
         public ICollection<FungibleBalance> TokenBalance { get; set; }
         public ICollection<NonFungibleToken> NonFungibleTokens { get; set; }
         public ICollection<AccountTransaction> AccountTransactions { get; }
-        public ICollection<Interop> Interops { get; set; }
     }
 }

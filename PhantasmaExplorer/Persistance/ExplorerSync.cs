@@ -216,17 +216,6 @@ namespace Phantasma.Explorer.Persistance
                     account.SoulStaked = accountResult.Stake;
                     account.TokenBalance.Clear();
                     account.NonFungibleTokens.Clear();
-                    account.Interops = new List<Interop>();
-
-                    foreach (var interop in accountResult.Interops)
-                    {
-                        account.Interops.Add(new Interop
-                        {
-                            Address = interop.Address,
-                            Platform = interop.Platform,
-                            InteropAddress = interop.InteropAddress,
-                        });
-                    }
 
                     foreach (var tokenBalance in accountResult.Tokens)
                     {
