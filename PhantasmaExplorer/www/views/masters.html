@@ -1,0 +1,40 @@
+﻿<div class="row">
+    <div class="col-xs-12">
+        <h1 class="page-title">Soul Masters</h1>
+        <div class="table-responsive">
+            <table class="table table-striped table-general">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th>Staked Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each soulmasters}}
+                    <tr>
+                        <td>{{Name}}</td>
+                        <td><a href="/address/{{Address}}">{{Address}}</a></td>
+                        <td>{{StakedAmount}} <a href="/token/SOUL">SOUL</a></td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-12">
+            <ul class="pager">
+                {{#if pagination.ShowPrevious}}
+                <li class="previous"><a href="/transactions/{{pagination.PreviousPage}}"><span aria-hidden="true">&larr;</span> Previous</a></li>
+                {{#else}}
+                <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Previous</a></li>
+                {{/if}}
+
+                {{#if pagination.ShowNext}}
+                <li class="next"><a href="/transactions/{{pagination.NextPage}}">Next <span aria-hidden="true">&rarr;</span></a></li>
+                {{#else}}
+                <li class="previous disabled"><a><span aria-hidden="true">&larr;</span>Next </a></li>
+                {{/if}}
+            </ul>
+        </div>
+    </div>
+</div>
