@@ -10,13 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Publish\**" />
+    <EmbeddedResource Remove="Publish\**" />
+    <None Remove="Publish\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LunarLabs.Server" Version="0.1.9.6" />
     <PackageReference Include="LunarParser" Version="1.1.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Blockchain\Phantasma.Blockchain.csproj" />
     <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Cryptography\Phantasma.Cryptography.csproj" />
+    <ProjectReference Include="..\..\PhantasmaChain\Phantasma.Domain\Phantasma.Domain.csproj" />
   </ItemGroup>
 
 </Project>

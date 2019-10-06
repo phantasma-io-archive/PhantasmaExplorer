@@ -1,3 +1,6 @@
 .vs/*
+*pubxml*
+PhantasmaExplorer/Publish/*
+PhantasmaExplorer/bin/*
 PhantasmaExplorer/obj/*
-PhantasmaExplorer/www/netcore*
+PhantasmaExplorer/www/bin*
