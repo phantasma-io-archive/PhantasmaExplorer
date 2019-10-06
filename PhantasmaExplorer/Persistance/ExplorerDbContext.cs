@@ -9,7 +9,6 @@ namespace Phantasma.Explorer.Persistance
         public ExplorerDbContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<App> Apps { get; set; }
         public DbSet<Block> Blocks { get; set; }
         public DbSet<Chain> Chains { get; set; }
         public DbSet<NonFungibleToken> NonFungibleTokens { get; set; }

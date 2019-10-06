@@ -42,12 +42,6 @@ namespace Phantasma.Explorer.Persistance
                 context.Database.EnsureCreated();
                 _phantasmaRpcService = (IPhantasmaRpcService)Explorer.AppServices.GetService(typeof(IPhantasmaRpcService));
 
-                if (!context.Apps.Any())
-                {
-                    var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
-                    await SyncUtils.SyncApps(context, appList);
-                }
-
                 if (!context.Tokens.Any())
                 {
                     var tokenList = await _phantasmaRpcService.GetTokens.SendRequestAsync();

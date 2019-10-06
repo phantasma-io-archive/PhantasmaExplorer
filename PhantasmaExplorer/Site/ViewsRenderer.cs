@@ -108,13 +108,8 @@ namespace Phantasma.Explorer.Site
 
             TemplateEngine.Server.Get($"{AppSettings.UrlChain}/{{input}}", RouteChain);
 
-            TemplateEngine.Server.Get($"{AppSettings.UrlApps}", RouteApps);
-
             TemplateEngine.Server.Get($"{AppSettings.UrlSoulMasters}", RouteSoulMasters);
             TemplateEngine.Server.Get($"{AppSettings.UrlSoulMasters}/{{page}}", RouteSoulMasters);
-
-
-            TemplateEngine.Server.Get($"{AppSettings.UrlApp}/{{input}}", RouteApp);
 
             TemplateEngine.Server.Get($"{AppSettings.UrlMarketplace}", RouteMarketplace);
             TemplateEngine.Server.Get($"{AppSettings.UrlMarketplace}/{{chain}}/{{page}}", RouteMarketplace);
@@ -516,32 +511,6 @@ namespace Phantasma.Explorer.Site
             return HTTPResponse.Redirect(AppSettings.UrlError);
         }
 
-        private object RouteApps(HTTPRequest request)
-        {
-            try
-            {
-                var controller = AppsControllerInstance;
-                var appList = controller.GetAllApps();
-                var context = GetSessionContext(request);
-                if (appList.Count > 0)
-                {
-                    context[AppSettings.MenuContext] = _menus;
-                    context[AppSettings.AppsContext] = appList;
-                    return RendererView(context, "layout", AppSettings.AppsContext);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
-            _errorContextInstance.ErrorCode = "apps error";
-            _errorContextInstance.ErrorDescription = "No apps found";
-            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
-
-            return HTTPResponse.Redirect(AppSettings.UrlError);
-        }
-
         private object RouteSoulMasters(HTTPRequest request)
         {
             try
@@ -579,34 +548,6 @@ namespace Phantasma.Explorer.Site
 
             _errorContextInstance.ErrorCode = "apps error";
             _errorContextInstance.ErrorDescription = "No Soul Masters found";
-            request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
-
-            return HTTPResponse.Redirect(AppSettings.UrlError);
-        }
-
-        private object RouteApp(HTTPRequest request)
-        {
-            var appId = request.GetVariable("input");
-            try
-            {
-                var controller = AppsControllerInstance;
-                var app = controller.GetApp(appId);
-                var context = GetSessionContext(request);
-                if (app != null)
-                {
-                    context[AppSettings.MenuContext] = _menus;
-                    context[AppSettings.AppContext] = app;
-
-                    return RendererView(context, "layout", AppSettings.AppContext);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
-            _errorContextInstance.ErrorCode = "apps error";
-            _errorContextInstance.ErrorDescription = $"No app with {appId} found";
             request.session.SetStruct<ErrorContext>(AppSettings.ErrorContext, _errorContextInstance);
 
             return HTTPResponse.Redirect(AppSettings.UrlError);
@@ -694,7 +635,6 @@ namespace Phantasma.Explorer.Site
         private ChainsController ChainsControllerInstance => new ChainsController();
         private TransactionsController TransactionsControllerInstance => new TransactionsController();
         private TokensController TokensControllerInstance => new TokensController();
-        private AppsController AppsControllerInstance => new AppsController();
         private SoulMastersController SoulMastersControllerInstance => new SoulMastersController();
         private MarketplaceController MarketplaceControllerInstance => new MarketplaceController();
         //private ApiController ApiControllerInstance => new ApiController();

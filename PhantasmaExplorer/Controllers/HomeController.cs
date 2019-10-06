@@ -141,13 +141,6 @@ namespace Phantasma.Explorer.Controllers
                     return $"token/{token.Symbol}";
                 }
 
-                //app
-                var app = new AppQueries(_context).QueryApp(input);
-                if (app != null)
-                {
-                    return $"app/{app.Id}";
-                }
-
                 //hash
                 if (Hash.TryParse(input, out var hash))
                 {

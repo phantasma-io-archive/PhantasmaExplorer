@@ -32,14 +32,6 @@ namespace Phantasma.Explorer.Persistance
         }
     }
 
-    public class AppConfiguration : IEntityTypeConfiguration<App>
-    {
-        public void Configure(EntityTypeBuilder<App> builder)
-        {
-            builder.HasKey(e => e.Id);
-        }
-    }
-
     public class ChainConfiguration : IEntityTypeConfiguration<Chain>
     {
         public void Configure(EntityTypeBuilder<Chain> builder)

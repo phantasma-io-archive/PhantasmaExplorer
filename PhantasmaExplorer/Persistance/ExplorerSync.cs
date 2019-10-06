@@ -122,10 +122,6 @@ namespace Phantasma.Explorer.Persistance
                 Console.WriteLine("Sync new chains?");
                 await SyncChains(context);
 
-                Console.WriteLine("Sync new apps?");
-                var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
-                await SyncUtils.SyncApps(context, appList);
-
                 Console.WriteLine("Sync new tokens?");
                 var tokenList = await _phantasmaRpcService.GetTokens.SendRequestAsync();
                 await SyncUtils.SyncToken(context, tokenList);

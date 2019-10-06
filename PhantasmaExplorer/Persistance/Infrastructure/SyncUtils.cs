@@ -67,26 +67,6 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
             await context.SaveChangesAsync();
         }
 
-        internal static async Task SyncApps(ExplorerDbContext context, IList<AppDto> appList)
-        {
-            foreach (var dto in appList)
-            {
-                if (context.Apps.SingleOrDefault(p => p.Id.Equals(dto.Id)) == null)
-                {
-                    context.Apps.Add(new App
-                    {
-                        Id = dto.Id,
-                        Url = dto.Url,
-                        Description = dto.Description,
-                        Title = dto.Title,
-                        Icon = dto.Icon
-                    });
-
-                    await context.SaveChangesAsync();
-                }
-            }
-        }
-
         internal static async Task SyncToken(ExplorerDbContext context, IList<TokenDto> tokenList)
         {
             foreach (var tokenDto in tokenList)
