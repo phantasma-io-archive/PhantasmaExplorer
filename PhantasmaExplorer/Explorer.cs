@@ -22,7 +22,7 @@ namespace Phantasma.Explorer
         static async Task Main(string[] args)
         {
             var settings = new Arguments(args);
-            AppSettings.RpcServerUrl = settings.GetString("rpc", "http://localhost:7077/rpc");
+            AppSettings.RpcServerUrl = settings.GetString("rpc", AppSettings.RpcServerUrl);
 
             PrintAscii();
             Console.WriteLine("\n");

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Cryptography;
+using Phantasma.Domain;
 using Phantasma.Explorer.Application;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
@@ -11,6 +11,7 @@ using Phantasma.Explorer.ViewModels;
 using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
 using Phantasma.Storage;
+using EventKind = Phantasma.RpcClient.DTOs.EventKind;
 
 namespace Phantasma.Explorer.Utils
 {
@@ -24,11 +25,11 @@ namespace Phantasma.Explorer.Utils
             string description = null;
 
             string senderToken = null;
-            Address senderChain = Address.FromText(tx.Block.ChainAddress);
+            string senderChain = tx.Block.ChainAddress;
             Address senderAddress = Address.Null;
 
             string receiverToken = null;
-            Address receiverChain = Address.Null;
+            string receiverChain = "";
             Address receiverAddress = Address.Null;
 
             BigInteger amount = 0;
@@ -40,33 +41,32 @@ namespace Phantasma.Explorer.Utils
                     case EventKind.TokenSend:
                         {
                             var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());
-                            amount = data.value;
+                            amount = data.Value;
                             senderAddress = Address.FromText(evt.EventAddress);
-                            senderToken = data.symbol;
+                            senderToken = data.Symbol;
                         }
                         break;
 
                     case EventKind.TokenReceive:
                         {
                             var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());
-                            amount = data.value;
+                            amount = data.Value;
                             receiverAddress = Address.FromText(evt.EventAddress);
-                            receiverChain = data.chainAddress;
-                            receiverToken = data.symbol;
+                            receiverChain = data.ChainName;
+                            receiverToken = data.Symbol;
                         }
                         break;
 
                     case EventKind.TokenEscrow:
                         {
                             var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());
-                            amount = data.value;
+                            amount = data.Value;
                             var amountDecimal = UnitConversion.ToDecimal(amount, (int)
-                                phantasmaTokens.Single(p => p.Symbol == data.symbol).Decimals);
+                                phantasmaTokens.Single(p => p.Symbol == data.Symbol).Decimals);
                             receiverAddress = Address.FromText(evt.EventAddress);
-                            receiverChain = data.chainAddress;
-                            var chain = GetChainName(receiverChain.Text, phantasmaChains);
+                            receiverChain = data.ChainName;
                             description =
-                                $"{amountDecimal} {data.symbol} tokens escrowed for address {receiverAddress} in {chain}";
+                                $"{amountDecimal} {data.Symbol} tokens escrowed for address {receiverAddress} in {receiverChain}";
                         }
                         break;
                     case EventKind.AddressRegister:
@@ -79,14 +79,14 @@ namespace Phantasma.Explorer.Utils
                     case EventKind.AddressLink:
                         {
                             var address = Serialization.Unserialize<Address>(evt.Data.Decode());
-                            description = $"{evt.EventAddress} added '{address.ToString()} to friends.'";
+                            description = $"{evt.EventAddress} linked an address '{address.ToString()}.'";
                         }
                         break;
 
                     case EventKind.AddressUnlink:
                         {
                             var address = Serialization.Unserialize<Address>(evt.Data.Decode());
-                            description = $"{evt.EventAddress} removed '{address.ToString()} from friends.'";
+                            description = $"{evt.EventAddress} unlinked an address '{address.ToString()}.'";
                         }
                         break;
                 }
@@ -130,16 +130,16 @@ namespace Phantasma.Explorer.Utils
                     description = "Custom transaction";
                 }
 
-                if (receiverChain != Address.Null && receiverChain != senderChain)
+                if (!string.IsNullOrEmpty(receiverChain) && receiverChain != senderChain)
                 {
                     description +=
-                        $" from {GetChainName(senderChain.Text, phantasmaChains)} chain to {GetChainName(receiverChain.Text, phantasmaChains)} chain";
+                        $" from {senderChain} chain to {receiverChain} chain";
                 }
             }
             return description;
         }
 
-        public static string GetEventContent(Block block, Event evt) //todo remove Native event dependency and move this
+        public static string GetEventContent(Block block, Domain.ValueObjects.Event evt) //todo remove Native event dependency and move this
         {
             var context = Explorer.AppServices.GetService<ExplorerDbContext>();
             var phantasmaChains = context.Chains;
@@ -192,7 +192,7 @@ namespace Phantasma.Explorer.Utils
                 case EventKind.TokenClaim:
                     {
                         var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());
-                        var token = phantasmaTokens.Single(t => t.Symbol.Equals(data.symbol));
+                        var token = phantasmaTokens.Single(t => t.Symbol.Equals(data.Symbol));
                         string action;
 
                         switch (evt.EventKind)
@@ -211,30 +211,30 @@ namespace Phantasma.Explorer.Utils
 
                         string chainText;
 
-                        if (data.chainAddress.ToString() != block.ChainAddress)
+                        if (data.ChainName != block.ChainName)
                         {
-                            Address srcAddress, dstAddress;
+                            string srcName, dstName;
 
                             if (evt.EventKind == EventKind.TokenReceive)
                             {
-                                srcAddress = data.chainAddress;
-                                dstAddress = Address.FromText(block.ChainAddress);
+                                srcName = data.ChainName;
+                                dstName = block.ChainName;
                             }
                             else
                             {
-                                srcAddress = Address.FromText(block.ChainAddress);
-                                dstAddress = data.chainAddress;
+                                srcName = block.ChainName;
+                                dstName = data.ChainName;
                             }
 
-                            chainText = $"from <a href=\"/chain/{srcAddress}\">{GetChainName(srcAddress.ToString(), phantasmaChains)} chain</a> to <a href=\"/chain/{dstAddress}\">{GetChainName(dstAddress.ToString(), phantasmaChains)} chain";
+                            chainText = $"from <a href=\"/chain/{srcName}\">{srcName} chain</a> to <a href=\"/chain/{dstName}\">{dstName} chain";
                         }
                         else
                         {
-                            chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(data.chainAddress.ToString(), phantasmaChains)} chain";
+                            chainText = $"in <a href=\"/chain/{data.ChainName}\">{data.ChainName} chain";
                         }
 
                         string fromAt = action == "sent" ? "from" : "at";
-                        return $"{UnitConversion.ToDecimal(data.value, (int)token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{evt.EventAddress}\">{evt.EventAddress}</a> {chainText}.";
+                        return $"{UnitConversion.ToDecimal(data.Value, (int)token.Decimals)} {token.Name} tokens {action} {fromAt} </a> address <a href=\"/address/{evt.EventAddress}\">{evt.EventAddress}</a> {chainText}.";
                     }
 
                 default: return "Nothing.";

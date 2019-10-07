@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Domain.ValueObjects;
 using Phantasma.Explorer.Persistance.Infrastructure;
@@ -12,6 +11,8 @@ using Phantasma.Storage;
 using Phantasma.Numerics;
 using Phantasma.RpcClient.DTOs;
 using Phantasma.Explorer.Application;
+using Phantasma.Domain;
+using EventKind = Phantasma.RpcClient.DTOs.EventKind;
 
 namespace Phantasma.Explorer.Persistance
 {
@@ -40,12 +41,6 @@ namespace Phantasma.Explorer.Persistance
                 sw.Start();
                 context.Database.EnsureCreated();
                 _phantasmaRpcService = (IPhantasmaRpcService)Explorer.AppServices.GetService(typeof(IPhantasmaRpcService));
-
-                if (!context.Apps.Any())
-                {
-                    var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
-                    await SyncUtils.SyncApps(context, appList);
-                }
 
                 if (!context.Tokens.Any())
                 {
@@ -132,7 +127,7 @@ namespace Phantasma.Explorer.Persistance
                             //Events
                             foreach (var eventDto in transactionDto.Events)
                             {
-                                var domainEvent = new Event
+                                var domainEvent = new Domain.ValueObjects.Event
                                 {
                                     Data = eventDto.Data,
                                     EventAddress = eventDto.EventAddress,
@@ -154,7 +149,7 @@ namespace Phantasma.Explorer.Persistance
                                         )
                                     {
                                         var data = Serialization.Unserialize<TokenEventData>(eventDto.Data.Decode());
-                                        var token = context.Tokens.SingleOrDefault(p => p.Symbol == data.symbol);
+                                        var token = context.Tokens.SingleOrDefault(p => p.Symbol == data.Symbol);
                                         if (token != null)
                                         {
                                             token.Transactions.Add(transaction);

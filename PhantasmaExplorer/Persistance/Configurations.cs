@@ -17,15 +17,6 @@ namespace Phantasma.Explorer.Persistance
                 a.Property(ca => ca.Amount);
                 a.HasKey("Address", "Chain", "TokenSymbol", "Amount");
             });
-
-            builder.OwnsMany(p => p.Interops, a =>
-            {
-                a.HasForeignKey("Address");
-                a.Property(p => p.InteropAddress);
-                a.Property(p => p.Platform);
-                a.Property(p => p.Address);
-                a.HasKey("Address", "InteropAddress", "Platform");
-            });
         }
     }
 
@@ -38,14 +29,6 @@ namespace Phantasma.Explorer.Persistance
             builder.HasOne(p => p.Account)
                 .WithMany(p => p.NonFungibleTokens)
                 .HasForeignKey(p => p.AccountAddress);
-        }
-    }
-
-    public class AppConfiguration : IEntityTypeConfiguration<App>
-    {
-        public void Configure(EntityTypeBuilder<App> builder)
-        {
-            builder.HasKey(e => e.Id);
         }
     }
 

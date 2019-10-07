@@ -122,10 +122,6 @@ namespace Phantasma.Explorer.Persistance
                 Console.WriteLine("Sync new chains?");
                 await SyncChains(context);
 
-                Console.WriteLine("Sync new apps?");
-                var appList = await _phantasmaRpcService.GetApplications.SendRequestAsync();
-                await SyncUtils.SyncApps(context, appList);
-
                 Console.WriteLine("Sync new tokens?");
                 var tokenList = await _phantasmaRpcService.GetTokens.SendRequestAsync();
                 await SyncUtils.SyncToken(context, tokenList);
@@ -216,17 +212,6 @@ namespace Phantasma.Explorer.Persistance
                     account.SoulStaked = accountResult.Stake;
                     account.TokenBalance.Clear();
                     account.NonFungibleTokens.Clear();
-                    account.Interops = new List<Interop>();
-
-                    foreach (var interop in accountResult.Interops)
-                    {
-                        account.Interops.Add(new Interop
-                        {
-                            Address = interop.Address,
-                            Platform = interop.Platform,
-                            InteropAddress = interop.InteropAddress,
-                        });
-                    }
 
                     foreach (var tokenBalance in accountResult.Tokens)
                     {

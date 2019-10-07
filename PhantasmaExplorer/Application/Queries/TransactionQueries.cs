@@ -1,12 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Phantasma.Blockchain.Contracts.Native;
 using Phantasma.Explorer.Domain.Entities;
 using Phantasma.Explorer.Persistance;
-using Phantasma.Numerics;
-using Phantasma.RpcClient.DTOs;
-using Phantasma.Storage;
 
 namespace Phantasma.Explorer.Application.Queries
 {
