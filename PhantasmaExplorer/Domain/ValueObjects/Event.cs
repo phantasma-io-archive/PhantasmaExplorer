@@ -15,6 +15,7 @@ namespace Phantasma.Explorer.Domain.ValueObjects
         {
             yield return EventAddress;
             yield return Data;
+            yield return Contract;
             yield return EventKind;
         }
     }

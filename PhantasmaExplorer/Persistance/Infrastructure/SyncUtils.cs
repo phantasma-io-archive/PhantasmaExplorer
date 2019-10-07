@@ -34,9 +34,9 @@ namespace Phantasma.Explorer.Persistance.Infrastructure
                     Address = eventDtoEventAddress
                 };
 
-                await context.Accounts.AddAsync(account);
-
                 account.AccountTransactions.Add(new AccountTransaction { Account = account, Transaction = transaction });
+                
+                await context.Accounts.AddAsync(account);
             }
 
             await context.SaveChangesAsync();

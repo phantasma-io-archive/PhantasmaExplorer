@@ -140,7 +140,6 @@ namespace Phantasma.Explorer.Persistance
                                 {
                                     if (domainEvent.EventKind == EventKind.TokenBurn
                                         || domainEvent.EventKind == EventKind.TokenSend
-                                        || domainEvent.EventKind == EventKind.TokenEscrow
                                         || domainEvent.EventKind == EventKind.TokenStake
                                         || domainEvent.EventKind == EventKind.TokenUnstake
                                         || domainEvent.EventKind == EventKind.TokenReceive

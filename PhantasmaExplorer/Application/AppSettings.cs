@@ -13,6 +13,7 @@ namespace Phantasma.Explorer.Application
         internal static string RpcServerUrl = "http://localhost:7077/rpc";
 #else
         internal static string RpcServerUrl = "http://45.76.88.140:7077/rpc";
+#endif
         internal static string FuelSymbol = DomainSettings.FuelTokenSymbol;
         internal static string NativeSymbol = DomainSettings.FiatTokenSymbol;
         internal static string FiatSymbol = DomainSettings.FiatTokenSymbol;
@@ -21,11 +22,7 @@ namespace Phantasma.Explorer.Application
         internal static int StakingDecimals = DomainSettings.StakingTokenDecimals;
         internal static int FiatDecimals = DomainSettings.FiatTokenDecimals;
 
-        internal static int FuelDecimals = DomainSettings.FuelTokenDecimals;
-        internal static int StakingDecimals = DomainSettings.StakingTokenDecimals;
-        internal static int FiatDecimals = DomainSettings.FiatTokenDecimals;
-
-#region URL&CONTEXT
+        #region URL&CONTEXT
         internal const string UrlHome = "/home";
         internal const string UrlTokens = "/tokens";
         internal const string UrlToken = "/token";
@@ -66,6 +63,6 @@ namespace Phantasma.Explorer.Application
         internal const string PaginationContext = "pagination";
         internal const string MarketplaceContext = "marketplace";
 
-#endregion
+        #endregion
     }
 }

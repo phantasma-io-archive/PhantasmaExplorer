@@ -57,18 +57,18 @@ namespace Phantasma.Explorer.Utils
                         }
                         break;
 
-                    case EventKind.TokenEscrow:
-                        {
-                            var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());
-                            amount = data.Value;
-                            var amountDecimal = UnitConversion.ToDecimal(amount, (int)
-                                phantasmaTokens.Single(p => p.Symbol == data.Symbol).Decimals);
-                            receiverAddress = Address.FromText(evt.EventAddress);
-                            receiverChain = data.ChainName;
-                            description =
-                                $"{amountDecimal} {data.Symbol} tokens escrowed for address {receiverAddress} in {receiverChain}";
-                        }
-                        break;
+                    //case EventKind.TokenEscrow:
+                    //    {
+                    //        var data = Serialization.Unserialize<TokenEventData>(evt.Data.Decode());
+                    //        amount = data.Value;
+                    //        var amountDecimal = UnitConversion.ToDecimal(amount, (int)
+                    //            phantasmaTokens.Single(p => p.Symbol == data.Symbol).Decimals);
+                    //        receiverAddress = Address.FromText(evt.EventAddress);
+                    //        receiverChain = data.ChainName;
+                    //        description =
+                    //            $"{amountDecimal} {data.Symbol} tokens escrowed for address {receiverAddress} in {receiverChain}";
+                    //    }
+                    //    break;
                     case EventKind.AddressRegister:
                         {
                             var name = Serialization.Unserialize<string>(evt.Data.Decode());
@@ -185,7 +185,7 @@ namespace Phantasma.Explorer.Utils
                 case EventKind.TokenMint:
                 case EventKind.TokenBurn:
                 case EventKind.TokenSend:
-                case EventKind.TokenEscrow:
+                //case EventKind.TokenEscrow:
                 case EventKind.TokenStake:
                 case EventKind.TokenUnstake:
                 case EventKind.TokenReceive:
@@ -203,7 +203,7 @@ namespace Phantasma.Explorer.Utils
                             case EventKind.TokenReceive: action = "received"; break;
                             case EventKind.TokenStake: action = "staked"; break;
                             case EventKind.TokenUnstake: action = "unstaked"; break;
-                            case EventKind.TokenEscrow: action = "escrowed"; break;
+                           // case EventKind.TokenEscrow: action = "escrowed"; break;
                             case EventKind.TokenClaim: action = "claimed"; break;
 
                             default: action = "???"; break;

@@ -8,7 +8,7 @@ using Phantasma.Explorer.Persistance;
 namespace Phantasma.Explorer.Migrations
 {
     [DbContext(typeof(ExplorerDbContext))]
-    [Migration("20190920172825_init")]
+    [Migration("20191007162235_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,24 +44,6 @@ namespace Phantasma.Explorer.Migrations
                     b.HasIndex("TransactionId");
 
                     b.ToTable("AccountTransaction");
-                });
-
-            modelBuilder.Entity("Phantasma.Explorer.Domain.Entities.App", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Description");
-
-                    b.Property<string>("Icon");
-
-                    b.Property<string>("Title");
-
-                    b.Property<string>("Url");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Apps");
                 });
 
             modelBuilder.Entity("Phantasma.Explorer.Domain.Entities.Block", b =>
@@ -195,24 +177,6 @@ namespace Phantasma.Explorer.Migrations
                                 .HasForeignKey("Address")
                                 .OnDelete(DeleteBehavior.Cascade);
                         });
-
-                    b.OwnsMany("Phantasma.Explorer.Domain.ValueObjects.Interop", "Interops", b1 =>
-                        {
-                            b1.Property<string>("Address");
-
-                            b1.Property<string>("InteropAddress");
-
-                            b1.Property<string>("Platform");
-
-                            b1.HasKey("Address", "InteropAddress", "Platform");
-
-                            b1.ToTable("Interop");
-
-                            b1.HasOne("Phantasma.Explorer.Domain.Entities.Account")
-                                .WithMany("Interops")
-                                .HasForeignKey("Address")
-                                .OnDelete(DeleteBehavior.Cascade);
-                        });
                 });
 
             modelBuilder.Entity("Phantasma.Explorer.Domain.Entities.AccountTransaction", b =>
@@ -287,7 +251,7 @@ namespace Phantasma.Explorer.Migrations
 
                             b1.Property<string>("Contract");
 
-                            b1.HasKey("Hash", "Data", "EventAddress", "EventKind");
+                            b1.HasKey("Hash", "Data", "EventAddress", "EventKind", "Contract");
 
                             b1.ToTable("Event");
 

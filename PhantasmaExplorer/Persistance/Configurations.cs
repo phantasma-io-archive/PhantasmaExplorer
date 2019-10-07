@@ -86,7 +86,8 @@ namespace Phantasma.Explorer.Persistance
                 a.Property(ca => ca.Data);
                 a.Property(ca => ca.EventAddress);
                 a.Property(ca => ca.EventKind);
-                a.HasKey("Hash", "Data", "EventAddress", "EventKind");
+                a.Property(ca => ca.Contract);
+                a.HasKey("Hash", "Data", "EventAddress", "EventKind", "Contract");
             });
         }
     }
