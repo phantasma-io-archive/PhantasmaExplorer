@@ -1,4 +1,4 @@
-﻿using Phantasma.Blockchain;
+﻿using Phantasma.Domain;
 
 namespace Phantasma.Explorer.Application
 {
@@ -9,13 +9,13 @@ namespace Phantasma.Explorer.Application
         internal const string MockLogoUrl = "https://s2.coinmarketcap.com/static/img/coins/32x32/2827.png";
 
         internal static string RpcServerUrl = "http://45.76.88.140:7077/rpc";
-        internal static string FuelSymbol = Nexus.FuelTokenSymbol;
-        internal static string NativeSymbol = Nexus.StakingTokenSymbol;
-        internal static string FiatSymbol = Nexus.FiatTokenSymbol;
+        internal static string FuelSymbol = DomainSettings.FuelTokenSymbol;
+        internal static string NativeSymbol = DomainSettings.FiatTokenSymbol;
+        internal static string FiatSymbol = DomainSettings.FiatTokenSymbol;
 
-        internal static int FuelDecimals = Nexus.FuelTokenDecimals;
-        internal static int StakingDecimals = Nexus.StakingTokenDecimals;
-        internal static int FiatDecimals = Nexus.FiatTokenDecimals;
+        internal static int FuelDecimals = DomainSettings.FuelTokenDecimals;
+        internal static int StakingDecimals = DomainSettings.StakingTokenDecimals;
+        internal static int FiatDecimals = DomainSettings.FiatTokenDecimals;
 
         #region URL&CONTEXT
         internal const string UrlHome = "/home";
