@@ -1,7 +1,9 @@
 ﻿using LunarLabs.Templates;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
+using Phantasma.Domain;
 using Phantasma.Explorer.Utils;
+using Phantasma.Numerics;
 using System;
 using System.Globalization;
 
@@ -57,6 +59,59 @@ namespace Phantasma.Explorer
             }
 
             context.output.Append(ToKMB(number));
+        }
+
+        public static string ToKMB(decimal num)
+        {
+            if (num > 999999999 || num < -999999999)
+            {
+                return num.ToString("0,,,.###B", CultureInfo.InvariantCulture);
+            }
+            else
+            if (num > 999999 || num < -999999)
+            {
+                return num.ToString("0,,.##M", CultureInfo.InvariantCulture);
+            }
+            else
+            if (num > 999 || num < -999)
+            {
+                return num.ToString("0,.#K", CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                return num.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+    }
+
+    public class HexTag : TemplateNode
+    {
+        private readonly RenderingKey _key;
+
+        public HexTag(Document doc, string key) : base(doc)
+        {
+            _key = RenderingKey.Parse(key, RenderingType.Any);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(_key);
+            if (temp == null)
+            {
+                return;
+            }
+
+            var array = temp as byte[];
+
+            if (array != null && array.Length > 0)
+            {
+                context.output.Append(Base16.Encode(array));
+            }
+            else
+            {
+                context.output.Append("-");
+
+            }
         }
 
         public static string ToKMB(decimal num)
@@ -198,16 +253,19 @@ namespace Phantasma.Explorer
 
     public class LinkBlockTag : TemplateNode
     {
-        private readonly RenderingKey _key;
+        private readonly RenderingKey _chainKey;
+        private readonly RenderingKey _hashKey;
 
         public LinkBlockTag(Document doc, string key) : base(doc)
         {
-            _key = RenderingKey.Parse(key, RenderingType.String);
+            var temp = key.Split(',');
+            _chainKey = RenderingKey.Parse(temp[0], RenderingType.String);
+            _hashKey = RenderingKey.Parse(temp[1], RenderingType.String);
         }
 
         public override void Execute(RenderingContext context)
         {
-            var temp = context.EvaluateObject(_key);
+            var temp = context.EvaluateObject(_hashKey);
             if (temp == null)
             {
                 return;
@@ -224,33 +282,60 @@ namespace Phantasma.Explorer
                 hash = (string)temp;
             }
 
-            context.output.Append($"<a href=/block/{hash}>{hash}</a>");
+            temp = context.EvaluateObject(_chainKey);
+            if (temp == null)
+            {
+                return;
+            }
+
+            var chain = (string)temp;
+
+            context.output.Append($"<a href=/block/{chain}/{hash}>{hash}</a>");
         }
     }
 
     public class LinkAddressTag : TemplateNode
     {
         private readonly RenderingKey _key;
+        private readonly NexusData nexus;
 
-        public LinkAddressTag(Document doc, string key) : base(doc)
+        private bool hideName;
+
+        public LinkAddressTag(NexusData nexus, Document doc, string key) : base(doc)
         {
+            this.nexus = nexus;
+
+            if (key.StartsWith("_"))
+            {
+                hideName = true;
+                key = key.Substring(1);
+            }
+
             _key = RenderingKey.Parse(key, RenderingType.String);
         }
 
-        public static string GenerateLink(Address address, string name = null)
+        public static string GenerateLink(NexusData nexus, Address address, string name = null)
         {
             if (address.IsInterop)
             {
                 var temp = Pay.Chains.NeoWallet.DecodeAddress(address);
-                return $"<a href=\"https://neoscan.io/address/{temp}>{temp}</a>";
+                return $"<a href=\"https://neoscan.io/address/{temp}\">{temp}</a>";
             }
 
             if (name == null)
             {
-                name = address.Text;
+                var account = nexus.FindAccount(address, false);
+                if (account != null && account.Name != ValidationUtils.ANONYMOUS)
+                {
+                    name = account.Name;
+                }
+                else
+                {
+                    name = address.Text;
+                }
             }
 
-            return $"<a href=\"/address/{address.Text}\">{address.Text}</a>";
+            return $"<a href=\"/address/{address.Text}\">{name}</a>";
         }
 
         public override void Execute(RenderingContext context)
@@ -272,7 +357,18 @@ namespace Phantasma.Explorer
                 address = Address.FromText((string)temp);
             }
 
-            context.output.Append(GenerateLink(address));
+            string output;
+
+            if (hideName)
+            {
+                output = GenerateLink(this.nexus, address, address.Text);
+            }
+            else
+            {
+                output = GenerateLink(this.nexus, address);
+            }
+
+            context.output.Append(output);
         }
     }
 

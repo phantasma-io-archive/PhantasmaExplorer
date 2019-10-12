@@ -48,7 +48,7 @@
 
                                     <tr>
                                         <td>Block Hash</td>
-                                        <td><a href="/block/{{transaction.Block.Hash}}">{{transaction.Block.Hash}}</a></td>
+                                        <td>{{#link-block transaction.ChainName,transaction.Block.Hash}}</a></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -86,14 +86,18 @@
                                 <thead>
                                     <tr>
                                         <th>Kind</th>
-                                        <th>Content</th>
-                                    </tr>
+                                        <th>Address</th>
+                                        <th>Contract</th>
+										<th>Content</th>
+                                     </tr>
                                 </thead>
                                 <tbody>
                                     {{#each transaction.Events}}
                                     <tr>
                                         <td>{{Kind}}</td>
-                                        <td>{{{Content}}}</td>
+                                        <td>{{#link-address Address}}</td>
+                                        <td>{{Contract}}</td>
+                                        <td>{{#hex Data}}</td>
                                     </tr>
                                     {{/each}}
                                 </tbody>

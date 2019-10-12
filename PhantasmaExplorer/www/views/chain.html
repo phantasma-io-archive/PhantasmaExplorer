@@ -8,6 +8,9 @@
                 <a class="nav-link" id="blocks-tab" data-toggle="tab" href="#blocks" role="tab" aria-controls="blocks" aria-selected="false">Blocks</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" id="contracts-tab" data-toggle="tab" href="#contracts" role="tab" aria-controls="contracts" aria-selected="false">Contracts</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" id="childs-tab" data-toggle="tab" href="#childs" role="tab" aria-controls="childs" aria-selected="false">Sidechains</a>
             </li>
         </ul>
@@ -27,7 +30,7 @@
 
                                     <tr>
                                         <td>Address</td>
-                                        <td>{{#link-address chain.Address}}</td>
+                                        <td>{{#link-address _chain.Address}}</td>
                                     </tr>
 
                                     <tr>
@@ -37,7 +40,7 @@
 
                                     <tr>
                                         <td>Last block</td>
-                                        <td>{{#link-block chain.LastBlock.Hash}}</td>
+                                        <td>{{#link-block chain.Name,chain.LastBlock.Hash}}</td>
                                     </tr>
 
                                     <tr>
@@ -83,8 +86,36 @@
                                 <tr>
                                     <td>{{Height}}</td>
                                     <td>{{#timeago Timestamp}}</td>
-                                    <td><a href="/block/{{Hash}}">{{Hash}}</a></td>
+                                    <td>{{#link-block chain.Name,Hash}}</a></td>
                                     <td>{{#link-address ValidatorAddress}}</td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                        {{#else}}
+                        Nothing here...
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="contracts" role="tabpanel" aria-labelledby="contracts-tab">
+                <div class="panel panel-single">
+                    <div class="panel-heading">Contracts</div>
+                    <div class="panel-body">
+                        {{#if chain.Contracts}}
+                        <table class="table table-responsive table-striped table-general">
+                            <thead>
+                                <tr>
+                                    <th>Contract</th>
+                                    <th>Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each chain.Contracts}}
+                                <tr>
+                                    <td>{{#link-address this}}</td>
+                                    <td>{{#link-address _this}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>
@@ -123,6 +154,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

@@ -14,11 +14,11 @@ namespace Phantasma.Explorer
 {
     public abstract class ExplorerObject
     {
-        public readonly NexusData Database;
+        public readonly NexusData Nexus;
 
         public ExplorerObject(NexusData database)
         {
-            this.Database = database;
+            this.Nexus = database;
         }
     }
 
@@ -44,7 +44,7 @@ namespace Phantasma.Explorer
         public BlockData(NexusData database, DataNode node) : base(database)
         {
             ChainAddress = Address.FromText(node.GetString("chainAddress"));
-            Chain = Database.FindChainByAddress(this.ChainAddress);
+            Chain = Nexus.FindChainByAddress(this.ChainAddress);
 
             Height = BigInteger.Parse(node.GetString("height"));
             Timestamp = new Timestamp(node.GetUInt32("timestamp"));
@@ -60,12 +60,12 @@ namespace Phantasma.Explorer
             TransactionHashes = new Hash[txsNode.ChildCount];
             Transactions = new TransactionData[TransactionHashes.Length];
 
-            Database.DoParallelRequests($"Fetching transactions for block {Hash}...", Transactions.Length, (index) =>
+            Nexus.DoParallelRequests($"Fetching transactions for block {Hash}...", Transactions.Length, (index) =>
             {
                 var temp = txsNode.GetNodeByIndex(index);
                 var txHash = Hash.Parse(temp.GetString("hash"));
                 TransactionHashes[index] = txHash;
-                var tx = Database.FindTransaction(Chain, txHash);
+                var tx = Nexus.FindTransaction(Chain, txHash);
                 Transactions[index] = tx;
                 tx.Block = this;
             });
@@ -147,23 +147,65 @@ namespace Phantasma.Explorer
 
         private string LinkAddress(Address address, string name = null)
         {
-            return LinkAddressTag.GenerateLink(address, name);
+            return LinkAddressTag.GenerateLink(this.Nexus, address, name);
         }
 
         private string LinkToken(string symbol)
         {
-            var token = Database.FindTokenBySymbol(symbol);
+            var token = Nexus.FindTokenBySymbol(symbol);
 
             var name = token != null ? token.Name : symbol;
 
-            return $"<a href=\"/token/{symbol}\">{name}</a>";
+            return $"<a href=\"/token/{symbol}\">{symbol}</a>";
         }
 
         private string GenerateDescription()
         {
+            decimal totalFees = 0;
+            var fees = new Dictionary<Address, decimal>();
+
+            Address feeAddress = Address.Null;
+
             var sb = new StringBuilder();
             foreach (var evt in Events)
             {
+                if (evt.Contract == "gas")
+                {
+                    switch (evt.Kind)
+                    {
+                        case EventKind.TokenStake:
+                            {
+                                var data = evt.GetContent<TokenEventData>();
+                                if (data.Symbol == DomainSettings.FuelTokenSymbol)
+                                {
+                                    feeAddress = evt.Address;
+                                }
+                                break;
+                            }
+
+                        case EventKind.TokenClaim:
+                            {
+                                var data = evt.GetContent<TokenEventData>();
+                                if (data.Symbol == DomainSettings.FuelTokenSymbol)
+                                {
+                                    if (evt.Address.IsSystem)
+                                    {
+                                        var amount = UnitConversion.ToDecimal(data.Value, DomainSettings.FuelTokenDecimals);
+                                        totalFees += amount;
+
+                                        decimal fee = fees.ContainsKey(evt.Address) ? fees[evt.Address] : 0;
+                                        fee += amount;
+
+                                        fees[evt.Address] = fee;
+                                    }
+                                }
+                                break;
+                            }
+                    }
+
+                    continue;
+                }
+
                 switch (evt.Kind)
                 {
                     case EventKind.BlockCreate:
@@ -191,7 +233,7 @@ namespace Phantasma.Explorer
                     case EventKind.AddressRegister:
                         {
                             var name = evt.GetContent<string>();
-                            sb.AppendLine($"Registered name: {LinkAddress(evt.Address, name)}</a>");
+                            sb.AppendLine($"Registered name: {name} for {LinkAddress(evt.Address, name)}");
                             break;
                         }
 
@@ -212,7 +254,7 @@ namespace Phantasma.Explorer
                     case EventKind.TransactionSettle:
                         {
                             var data = evt.GetContent<TransactionSettleEventData>();
-                            sb.AppendLine($"Settled {data.Platform} transaction");
+                            sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://neoscan.io/transaction/{data.Hash}\">{data.Hash}</a>");
                             break;
                         }
 
@@ -250,54 +292,87 @@ namespace Phantasma.Explorer
                             break;
                         }
 
+                    case EventKind.GasEscrow:
+                        {
+                            var data = evt.GetContent<GasEventData>();
+                            sb.AppendLine($"{LinkAddress(evt.Address)} escrowed {data.amount} fuel at price {UnitConversion.ToDecimal(data.price, DomainSettings.FuelTokenDecimals)} {DomainSettings.FuelTokenSymbol}");
+                            break;
+                        }
+
+                    case EventKind.GasPayment:
+                        {
+                            var data = evt.GetContent<GasEventData>();
+                            sb.AppendLine($"{LinkAddress(evt.Address)} paid {data.amount} fuel at price {UnitConversion.ToDecimal(data.price, DomainSettings.FuelTokenDecimals)} {DomainSettings.FuelTokenSymbol}");
+                            break;
+                        }
+
                     case EventKind.TokenMint:
                         {
                             var data = evt.GetContent<TokenEventData>();
-                            var token = Database.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"Minted {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} to {LinkAddress(evt.Address)}");
+                            var token = Nexus.FindTokenBySymbol(data.Symbol);
+                            sb.AppendLine($"{LinkAddress(evt.Address)} minted {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             break;
                         }
 
                     case EventKind.TokenBurn:
                         {
                             var data = evt.GetContent<TokenEventData>();
-                            var token = Database.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"Burned {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(evt.Address)}");
+                            var token = Nexus.FindTokenBySymbol(data.Symbol);
+                            sb.AppendLine($"{LinkAddress(evt.Address)} burned {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             break;
                         }
 
                     case EventKind.TokenClaim:
                         {
                             var data = evt.GetContent<TokenEventData>();
-                            var token = Database.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"Claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} to {LinkAddress(evt.Address)}");
+                            var token = Nexus.FindTokenBySymbol(data.Symbol);
+                            sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             break;
                         }
 
                     case EventKind.TokenStake:
                         {
                             var data = evt.GetContent<TokenEventData>();
-                            var token = Database.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"Staked {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(evt.Address)}");
+                            var token = Nexus.FindTokenBySymbol(data.Symbol);
+
+                            if (evt.Contract == "entry")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} staked {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            }
+                            else
+                            {
+                                var contractAddress = Address.FromHash(evt.Contract);
+                                sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                            }
                             break;
                         }
 
                     case EventKind.TokenSend:
                         {
                             var data = evt.GetContent<TokenEventData>();
-                            var token = Database.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"Sent {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(evt.Address)}");
+                            var token = Nexus.FindTokenBySymbol(data.Symbol);
+                            sb.AppendLine($"{LinkAddress(evt.Address)} sent {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             break;
                         }
 
                     case EventKind.TokenReceive:
                         {
                             var data = evt.GetContent<TokenEventData>();
-                            var token = Database.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"Received {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} at {LinkAddress(evt.Address)}");
+                            var token = Nexus.FindTokenBySymbol(data.Symbol);
+                            sb.AppendLine($"{LinkAddress(evt.Address)} received {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             break;
                         }
                 }
+            }
+
+            if (!feeAddress.IsNull)
+            {
+                sb.AppendLine($"{LinkAddress(feeAddress)} paid {totalFees} {LinkToken(DomainSettings.FuelTokenSymbol)} in fees.");
+            }
+
+            foreach (var entry in fees)
+            {
+                sb.AppendLine($"{LinkAddress(entry.Key)} received {entry.Value} {LinkToken(DomainSettings.FuelTokenSymbol)} in fees.");
             }
 
             if (sb.Length > 0)
@@ -316,14 +391,55 @@ namespace Phantasma.Explorer
             this.Name = node.GetString("name");
             this.Address = Address.FromText(node.GetString("address"));
             this.Height = BigInteger.Parse(node.GetString("height"));
-            this.BlockList = new BlockData[(uint)Height];
+            this.BlockList = new List<BlockData>((int)Height);
+
+            var contractsNodes = node.GetNode("contracts");
+            if (contractsNodes != null)
+            {
+                Contracts = new Address[contractsNodes.ChildCount];
+                for (int i=0; i<Contracts.Length; i++)
+                {
+                    var name = contractsNodes.GetString(i);
+                    Contracts[i] = Address.FromHash(name);
+                }
+            }
+            else
+            {
+                Contracts = new Address[0];
+            }
         }
 
-        public void InitBlocks()
+        public void Grow(int height)
         {
-            Database.DoParallelRequests($"Fetching blocks for chain {Name}...", BlockList.Length, (index) =>
+            if (height < 0)
             {
-                BlockList[index] = Database.FindBlockByHeight(this, index + 1);
+                throw new Exception("Invalid chain height: " + height);
+            }
+
+            this.Height = height;
+            UpdateBlocks();
+        }
+
+        internal void UpdateBlocks()
+        {
+            int currentHeight = BlockList.Count;
+
+            int newBlocks = 0;
+            while (BlockList.Count < Height)
+            {
+                BlockList.Add(null);
+                newBlocks++;
+            }
+
+            if (newBlocks <= 0)
+            {
+                return;
+            }
+
+            Nexus.DoParallelRequests($"Fetching new blocks for chain {Name}...", newBlocks, (index) =>
+            {
+                var ofs = index + currentHeight;
+                BlockList[ofs] = Nexus.FindBlockByHeight(this, ofs + 1);
             });
         }
 
@@ -334,11 +450,11 @@ namespace Phantasma.Explorer
         public ChainData ParentChain { get; private set; }
         public ChainData[] ChildChains { get; private set; }
 
-        public ContractData[] Contracts { get; private set; }
+        public Address[] Contracts { get; private set; }
 
-        public BlockData[] BlockList { get; private set; }
+        public List<BlockData> BlockList { get; private set; }
 
-        public BlockData LastBlock => BlockList[BlockList.Length - 1];
+        public BlockData LastBlock => BlockList[BlockList.Count - 1];
 
         public IEnumerable<BlockData> Blocks => BlockList.Skip(Math.Max(0, (int)(Height - 20))).Reverse();
     }
@@ -520,6 +636,8 @@ namespace Phantasma.Explorer
 
         private List<GovernanceData> _governance = new List<GovernanceData>();
 
+        public Address[] Masters { get; private set; }
+
         private string RESTurl;
 
         public IEnumerable<ChainData> Chains => _chains.Values;
@@ -529,6 +647,8 @@ namespace Phantasma.Explorer
 
         public ChainData RootChain => FindChainByName("main");
 
+        private int updateCount;
+
         public NexusData(string RESTurl)
         {
             if (!RESTurl.EndsWith("/"))
@@ -536,35 +656,59 @@ namespace Phantasma.Explorer
                 RESTurl += "/";
             }
             this.RESTurl = RESTurl;
-
-            Console.WriteLine("Connecting explorer via REST: " + RESTurl);
-            this.Init();
         }
 
-        private void Init()
+        public bool Update()
         {
             var node = APIRequest("getNexus");
+            if (node == null)
+            {
+                return false;
+            }
+
             this.Name = node.GetString("name");
 
             var tokens = node.GetNode("tokens");
             foreach (var entry in tokens.Children)
             {
                 var token = new TokenData(this, entry);
-                _tokens[token.Symbol] = token;
+                if (!_tokens.ContainsKey(token.Symbol))
+                {
+                    Console.WriteLine("Detected new token: " + token.Name);
+                    _tokens[token.Symbol] = token;
+                }
             }
             
             var chains = node.GetNode("chains");
             foreach (var entry in chains.Children)
             {
                 var chain = new ChainData(this, entry);
-                _chains[chain.Name] = chain;
+                if (_chains.ContainsKey(chain.Name))
+                {
+                    var height = chain.Height;
+                    chain = _chains[chain.Name];
+                    var diff = height - chain.Height;
+                    if (diff > 0)
+                    {
+                        Console.WriteLine($"Detected {diff} new blocks on chain {chain.Name}");
+                        chain.Grow((int)height);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Detected new chain: " + chain.Name);
+                    _chains[chain.Name] = chain;
+                }
             }
 
             var platforms = node.GetNode("platforms");
-            foreach (var entry in platforms.Children)
+            if (platforms != null)
             {
-                var platform = new PlatformData(this, entry);
-                _platforms[platform.Name] = platform;
+                foreach (var entry in platforms.Children)
+                {
+                    var platform = new PlatformData(this, entry);
+                    _platforms[platform.Name] = platform;
+                }
             }
 
             var govNode = node.GetNode("governance");
@@ -574,10 +718,38 @@ namespace Phantasma.Explorer
                 _governance.Add(gov);
             }
 
+            var masterNode = node.GetNode("masters");
+            if (masterNode != null)
+            {
+                this.Masters = new Address[masterNode.ChildCount];
+                int index = 0;
+                foreach (var entry in masterNode.Children)
+                {
+                    Masters[index] = Address.FromText(entry.Value);
+                    index++;
+                }
+            }
+            else
+            {
+                this.Masters = new Address[0];
+            }
+
             foreach (var chain in _chains.Values)
             {
-                chain.InitBlocks();
+                chain.UpdateBlocks();
             }
+
+            if (updateCount == 0)
+            {
+                DoParallelRequests("Fetching master accounts...", Masters.Length, (index) =>
+                {
+                    FindAccount(Masters[index], false);
+                });
+            }
+
+            updateCount++;
+
+            return true;
         }
 
         public DataNode APIRequest(string path)
@@ -686,7 +858,7 @@ namespace Phantasma.Explorer
             return null;
         }
 
-        public AccountData FindAccount(Address address)
+        public AccountData FindAccount(Address address, bool canExpire)
         {
             AccountData account;
 
@@ -697,14 +869,14 @@ namespace Phantasma.Explorer
                 if (account != null)
                 {
                     var diff = DateTime.UtcNow - account.LastTime;
-                    if (diff.TotalSeconds < 60)
+                    if (!canExpire || diff.TotalSeconds < 60)
                     {
                         return account;
                     }
                 }
             }
 
-            var node = APIRequest("getAccount?addressText=" + address.Text);
+            var node = APIRequest("getAccount?account=" + address.Text);
 
             if (node != null)
             {
@@ -727,28 +899,41 @@ namespace Phantasma.Explorer
 
             //var progress = new ProgressBar();
 
-            var tasks = new Task[total];
-            int finished = 0;
-            for (int i = 0; i < total; i++)
+            var blockSize = 16;
+
+            //int finished = 0;
+
+            int offset = 0;
+            while (total > 0)
             {
-                var index = i;
-                tasks[index] = new Task(() =>
+                var roundSize = Math.Min(blockSize, total);
+
+                var tasks = new Task[roundSize];
+
+                for (int i = 0; i < roundSize; i++)
                 {
-                    fetcher(index);
-                    /*lock (progress)
+                    var index = i + offset;
+                    tasks[i] = new Task(() =>
                     {
-                        finished++;
-                        progress.Report(finished / (float)total);
-                    }*/
-                });
-            }
+                        fetcher(index);
+                        /*lock (progress)
+                        {
+                            finished++;
+                            progress.Report(finished / (float)total);
+                        }*/
+                    });
+                }
 
-            foreach (var task in tasks)
-            {
-                task.Start();
-            }
+                foreach (var task in tasks)
+                {
+                    task.Start();
+                }
 
-            Task.WaitAll(tasks);
+                Task.WaitAll(tasks);
+
+                offset += roundSize;
+                total -= roundSize;
+            }
         }
     }
 }

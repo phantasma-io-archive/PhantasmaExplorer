@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using LunarLabs.WebServer.Core;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
@@ -243,9 +245,9 @@ namespace PhantasmaExplorer
 
             menus = new List<MenuContext>();
             //menus.Add(new MenuContext() { Text = "Transactions", Url = "/transactions", Active = true });
-            menus.Add(new MenuContext() { Text = "Chains", Url = "/chains", Active = false });
+           // menus.Add(new MenuContext() { Text = "Chains", Url = "/chains", Active = false });
             //menus.Add(new MenuContext() { Text = "Blocks", Url = "/blocks", Active = false });
-            menus.Add(new MenuContext() { Text = "Tokens", Url = "/tokens", Active = false });
+           // menus.Add(new MenuContext() { Text = "Tokens", Url = "/tokens", Active = false });
             //menus.Add(new MenuContext() { Text = "Addresses", Url = "/addresses", Active = false });
 
             // TODO this should be updated every 5 minutes or so
@@ -254,6 +256,13 @@ namespace PhantasmaExplorer
             var explorerArgs = new Arguments(args);
             var restURL = explorerArgs.GetString("phantasma.rest", "http://localhost:7078/api");
             nexus = new NexusData(restURL);
+
+            Console.WriteLine("Connecting explorer via REST: " + restURL);
+            if (!nexus.Update())
+            {
+                Console.WriteLine("Initialization failed!");
+                return;
+            }
 
             var curPath = Directory.GetCurrentDirectory();
             Console.WriteLine("Current path: " + curPath);
@@ -267,11 +276,12 @@ namespace PhantasmaExplorer
             var templateEngine = new TemplateEngine(server, "views");
             templateEngine.Compiler.RegisterTag("value", (doc, val) => new ValueTag(doc, val));
             templateEngine.Compiler.RegisterTag("number", (doc, val) => new NumberTag(doc, val));
+            templateEngine.Compiler.RegisterTag("hex", (doc, val) => new HexTag(doc, val));
             templateEngine.Compiler.RegisterTag("timeago", (doc, val) => new TimeAgoTag(doc, val));
             templateEngine.Compiler.RegisterTag("async", (doc, val) => new AsyncTag(doc, val));
             templateEngine.Compiler.RegisterTag("link-chain", (doc, val) => new LinkChainTag(doc, val));
             templateEngine.Compiler.RegisterTag("link-tx", (doc, val) => new LinkTransactionTag(doc, val));
-            templateEngine.Compiler.RegisterTag("link-address", (doc, val) => new LinkAddressTag(doc, val));
+            templateEngine.Compiler.RegisterTag("link-address", (doc, val) => new LinkAddressTag(nexus, doc, val));
             templateEngine.Compiler.RegisterTag("link-block", (doc, val) => new LinkBlockTag(doc, val));
             templateEngine.Compiler.RegisterTag("description", (doc, val) => new DescriptionTag(doc, val));
             templateEngine.Compiler.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
@@ -319,20 +329,58 @@ namespace PhantasmaExplorer
                 return templateEngine.Render(context, "layout", "tokens");
             });
 
-            server.Get("/block/{input}", (request) =>
+            server.Get("/block/{chain}/{hash}", (request) =>
             {
-                var hash = Hash.Parse(request.GetVariable("input"));
+                var chainName = request.GetVariable("chain");
 
-                var block = nexus.FindBlockByHash(nexus.RootChain, hash);
-                if (block != null)
+                var chain = nexus.FindChainByName(chainName);
+                if (chain != null)
                 {
-                    var context = CreateContext();
-                    context["block"] = block;
-                    return templateEngine.Render(context, "layout", "block");
-
+                    var hash = Hash.Parse(request.GetVariable("hash"));
+                    var block = nexus.FindBlockByHash(chain, hash);
+                    if (block != null)
+                    {
+                        var context = CreateContext();
+                        context["block"] = block;
+                        return templateEngine.Render(context, "layout", "block");
+                    }
+                    else
+                    {
+                        return Error(templateEngine, "Could not find block with hash: " + hash);
+                    }
                 }
+                else
+                {
+                    return Error(templateEngine, "Could not find chain with name: " + chainName);
+                }
+            });
 
-                return Error(templateEngine, "Could not find block with hash: " + hash);
+            server.Get("/height/{chain}/{index}", (request) =>
+            {
+                var chainName = request.GetVariable("chain");
+
+                var chain = nexus.FindChainByName(chainName);
+                if (chain != null)
+                {
+                    var height = int.Parse(request.GetVariable("index"));
+                    var block = height > 0 && height<= chain.BlockList.Count ? chain.BlockList[height-1] : null;
+
+                    if (block != null)
+                    {
+                        var context = CreateContext();
+                        context["block"] = block;
+                        return templateEngine.Render(context, "layout", "block");
+
+                    }
+                    else
+                    {
+                        return Error(templateEngine, "Could not find block with height: " + height);
+                    }
+                }
+                else
+                {
+                    return Error(templateEngine, "Could not find chain with name: " + chainName);
+                }
             });
 
             server.Get("/tx/{input}", (request) =>
@@ -371,7 +419,7 @@ namespace PhantasmaExplorer
             {
                 var address = Address.FromText(request.GetVariable("input"));
 
-                var account = nexus.FindAccount(address);
+                var account = nexus.FindAccount(address, true);
                 if (account != null)
                 {
                     var context = CreateContext();
@@ -417,6 +465,33 @@ namespace PhantasmaExplorer
 
                 return Error(templateEngine, "Could not find anything...");
             });
+
+            bool running = true;
+
+            new Thread(() =>
+            {
+                while (running)
+                {
+                    Thread.Sleep(1000 * 30);
+                    nexus.Update();
+                }
+            }).Start();
+
+            Console.CancelKeyPress += delegate {
+                Console.WriteLine("Terminating explorer...");
+                running = false;
+                try
+                {
+                    server.Stop();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+
+                Environment.Exit(0);
+            };
+
 
             Console.WriteLine($"Explorer running at port {settings.Port}");
             server.Run();
