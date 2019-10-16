@@ -283,6 +283,7 @@ namespace PhantasmaExplorer
             templateEngine.Compiler.RegisterTag("link-tx", (doc, val) => new LinkTransactionTag(doc, val));
             templateEngine.Compiler.RegisterTag("link-address", (doc, val) => new LinkAddressTag(nexus, doc, val));
             templateEngine.Compiler.RegisterTag("link-block", (doc, val) => new LinkBlockTag(doc, val));
+            templateEngine.Compiler.RegisterTag("link-org", (doc, val) => new LinkOrganizationTag(doc, val));
             templateEngine.Compiler.RegisterTag("description", (doc, val) => new DescriptionTag(doc, val));
             templateEngine.Compiler.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
 
@@ -399,6 +400,22 @@ namespace PhantasmaExplorer
                 return Error(templateEngine, "Could not find transaction with hash: " + hash);
             });
 
+            server.Get("/dao/{input}", (request) =>
+            {
+                var id = request.GetVariable("input");
+
+                var org = nexus.FindOrganization(id);
+                if (org != null)
+                {
+                    var context = CreateContext();
+                    context["dao"] = org;
+
+                    return templateEngine.Render(context, "layout", "dao");
+                }
+
+                return Error(templateEngine, "Could not find organization with id: " + id);
+            });
+
             server.Get("/token/{input}", (request) =>
             {
                 var symbol = request.GetVariable("input");
@@ -423,9 +440,9 @@ namespace PhantasmaExplorer
                 if (account != null)
                 {
                     var context = CreateContext();
-                    context["address"] = account;
+                    context["account"] = account;
 
-                    return templateEngine.Render(context, "layout", "address");
+                    return templateEngine.Render(context, "layout", "account");
                 }
 
                 return Error(templateEngine, "Could not find address: " + address);

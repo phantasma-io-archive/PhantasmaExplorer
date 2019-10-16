@@ -35,12 +35,16 @@
                                         <td>{{transaction.Hash}}</td>
                                     </tr>
 
-                                    {{#if transaction.Result}}
+                                    <tr>
+                                        <td>Payload</td>
+                                        <td>{{#if transaction.Payload}}{{#hex transaction.Payload}}{{#else}}-{{/if}}</td>
+                                    </tr>
+                                    
                                     <tr>
                                         <td>Result</td>
-                                        <td>{{transaction.Result}}</td>
+                                        <td>{{#if transaction.Result}}{{#hex transaction.Result}}{{#else}}-{{/if}}</td>
                                     </tr>
-                                    {{/if}}
+
                                     <tr>
                                         <td>Chain</td>
                                         <td><a href="/chain/{{transaction.ChainName}}">{{transaction.ChainName}}</a></td>

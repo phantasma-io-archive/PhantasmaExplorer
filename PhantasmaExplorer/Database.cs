@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using LunarLabs.Parser;
 using Phantasma.Core.Types;
@@ -33,6 +34,8 @@ namespace Phantasma.Explorer
         public Hash[] TransactionHashes { get; private set; }
         public IOracleEntry[] OracleData { get; private set; }
 
+        public Event[] Events { get; private set; }
+
         public Address ValidatorAddress { get; private set; }
 
         public TransactionData[] Transactions { get; private set; }
@@ -51,6 +54,8 @@ namespace Phantasma.Explorer
             PreviousHash = Hash.Parse(node.GetString("previousHash"));
             Protocol = node.GetUInt32("protocol");
             Hash = Hash.Parse(node.GetString("hash"));
+
+            Events = Nexus.ReadEvents(node);
 
             ValidatorAddress = Address.FromText(node.GetString("validatorAddress"));
 
@@ -94,19 +99,7 @@ namespace Phantasma.Explorer
                 Result = "-";
             }
 
-            var eventsNode = node.GetNode("events");
-            Events = new Event[eventsNode.ChildCount];
-            for (int i=0; i<Events.Length; i++)
-            {
-                var temp = eventsNode.GetNodeByIndex(i);
-
-                var kind = temp.GetEnum<EventKind>("kind");
-                var contract = temp.GetString("contract");
-                addr = Address.FromText( temp.GetString("address"));
-                var data = Base16.Decode(temp.GetString("data"));
-
-                Events[i] = new Event(kind, addr, contract, data);
-            }
+            Events = Nexus.ReadEvents(node);
 
             var disasm = new Disassembler(this.Script);
             this.Instructions = disasm.Instructions.ToArray();
@@ -166,9 +159,16 @@ namespace Phantasma.Explorer
 
             Address feeAddress = Address.Null;
 
+            var addresses = new HashSet<Address>();
+
             var sb = new StringBuilder();
             foreach (var evt in Events)
             {
+                if (evt.Address.IsUser)
+                {
+                    addresses.Add(evt.Address);
+                }
+
                 if (evt.Contract == "gas")
                 {
                     switch (evt.Kind)
@@ -183,7 +183,7 @@ namespace Phantasma.Explorer
                                 break;
                             }
 
-                        case EventKind.TokenClaim:
+                        case EventKind.TokenReceive:
                             {
                                 var data = evt.GetContent<TokenEventData>();
                                 if (data.Symbol == DomainSettings.FuelTokenSymbol)
@@ -208,14 +208,6 @@ namespace Phantasma.Explorer
 
                 switch (evt.Kind)
                 {
-                    case EventKind.BlockCreate:
-                        sb.AppendLine("Started Block");
-                        break;
-
-                    case EventKind.BlockClose:
-                        sb.AppendLine( "Closed Block");
-                        break;
-
                     case EventKind.ChainCreate:
                         {
                             var name = evt.GetContent<string>();
@@ -233,7 +225,7 @@ namespace Phantasma.Explorer
                     case EventKind.AddressRegister:
                         {
                             var name = evt.GetContent<string>();
-                            sb.AppendLine($"Registered name: {name} for {LinkAddress(evt.Address, name)}");
+                            sb.AppendLine($"Registered name: {name} for {LinkAddress(evt.Address, null)}");
                             break;
                         }
 
@@ -251,7 +243,14 @@ namespace Phantasma.Explorer
                             break;
                         }
 
-                    case EventKind.TransactionSettle:
+                    case EventKind.OrganizationCreate:
+                        {
+                            var name = evt.GetContent<string>();
+                            sb.AppendLine($"Created organization: {name}");
+                            break;
+                        }
+
+                    case EventKind.ChainSwap:
                         {
                             var data = evt.GetContent<TransactionSettleEventData>();
                             sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://neoscan.io/transaction/{data.Hash}\">{data.Hash}</a>");
@@ -373,6 +372,16 @@ namespace Phantasma.Explorer
             foreach (var entry in fees)
             {
                 sb.AppendLine($"{LinkAddress(entry.Key)} received {entry.Value} {LinkToken(DomainSettings.FuelTokenSymbol)} in fees.");
+            }
+
+            foreach (var addr in addresses)
+            {
+                var account = Nexus.FindAccount(addr, false);
+                if (account != null)
+                {
+                    account.Transactions.Add(this.Hash);
+                    //Nexus._addresses.Add(addr);
+                }
             }
 
             if (sb.Length > 0)
@@ -560,10 +569,13 @@ namespace Phantasma.Explorer
     {
         public AccountData(NexusData database, DataNode node) : base(database)
         {
+            this.Transactions = new HashSet<Hash>();
+
             Name = node.GetString("name");
             Address = Cryptography.Address.FromText(node.GetString("address"));
 
-            Stake = BigInteger.Parse( node.GetString("stake"));
+            var stakeNode = node.GetNode("stakes");
+            Stake = BigInteger.Parse(stakeNode.GetString("amount"));
 
             var balancesNode = node.GetNode("balances");
             if (balancesNode != null)
@@ -593,7 +605,7 @@ namespace Phantasma.Explorer
 
         public BalanceData[] Balances { get; private set; }
 
-        public TransactionData[] Transactions { get; private set; }
+        public HashSet<Hash> Transactions { get; internal set; }
 
         public bool IsEmpty
         {
@@ -621,6 +633,45 @@ namespace Phantasma.Explorer
         public string Value { get; private set; }
     }
 
+    public class OrganizationData : ExplorerObject
+    {
+        public OrganizationData(NexusData database, DataNode node) : base(database)
+        {
+            ID = node.GetString("id");
+            Name = node.GetString("name");
+            var membersNode = node.GetNode("members");
+            Members = new Address[membersNode.ChildCount];
+            for (int i=0; i<Members.Length; i++)
+            {
+                Members[i] = Address.FromText( membersNode.GetString(i));
+            }
+
+            this.Address = Address.FromHash(ID);
+        }
+
+        public void UpdateAccounts()
+        {
+            this.Nexus.DoParallelRequests($"Fetching accounts for {ID}...", Members.Length, (index) =>
+            {
+                Nexus.FindAccount(Members[index], false);
+            });
+        }
+
+        public string ID { get; private set; }
+        public string Name { get; private set; }
+        public Address[] Members { get; private set; }
+        public Address Address { get; private set; }
+        public int Size => Members.Length;
+    }
+
+    public struct LeaderboardEntry
+    {
+        public Address address;
+        public BigInteger score;
+        public int ranking;
+        public string formatted;
+    }
+
     public class NexusData
     {
         public string Name { get; private set; }
@@ -628,6 +679,7 @@ namespace Phantasma.Explorer
         private Dictionary<string, ChainData> _chains = new Dictionary<string, ChainData>();
         private Dictionary<string, TokenData> _tokens = new Dictionary<string, TokenData>();
         private Dictionary<string, PlatformData> _platforms = new Dictionary<string, PlatformData>();
+        public Dictionary<string, OrganizationData> _organizations = new Dictionary<string, OrganizationData>();
 
         private Dictionary<Hash, BlockData> _blocks = new Dictionary<Hash, BlockData>();
         private Dictionary<Hash, TransactionData> _transactions = new Dictionary<Hash, TransactionData>();
@@ -636,13 +688,18 @@ namespace Phantasma.Explorer
 
         private List<GovernanceData> _governance = new List<GovernanceData>();
 
-        public Address[] Masters { get; private set; }
+        /*internal HashSet<Address> _addresses = new HashSet<Address>();
+        public IEnumerable<Address> Addresses => _addresses;
+        */
+
+        public LeaderboardEntry[] SES { get; private set; }
 
         private string RESTurl;
 
         public IEnumerable<ChainData> Chains => _chains.Values;
         public IEnumerable<TokenData> Tokens => _tokens.Values;
         public IEnumerable<PlatformData> Platforms => _platforms.Values;
+        public IEnumerable<OrganizationData> Organizations => _organizations.Values;
         public IEnumerable<GovernanceData> Governance => _governance;
 
         public ChainData RootChain => FindChainByName("main");
@@ -718,22 +775,38 @@ namespace Phantasma.Explorer
                 _governance.Add(gov);
             }
 
-            var masterNode = node.GetNode("masters");
-            if (masterNode != null)
+            var orgNode = node.GetNode("organizations");
+            if (orgNode != null)
             {
-                this.Masters = new Address[masterNode.ChildCount];
-                int index = 0;
-                foreach (var entry in masterNode.Children)
+                foreach (var entry in orgNode.Children)
                 {
-                    Masters[index] = Address.FromText(entry.Value);
+                    var name = entry.Value;
+                    FindOrganization(name);
+                }
+            }
+
+            var sesNode = node.GetNode("ses");
+            if (sesNode != null)
+            {
+                this.SES = new LeaderboardEntry[sesNode.ChildCount];
+                int index = 0;
+                foreach (var entry in sesNode.Children)
+                {
+                    var row = new LeaderboardEntry();
+                    row.ranking = index + 1;
+                    row.address = Address.FromText(entry.GetString("address"));
+                    row.score = BigInteger.Parse(entry.GetString("value"));
+                    row.formatted = UnitConversion.ToDecimal(row.score, DomainSettings.FuelTokenDecimals).ToString();
+                    SES[index] = row;
                     index++;
                 }
             }
             else
             {
-                this.Masters = new Address[0];
+                this.SES = new LeaderboardEntry[0];
             }
 
+            Console.WriteLine($"Updating {_chains.Count} chains...");
             foreach (var chain in _chains.Values)
             {
                 chain.UpdateBlocks();
@@ -741,10 +814,17 @@ namespace Phantasma.Explorer
 
             if (updateCount == 0)
             {
-                DoParallelRequests("Fetching master accounts...", Masters.Length, (index) =>
+                var masters = _organizations["masters"];
+                masters.UpdateAccounts();
+
+                /*new Thread(() =>
                 {
-                    FindAccount(Masters[index], false);
-                });
+                    Console.WriteLine($"Updating {_transactions.Count} transactions...");
+                    foreach (var tx in _transactions.Values)
+                    {
+                        var temp = tx.Description;
+                    }
+                }).Start();*/
             }
 
             updateCount++;
@@ -757,21 +837,32 @@ namespace Phantasma.Explorer
             var url = RESTurl + path;
             //Console.WriteLine("Request: " + url);
 
-            try
+            int max = 5;
+            for (int i=1; i<=max; i++)
             {
-                string contents;
-                using (var wc = new System.Net.WebClient())
+                try
                 {
-                    contents = wc.DownloadString(url);
-                }
+                    string contents;
+                    using (var wc = new System.Net.WebClient())
+                    {
+                        contents = wc.DownloadString(url);
+                    }
 
-                var node = LunarLabs.Parser.JSON.JSONReader.ReadFromString(contents);
-                return node;
+                    var node = LunarLabs.Parser.JSON.JSONReader.ReadFromString(contents);
+                    return node;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    if (i < max)
+                    {
+                        Thread.Sleep(1000*i);
+                        Console.WriteLine("Trying again...");
+                    }
+                }
             }
-            catch (Exception e)
-            {
-                return null;
-            }
+
+            return null;
         }
 
         public ChainData FindChainByName(string name)
@@ -818,6 +909,20 @@ namespace Phantasma.Explorer
             return 0;
         }
 
+        public OrganizationData FindOrganization(string id)
+        {
+            if (_organizations.ContainsKey(id))
+            {
+                return _organizations[id];
+            }
+
+            Console.WriteLine("Detected new organization: " + id);
+            var temp = APIRequest("getOrganization/" + id);
+            var org = new OrganizationData(this, temp);
+            _organizations[id] = org;
+            return org;
+        }
+
         public TransactionData FindTransaction(ChainData chain, Hash txHash)
         {
             if (_transactions.ContainsKey(txHash))
@@ -860,18 +965,21 @@ namespace Phantasma.Explorer
 
         public AccountData FindAccount(Address address, bool canExpire)
         {
-            AccountData account;
+            AccountData account = null;
 
-            if (_accounts.ContainsKey(address))
+            lock (_accounts)
             {
-                account = _accounts[address];
-                
-                if (account != null)
+                if (_accounts.ContainsKey(address))
                 {
-                    var diff = DateTime.UtcNow - account.LastTime;
-                    if (!canExpire || diff.TotalSeconds < 60)
+                    account = _accounts[address];
+
+                    if (account != null)
                     {
-                        return account;
+                        var diff = DateTime.UtcNow - account.LastTime;
+                        if (!canExpire || diff.TotalSeconds < 60)
+                        {
+                            return account;
+                        }
                     }
                 }
             }
@@ -880,13 +988,24 @@ namespace Phantasma.Explorer
 
             if (node != null)
             {
+                var prev = account;
+
                 account = new AccountData(this, node);
                 if (account.IsEmpty)
                 {
                     return null;
                 }
 
-                _accounts[address] = account;
+                if (prev != null)
+                {
+                    account.Transactions = prev.Transactions;
+                }
+
+                lock (_accounts)
+                {
+                    _accounts[address] = account;
+                }
+
                 return account;
             }
 
@@ -934,6 +1053,30 @@ namespace Phantasma.Explorer
                 offset += roundSize;
                 total -= roundSize;
             }
+        }
+
+        internal Event[] ReadEvents(DataNode node)
+        {
+            var eventsNode = node.GetNode("events");
+            if (eventsNode == null)
+            {
+                return new Event[0];
+            }
+
+            var events = new Event[eventsNode.ChildCount];
+            for (int i = 0; i < events.Length; i++)
+            {
+                var temp = eventsNode.GetNodeByIndex(i);
+
+                var kind = temp.GetEnum<EventKind>("kind");
+                var contract = temp.GetString("contract");
+                var addr = Address.FromText(temp.GetString("address"));
+                var data = Base16.Decode(temp.GetString("data"));
+
+                events[i] = new Event(kind, addr, contract, data);
+            }
+
+            return events;
         }
     }
 }

@@ -13,7 +13,10 @@
                 <a class="nav-link" id="governance-tab" data-toggle="tab" href="#governance" role="tab" aria-controls="governance" aria-selected="false">Governance</a>
             </li>-->
             <li class="nav-item">
-                <a class="nav-link" id="masters-tab" data-toggle="tab" href="#masters" role="tab" aria-controls="masters" aria-selected="false">Masters</a>
+                <a class="nav-link" id="orgs-tab" data-toggle="tab" href="#orgs" role="tab" aria-controls="orgs" aria-selected="false">DAOs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="ses-tab" data-toggle="tab" href="#ses" role="tab" aria-controls="ses" aria-selected="false">SES</a>
             </li>
         </ul>
 
@@ -126,26 +129,62 @@
 				</div>
 			</div>-->
 
-			<div class="tab-pane fade" id="masters" role="tabpanel" aria-labelledby="masters-tab">
+			<div class="tab-pane fade" id="orgs" role="tabpanel" aria-labelledby="orgs-tab">
 				<div class="panel panel-single">
-					<div class="panel-heading">Masters</div>
+					<div class="panel-heading">DAOs</div>
 					<div class="panel-body">
 
 						<div class="table-responsive">
 							<table class="table table-striped table-general">
 								<thead>
 									<tr>
-										<th>Addresses ({{nexus.Masters.Length}} total)</th>
+										<th>Name</th>
+										<th>Address</th>
+										<th>Size</th>
 									</tr>
 								</thead>
 								<tbody>
-									{{#each nexus.Masters}}
+									{{#each nexus.Organizations}}
+									{{#if ID!='validators'}}
 									<tr>
-										<td>{{#link-address this}}</td>
+										<td>{{#link-org this}}</td>
+										<td>{{#link-address _Address}}</td>
+										<td>{{Size}}</td>
 									</tr>
+									{{/if}}
 									{{/each}}
 								</tbody>
 							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="tab-pane fade" id="ses" role="tabpanel" aria-labelledby="ses-tab">
+				<div class="panel panel-single">
+					<div class="panel-heading">SES leaderboard</div>
+					<div class="panel-body">
+						<p>Click <a href="http://bit.ly/PhantasmaSES">here</a> for more information about the SES.</p>
+
+						<div class="table-responsive">
+							<table class="table table-striped table-general">
+								<thead>
+									<tr>
+										<th>Ranking</th>
+										<th>Address</th>
+										<th>Amount</th>
+									</tr>
+								</thead>
+								<tbody>
+									{{#each nexus.SES}}
+									<tr>
+										<td>{{ranking}}</td>
+										<td>{{#link-address address}}</td>
+										<td>{{formatted}} KCAL</td>
+									</tr>
+									{{/each}}
+								</tbody>
+							</table>							
 						</div>
 					</div>
 				</div>

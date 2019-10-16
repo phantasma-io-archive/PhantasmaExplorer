@@ -251,6 +251,29 @@ namespace Phantasma.Explorer
         }
     }
 
+    public class LinkOrganizationTag : TemplateNode
+    {
+        private readonly RenderingKey _key;
+
+        public LinkOrganizationTag(Document doc, string key) : base(doc)
+        {
+            _key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(_key);
+            if (temp == null)
+            {
+                return;
+            }
+
+            var org = (OrganizationData)temp;
+
+            context.output.Append($"<a href=/dao/{org.ID}>{org.Name}</a>");
+        }
+    }
+
     public class LinkBlockTag : TemplateNode
     {
         private readonly RenderingKey _chainKey;

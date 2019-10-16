@@ -8,6 +8,9 @@
             <li class="nav-item">
                 <a class="nav-link" id="transactions-tab" data-toggle="tab" href="#transactions" role="tab" aria-controls="transactions" aria-selected="false">Transactions</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="events-tab" data-toggle="tab" href="#events" role="tab" aria-controls="events" aria-selected="false">Events</a>
+            </li>
         </ul>
 
         <div class="tab-content" id="myTabContent">
@@ -43,6 +46,11 @@
                                         <td>{{#link-address block.ValidatorAddress}}</td>
                                     </tr>
 
+                                    <tr>
+                                        <td>Fees</td>
+                                        <td>{{#link-address block.ValidatorAddress}}</td>
+                                    </tr>
+
                                 </tbody>
                             </table>
                         </div>
@@ -68,6 +76,40 @@
                                     <tr>
                                         <td>{{#link-tx Hash}}</td>
                                         <td>{{#description this}}</td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                        {{#else}}
+                        Nothing here...
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="events" role="tabpanel" aria-labelledby="events-tab">
+                <div class="panel panel-single">
+                    <div class="panel-heading">Block Events</div>
+                    <div class="panel-body">
+                        {{#if block.Events}}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-general">
+                                <thead>
+                                    <tr>
+                                        <th>Kind</th>
+                                        <th>Address</th>
+                                        <th>Contract</th>
+										<th>Content</th>
+                                     </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each block.Events}}
+                                    <tr>
+                                        <td>{{Kind}}</td>
+                                        <td>{{#link-address Address}}</td>
+                                        <td>{{Contract}}</td>
+                                        <td>{{#hex Data}}</td>
                                     </tr>
                                     {{/each}}
                                 </tbody>
