@@ -23,7 +23,13 @@ namespace Phantasma.Explorer
         }
     }
 
-    public class BlockData : ExplorerObject, IBlock
+    public struct OracleData
+    {
+        public string URL;
+        public string Content;
+    }
+
+    public class BlockData : ExplorerObject
     {
         public Address ChainAddress { get; private set; }
         public BigInteger Height { get; private set; }
@@ -32,7 +38,7 @@ namespace Phantasma.Explorer
         public uint Protocol { get; private set; }
         public Hash Hash { get; private set; }
         public Hash[] TransactionHashes { get; private set; }
-        public IOracleEntry[] OracleData { get; private set; }
+        public OracleData[] OracleData { get; private set; }
 
         public Event[] Events { get; private set; }
 
@@ -59,7 +65,24 @@ namespace Phantasma.Explorer
 
             ValidatorAddress = Address.FromText(node.GetString("validatorAddress"));
 
-            OracleData = null; // TODO
+            var oracleNode = node.GetNode("oracles");
+            if (oracleNode != null)
+            {
+                OracleData = new OracleData[oracleNode.ChildCount];
+                for (int i = 0; i < OracleData.Length; i++)
+                {
+                    var temp = oracleNode.GetNodeByIndex(i);
+                    OracleData[i] = new OracleData()
+                    {
+                        Content = temp.GetString("content"),
+                        URL = temp.GetString("url"),
+                    };
+                }
+            }
+            else
+            {
+                OracleData = new OracleData[0];
+            }
 
             var txsNode = node.GetNode("txs");
             TransactionHashes = new Hash[txsNode.ChildCount];
@@ -325,7 +348,8 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            var action = evt.Contract == "stake" ? "unstaked" : "claimed";
+                            sb.AppendLine($"{LinkAddress(evt.Address)} {action} {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             break;
                         }
 
@@ -592,6 +616,16 @@ namespace Phantasma.Explorer
                 Balances = new BalanceData[0];
             }
 
+            var txsNode = node.GetNode("txs");
+            if (txsNode != null)
+            {
+                for (int i = 0; i < txsNode.ChildCount; i++)
+                {
+                    var hash = Hash.Parse(txsNode.GetString(i));
+                    Transactions.Add(hash);
+                }
+            }
+
             LastTime = DateTime.UtcNow;
         }
 
@@ -701,6 +735,8 @@ namespace Phantasma.Explorer
         public IEnumerable<PlatformData> Platforms => _platforms.Values;
         public IEnumerable<OrganizationData> Organizations => _organizations.Values;
         public IEnumerable<GovernanceData> Governance => _governance;
+
+        public int SESprogress { get; private set; }
 
         public ChainData RootChain => FindChainByName("main");
 
@@ -829,6 +865,22 @@ namespace Phantasma.Explorer
 
             updateCount++;
 
+            var kcal = FindTokenBySymbol("KCAL");
+            if (kcal != null)
+            {
+                var bombAddress = Address.FromText("S3dNNgHpUgHhA3U8ZLEbS3fn28scs4y6fs8TB6A14WNWSJA");
+                var bombAccount = FindAccount(bombAddress, true);
+                var bombBalance = bombAccount.Balances.FirstOrDefault().Amount;
+                var expectedAmount = kcal.CurrentSupply / 2;
+                var progress = (int)((bombBalance * 100) / expectedAmount);
+                if (progress > 100)
+                {
+                    progress = 100;
+                }
+
+                SESprogress = progress;
+            }
+
             return true;
         }
 
@@ -888,7 +940,7 @@ namespace Phantasma.Explorer
             return null;
         }
 
-        internal IToken FindTokenBySymbol(string symbol)
+        internal TokenData FindTokenBySymbol(string symbol)
         {
             if (_tokens.ContainsKey(symbol))
             {
@@ -984,7 +1036,7 @@ namespace Phantasma.Explorer
                 }
             }
 
-            var node = APIRequest("getAccount?account=" + address.Text);
+            var node = APIRequest("getAccount/" + address.Text);
 
             if (node != null)
             {
