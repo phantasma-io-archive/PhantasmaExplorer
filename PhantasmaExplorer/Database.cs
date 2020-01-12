@@ -348,8 +348,7 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
-                            var action = evt.Contract == "stake" ? "unstaked" : "claimed";
-                            sb.AppendLine($"{LinkAddress(evt.Address)} {action} {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             break;
                         }
 
@@ -589,6 +588,34 @@ namespace Phantasma.Explorer
         }
     }
 
+    public class LeaderboardData: ExplorerObject
+    {
+        public string Name { get; private set; }
+        public LeaderboardEntry[] Rows { get; private set; }
+
+        public LeaderboardData(NexusData database, DataNode node) : base(database)
+        {
+            this.Name = node.GetString("name");
+
+            var rowsNode = node.GetNode("rows");
+            this.Rows = new LeaderboardEntry[rowsNode.ChildCount];
+            for (int i=0; i<Rows.Length; i++)
+            {
+                var temp = rowsNode.GetNodeByIndex(i);
+                var addr = Address.FromText(temp.GetString("address"));
+                var score = temp.GetInt32("value");
+
+                this.Rows[i] = new LeaderboardEntry()
+                {
+                    formatted = "?",
+                    ranking = i+1,
+                    address = addr,
+                    score = score
+                };
+            }
+        }
+    }
+
     public class AccountData : ExplorerObject
     {
         public AccountData(NexusData database, DataNode node) : base(database)
@@ -720,6 +747,8 @@ namespace Phantasma.Explorer
 
         private Dictionary<Address, AccountData> _accounts = new Dictionary<Address, AccountData>();
 
+        private Dictionary<string, LeaderboardData> _leaderboards = new Dictionary<string, LeaderboardData>();
+
         private List<GovernanceData> _governance = new List<GovernanceData>();
 
         /*internal HashSet<Address> _addresses = new HashSet<Address>();
@@ -736,6 +765,7 @@ namespace Phantasma.Explorer
         public IEnumerable<OrganizationData> Organizations => _organizations.Values;
         public IEnumerable<GovernanceData> Governance => _governance;
 
+        public decimal SESburned { get; private set; }
         public int SESprogress { get; private set; }
 
         public ChainData RootChain => FindChainByName("main");
@@ -878,6 +908,7 @@ namespace Phantasma.Explorer
                     progress = 100;
                 }
 
+                SESburned = UnitConversion.ToDecimal(bombBalance, DomainSettings.FuelTokenDecimals); 
                 SESprogress = progress;
             }
 
@@ -1010,6 +1041,33 @@ namespace Phantasma.Explorer
                 {
                     return _blocks[hash];
                 }
+            }
+
+            return null;
+        }
+
+        public LeaderboardData FindLeaderboard(string name)
+        {
+            lock (_leaderboards)
+            {
+                if (_leaderboards.ContainsKey(name))
+                {
+                    return _leaderboards[name];
+                }
+            }
+
+            var node = APIRequest("getLeaderboard/" + name);
+
+            if (node != null)
+            {
+                var leaderboard = new LeaderboardData(this, node);
+
+                lock (_leaderboards)
+                {
+                    _leaderboards[name] = leaderboard;
+                }
+
+                return leaderboard;
             }
 
             return null;

@@ -448,6 +448,23 @@ namespace PhantasmaExplorer
                 return Error(templateEngine, "Could not find address: " + address);
             });
 
+            server.Get("/leaderboard/{input}", (request) =>
+            {
+                var input = request.GetVariable("input");
+
+                var leaderboard = nexus.FindLeaderboard(input);
+
+                if (leaderboard != null)
+                {
+                    var context = CreateContext();
+                    context["board"] = leaderboard;
+
+                    return templateEngine.Render(context, "layout", "leaderboard");
+                }
+
+                return Error(templateEngine, "Could not find season: " + input);
+            });
+
             server.Post("/nexus", (request) =>
             {
                 var input = request.GetVariable("searchInput");

@@ -65,6 +65,19 @@
                 <div class="panel panel-single">
                     <div class="panel-heading">Transaction Script</div>
                     <div class="panel-body">
+						<p>Raw</p>
+                        {{#if transaction.Script}}
+                        <table class="monospace">
+                            <tr>
+                                <td>{{#hex transaction.Script}}</td>
+                            </tr>
+                        </table>
+                        {{#else}}
+                        Nothing here...
+                        {{/if}}
+						
+						<br>
+						<p>Disassembly</p>
                         {{#if transaction.Instructions}}
                         <table class="monospace">
                             {{#each transaction.Instructions}}
