@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -238,7 +238,7 @@ namespace Phantasma.Explorer
                             break;
                         }
 
-                    case EventKind.TokenCreate: 
+                    case EventKind.TokenCreate:
                         {
                             var symbol = evt.GetContent<string>();
                             sb.AppendLine($"Created token: {LinkToken(symbol)}");
@@ -332,7 +332,15 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"{LinkAddress(evt.Address)} minted {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            bool fungible = token.IsFungible();
+                            if (fungible)
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                            }
                             break;
                         }
 
@@ -340,7 +348,15 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"{LinkAddress(evt.Address)} burned {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            bool fungible = token.IsFungible();
+                            if (fungible)
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} burned {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} burned {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                            }
                             break;
                         }
 
@@ -373,7 +389,15 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"{LinkAddress(evt.Address)} sent {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            bool fungible = token.IsFungible();
+                            if (fungible)
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                            }
                             break;
                         }
 
@@ -381,7 +405,15 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"{LinkAddress(evt.Address)} received {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            bool fungible = token.IsFungible();
+                            if (fungible)
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} received {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} received {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                            }
                             break;
                         }
                 }
@@ -755,8 +787,6 @@ namespace Phantasma.Explorer
         public IEnumerable<Address> Addresses => _addresses;
         */
 
-        public LeaderboardEntry[] SES { get; private set; }
-
         private string RESTurl;
 
         public IEnumerable<ChainData> Chains => _chains.Values;
@@ -764,10 +794,6 @@ namespace Phantasma.Explorer
         public IEnumerable<PlatformData> Platforms => _platforms.Values;
         public IEnumerable<OrganizationData> Organizations => _organizations.Values;
         public IEnumerable<GovernanceData> Governance => _governance;
-
-        public decimal SESburned { get; private set; }
-        public int SESprogress { get; private set; }
-
         public ChainData RootChain => FindChainByName("main");
 
         private int updateCount;
@@ -801,7 +827,7 @@ namespace Phantasma.Explorer
                     _tokens[token.Symbol] = token;
                 }
             }
-            
+
             var chains = node.GetNode("chains");
             foreach (var entry in chains.Children)
             {
@@ -851,27 +877,6 @@ namespace Phantasma.Explorer
                 }
             }
 
-            var sesNode = node.GetNode("ses");
-            if (sesNode != null)
-            {
-                this.SES = new LeaderboardEntry[sesNode.ChildCount];
-                int index = 0;
-                foreach (var entry in sesNode.Children)
-                {
-                    var row = new LeaderboardEntry();
-                    row.ranking = index + 1;
-                    row.address = Address.FromText(entry.GetString("address"));
-                    row.score = BigInteger.Parse(entry.GetString("value"));
-                    row.formatted = UnitConversion.ToDecimal(row.score, DomainSettings.FuelTokenDecimals).ToString();
-                    SES[index] = row;
-                    index++;
-                }
-            }
-            else
-            {
-                this.SES = new LeaderboardEntry[0];
-            }
-
             Console.WriteLine($"Updating {_chains.Count} chains...");
             foreach (var chain in _chains.Values)
             {
@@ -894,23 +899,6 @@ namespace Phantasma.Explorer
             }
 
             updateCount++;
-
-            var kcal = FindTokenBySymbol("KCAL");
-            if (kcal != null)
-            {
-                var bombAddress = Address.FromText("S3dNNgHpUgHhA3U8ZLEbS3fn28scs4y6fs8TB6A14WNWSJA");
-                var bombAccount = FindAccount(bombAddress, true);
-                var bombBalance = bombAccount.Balances.FirstOrDefault().Amount;
-                var expectedAmount = kcal.CurrentSupply / 2;
-                var progress = (int)((bombBalance * 100) / expectedAmount);
-                if (progress > 100)
-                {
-                    progress = 100;
-                }
-
-                SESburned = UnitConversion.ToDecimal(bombBalance, DomainSettings.FuelTokenDecimals); 
-                SESprogress = progress;
-            }
 
             return true;
         }
