@@ -755,8 +755,6 @@ namespace Phantasma.Explorer
         public IEnumerable<Address> Addresses => _addresses;
         */
 
-        public LeaderboardEntry[] SES { get; private set; }
-
         private string RESTurl;
 
         public IEnumerable<ChainData> Chains => _chains.Values;
@@ -764,10 +762,6 @@ namespace Phantasma.Explorer
         public IEnumerable<PlatformData> Platforms => _platforms.Values;
         public IEnumerable<OrganizationData> Organizations => _organizations.Values;
         public IEnumerable<GovernanceData> Governance => _governance;
-
-        public decimal SESburned { get; private set; }
-        public int SESprogress { get; private set; }
-
         public ChainData RootChain => FindChainByName("main");
 
         private int updateCount;
@@ -851,27 +845,6 @@ namespace Phantasma.Explorer
                 }
             }
 
-            var sesNode = node.GetNode("ses");
-            if (sesNode != null)
-            {
-                this.SES = new LeaderboardEntry[sesNode.ChildCount];
-                int index = 0;
-                foreach (var entry in sesNode.Children)
-                {
-                    var row = new LeaderboardEntry();
-                    row.ranking = index + 1;
-                    row.address = Address.FromText(entry.GetString("address"));
-                    row.score = BigInteger.Parse(entry.GetString("value"));
-                    row.formatted = UnitConversion.ToDecimal(row.score, DomainSettings.FuelTokenDecimals).ToString();
-                    SES[index] = row;
-                    index++;
-                }
-            }
-            else
-            {
-                this.SES = new LeaderboardEntry[0];
-            }
-
             Console.WriteLine($"Updating {_chains.Count} chains...");
             foreach (var chain in _chains.Values)
             {
@@ -894,23 +867,6 @@ namespace Phantasma.Explorer
             }
 
             updateCount++;
-
-            var kcal = FindTokenBySymbol("KCAL");
-            if (kcal != null)
-            {
-                var bombAddress = Address.FromText("S3dNNgHpUgHhA3U8ZLEbS3fn28scs4y6fs8TB6A14WNWSJA");
-                var bombAccount = FindAccount(bombAddress, true);
-                var bombBalance = bombAccount.Balances.FirstOrDefault().Amount;
-                var expectedAmount = kcal.CurrentSupply / 2;
-                var progress = (int)((bombBalance * 100) / expectedAmount);
-                if (progress > 100)
-                {
-                    progress = 100;
-                }
-
-                SESburned = UnitConversion.ToDecimal(bombBalance, DomainSettings.FuelTokenDecimals); 
-                SESprogress = progress;
-            }
 
             return true;
         }
