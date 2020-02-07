@@ -541,8 +541,6 @@ namespace Phantasma.Explorer
         {
             this.Name = node.GetString("name");
             this.Symbol = node.GetString("symbol");
-            this.Platform = node.GetString("platform");
-            this.Hash = Hash.Parse(node.GetString("hash"));
             this.MaxSupply = BigInteger.Parse(node.GetString("maxSupply"));
             this.CurrentSupply = BigInteger.Parse(node.GetString("currentSupply"));
             this.Decimals = int.Parse(node.GetString("decimals"));
@@ -552,8 +550,6 @@ namespace Phantasma.Explorer
 
         public string Name { get; private set; }
         public string Symbol { get; private set; }
-        public string Platform { get; private set; }
-        public Hash Hash { get; private set; }
         public TokenFlags Flags { get; private set; }
         public BigInteger MaxSupply { get; private set; }
         public BigInteger CurrentSupply { get; private set; }
