@@ -1,16 +1,14 @@
 <div class="row ">
 
-    <h2 class="page-title">Search Results</h2>
+    <h2 class="page-title">Found {{#count results}} Results</h2>
 
-    <br />
-    <div class="col-md-6">
+    <div class="col-md-8 col-md-offset-2">
         <div class="table-responsive">
             <table class="table table-general">
                 <tbody>
 					{{#each results}}
                     <tr>
-                        <td>{{Kind}}</td>
-                        <td><a href="{{URL}}">{{Text}}</a></td>
+                        <td><a href="{{URL}}">{{Text}}</a> ({{Kind}})</td>
                     </tr>
 					{{/each}}
                 </tbody>

@@ -249,6 +249,9 @@ namespace PhantasmaExplorer
         {
             switch (kind)
             {
+                case SearchResultKind.Chain:
+                    return $"/chain/{data}";
+
                 case SearchResultKind.Address:
                     return $"/address/{data}";
 
@@ -505,7 +508,7 @@ namespace PhantasmaExplorer
                 var results = nexus.SearchItem(input).Select(x => new SearchResultWithURL()
                 {
                     Kind = x.Kind,
-                    Text = x.Data,
+                    Text = x.Text,
                     URL = GetURLForSearch(x.Kind, x.Data)
                 }).ToList();
 
