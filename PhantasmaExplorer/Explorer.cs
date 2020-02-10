@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using LunarLabs.WebServer.Core;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
@@ -18,6 +17,13 @@ namespace PhantasmaExplorer
         public string Text;
         public string Url;
         public bool Active;
+    }
+
+    public struct SearchResultWithURL
+    {
+        public SearchResultKind Kind;
+        public string Text;
+        public string URL;
     }
 
     public struct HomeContext
@@ -237,6 +243,33 @@ namespace PhantasmaExplorer
             var context = CreateContext();
             context["error"] = msg;
             return templateEngine.Render(context, "layout", "error");
+        }
+
+        static string GetURLForSearch(SearchResultKind kind, string data)
+        {
+            switch (kind)
+            {
+                case SearchResultKind.Address:
+                    return $"/address/{data}";
+
+                case SearchResultKind.Transaction:
+                    return $"/tx/{data}";
+
+                case SearchResultKind.Block:
+                    return $"/block/{data}";
+
+                case SearchResultKind.Organization:
+                    return $"/dao/{data}";
+
+                case SearchResultKind.Leaderboard:
+                    return $"/leaderboard/{data}";
+
+                case SearchResultKind.Token:
+                    return $"/token/{data}";
+
+                default:
+                    return $"error";
+            }
         }
 
         static void Main(string[] args)
@@ -469,35 +502,20 @@ namespace PhantasmaExplorer
             {
                 var input = request.GetVariable("searchInput");
 
-                if (Address.IsValidAddress(input))
+                var results = nexus.SearchItem(input).Select(x => new SearchResultWithURL()
                 {
-                    return HTTPResponse.Redirect($"/address/{input}");
-                }
-                else
-                if (input.Length == 64)
-                {
-                    var hash = Hash.Parse(input);
+                    Kind = x.Kind,
+                    Text = x.Data,
+                    URL = GetURLForSearch(x.Kind, x.Data)
+                }).ToList();
 
-                    var tx = nexus.FindTransaction(nexus.RootChain, hash);
-                    if (tx != null)
-                    {
-                        return HTTPResponse.Redirect($"/tx/{input}");
-                    }
+                var context = CreateContext();
 
-                    var block = nexus.FindBlockByHash(nexus.RootChain, hash);
-                    if (block != null)
-                    {
-                        return HTTPResponse.Redirect($"/block/{input}");
-                    }
-                }
+                context["results"] = results;
 
-                var token = nexus.FindTokenBySymbol(input);
-                if (token != null)
-                {
-                    return HTTPResponse.Redirect($"/token/{input}");
-                }
+                return templateEngine.Render(context, "layout", "search");
 
-                return Error(templateEngine, "Could not find anything...");
+                //return Error(templateEngine, "Could not find anything...");
             });
 
             bool running = true;

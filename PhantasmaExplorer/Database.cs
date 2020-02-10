@@ -23,6 +23,24 @@ namespace Phantasma.Explorer
         }
     }
 
+    public enum SearchResultKind
+    {
+        Address,
+        Transaction,
+        Block,
+        Token,
+        Organization,
+        Leaderboard,
+        Contract,
+        Chain,
+    }
+
+    public struct SearchResult
+    {
+        public SearchResultKind Kind;
+        public string Data;
+    }
+
     public struct OracleData
     {
         public string URL;
@@ -83,6 +101,8 @@ namespace Phantasma.Explorer
             {
                 OracleData = new OracleData[0];
             }
+
+            Nexus.RegisterSearch(this.Hash.ToString(), SearchResultKind.Block);
 
             var txsNode = node.GetNode("txs");
             TransactionHashes = new Hash[txsNode.ChildCount];
@@ -235,6 +255,7 @@ namespace Phantasma.Explorer
                         {
                             var name = evt.GetContent<string>();
                             sb.AppendLine($"Created chain: <a href=\"/chain/{name}\">{name}</a>");
+                            Nexus.RegisterSearch(name, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -242,6 +263,7 @@ namespace Phantasma.Explorer
                         {
                             var symbol = evt.GetContent<string>();
                             sb.AppendLine($"Created token: {LinkToken(symbol)}");
+                            Nexus.RegisterSearch(symbol, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -249,6 +271,7 @@ namespace Phantasma.Explorer
                         {
                             var name = evt.GetContent<string>();
                             sb.AppendLine($"Registered name: {name} for {LinkAddress(evt.Address, null)}");
+                            Nexus.RegisterSearch(name, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -256,6 +279,7 @@ namespace Phantasma.Explorer
                         {
                             var name = evt.GetContent<string>();
                             sb.AppendLine($"Deployed contract: {name}</a>");
+                            Nexus.RegisterSearch(name, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -263,6 +287,7 @@ namespace Phantasma.Explorer
                         {
                             var name = evt.GetContent<string>();
                             sb.AppendLine($"Created platform: {name}");
+                            Nexus.RegisterSearch(name, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -270,6 +295,7 @@ namespace Phantasma.Explorer
                         {
                             var name = evt.GetContent<string>();
                             sb.AppendLine($"Created organization: {name}");
+                            Nexus.RegisterSearch(name, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -277,6 +303,7 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TransactionSettleEventData>();
                             sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://neoscan.io/transaction/{data.Hash}\">{data.Hash}</a>");
+                            Nexus.RegisterSearch(data.Hash.ToString(), SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -304,6 +331,7 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<ChainValueEventData>();
                             sb.AppendLine($"Created governance value: {data.Name}");
+                            Nexus.RegisterSearch(data.Name, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -311,6 +339,7 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<ChainValueEventData>();
                             sb.AppendLine($"Updated governance value: {data.Name}");
+                            Nexus.RegisterSearch(data.Name, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -341,6 +370,8 @@ namespace Phantasma.Explorer
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT #{data.Value}");
                             }
+
+                            Nexus.RegisterSearch(data.Symbol, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -357,6 +388,7 @@ namespace Phantasma.Explorer
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} burned {LinkToken(data.Symbol)} - NFT #{data.Value}");
                             }
+                            Nexus.RegisterSearch(data.Symbol, SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
 
@@ -435,6 +467,7 @@ namespace Phantasma.Explorer
                 if (account != null)
                 {
                     account.Transactions.Add(this.Hash);
+                    Nexus.RegisterSearch(addr.Text, SearchResultKind.Transaction, this.Hash.ToString());
                     //Nexus._addresses.Add(addr);
                 }
             }
@@ -821,6 +854,9 @@ namespace Phantasma.Explorer
                 {
                     Console.WriteLine("Detected new token: " + token.Name);
                     _tokens[token.Symbol] = token;
+
+                    RegisterSearch(token.Symbol, SearchResultKind.Token);
+                    RegisterSearch(token.Name, SearchResultKind.Token);
                 }
             }
 
@@ -987,6 +1023,10 @@ namespace Phantasma.Explorer
             var temp = APIRequest("getOrganization/" + id);
             var org = new OrganizationData(this, temp);
             _organizations[id] = org;
+
+            RegisterSearch(id, SearchResultKind.Organization, id);
+            RegisterSearch(org.Name, SearchResultKind.Organization, id);
+
             return org;
         }
 
@@ -1003,6 +1043,8 @@ namespace Phantasma.Explorer
             {
                 _transactions[tx.Hash] = tx;
             }
+
+            RegisterSearch(txHash.ToString(), SearchResultKind.Transaction);
             return tx;
         }
 
@@ -1013,6 +1055,7 @@ namespace Phantasma.Explorer
             lock (_blocks)
             {
                 _blocks[block.Hash] = block;
+                RegisterSearch(height.ToString(), SearchResultKind.Block, block.Hash.ToString());
             }
             return block;
         }
@@ -1051,6 +1094,7 @@ namespace Phantasma.Explorer
                     _leaderboards[name] = leaderboard;
                 }
 
+                RegisterSearch(name, SearchResultKind.Leaderboard);
                 return leaderboard;
             }
 
@@ -1099,6 +1143,8 @@ namespace Phantasma.Explorer
                 {
                     _accounts[address] = account;
                 }
+
+                RegisterSearch(account.Address.Text, SearchResultKind.Address);
 
                 return account;
             }
@@ -1171,6 +1217,58 @@ namespace Phantasma.Explorer
             }
 
             return events;
+        }
+
+        private Dictionary<string, List<SearchResult>> _search = new Dictionary<string, List<SearchResult>>(StringComparer.OrdinalIgnoreCase);
+
+        public void RegisterSearch(string text, SearchResultKind kind, string data = null)
+        {
+            if (data == null)
+            {
+                data = text;
+            }
+
+            var item = new SearchResult()
+            {
+                Kind = kind,
+                Data = data,
+            };
+
+            List<SearchResult> results;
+
+            lock (_search)
+            {
+                if (_search.ContainsKey(text))
+                {
+                    results = _search[text];
+                }
+                else
+                {
+                    results = new List<SearchResult>();
+                    _search[text] = results;
+                }
+
+                foreach (var other in results)
+                {
+                    if (other.Kind == item.Kind && other.Data == item.Data)
+                    {
+                        return;
+                    }
+                }
+
+                results.Add(item);
+            }
+
+        }
+
+        public IEnumerable<SearchResult> SearchItem(string text)
+        {
+            if (_search.ContainsKey(text))
+            {
+                return _search[text];
+            }
+
+            return Enumerable.Empty<SearchResult>();
         }
     }
 }
