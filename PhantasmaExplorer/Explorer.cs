@@ -294,11 +294,20 @@ namespace PhantasmaExplorer
             nexus = new NexusData(restURL);
 
             Console.WriteLine("Connecting explorer via REST: " + restURL);
-            if (!nexus.Update())
+
+            bool initialized = false;
+            string nexusError = null;
+
+            new Thread(() =>
             {
-                Console.WriteLine("Initialization failed!");
-                return;
-            }
+                if (!nexus.Update())
+                {
+                    nexusError = "Initialization failed!";
+                }
+
+                initialized = true;
+                Console.WriteLine("Explorer is now ready");
+            }).Start();
 
             var curPath = Directory.GetCurrentDirectory();
             Console.WriteLine("Current path: " + curPath);
@@ -328,15 +337,34 @@ namespace PhantasmaExplorer
                 return HTTPResponse.Redirect("/nexus");
             });
 
+            server.Get("/progress", (request) =>
+            {
+                var progress = "{\"status\": \""+nexus.UpdateStatus+"\", \"percent\": "+nexus.UpdateProgress+"}";
+                return HTTPResponse.FromString(progress, HTTPCode.OK, false, "application/json");
+            });
+
             server.Get("/nexus", (request) =>
             {
                 var context = CreateContext();
+
+                if (!initialized)
+                {
+                    context["progress"] = nexus.UpdateProgress;
+                    context["status"] = nexusError != null ? nexusError : nexus.UpdateStatus;
+                    return templateEngine.Render(context, "layout", "init");
+                }
+
                 context["nexus"] = nexus;
                 return templateEngine.Render(context, "layout", "nexus");
             });
 
             server.Get("/chain/{input}", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var chainName = request.GetVariable("input");
 
                 var chain  = nexus.FindChainByName(chainName);
@@ -352,6 +380,11 @@ namespace PhantasmaExplorer
 
             server.Get("/chains", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var context = CreateContext();
                 context["chains"] = nexus.Chains;
 
@@ -360,6 +393,11 @@ namespace PhantasmaExplorer
 
             server.Get("/tokens", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var context = CreateContext();
                 context["tokens"] = nexus.Tokens;
 
@@ -368,6 +406,11 @@ namespace PhantasmaExplorer
 
             server.Get("/block/{chain}/{hash}", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var chainName = request.GetVariable("chain");
 
                 var chain = nexus.FindChainByName(chainName);
@@ -394,6 +437,11 @@ namespace PhantasmaExplorer
 
             server.Get("/height/{chain}/{index}", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var chainName = request.GetVariable("chain");
 
                 var chain = nexus.FindChainByName(chainName);
@@ -422,6 +470,11 @@ namespace PhantasmaExplorer
 
             server.Get("/tx/{input}", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var hash = Hash.Parse(request.GetVariable("input"));
 
                 var tx = nexus.FindTransaction(nexus.RootChain, hash);
@@ -438,6 +491,11 @@ namespace PhantasmaExplorer
 
             server.Get("/dao/{input}", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var id = request.GetVariable("input");
 
                 var org = nexus.FindOrganization(id);
@@ -454,6 +512,11 @@ namespace PhantasmaExplorer
 
             server.Get("/token/{input}", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var symbol = request.GetVariable("input");
 
                 var token = nexus.FindTokenBySymbol(symbol);
@@ -470,6 +533,11 @@ namespace PhantasmaExplorer
 
             server.Get("/address/{input}", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var address = Address.FromText(request.GetVariable("input"));
 
                 var account = nexus.FindAccount(address, true);
@@ -486,6 +554,11 @@ namespace PhantasmaExplorer
 
             server.Get("/leaderboard/{input}", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var input = request.GetVariable("input");
 
                 var leaderboard = nexus.FindLeaderboard(input);
@@ -503,6 +576,11 @@ namespace PhantasmaExplorer
 
             server.Post("/nexus", (request) =>
             {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
                 var input = request.GetVariable("searchInput");
 
                 var results = nexus.SearchItem(input).Select(x => new SearchResultWithURL()

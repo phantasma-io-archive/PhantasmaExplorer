@@ -1,0 +1,38 @@
+<div class="row ">
+    <h2 class="page-title">Explorer is initializing...</h2>
+	<p id="status">{{status}}...</p>
+	 <div class="progress">
+	  <div id="progbar" class="progress-bar" role="progressbar" aria-valuenow="{{progress}}"
+	  aria-valuemin="0" aria-valuemax="100" style="width:{{progress}}%">
+		<span class="sr-only">{{progress}}% Complete</span>
+	  </div>
+	</div> 
+</div>
+
+<script type="text/javascript">
+
+
+function fetchStatus() {
+	
+	$.ajax({
+		url: '/progress',
+		type: "GET",
+		dataType: "json",
+		success: function (data) {
+			//console.log("got: ", data);
+			$("status").text(data.status);
+			
+			let current_progress = data.percent;
+			$("progbar")
+			  .css("width", current_progress + "%")
+				.attr("aria-valuenow", current_progress)
+			.text(current_progress + "% Complete");
+		}
+	});
+
+    setTimeout(fetchStatus, 2000);
+}
+
+fetchStatus();
+
+</script>

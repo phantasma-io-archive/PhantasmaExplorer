@@ -111,7 +111,7 @@ namespace Phantasma.Explorer
             TransactionHashes = new Hash[txsNode.ChildCount];
             Transactions = new TransactionData[TransactionHashes.Length];
 
-            Nexus.DoParallelRequests($"Fetching transactions for block {Hash}...", Transactions.Length, (index) =>
+            Nexus.DoParallelRequests($"Fetching transactions for block {Hash}...", Transactions.Length, false, (index) =>
             {
                 var temp = txsNode.GetNodeByIndex(index);
                 var txHash = Hash.Parse(temp.GetString("hash"));
@@ -518,7 +518,7 @@ namespace Phantasma.Explorer
             }
 
             this.Height = height;
-            UpdateBlocks();
+            //UpdateBlocks();
         }
 
         internal void UpdateBlocks()
@@ -537,7 +537,7 @@ namespace Phantasma.Explorer
                 return;
             }
 
-            Nexus.DoParallelRequests($"Fetching new blocks for chain {Name}...", newBlocks, (index) =>
+            Nexus.DoParallelRequests($"Fetching new blocks for chain {Name}...", newBlocks,  true, (index) =>
             {
                 var ofs = index + currentHeight;
                 var block = Nexus.FindBlockByHeight(this, ofs + 1);
@@ -783,7 +783,7 @@ namespace Phantasma.Explorer
 
         public void UpdateAccounts()
         {
-            this.Nexus.DoParallelRequests($"Fetching accounts for {ID}...", Members.Length, (index) =>
+            this.Nexus.DoParallelRequests($"Fetching accounts for {ID}...", Members.Length, true, (index) =>
             {
                 Nexus.FindAccount(Members[index], false);
             });
@@ -806,6 +806,8 @@ namespace Phantasma.Explorer
 
     public class NexusData
     {
+        public string UpdateStatus { get; private set; }
+        public int UpdateProgress { get; private set; }
         public string Name { get; private set; }
 
         private Dictionary<string, ChainData> _chains = new Dictionary<string, ChainData>();
@@ -850,6 +852,9 @@ namespace Phantasma.Explorer
 
         public bool Update()
         {
+            this.UpdateStatus = "Connecting to nexus";
+            this.UpdateProgress = 0;
+
             var node = APIRequest("getNexus");
             if (node == null)
             {
@@ -859,6 +864,9 @@ namespace Phantasma.Explorer
             bool generateDescriptions = false;
 
             this.Name = node.GetString("name");
+
+            this.UpdateStatus = "Fetching tokens";
+            this.UpdateProgress = 0;
 
             var tokens = node.GetNode("tokens");
             foreach (var entry in tokens.Children)
@@ -873,6 +881,9 @@ namespace Phantasma.Explorer
                     RegisterSearch(token.Name, null, SearchResultKind.Token, token.Symbol);
                 }
             }
+
+            this.UpdateStatus = "Fetching chains";
+            this.UpdateProgress = 0;
 
             var chains = node.GetNode("chains");
             foreach (var entry in chains.Children)
@@ -901,6 +912,9 @@ namespace Phantasma.Explorer
                 }
             }
 
+            this.UpdateStatus = "Fetching platforms";
+            this.UpdateProgress = 0;
+
             var platforms = node.GetNode("platforms");
             if (platforms != null)
             {
@@ -913,12 +927,18 @@ namespace Phantasma.Explorer
                 }
             }
 
+            this.UpdateStatus = "Fetching governance";
+            this.UpdateProgress = 0;
+
             var govNode = node.GetNode("governance");
             foreach (var entry in govNode.Children)
             {
                 var gov = new GovernanceData(this, entry);
                 _governance.Add(gov);
             }
+
+            this.UpdateStatus = "Fetching organizations";
+            this.UpdateProgress = 0;
 
             var orgNode = node.GetNode("organizations");
             if (orgNode != null)
@@ -930,14 +950,11 @@ namespace Phantasma.Explorer
                 }
             }
 
-            Console.WriteLine($"Updating {_chains.Count} chains...");
-            foreach (var chain in _chains.Values)
-            {
-                chain.UpdateBlocks();
-            }
-
             if (updateCount == 0)
             {
+                this.UpdateStatus = "Fetching master accounts";
+                this.UpdateProgress = 0;
+
                 var masters = _organizations["masters"];
                 masters.UpdateAccounts();
 
@@ -950,10 +967,23 @@ namespace Phantasma.Explorer
                     }
                 }).Start();*/
             }
+
+            Console.WriteLine($"Updating {_chains.Count} chains...");
+            foreach (var chain in _chains.Values)
+            {
+                this.UpdateStatus = "Fetching blocks for chain "+chain.Name;
+                this.UpdateProgress = 0;
+
+                chain.UpdateBlocks();
+            }
+
             updateCount++;
 
             if (generateDescriptions)
             {
+                this.UpdateStatus = "Generating transaction descriptions";
+                this.UpdateProgress = 0;
+
                 Queue<TransactionData> queue;
                 lock (_transactionQueue)
                 {
@@ -963,13 +993,18 @@ namespace Phantasma.Explorer
 
                 new Thread(() =>
                 {
-                    var total = 0;
+                    var total = queue.Count;
+                    int current = 0;
+
                     while (queue.Count > 0)
                     {
                         var tx = queue.Dequeue();
                         var temp = tx.Description;
-                        total++;
+                        current++;
+
+                        this.UpdateProgress = (current * 100)/total;
                     }
+
                     Console.Write($"Finished generating {total} tx descriptions");
                 }).Start();
             }
@@ -998,7 +1033,7 @@ namespace Phantasma.Explorer
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Console.WriteLine(e.Message);
                     if (i < max)
                     {
                         Thread.Sleep(1000*i);
@@ -1199,7 +1234,7 @@ namespace Phantasma.Explorer
             return null;
         }
 
-        public void DoParallelRequests(string description, int total, Action<int> fetcher)
+        public void DoParallelRequests(string description, int total, bool isStatus, Action<int> fetcher)
         {
             Console.WriteLine(description);
 
@@ -1208,6 +1243,14 @@ namespace Phantasma.Explorer
             var blockSize = 16;
 
             //int finished = 0;
+
+            if (isStatus)
+            {
+                this.UpdateStatus = description;
+                this.UpdateProgress = 0;
+            }
+
+            int max = total;
 
             int offset = 0;
             while (total > 0)
@@ -1239,6 +1282,11 @@ namespace Phantasma.Explorer
 
                 offset += roundSize;
                 total -= roundSize;
+
+                if (isStatus)
+                {
+                    this.UpdateProgress = (offset * 100) / max;
+                }
             }
         }
 
