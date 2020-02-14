@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using LunarLabs.Parser;
+using LunarLabs.Parser.XML;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
 using Phantasma.Domain;
@@ -111,14 +114,45 @@ namespace Phantasma.Explorer
             TransactionHashes = new Hash[txsNode.ChildCount];
             Transactions = new TransactionData[TransactionHashes.Length];
 
-            Nexus.DoParallelRequests($"Fetching transactions for block {Hash}...", Transactions.Length, false, (index) =>
+            var missingHashes = new List<Hash>();
+
+            for (int i=0; i<TransactionHashes.Length; i++)
             {
-                var temp = txsNode.GetNodeByIndex(index);
-                var txHash = Hash.Parse(temp.GetString("hash"));
-                TransactionHashes[index] = txHash;
-                var tx = Nexus.FindTransaction(Chain, txHash);
-                Transactions[index] = tx;
+                var txNode = txsNode.GetNodeByIndex(i);
+                var txHash = Hash.Parse(txNode.GetString("hash"));
+                TransactionHashes[i] = txHash;
+
+                var fileName = Nexus.GetTransactionCacheFileName(txHash);
+                if (File.Exists(fileName))
+                {
+                    var xml = File.ReadAllText(fileName);
+                    var temp = XMLReader.ReadFromString(xml);
+                    temp = temp.GetNodeByIndex(0);
+                    var tx = new TransactionData(Nexus, temp);
+                    Transactions[i] = tx;
+                    Console.WriteLine("Loaded transaction from cache: " + txHash);
+                }
+                else
+                {
+                    missingHashes.Add(txHash);
+                }
+            }
+
+            Nexus.DoParallelRequests($"Fetching missing transactions for block {Hash}...", missingHashes.Count, false, (index) =>
+            {
+                var hash = missingHashes[index];
+                var tx = Nexus.FindTransaction(Chain, hash);
                 tx.Block = this;
+
+                for (int i=0; i<TransactionHashes.Length; i++)
+                {
+                    if (TransactionHashes[i] == hash)
+                    {
+                        Transactions[i] = tx;
+                        break;
+                    }
+
+                }
             });
         }
     }
@@ -510,6 +544,35 @@ namespace Phantasma.Explorer
             }
         }
 
+        public void LoadFromCache()
+        {
+            if (string.IsNullOrEmpty(Nexus.cachePath))
+            {
+                return;
+            }
+
+            for (int i = 0; i < Height; i++)
+            {
+                var fileName = Nexus.GetBlockCacheFileName(this, i + 1);
+                if (File.Exists(fileName))
+                {
+                    var xml = File.ReadAllText(fileName);
+                    var temp = XMLReader.ReadFromString(xml);
+                    temp = temp.GetNodeByIndex(0);
+                    var block = new BlockData(Nexus, temp);
+
+                    BlockList.Add(null);
+                    RegisterBlock(i, block);
+
+                    Console.WriteLine($"Loaded block from cache: {this.Name}, {i+1} out of {Height}");
+                }
+                else
+                {
+                    break;
+                }           
+            }
+        }
+
         public void Grow(int height)
         {
             if (height < 0)
@@ -541,13 +604,18 @@ namespace Phantasma.Explorer
             {
                 var ofs = index + currentHeight;
                 var block = Nexus.FindBlockByHeight(this, ofs + 1);
-                BlockList[ofs] = block;
-
-                if (ofs == 0 && this.Name == DomainSettings.RootChainName)
-                {
-                    Nexus.RegisterSearch("genesis", null, SearchResultKind.Address, block.ValidatorAddress.Text);
-                }
+                RegisterBlock(ofs, block);
             });
+        }
+
+        private void RegisterBlock(int ofs, BlockData block)
+        {
+            BlockList[ofs] = block;
+
+            if (ofs == 0 && this.Name == DomainSettings.RootChainName)
+            {
+                Nexus.RegisterSearch("genesis", null, SearchResultKind.Address, block.ValidatorAddress.Text);
+            }
         }
 
         public string Name { get; private set; }
@@ -841,8 +909,21 @@ namespace Phantasma.Explorer
 
         private int updateCount;
 
-        public NexusData(string RESTurl)
+        public readonly string cachePath;
+
+        public NexusData(string RESTurl, string cachePath)
         {
+            if (!cachePath.EndsWith("/"))
+            {
+                cachePath += "/";
+            }
+            this.cachePath = cachePath;
+
+            if (!Directory.Exists(cachePath))
+            {
+                Directory.CreateDirectory(cachePath);
+            }
+
             if (!RESTurl.EndsWith("/"))
             {
                 RESTurl += "/";
@@ -909,6 +990,8 @@ namespace Phantasma.Explorer
 
                     RegisterSearch(chain.Name, null, SearchResultKind.Chain);
                     generateDescriptions = true;
+
+                    chain.LoadFromCache();
                 }
             }
 
@@ -1126,19 +1209,64 @@ namespace Phantasma.Explorer
                 _transactionQueue.Enqueue(tx);
             }
 
+            var fileName = GetTransactionCacheFileName(txHash);
+            if (fileName != null && !File.Exists(fileName))
+            {
+                var xml = XMLWriter.WriteToString(node);
+                File.WriteAllText(fileName, xml);
+            }
+
             RegisterSearch(txHash.ToString(), null, SearchResultKind.Transaction);
             return tx;
         }
-
-        internal BlockData FindBlockByHeight(ChainData chainData, int height)
+        public string GetBlockCacheFileName(ChainData chain, int height)
         {
-            var node = APIRequest($"getBlockByHeight?chainInput={chainData.Name}&height={height}");
+            return GetCacheFileName($"{chain.Name}_block_{height}");
+        }
+        public string GetTransactionCacheFileName(Hash hash)
+        {
+            return GetCacheFileName($"tx_{hash}");
+        }
+
+        public string GetCacheFileName(string desc)
+        {
+            if (string.IsNullOrEmpty(cachePath))
+            {
+                return null;
+            }
+
+            var md5Hasher = MD5.Create();
+            var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(desc));
+            var bucket = BitConverter.ToUInt32(hashed, 0);
+            bucket %= 1024;
+
+            var dir = $"{cachePath}/{bucket}";
+            if (!Directory.Exists(dir))
+            {
+                Console.WriteLine("Creating cache dir: " + dir);
+                Directory.CreateDirectory(dir);
+            }
+
+            return $"{dir}/{desc}.xml";
+        }
+
+        internal BlockData FindBlockByHeight(ChainData chain, int height)
+        {
+            var node = APIRequest($"getBlockByHeight?chainInput={chain.Name}&height={height}");
             var block = new BlockData(this, node);
             lock (_blocks)
             {
                 _blocks[block.Hash] = block;
                 RegisterSearch(height.ToString(), block.Hash.ToString(), SearchResultKind.Block, block.Hash.ToString());
             }
+
+            var fileName = GetBlockCacheFileName(chain, height);
+            if (fileName != null && !File.Exists(fileName))
+            {
+                var xml = XMLWriter.WriteToString(node);
+                File.WriteAllText(fileName, xml);
+            }
+
             return block;
         }
 
@@ -1236,6 +1364,11 @@ namespace Phantasma.Explorer
 
         public void DoParallelRequests(string description, int total, bool isStatus, Action<int> fetcher)
         {
+            if (total <= 0)
+            {
+                return;
+            }
+
             Console.WriteLine(description);
 
             //var progress = new ProgressBar();

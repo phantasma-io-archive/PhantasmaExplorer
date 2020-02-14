@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using LunarLabs.WebServer.Core;
 using LunarLabs.WebServer.HTTP;
@@ -281,17 +282,33 @@ namespace PhantasmaExplorer
 
             menus = new List<MenuContext>();
             //menus.Add(new MenuContext() { Text = "Transactions", Url = "/transactions", Active = true });
-           // menus.Add(new MenuContext() { Text = "Chains", Url = "/chains", Active = false });
+            // menus.Add(new MenuContext() { Text = "Chains", Url = "/chains", Active = false });
             //menus.Add(new MenuContext() { Text = "Blocks", Url = "/blocks", Active = false });
-           // menus.Add(new MenuContext() { Text = "Tokens", Url = "/tokens", Active = false });
+            // menus.Add(new MenuContext() { Text = "Tokens", Url = "/tokens", Active = false });
             //menus.Add(new MenuContext() { Text = "Addresses", Url = "/addresses", Active = false });
 
             // TODO this should be updated every 5 minutes or so
             //soulRate = CoinUtils.GetCoinRate(2827);
 
+            var defaultCachePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/Cache";
+
             var explorerArgs = new Arguments(args);
             var restURL = explorerArgs.GetString("phantasma.rest", "http://localhost:7078/api");
-            nexus = new NexusData(restURL);
+            var cachePath = explorerArgs.GetString("cache.path", defaultCachePath);
+            nexus = new NexusData(restURL, cachePath);
+
+            if (!string.IsNullOrEmpty(cachePath))
+            {
+                Console.WriteLine("Explorer cache path: " + cachePath);
+                if (!Directory.Exists(cachePath))
+                {
+                    Directory.CreateDirectory(cachePath);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Explorer cache not set");
+            }
 
             Console.WriteLine("Connecting explorer via REST: " + restURL);
 
@@ -606,7 +623,11 @@ namespace PhantasmaExplorer
                 while (running)
                 {
                     Thread.Sleep(1000 * 30);
-                    nexus.Update();
+                    
+                    if (initialized)
+                    {
+                        nexus.Update();
+                    }
                 }
             }).Start();
 
