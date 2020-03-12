@@ -364,7 +364,15 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
-                            sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            bool fungible = token.IsFungible();
+                            if (fungible)
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                            }                          
                             break;
                         }
 
