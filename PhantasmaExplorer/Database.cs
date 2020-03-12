@@ -449,7 +449,15 @@ namespace Phantasma.Explorer
                             else
                             {
                                 var contractAddress = Address.FromHash(evt.Contract);
-                                sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                bool fungible = token.IsFungible();
+                                if (fungible)
+                                {
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                }
+                                else
+                                {
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                }
                             }
                             break;
                         }
