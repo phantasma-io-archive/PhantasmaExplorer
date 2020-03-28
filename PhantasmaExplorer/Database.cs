@@ -142,8 +142,7 @@ namespace Phantasma.Explorer
             {
                 var hash = missingHashes[index];
                 var tx = Nexus.FindTransaction(Chain, hash);
-                tx.Block = this;
-
+                
                 for (int i=0; i<TransactionHashes.Length; i++)
                 {
                     if (TransactionHashes[i] == hash)
@@ -163,9 +162,8 @@ namespace Phantasma.Explorer
         {
             Script = Base16.Decode(node.GetString("script"));
             NexusName = null; // TODO
-            var addr = Address.FromText(node.GetString("chainAddress"));
-            Chain = database.FindChainByAddress(addr);
-            ChainName = Chain.Name;
+            ChainAddress = Address.FromText(node.GetString("chainAddress"));
+            BlockHash = Hash.Parse(node.GetString("blockHash"));
             Expiration = 0; // TODO
             Payload = null; // TODO
             Signatures = null; // TODO
@@ -185,13 +183,14 @@ namespace Phantasma.Explorer
             this.Instructions = disasm.Instructions.ToArray();
         }
 
-        public ChainData Chain { get; private set; }
-
-        public BlockData Block { get; internal set; }
+        public ChainData Chain => Nexus.FindChainByAddress(ChainAddress);
+        public string ChainName => Chain.Name;
+        public BlockData Block => Nexus.FindBlockByHash(Chain, BlockHash);
 
         public byte[] Script { get; private set; }
         public string NexusName { get; private set; }
-        public string ChainName { get; private set; }
+        public Address ChainAddress { get; private set; }
+        public Hash BlockHash { get; private set; }
         public Timestamp Expiration { get; private set; }
         public byte[] Payload { get; private set; }
         public Signature[] Signatures { get; private set; }
@@ -579,6 +578,8 @@ namespace Phantasma.Explorer
 
                     BlockList.Add(null);
                     RegisterBlock(i, block);
+
+                    Nexus.AcknowledgeBlock(block);
 
                     Console.WriteLine($"Loaded block from cache: {this.Name}, {i+1} out of {Height}");
                 }
@@ -1266,15 +1267,21 @@ namespace Phantasma.Explorer
             return $"{dir}/{desc}.xml";
         }
 
+        internal void AcknowledgeBlock(BlockData block)
+        {
+            lock (_blocks)
+            {
+                _blocks[block.Hash] = block;
+                RegisterSearch(block.Height.ToString(), block.Hash.ToString(), SearchResultKind.Block, block.Hash.ToString());
+            }
+        }
+
         internal BlockData FindBlockByHeight(ChainData chain, int height)
         {
             var node = APIRequest($"getBlockByHeight?chainInput={chain.Name}&height={height}");
             var block = new BlockData(this, node);
-            lock (_blocks)
-            {
-                _blocks[block.Hash] = block;
-                RegisterSearch(height.ToString(), block.Hash.ToString(), SearchResultKind.Block, block.Hash.ToString());
-            }
+
+            AcknowledgeBlock(block);
 
             var fileName = GetBlockCacheFileName(chain, height);
             if (fileName != null && !File.Exists(fileName))
