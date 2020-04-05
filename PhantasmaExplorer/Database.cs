@@ -1050,11 +1050,10 @@ namespace Phantasma.Explorer
                 }
             }
 
+            this.UpdateStatus = "Fetching master accounts";
+            this.UpdateProgress = 0;
             if (updateCount == 0)
             {
-                this.UpdateStatus = "Fetching master accounts";
-                this.UpdateProgress = 0;
-
                 var masters = _organizations["masters"];
                 masters.UpdateAccounts();
 
@@ -1066,6 +1065,14 @@ namespace Phantasma.Explorer
                         var temp = tx.Description;
                     }
                 }).Start();*/
+            }
+            else
+            {
+                var masters = UpdateOrganization("masters");
+                if (masters != null)
+                {
+                    masters.UpdateAccounts();
+                }
             }
 
             Console.WriteLine($"Updating {_chains.Count} chains...");
@@ -1205,6 +1212,21 @@ namespace Phantasma.Explorer
             RegisterSearch(org.Name, null, SearchResultKind.Organization, id);
 
             return org;
+        }
+
+        public OrganizationData UpdateOrganization(string id)
+        {
+            if (_organizations.ContainsKey(id))
+            {
+                Console.WriteLine("Updating organization: " + id);
+                var temp = APIRequest("getOrganization/" + id);
+                var org = new OrganizationData(this, temp);
+                _organizations[id] = org;
+
+                return _organizations[id];
+            }
+
+            return null;
         }
 
         public TransactionData FindTransaction(ChainData chain, Hash txHash)
