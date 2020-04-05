@@ -1215,26 +1215,33 @@ namespace Phantasma.Explorer
             }
 
             var node = APIRequest($"getTransaction?hashText={txHash}");
-            var tx = new TransactionData(this, node);
-            lock (_transactions)
+            if (node != null && !String.IsNullOrEmpty(node.GetString("chainAddress")))
             {
-                _transactions[tx.Hash] = tx;
-            }
+                var tx = new TransactionData(this, node);
+                lock (_transactions)
+                {
+                    _transactions[tx.Hash] = tx;
+                }
 
-            lock (_transactionQueue)
+                lock (_transactionQueue)
+                {
+                    _transactionQueue.Enqueue(tx);
+                }
+
+                var fileName = GetTransactionCacheFileName(txHash);
+                if (fileName != null && !File.Exists(fileName))
+                {
+                    var xml = XMLWriter.WriteToString(node);
+                    File.WriteAllText(fileName, xml);
+                }
+
+                RegisterSearch(txHash.ToString(), null, SearchResultKind.Transaction);
+                return tx;
+            }
+            else
             {
-                _transactionQueue.Enqueue(tx);
+                return null;
             }
-
-            var fileName = GetTransactionCacheFileName(txHash);
-            if (fileName != null && !File.Exists(fileName))
-            {
-                var xml = XMLWriter.WriteToString(node);
-                File.WriteAllText(fileName, xml);
-            }
-
-            RegisterSearch(txHash.ToString(), null, SearchResultKind.Transaction);
-            return tx;
         }
         public string GetBlockCacheFileName(ChainData chain, int height)
         {
