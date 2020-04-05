@@ -1407,6 +1407,11 @@ namespace Phantasma.Explorer
                 }
 
                 RegisterSearch(account.Address.Text, account.Name, SearchResultKind.Address);
+                if(!String.IsNullOrEmpty(account.Name))
+                {
+                    // We need this for search by account name.
+                    RegisterSearch(account.Name, null, SearchResultKind.Address, account.Address.Text);
+                }
 
                 return account;
             }
