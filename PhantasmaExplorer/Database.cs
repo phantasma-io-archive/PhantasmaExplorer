@@ -802,7 +802,7 @@ namespace Phantasma.Explorer
             var txsNode = node.GetNode("txs");
             if (txsNode != null)
             {
-                for (int i = 0; i < txsNode.ChildCount; i++)
+                for (int i = txsNode.ChildCount - 1; i >= 0 ; i--)
                 {
                     var hash = Hash.Parse(txsNode.GetString(i));
                     Transactions.Add(hash);
