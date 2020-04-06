@@ -41,7 +41,7 @@ Once you have publisheed the binaries as per above you can run it with the follo
 - Note the first run can take some time as it will build the cache from scratch
 
 ```
-dotnet /<path to explorer binaries>/bin/Phantasma.Explorer.dll --port=7074 --env=prod --path=/<path to explorer root>/ -phantasma.rest=http://207.148.17.86:7078/api -cache.path=Cache
+dotnet /<explorer root dir>/bin/Phantasma.Explorer.dll --port=7074 --env=prod --path=/<explorer root dir>/ -phantasma.rest=http://207.148.17.86:7078/api -cache.path=Cache
 ```
 
 ## Contributing
