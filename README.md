@@ -1,4 +1,4 @@
-# PhantasmaExplorer V 2.0
+# Phantasma Explorer V 2.0
 Block explorer for Phantasma Chain
 
 ## Contents
