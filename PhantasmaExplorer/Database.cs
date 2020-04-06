@@ -154,6 +154,130 @@ namespace Phantasma.Explorer
                 }
             });
         }
+
+        // Register all suitable data from Block in search database.
+        public void RegisterBlockContents()
+        {
+            // Extract events from block's transactions.
+            foreach (var tx in Transactions)
+            {
+                foreach (var evnt in tx.Events)
+                {
+                    ReqisterEvent(evnt, false, tx.Hash);
+                }
+            }
+
+            // Extract events from block itself.
+            foreach (var evnt in Events)
+            {
+                ReqisterEvent(evnt, true, this.Hash);
+            }
+        }
+
+        // Register all suitable data from Event in search database.
+        public void ReqisterEvent(Event evnt, bool isBlockEvent, Hash hash)
+        {
+            if (!isBlockEvent)
+            {
+                // Register transaction search by hash.
+                Nexus.RegisterSearch(hash.ToString(), null, SearchResultKind.Transaction);
+            }
+
+            if (evnt.Address.IsUser)
+            {
+                if (!isBlockEvent)
+                {
+                    // Register transaction search by address.
+                    Nexus.RegisterSearch(evnt.Address.Text, hash.ToString(), SearchResultKind.Transaction, hash.ToString());
+                }
+
+                // Register address search.
+                Nexus.RegisterSearch(evnt.Address.Text, null, SearchResultKind.Address);
+            }
+
+            switch (evnt.Kind)
+            {
+                case EventKind.ChainCreate:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Chain Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.TokenCreate:
+                    {
+                        var symbol = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(symbol, "Token Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.AddressRegister:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Name Registration", SearchResultKind.Transaction, hash.ToString());
+
+                        // Register address search by name.
+                        Nexus.RegisterSearch(name, null, SearchResultKind.Address, evnt.Address.ToString());
+                        break;
+                    }
+
+                case EventKind.ContractDeploy:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Deployment", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.PlatformCreate:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Platform Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.OrganizationCreate:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Organization Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.ChainSwap:
+                    {
+                        var data = evnt.GetContent<TransactionSettleEventData>();
+                        Nexus.RegisterSearch(data.Hash.ToString(), "Settlement", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.ValueCreate:
+                    {
+                        var data = evnt.GetContent<ChainValueEventData>();
+                        Nexus.RegisterSearch(data.Name, "Value Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.ValueUpdate:
+                    {
+                        var data = evnt.GetContent<ChainValueEventData>();
+                        Nexus.RegisterSearch(data.Name, "Value Update", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.TokenMint:
+                    {
+                        var data = evnt.GetContent<TokenEventData>();
+                        Nexus.RegisterSearch(data.Symbol, "Token Mint", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.TokenBurn:
+                    {
+                        var data = evnt.GetContent<TokenEventData>();
+                        Nexus.RegisterSearch(data.Symbol, "Token Burn", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+            }
+        }
     }
 
     public class TransactionData : ExplorerObject, ITransaction
@@ -632,6 +756,10 @@ namespace Phantasma.Explorer
             if (ofs == 0 && this.Name == DomainSettings.RootChainName)
             {
                 Nexus.RegisterSearch("genesis", null, SearchResultKind.Address, block.ValidatorAddress.Text);
+            }
+            else
+            {
+                block.RegisterBlockContents();
             }
         }
 
