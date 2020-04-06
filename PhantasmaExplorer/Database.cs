@@ -924,8 +924,6 @@ namespace Phantasma.Explorer
         public IEnumerable<GovernanceData> Governance => _governance;
         public ChainData RootChain => FindChainByName("main");
 
-        private int updateCount;
-
         public readonly string cachePath;
 
         public NexusData(string RESTurl, string cachePath)
@@ -1046,13 +1044,20 @@ namespace Phantasma.Explorer
                 foreach (var entry in orgNode.Children)
                 {
                     var name = entry.Value;
-                    FindOrganization(name);
+                    if (!CheckOrganization(name))
+                    {
+                        FindOrganization(name);
+                    }
+                    else
+                    {
+                        UpdateOrganization(name);
+                    }
                 }
             }
 
             this.UpdateStatus = "Fetching master accounts";
             this.UpdateProgress = 0;
-            if (updateCount == 0)
+            if (CheckOrganization("masters"))
             {
                 var masters = _organizations["masters"];
                 masters.UpdateAccounts();
@@ -1066,14 +1071,6 @@ namespace Phantasma.Explorer
                     }
                 }).Start();*/
             }
-            else
-            {
-                var masters = UpdateOrganization("masters");
-                if (masters != null)
-                {
-                    masters.UpdateAccounts();
-                }
-            }
 
             Console.WriteLine($"Updating {_chains.Count} chains...");
             foreach (var chain in _chains.Values)
@@ -1083,8 +1080,6 @@ namespace Phantasma.Explorer
 
                 chain.UpdateBlocks();
             }
-
-            updateCount++;
 
             if (generateDescriptions)
             {
@@ -1194,6 +1189,11 @@ namespace Phantasma.Explorer
             }
 
             return 0;
+        }
+
+        public bool CheckOrganization(string id)
+        {
+            return _organizations.ContainsKey(id);
         }
 
         public OrganizationData FindOrganization(string id)
