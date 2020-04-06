@@ -32,14 +32,18 @@ Ensure both of these sit in the same root directory on your PC and are in folder
 - Open Visual Studio
 - Open the PhantasmaExplorer\PhantasmaExplorer.sln solution
 - Build the solution
-- Publish the Phantasma.Explorer Project
+- Open a command window
+- Navigate to the Phantasma.Explorer root dir
+- Run the following:
+```
+dotnet publish
+```
 
 The files needed to run a node will now be in PhantasmaExplorer\Phantasma.Explorer\Publish
 
 ## Run
 Once you have publisheed the binaries as per above you can run it with the following command:
 - Note the first run can take some time as it will build the cache from scratch
-
 ```
 dotnet /<explorer root dir>/bin/Phantasma.Explorer.dll --port=7074 --env=prod --path=/<explorer root dir>/ -phantasma.rest=http://207.148.17.86:7078/api -cache.path=Cache
 ```
