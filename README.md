@@ -30,7 +30,7 @@ Ensure both of these sit in the same root directory on your PC and are in folder
 
 ## Build
 - Open Visual Studio
-- Open the PhantasmaSpook\Spook.sln solution
+- Open the PhantasmaExplorer\PhantasmaExplorer.sln solution
 - Build the solution
 - Publish the Phantasma.Explorer Project
 
