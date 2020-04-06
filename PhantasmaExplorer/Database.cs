@@ -185,12 +185,6 @@ namespace Phantasma.Explorer
 
             if (evnt.Address.IsUser)
             {
-                if (!isBlockEvent)
-                {
-                    // Register transaction search by address.
-                    Nexus.RegisterSearch(evnt.Address.Text, hash.ToString(), SearchResultKind.Transaction, hash.ToString());
-                }
-
                 // Register address search.
                 Nexus.RegisterSearch(evnt.Address.Text, null, SearchResultKind.Address);
             }
@@ -643,7 +637,6 @@ namespace Phantasma.Explorer
                 if (account != null)
                 {
                     account.Transactions.Add(this.Hash);
-                    Nexus.RegisterSearch(addr.Text, this.Hash.ToString(), SearchResultKind.Transaction, this.Hash.ToString());
                     //Nexus._addresses.Add(addr);
                 }
             }
