@@ -1,0 +1,48 @@
+<div class="row first-page-row">
+    <!--todo page not in routes-->
+    {{#each nftTokens}}
+    <h3 class="page-title">{{Symbol}}</h3>
+    {{#if HasViewerUrl}}
+    <div class="table-responsive">
+        <table class="table table-striped table-general" style="table-layout: fixed">
+            <thead>
+                <tr>
+                    <th width="128"></th>
+                    <th width="128">Number</th>
+                    <th>Info</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each InfoList}}
+                <tr>
+                    <td><img src="{{ViewerUrl}}{{Id}}" width="64" /></td>
+                    <td>{{Id}}#</td>
+                    <td>{{Info}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+    {{#else}}
+    <div class="table-responsive">
+        <table class="table table-responsive table-striped table-general" style="table-layout: fixed">
+            <thead>
+                <tr>
+                    <th width="128">Number</th>
+                    <th>Info</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each InfoList}}
+                <tr>
+                    <td>{{Id}}#</td>
+                    <td>{{Info}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+    {{/if}}
+    {{/each}}
+</div>

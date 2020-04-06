@@ -1,0 +1,18 @@
+<div class="row ">
+
+    <h2 class="page-title">Found {{#count results}} Results</h2>
+
+    <div class="col-md-8 col-md-offset-2">
+        <div class="table-responsive">
+            <table class="table table-general">
+                <tbody>
+					{{#each results}}
+                    <tr>
+                        <td><a href="{{URL}}">{{Text}}</a> ({{Kind}})</td>
+                    </tr>
+					{{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

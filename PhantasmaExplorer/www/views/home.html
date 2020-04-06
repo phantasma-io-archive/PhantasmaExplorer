@@ -1,0 +1,66 @@
+﻿<div class="row">
+    <div class="col-lg-6 col-sm-12">
+        <div class="panel panel-default panel-home">
+            <div class="panel-heading">
+                <i class="fas fa-cubes"></i> Blocks
+                <div class="btn-group pull-right">
+                    <a href="/blocks" class="btn btn-default btn-sm btn-view-all" style="margin-top: -4px;">View All</a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody>
+                            {{#each home.Blocks}}
+                            <tr class="home-label">
+                                <td class="td-bottom-border">
+                                    <span class="bold-home-link"><a href="/block/{{Hash}}">Block {{Height}}</a></span><br>
+                                    <i>&gt;{{#timeago Timestamp}}</i>
+                                </td>
+                                <td>
+                                    Miner: <span class="thin-home-link">{{#link-address ValidatorAddress}}</span><br>
+                                    Chain: <span class="thin-home-link"> <a href="/chain/{{ChainAddress}}">{{ChainName}}</a></span><br>
+                                    <span class="bold-home-link"><a href="/block/{{Hash}}#tab_transactions">{{Transactions}} Txn</a></span><br>
+                                    Block reward: {{Reward}} KCAL
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 col-sm-12">
+        <div class="panel panel-default panel-home">
+            <div class="panel-heading">
+                <i class="fas fa-database"></i> Transactions
+                <div class="btn-group pull-right">
+                    <a href="/transactions" class="btn btn-default btn-sm btn-view-all" style="margin-top: -4px;">View All</a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table home-tx-table">
+                        <tbody>
+                            {{#each home.Transactions}}
+                            <tr class="home-label">
+                                <td>
+                                    <span class="bold-home-link">
+                                        TX#
+                                        <small>{{#link-tx Hash}}</small><br>
+                                    </span>
+                                    <i>&gt;{{#timeago Date}} in </i> <span class="bold-home-link"><a href="/chain/{{ChainAddress}}">{{ChainName}}</a> chain<br></span>
+                                    {{{Description}}}<br>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
