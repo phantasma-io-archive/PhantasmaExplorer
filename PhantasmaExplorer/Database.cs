@@ -163,19 +163,19 @@ namespace Phantasma.Explorer
             {
                 foreach (var evnt in tx.Events)
                 {
-                    ReqisterEvent(evnt, false, tx.Hash);
+                    RegisterEvent(evnt, false, tx.Hash);
                 }
             }
 
             // Extract events from block itself.
             foreach (var evnt in Events)
             {
-                ReqisterEvent(evnt, true, this.Hash);
+                RegisterEvent(evnt, true, this.Hash);
             }
         }
 
         // Register all suitable data from Event in search database.
-        public void ReqisterEvent(Event evnt, bool isBlockEvent, Hash hash)
+        public void RegisterEvent(Event evnt, bool isBlockEvent, Hash hash)
         {
             if (!isBlockEvent)
             {
