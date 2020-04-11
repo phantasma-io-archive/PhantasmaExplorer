@@ -636,7 +636,34 @@ namespace Phantasma.Explorer
                 var account = Nexus.FindAccount(addr, false);
                 if (account != null)
                 {
-                    account.Transactions.Add(this.Hash);
+                    if (!account.Transactions.Exists(e => e.Hash == Hash))
+                    {
+                        if(DateTime.Compare(account.Transactions.First().Timestamp, Timestamp) <= 0)
+                        {
+                            // This transaction is newer (or same time) then all others, we should insert at the start of the list.
+                            account.Transactions.Insert(0, new TransactionForDisplay(Hash, Timestamp));
+                        }
+                        else if(DateTime.Compare(account.Transactions.Last().Timestamp, Timestamp) >= 0)
+                        {
+                            // This transaction is older (or same time) then all others, we should insert at the end of the list.
+                            account.Transactions.Add(new TransactionForDisplay(Hash, Timestamp));
+                        }
+                        else
+                        {
+                            int index = account.Transactions.FindIndex(e => DateTime.Compare(e.Timestamp, Timestamp) <= 0);
+                            if(index != -1)
+                            {
+                                // Inserting transaction in the middle of the list.
+                                account.Transactions.Insert(index, new TransactionForDisplay(Hash, Timestamp));
+                            }
+                            else
+                            {
+                                // Impossible really.
+                                account.Transactions.Add(new TransactionForDisplay(Hash, Timestamp));
+                            }
+                        }                        
+                    }
+
                     //Nexus._addresses.Add(addr);
                 }
             }
@@ -893,12 +920,23 @@ namespace Phantasma.Explorer
         }
     }
 
+    public class TransactionForDisplay
+    {
+        public Hash Hash { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string Date { get; set; }
+        public TransactionForDisplay(Hash hash, DateTime timestamp)
+        {
+            Hash = hash;
+            Timestamp = timestamp;
+            Date = Timestamp.ToString("dd.MM.yyyy HH:mm:ss");
+        }
+    }
+
     public class AccountData : ExplorerObject
     {
         public AccountData(NexusData database, DataNode node) : base(database)
         {
-            this.Transactions = new HashSet<Hash>();
-
             Name = node.GetString("name");
             Address = Cryptography.Address.FromText(node.GetString("address"));
 
@@ -920,13 +958,26 @@ namespace Phantasma.Explorer
                 Balances = new BalanceData[0];
             }
 
+            Transactions = new List<TransactionForDisplay>();
+
             var txsNode = node.GetNode("txs");
             if (txsNode != null)
             {
-                for (int i = txsNode.ChildCount - 1; i >= 0 ; i--)
+                for (int i = 0; i < txsNode.ChildCount; i++)
                 {
-                    var hash = Hash.Parse(txsNode.GetString(i));
-                    Transactions.Add(hash);
+                    Hash hash = Hash.Parse(txsNode.GetString(i));
+
+                    var tx = Nexus.FindTransaction(null, hash);
+
+                    if (tx != null)
+                    {
+                        Transactions.Add(new TransactionForDisplay(hash, tx.Timestamp));
+                    }
+                    else
+                    {
+                        Transactions.Add(new TransactionForDisplay(hash, new DateTime(0)));
+                    }
+                    Transactions.Sort((a, b) => b.Timestamp.CompareTo(a.Timestamp));
                 }
             }
 
@@ -943,7 +994,7 @@ namespace Phantasma.Explorer
 
         public BalanceData[] Balances { get; private set; }
 
-        public HashSet<Hash> Transactions { get; internal set; }
+        public List<TransactionForDisplay> Transactions { get; internal set; }
 
         public bool IsEmpty
         {
@@ -1238,7 +1289,7 @@ namespace Phantasma.Explorer
         public DataNode APIRequest(string path)
         {
             var url = RESTurl + path;
-            //Console.WriteLine("Request: " + url);
+            //Console.WriteLine("APIRequest: url: " + url);
 
             int max = 5;
             for (int i=1; i<=max; i++)
@@ -1250,6 +1301,8 @@ namespace Phantasma.Explorer
                     {
                         contents = wc.DownloadString(url);
                     }
+
+                    //Console.WriteLine("APIRequest: response: " + contents);
 
                     var node = LunarLabs.Parser.JSON.JSONReader.ReadFromString(contents);
                     return node;
