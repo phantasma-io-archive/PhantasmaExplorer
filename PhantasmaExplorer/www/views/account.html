@@ -85,12 +85,14 @@
                             <thead>
                                 <tr>
                                     <th>Hash</th>
+                                    <th>Date</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {{#each account.Transactions}}
                                 <tr>
-                                    <td>{{#link-tx this}}</td>
+                                    <td>{{#link-tx this.Hash}}</td>
+                                    <td>{{this.Date}} UTC</td>
                                 </tr>
                                 {{/each}}
                             </tbody>
