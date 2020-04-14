@@ -341,8 +341,15 @@ namespace Phantasma.Explorer
         {
             if (address.IsInterop)
             {
-                var temp = Pay.Chains.NeoWallet.DecodeAddress(address);
-                return $"<a href=\"https://neoscan.io/address/{temp}\">{temp}</a>";
+                try
+                {
+                    var temp = Pay.Chains.NeoWallet.DecodeAddress(address);
+                    return $"<a href=\"https://neoscan.io/address/{temp}\">{temp}</a>";
+                }
+                catch (Exception e)
+                {
+                    // skip for now, check later tx ED66C4F42E52EB720F7B4DC25B2CE25F65315F384F1F6A27BAEC56C01CE36094
+                }
             }
 
             if (name == null)
