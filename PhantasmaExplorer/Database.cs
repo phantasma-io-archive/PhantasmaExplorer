@@ -802,7 +802,7 @@ namespace Phantasma.Explorer
             var txsNode = node.GetNode("txs");
             if (txsNode != null)
             {
-                for (int i = 0; i < txsNode.ChildCount; i++)
+                for (int i = txsNode.ChildCount - 1; i >= 0 ; i--)
                 {
                     var hash = Hash.Parse(txsNode.GetString(i));
                     Transactions.Add(hash);
@@ -1050,11 +1050,10 @@ namespace Phantasma.Explorer
                 }
             }
 
+            this.UpdateStatus = "Fetching master accounts";
+            this.UpdateProgress = 0;
             if (updateCount == 0)
             {
-                this.UpdateStatus = "Fetching master accounts";
-                this.UpdateProgress = 0;
-
                 var masters = _organizations["masters"];
                 masters.UpdateAccounts();
 
@@ -1066,6 +1065,14 @@ namespace Phantasma.Explorer
                         var temp = tx.Description;
                     }
                 }).Start();*/
+            }
+            else
+            {
+                var masters = UpdateOrganization("masters");
+                if (masters != null)
+                {
+                    masters.UpdateAccounts();
+                }
             }
 
             Console.WriteLine($"Updating {_chains.Count} chains...");
@@ -1207,6 +1214,21 @@ namespace Phantasma.Explorer
             return org;
         }
 
+        public OrganizationData UpdateOrganization(string id)
+        {
+            if (_organizations.ContainsKey(id))
+            {
+                Console.WriteLine("Updating organization: " + id);
+                var temp = APIRequest("getOrganization/" + id);
+                var org = new OrganizationData(this, temp);
+                _organizations[id] = org;
+
+                return _organizations[id];
+            }
+
+            return null;
+        }
+
         public TransactionData FindTransaction(ChainData chain, Hash txHash)
         {
             if (_transactions.ContainsKey(txHash))
@@ -1215,26 +1237,33 @@ namespace Phantasma.Explorer
             }
 
             var node = APIRequest($"getTransaction?hashText={txHash}");
-            var tx = new TransactionData(this, node);
-            lock (_transactions)
+            if (node != null && !String.IsNullOrEmpty(node.GetString("chainAddress")))
             {
-                _transactions[tx.Hash] = tx;
-            }
+                var tx = new TransactionData(this, node);
+                lock (_transactions)
+                {
+                    _transactions[tx.Hash] = tx;
+                }
 
-            lock (_transactionQueue)
+                lock (_transactionQueue)
+                {
+                    _transactionQueue.Enqueue(tx);
+                }
+
+                var fileName = GetTransactionCacheFileName(txHash);
+                if (fileName != null && !File.Exists(fileName))
+                {
+                    var xml = XMLWriter.WriteToString(node);
+                    File.WriteAllText(fileName, xml);
+                }
+
+                RegisterSearch(txHash.ToString(), null, SearchResultKind.Transaction);
+                return tx;
+            }
+            else
             {
-                _transactionQueue.Enqueue(tx);
+                return null;
             }
-
-            var fileName = GetTransactionCacheFileName(txHash);
-            if (fileName != null && !File.Exists(fileName))
-            {
-                var xml = XMLWriter.WriteToString(node);
-                File.WriteAllText(fileName, xml);
-            }
-
-            RegisterSearch(txHash.ToString(), null, SearchResultKind.Transaction);
-            return tx;
         }
         public string GetBlockCacheFileName(ChainData chain, int height)
         {
@@ -1378,6 +1407,11 @@ namespace Phantasma.Explorer
                 }
 
                 RegisterSearch(account.Address.Text, account.Name, SearchResultKind.Address);
+                if(!String.IsNullOrEmpty(account.Name))
+                {
+                    // We need this for search by account name.
+                    RegisterSearch(account.Name, null, SearchResultKind.Address, account.Address.Text);
+                }
 
                 return account;
             }
