@@ -154,6 +154,124 @@ namespace Phantasma.Explorer
                 }
             });
         }
+
+        // Register all suitable data from Block in search database.
+        public void RegisterBlockContents()
+        {
+            // Extract events from block's transactions.
+            foreach (var tx in Transactions)
+            {
+                foreach (var evnt in tx.Events)
+                {
+                    RegisterEvent(evnt, false, tx.Hash);
+                }
+            }
+
+            // Extract events from block itself.
+            foreach (var evnt in Events)
+            {
+                RegisterEvent(evnt, true, this.Hash);
+            }
+        }
+
+        // Register all suitable data from Event in search database.
+        public void RegisterEvent(Event evnt, bool isBlockEvent, Hash hash)
+        {
+            if (!isBlockEvent)
+            {
+                // Register transaction search by hash.
+                Nexus.RegisterSearch(hash.ToString(), null, SearchResultKind.Transaction);
+            }
+
+            if (evnt.Address.IsUser)
+            {
+                // Register address search.
+                Nexus.RegisterSearch(evnt.Address.Text, null, SearchResultKind.Address);
+            }
+
+            switch (evnt.Kind)
+            {
+                case EventKind.ChainCreate:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Chain Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.TokenCreate:
+                    {
+                        var symbol = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(symbol, "Token Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.AddressRegister:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Name Registration", SearchResultKind.Transaction, hash.ToString());
+
+                        // Register address search by name.
+                        Nexus.RegisterSearch(name, null, SearchResultKind.Address, evnt.Address.ToString());
+                        break;
+                    }
+
+                case EventKind.ContractDeploy:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Deployment", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.PlatformCreate:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Platform Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.OrganizationCreate:
+                    {
+                        var name = evnt.GetContent<string>();
+                        Nexus.RegisterSearch(name, "Organization Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.ChainSwap:
+                    {
+                        var data = evnt.GetContent<TransactionSettleEventData>();
+                        Nexus.RegisterSearch(data.Hash.ToString(), "Settlement", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.ValueCreate:
+                    {
+                        var data = evnt.GetContent<ChainValueEventData>();
+                        Nexus.RegisterSearch(data.Name, "Value Creation", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.ValueUpdate:
+                    {
+                        var data = evnt.GetContent<ChainValueEventData>();
+                        Nexus.RegisterSearch(data.Name, "Value Update", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.TokenMint:
+                    {
+                        var data = evnt.GetContent<TokenEventData>();
+                        Nexus.RegisterSearch(data.Symbol, "Token Mint", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+
+                case EventKind.TokenBurn:
+                    {
+                        var data = evnt.GetContent<TokenEventData>();
+                        Nexus.RegisterSearch(data.Symbol, "Token Burn", SearchResultKind.Transaction, hash.ToString());
+                        break;
+                    }
+            }
+        }
     }
 
     public class TransactionData : ExplorerObject, ITransaction
@@ -518,8 +636,34 @@ namespace Phantasma.Explorer
                 var account = Nexus.FindAccount(addr, false);
                 if (account != null)
                 {
-                    account.Transactions.Add(this.Hash);
-                    Nexus.RegisterSearch(addr.Text, this.Hash.ToString(), SearchResultKind.Transaction, this.Hash.ToString());
+                    if (!account.Transactions.Exists(e => e.Hash == Hash))
+                    {
+                        if(DateTime.Compare(account.Transactions.First().Timestamp, Timestamp) <= 0)
+                        {
+                            // This transaction is newer (or same time) then all others, we should insert at the start of the list.
+                            account.Transactions.Insert(0, new TransactionForDisplay(Hash, Timestamp));
+                        }
+                        else if(DateTime.Compare(account.Transactions.Last().Timestamp, Timestamp) >= 0)
+                        {
+                            // This transaction is older (or same time) then all others, we should insert at the end of the list.
+                            account.Transactions.Add(new TransactionForDisplay(Hash, Timestamp));
+                        }
+                        else
+                        {
+                            int index = account.Transactions.FindIndex(e => DateTime.Compare(e.Timestamp, Timestamp) <= 0);
+                            if(index != -1)
+                            {
+                                // Inserting transaction in the middle of the list.
+                                account.Transactions.Insert(index, new TransactionForDisplay(Hash, Timestamp));
+                            }
+                            else
+                            {
+                                // Impossible really.
+                                account.Transactions.Add(new TransactionForDisplay(Hash, Timestamp));
+                            }
+                        }                        
+                    }
+
                     //Nexus._addresses.Add(addr);
                 }
             }
@@ -632,6 +776,10 @@ namespace Phantasma.Explorer
             if (ofs == 0 && this.Name == DomainSettings.RootChainName)
             {
                 Nexus.RegisterSearch("genesis", null, SearchResultKind.Address, block.ValidatorAddress.Text);
+            }
+            else
+            {
+                block.RegisterBlockContents();
             }
         }
 
@@ -772,12 +920,23 @@ namespace Phantasma.Explorer
         }
     }
 
+    public class TransactionForDisplay
+    {
+        public Hash Hash { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string Date { get; set; }
+        public TransactionForDisplay(Hash hash, DateTime timestamp)
+        {
+            Hash = hash;
+            Timestamp = timestamp;
+            Date = Timestamp.ToString("dd.MM.yyyy HH:mm:ss");
+        }
+    }
+
     public class AccountData : ExplorerObject
     {
         public AccountData(NexusData database, DataNode node) : base(database)
         {
-            this.Transactions = new HashSet<Hash>();
-
             Name = node.GetString("name");
             Address = Cryptography.Address.FromText(node.GetString("address"));
 
@@ -799,13 +958,26 @@ namespace Phantasma.Explorer
                 Balances = new BalanceData[0];
             }
 
+            Transactions = new List<TransactionForDisplay>();
+
             var txsNode = node.GetNode("txs");
             if (txsNode != null)
             {
-                for (int i = txsNode.ChildCount - 1; i >= 0 ; i--)
+                for (int i = 0; i < txsNode.ChildCount; i++)
                 {
-                    var hash = Hash.Parse(txsNode.GetString(i));
-                    Transactions.Add(hash);
+                    Hash hash = Hash.Parse(txsNode.GetString(i));
+
+                    var tx = Nexus.FindTransaction(null, hash);
+
+                    if (tx != null)
+                    {
+                        Transactions.Add(new TransactionForDisplay(hash, tx.Timestamp));
+                    }
+                    else
+                    {
+                        Transactions.Add(new TransactionForDisplay(hash, new DateTime(0)));
+                    }
+                    Transactions.Sort((a, b) => b.Timestamp.CompareTo(a.Timestamp));
                 }
             }
 
@@ -822,7 +994,7 @@ namespace Phantasma.Explorer
 
         public BalanceData[] Balances { get; private set; }
 
-        public HashSet<Hash> Transactions { get; internal set; }
+        public List<TransactionForDisplay> Transactions { get; internal set; }
 
         public bool IsEmpty
         {
@@ -923,8 +1095,6 @@ namespace Phantasma.Explorer
         public IEnumerable<OrganizationData> Organizations => _organizations.Values;
         public IEnumerable<GovernanceData> Governance => _governance;
         public ChainData RootChain => FindChainByName("main");
-
-        private int updateCount;
 
         public readonly string cachePath;
 
@@ -1046,13 +1216,20 @@ namespace Phantasma.Explorer
                 foreach (var entry in orgNode.Children)
                 {
                     var name = entry.Value;
-                    FindOrganization(name);
+                    if (!CheckOrganization(name))
+                    {
+                        FindOrganization(name);
+                    }
+                    else
+                    {
+                        UpdateOrganization(name);
+                    }
                 }
             }
 
             this.UpdateStatus = "Fetching master accounts";
             this.UpdateProgress = 0;
-            if (updateCount == 0)
+            if (CheckOrganization("masters"))
             {
                 var masters = _organizations["masters"];
                 masters.UpdateAccounts();
@@ -1066,14 +1243,6 @@ namespace Phantasma.Explorer
                     }
                 }).Start();*/
             }
-            else
-            {
-                var masters = UpdateOrganization("masters");
-                if (masters != null)
-                {
-                    masters.UpdateAccounts();
-                }
-            }
 
             Console.WriteLine($"Updating {_chains.Count} chains...");
             foreach (var chain in _chains.Values)
@@ -1083,8 +1252,6 @@ namespace Phantasma.Explorer
 
                 chain.UpdateBlocks();
             }
-
-            updateCount++;
 
             if (generateDescriptions)
             {
@@ -1122,7 +1289,7 @@ namespace Phantasma.Explorer
         public DataNode APIRequest(string path)
         {
             var url = RESTurl + path;
-            //Console.WriteLine("Request: " + url);
+            //Console.WriteLine("APIRequest: url: " + url);
 
             int max = 5;
             for (int i=1; i<=max; i++)
@@ -1134,6 +1301,8 @@ namespace Phantasma.Explorer
                     {
                         contents = wc.DownloadString(url);
                     }
+
+                    //Console.WriteLine("APIRequest: response: " + contents);
 
                     var node = LunarLabs.Parser.JSON.JSONReader.ReadFromString(contents);
                     return node;
@@ -1194,6 +1363,11 @@ namespace Phantasma.Explorer
             }
 
             return 0;
+        }
+
+        public bool CheckOrganization(string id)
+        {
+            return _organizations.ContainsKey(id);
         }
 
         public OrganizationData FindOrganization(string id)
