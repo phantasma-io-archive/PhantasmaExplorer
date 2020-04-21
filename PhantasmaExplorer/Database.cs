@@ -283,7 +283,7 @@ namespace Phantasma.Explorer
             ChainAddress = Address.FromText(node.GetString("chainAddress"));
             BlockHash = Hash.Parse(node.GetString("blockHash"));
             Expiration = 0; // TODO
-            Payload = null; // TODO
+            Payload = Base16.Decode(node.GetString("payload"));
             Signatures = null; // TODO
             Hash = Hash.Parse(node.GetString("hash"));
 
