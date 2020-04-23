@@ -37,7 +37,7 @@
 
                                     <tr>
                                         <td>Payload</td>
-                                        <td>{{#if transaction.Payload}}{{#hex transaction.Payload}}{{#else}}-{{/if}}</td>
+                                        <td>{{#if transaction.Payload}}{{transaction.DecodedPayload}}{{#else}}-{{/if}}</td>
                                     </tr>
                                     
                                     <tr>

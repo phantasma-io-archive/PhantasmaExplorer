@@ -289,6 +289,25 @@ namespace Phantasma.Explorer
 
             Timestamp = new Timestamp(node.GetUInt32("timestamp"));
 
+            bool isStringPayload = true;
+            foreach (var b in Payload)
+            {
+                if (b > 127)
+                {
+                    isStringPayload = false;
+                    break;
+                }
+            }
+
+            if (isStringPayload)
+            {
+                DecodedPayload = DecodedPayload = System.Text.Encoding.UTF8.GetString(Payload);
+            }
+            else
+            {
+                DecodedPayload = Base16.Encode(Payload);
+            }
+
             Result = node.GetString("result");
             if (string.IsNullOrEmpty(Result))
             {
@@ -334,6 +353,8 @@ namespace Phantasma.Explorer
                 return _description;
             }
         }
+
+        public string DecodedPayload { get; private set; }
 
         private string LinkAddress(Address address, string name = null)
         {
