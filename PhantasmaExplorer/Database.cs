@@ -142,7 +142,7 @@ namespace Phantasma.Explorer
             {
                 var hash = missingHashes[index];
                 var tx = Nexus.FindTransaction(Chain, hash);
-                
+
                 for (int i=0; i<TransactionHashes.Length; i++)
                 {
                     if (TransactionHashes[i] == hash)
@@ -543,7 +543,7 @@ namespace Phantasma.Explorer
                             }
                             else
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
 
                             Nexus.RegisterSearch(data.Symbol, "Token Mint", SearchResultKind.Transaction, this.Hash.ToString());
@@ -561,7 +561,7 @@ namespace Phantasma.Explorer
                             }
                             else
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} burned {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} burned {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
                             Nexus.RegisterSearch(data.Symbol, "Token Burn", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
@@ -578,8 +578,8 @@ namespace Phantasma.Explorer
                             }
                             else
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT #{data.Value}");
-                            }                          
+                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
                             break;
                         }
 
@@ -602,7 +602,7 @@ namespace Phantasma.Explorer
                                 }
                                 else
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
                                 }
                             }
                             break;
@@ -619,7 +619,7 @@ namespace Phantasma.Explorer
                             }
                             else
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
                             break;
                         }
@@ -635,7 +635,7 @@ namespace Phantasma.Explorer
                             }
                             else
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} received {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} received {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
                             break;
                         }
@@ -682,7 +682,7 @@ namespace Phantasma.Explorer
                                 // Impossible really.
                                 account.Transactions.Add(new TransactionForDisplay(Hash, Timestamp));
                             }
-                        }                        
+                        }
                     }
 
                     //Nexus._addresses.Add(addr);
@@ -751,7 +751,7 @@ namespace Phantasma.Explorer
                 else
                 {
                     break;
-                }           
+                }
             }
         }
 
