@@ -602,7 +602,7 @@ namespace Phantasma.Explorer
                                 }
                                 else
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
                                 }
                             }
                             break;
