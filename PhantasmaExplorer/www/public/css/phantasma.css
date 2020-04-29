@@ -41,6 +41,11 @@
     .page-title {
         font-size: 11px !important;
     }
+
+    .nav>li>a {
+        padding: 8px 8px !important;
+        font-size: 11px !important;
+    }
 }
 
 @media(min-width:991px) {
