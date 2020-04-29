@@ -50,7 +50,6 @@ body {
 /* Footer */
 footer {
     width: 100%;
-    height: 200px;
     color: white
 }
 
@@ -74,6 +73,41 @@ footer {
 
 .footer-copyrights {
     color: #17B0E7;
+}
+
+.footer-above .socials {
+    position: relative;
+    display: -webkit-inline-box;
+    display: -webkit-inline-flex;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    right: 0;
+    top: 0;
+    z-index: 0;
+    visibility: visible;
+}
+
+.footer-above .socials li a {
+    display: block;
+    width: 4.5rem;
+    height: 4.5rem;
+    left: 0;
+    top: 0;
+    position: relative;
+    text-align: center;
+    margin: 0 auto;
+    background: transparent;
+    -webkit-box-shadow: 1px -1px 0 transparent, 2px -2px 0 transparent, 3px -3px 0 transparent, 4px -4px 0 transparent;
+    box-shadow: 1px -1px 0 transparent, 2px -2px 0 transparent, 3px -3px 0 transparent, 4px -4px 0 transparent;
+    -webkit-transition: all 0.1s ease 0s;
+    -o-transition: all 0.1s ease 0s;
+    transition: all 0.1s ease 0s;
+    max-width: 3.8rem;
+    margin-right: 3em;
 }
 
 .navbar-inverse {
