@@ -226,6 +226,8 @@ namespace PhantasmaExplorer
     {
         //public static decimal soulRate { get; private set; }
 
+        public const string ExplorerVersion = "1.1.3";
+
         public static NexusData nexus { get; private set; }
 
         private static List<MenuContext> menus;
@@ -235,6 +237,7 @@ namespace PhantasmaExplorer
             var context = new Dictionary<string, object>();
 
             context["menu"] = menus;
+            context["explorerVersion"] = ExplorerVersion;
 
             return context;
         }
