@@ -28,7 +28,7 @@
                             <span>Total Supply</span>
                         </td>
                         {{#if token.IsFinite}}
-                        <td>{{token.MaxSupply}} {{token.Symbol}}</td>
+                        <td>{{token.FormattedMaxSupply}} {{token.Symbol}}</td>
                         {{#else}}
                         <td>-</td>
                         {{/if}}
@@ -37,7 +37,7 @@
                         <td>
                             <span>Current Supply</span>
                         </td>
-                        <td>{{token.CurrentSupply}} {{token.Symbol}}</td>
+                        <td>{{token.FormattedCurrentSupply}} {{token.Symbol}}</td>
                     </tr>
                 </tbody>
             </table>
