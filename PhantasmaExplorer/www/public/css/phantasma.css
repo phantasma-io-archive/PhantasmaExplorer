@@ -37,6 +37,10 @@
     .footer-above .socials li a {
         width: 2.5rem !important;
     }
+
+    .page-title {
+        font-size: 11px !important;
+    }
 }
 
 @media(min-width:991px) {

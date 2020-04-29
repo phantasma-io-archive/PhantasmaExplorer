@@ -11,6 +11,7 @@ using LunarLabs.Parser.XML;
 using Phantasma.Core.Types;
 using Phantasma.Cryptography;
 using Phantasma.Domain;
+using Phantasma.Explorer.Utils;
 using Phantasma.Numerics;
 using Phantasma.VM;
 
@@ -860,10 +861,10 @@ namespace Phantasma.Explorer
         public int Decimals { get; private set; }
         public byte[] Script { get; private set; }
 
-        public decimal FormattedMaxSupply => UnitConversion.ToDecimal(MaxSupply, Decimals);
-        public decimal FormattedCurrentSupply => UnitConversion.ToDecimal(CurrentSupply, Decimals);
+        public string FormattedMaxSupply => (UnitConversion.ToDecimal(MaxSupply, Decimals)).ToString("#,##0");
+        public string FormattedCurrentSupply => (UnitConversion.ToDecimal(CurrentSupply, Decimals)).ToString("#,##0");
 
-        public decimal Price = 0;
+        public decimal Price => CoinUtils.GetCoinRate(Symbol, "usd");
 
         public bool IsFungible => this.Flags.HasFlag(TokenFlags.Fungible);
         public bool IsFiat => this.Flags.HasFlag(TokenFlags.Fiat);
@@ -894,7 +895,9 @@ namespace Phantasma.Explorer
 
         private int decimals;
 
-        public decimal FormattedAmount => UnitConversion.ToDecimal(Amount, decimals);
+        public string FormattedAmount => (UnitConversion.ToDecimal(Amount, decimals)).ToString("#,##0");
+        public decimal Value => (UnitConversion.ToDecimal(Amount, decimals))*(CoinUtils.GetCoinRate(Symbol, "usd"));
+        public string FormattedValue => Value.ToString("#,##0");
 
         public BalanceData(NexusData database, DataNode node) : base(database)
         {
@@ -1018,7 +1021,7 @@ namespace Phantasma.Explorer
         public Address Address { get; private set; }
 
         public BigInteger Stake { get; private set; }
-        public decimal FormattedStake => UnitConversion.ToDecimal(Stake, DomainSettings.StakingTokenDecimals);
+        public string FormattedStake => (UnitConversion.ToDecimal(Stake, DomainSettings.StakingTokenDecimals)).ToString("#,##0");
 
         public BalanceData[] Balances { get; private set; }
 

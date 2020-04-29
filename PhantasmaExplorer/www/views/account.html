@@ -57,6 +57,7 @@
                             <thead>
                                 <tr>
 									<th>Balance</th>
+									<th>Value</th>
 									<th>Chain</th>
                                 </tr>
                             </thead>
@@ -64,6 +65,7 @@
 								{{#each account.Balances}}
 								<tr>
 									<td><img src="/img/tokens/{{Symbol}}.png" alt="" style="width: 20px; height: 20px; margin-right:16px;"><a href="/token/{{Symbol}}">{{FormattedAmount}} {{Symbol}}</td>
+									<td>{{#if FormattedValue>0}} ${{FormattedValue}}{{#else}}-{{/if}}</td>
 									<td>{{#link-chain Chain.Name}}</td>
 								</tr>
 								{{/each}}
