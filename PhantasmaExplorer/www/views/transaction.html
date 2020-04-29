@@ -39,7 +39,7 @@
                                         <td>Payload</td>
                                         <td>{{#if transaction.Payload}}{{transaction.DecodedPayload}}{{#else}}-{{/if}}</td>
                                     </tr>
-                                    
+
                                     <tr>
                                         <td>Result</td>
                                         <td>{{#if transaction.Result}}{{#hex transaction.Result}}{{#else}}-{{/if}}</td>
@@ -52,7 +52,7 @@
 
                                     <tr>
                                         <td>Block Hash</td>
-                                        <td>{{#link-block transaction.ChainName,transaction.Block.Hash}}</a></td>
+                                        <td>{{#link-block transaction.ChainName,transaction.Block.Hash}}></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -75,7 +75,7 @@
                         {{#else}}
                         Nothing here...
                         {{/if}}
-						
+
 						<br>
 						<p>Disassembly</p>
                         {{#if transaction.Instructions}}

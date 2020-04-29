@@ -35,7 +35,7 @@
 
                                     <tr>
                                         <td>Height</td>
-                                        <td>{{chain.Height}}</td>
+                                        <td><a href="/height/{{Name}}/{{Height}}">{{Height}}</a></td>
                                     </tr>
 
                                     <tr>
@@ -77,9 +77,9 @@
                             <tbody>
                                 {{#each chain.Blocks}}
                                 <tr>
-                                    <td>{{Height}}</td>
+                                    <td><a href="/height/{{chain.Name}}/{{Height}}">{{Height}}</a></td>
                                     <td>{{#timeago Timestamp}}</td>
-                                    <td>{{#link-block chain.Name,Hash}}</a></td>
+                                    <td>{{#link-block chain.Name,Hash}}</td>
                                     <td>{{#link-address ValidatorAddress}}</td>
                                 </tr>
                                 {{/each}}
