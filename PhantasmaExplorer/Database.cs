@@ -477,7 +477,7 @@ namespace Phantasma.Explorer
                     case EventKind.ChainSwap:
                         {
                             var data = evt.GetContent<TransactionSettleEventData>();
-                            sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://neoscan.io/transaction/{data.Hash}\">{data.Hash}</a>");
+                            sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://neoscan.io/transaction/{data.Hash}\" target=\"_blank\">{data.Hash}</a>");
                             Nexus.RegisterSearch(data.Hash.ToString(), "Settlement", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -598,7 +598,14 @@ namespace Phantasma.Explorer
                                 bool fungible = token.IsFungible();
                                 if (fungible)
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    if ((evt.Address).IsInterop) // used to check if from external chain
+                                    {
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} withdrew {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
+                                    else
+                                    {
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
                                 }
                                 else
                                 {
