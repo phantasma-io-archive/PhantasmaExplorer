@@ -237,7 +237,7 @@ namespace Phantasma.Explorer
             }
 
             string hash;
-            
+
             if (temp is Hash)
             {
                 hash = ((Hash)temp).ToString();
@@ -344,7 +344,7 @@ namespace Phantasma.Explorer
                 try
                 {
                     var temp = Pay.Chains.NeoWallet.DecodeAddress(address);
-                    return $"<a href=\"https://neoscan.io/address/{temp}\">{temp}</a>";
+                    return $"<a href=\"https://neoscan.io/address/{temp}\" target=\"_blank\">{temp}</a>";
                 }
                 catch (Exception e)
                 {
