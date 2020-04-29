@@ -22,8 +22,20 @@
     }
 
     .home-title {
-        font-size: 26px !important;
-        padding-top: 26px !important;
+        font-size: 20px !important;
+        padding-top: 20px !important;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .footer-above {
+        font-size: .2em;
+    }
+
+    .footer-above .socials li a {
+        width: 2.5rem !important;
     }
 }
 
@@ -159,6 +171,8 @@ footer {
     box-shadow: 10px 10px 26px -10px rgba(74,74,74,1);
     margin-bottom: 40px;
     border-radius: 0px;
+    float: initial;
+    margin: 0 auto;
 }
 
 /*Resize the wrap to see the search bar change!*/
