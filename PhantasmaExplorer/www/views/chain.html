@@ -1,11 +1,11 @@
 <div class="row">
     <div class="col-lg-12 col-sm-12 tab-panel-general">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item active">
-                <a class="nav-link" id="overview-tab" data-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="true">Overview</a>
-            </li>
             <li class="nav-item">
-                <a class="nav-link" id="blocks-tab" data-toggle="tab" href="#blocks" role="tab" aria-controls="blocks" aria-selected="false">Blocks</a>
+                <a class="nav-link" id="overview-tab" data-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="false">Overview</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" id="blocks-tab" data-toggle="tab" href="#blocks" role="tab" aria-controls="blocks" aria-selected="true">Blocks</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" id="contracts-tab" data-toggle="tab" href="#contracts" role="tab" aria-controls="contracts" aria-selected="false">Contracts</a>
@@ -16,7 +16,7 @@
         </ul>
 
         <div class="tab-content" id="myTabContent">
-            <div class="tab-pane active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+            <div class="tab-pane fade" id="overview" role="tabpanel" aria-labelledby="overview-tab">
                 <div class="panel panel-single">
                     <div class="panel-heading">Block Information</div>
                     <div class="panel-body">
@@ -59,7 +59,7 @@
 
             </div>
 
-            <div class="tab-pane fade" id="blocks" role="tabpanel" aria-labelledby="blocks-tab">
+            <div class="tab-pane active" id="blocks" role="tabpanel" aria-labelledby="blocks-tab">
                 <div class="panel panel-single">
                     <div class="panel-heading">Blocks</div>
                     <div class="panel-body">

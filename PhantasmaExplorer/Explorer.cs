@@ -281,6 +281,7 @@ namespace PhantasmaExplorer
             Console.WriteLine("Initializing Phantasma Block Explorer....");
 
             menus = new List<MenuContext>();
+            menus.Add(new MenuContext() { Text = "Blocks", Url = "/chain/main", Active = true });
             //menus.Add(new MenuContext() { Text = "Transactions", Url = "/transactions", Active = true });
             // menus.Add(new MenuContext() { Text = "Chains", Url = "/chains", Active = false });
             //menus.Add(new MenuContext() { Text = "Blocks", Url = "/blocks", Active = false });
@@ -623,7 +624,7 @@ namespace PhantasmaExplorer
                 while (running)
                 {
                     Thread.Sleep(1000 * 30);
-                    
+
                     if (initialized)
                     {
                         nexus.Update();
