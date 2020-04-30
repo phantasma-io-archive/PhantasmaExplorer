@@ -280,7 +280,7 @@ namespace Phantasma.Explorer
         public TransactionData(NexusData database, DataNode node) : base(database)
         {
             Script = Base16.Decode(node.GetString("script"));
-            NexusName = null; // TODO
+            NexusName = Nexus.Name;
             ChainAddress = Address.FromText(node.GetString("chainAddress"));
             BlockHash = Hash.Parse(node.GetString("blockHash"));
             Expiration = 0; // TODO
