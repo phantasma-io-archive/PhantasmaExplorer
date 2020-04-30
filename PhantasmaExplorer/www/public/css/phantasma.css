@@ -55,6 +55,10 @@
         font-size: 1em !important;
     }
 
+    table thead tr th:nth-child(1) {
+        min-width: 10em;
+    }
+
     table thead tr th:nth-child(2) {
         min-width: 7em;
     }
