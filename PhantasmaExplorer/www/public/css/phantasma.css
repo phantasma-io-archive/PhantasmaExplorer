@@ -131,6 +131,10 @@ footer {
     margin-right: 3em;
 }
 
+.footer-above .socials li a:hover {
+    opacity: 0.75;
+}
+
 .navbar-inverse {
     background-color: transparent;
     border-color: transparent;
