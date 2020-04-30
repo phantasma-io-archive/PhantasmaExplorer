@@ -973,6 +973,7 @@ namespace Phantasma.Explorer
 
             var stakeNode = node.GetNode("stakes");
             Stake = BigInteger.Parse(stakeNode.GetString("amount"));
+            Unclaimed = BigInteger.Parse(stakeNode.GetString("unclaimed"));
 
             var balancesNode = node.GetNode("balances");
             if (balancesNode != null)
@@ -1021,7 +1022,9 @@ namespace Phantasma.Explorer
         public Address Address { get; private set; }
 
         public BigInteger Stake { get; private set; }
+        public BigInteger Unclaimed { get; private set; }
         public string FormattedStake => (UnitConversion.ToDecimal(Stake, DomainSettings.StakingTokenDecimals)).ToString("#,##0");
+        public string FormattedUnclaimed => (UnitConversion.ToDecimal(Unclaimed, DomainSettings.FuelTokenDecimals)).ToString("#,##0");
 
         public BalanceData[] Balances { get; private set; }
 

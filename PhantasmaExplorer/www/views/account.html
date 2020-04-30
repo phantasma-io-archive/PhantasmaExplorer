@@ -40,6 +40,11 @@
                                         <td>Stake</td>
                                         <td>{{#if account.Stake>0}} {{account.FormattedStake}} SOUL{{#else}}-{{/if}}</td>
                                     </tr>
+
+																		<tr>
+																				<td>Unclaimed</td>
+																				<td>{{#if account.Unclaimed>0}} {{account.FormattedUnclaimed}} KCAL{{#else}}-{{/if}}</td>
+																		</tr>
                                 </tbody>
                             </table>
                         </div>
