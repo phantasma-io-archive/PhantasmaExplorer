@@ -960,7 +960,7 @@ namespace Phantasma.Explorer
         {
             Hash = hash;
             Timestamp = timestamp;
-            Date = Timestamp.ToString("dd.MM.yyyy HH:mm:ss");
+            Date = Timestamp.ToString("yyyy/MM/dd HH:mm:ss tt");
         }
     }
 
