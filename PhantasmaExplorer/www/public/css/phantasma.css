@@ -60,7 +60,7 @@
     }
 
     table thead tr th:nth-child(2) {
-        min-width: 7em;
+        min-width: 10em;
     }
 }
 
@@ -290,6 +290,10 @@ form {
         font-weight: 600;
         font-size: 14px;
     }
+
+.layout-fixed {
+    table-layout: fixed !important;
+}
 
 .table {
     line-height: 19px;

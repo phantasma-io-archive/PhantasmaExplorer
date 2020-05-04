@@ -283,7 +283,7 @@ namespace Phantasma.Explorer
             NexusName = Nexus.Name;
             ChainAddress = Address.FromText(node.GetString("chainAddress"));
             BlockHash = Hash.Parse(node.GetString("blockHash"));
-            Expiration = 0; // TODO
+            Expiration = new Timestamp(node.GetUInt32("expiration"));
             Payload = Base16.Decode(node.GetString("payload"));
             Signatures = null; // TODO
             Hash = Hash.Parse(node.GetString("hash"));
@@ -850,7 +850,7 @@ namespace Phantasma.Explorer
             this.CurrentSupply = BigInteger.Parse(node.GetString("currentSupply"));
             this.Decimals = int.Parse(node.GetString("decimals"));
             this.Flags = node.GetEnum<TokenFlags>("flags");
-            this.Script = null; // TODO
+            this.Script = Base16.Decode(node.GetString("script"));
         }
 
         public string Name { get; private set; }
