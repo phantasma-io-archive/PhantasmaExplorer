@@ -63,6 +63,7 @@ namespace Phantasma.Explorer
         public uint Protocol { get; private set; }
         public Hash Hash { get; private set; }
         public Hash[] TransactionHashes { get; private set; }
+        public uint TxsCount { get; private set; }
         public OracleData[] OracleData { get; private set; }
 
         public Event[] Events { get; private set; }
@@ -113,6 +114,7 @@ namespace Phantasma.Explorer
 
             var txsNode = node.GetNode("txs");
             TransactionHashes = new Hash[txsNode.ChildCount];
+            TxsCount = (uint)TransactionHashes.Length;
             Transactions = new TransactionData[TransactionHashes.Length];
 
             var missingHashes = new List<Hash>();

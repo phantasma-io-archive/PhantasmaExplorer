@@ -70,6 +70,7 @@
                                     <th>Height</th>
                                     <th>Age</th>
                                     <th>Block Hash</th>
+                                    <th>Transactions</th>
                                     <th>Validator</th>
                                     <!--<th>Something more??</th>-->
                                 </tr>
@@ -80,6 +81,7 @@
                                     <td><a href="/height/{{chain.Name}}/{{Height}}">#{{Height}}</a></td>
                                     <td>{{#timeago Timestamp}}</td>
                                     <td>{{#link-block chain.Name,Hash}}</td>
+                                    <td>{{TxsCount}}</td>
                                     <td>{{#link-address ValidatorAddress}}</td>
                                 </tr>
                                 {{/each}}
