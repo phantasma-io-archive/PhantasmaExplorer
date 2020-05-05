@@ -827,7 +827,7 @@ namespace Phantasma.Explorer
 
         public BlockData LastBlock => BlockList[BlockList.Count - 1];
 
-        public IEnumerable<BlockData> Blocks => BlockList.Skip(Math.Max(0, (int)(Height - 20))).Reverse();
+        public IEnumerable<BlockData> Blocks => BlockList.Skip(Math.Max(0, (int)(Height - 100))).Reverse();
     }
 
     public class ContractData : ExplorerObject, IContract
