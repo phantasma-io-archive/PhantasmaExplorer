@@ -1496,7 +1496,7 @@ namespace Phantasma.Explorer
             var bucket = BitConverter.ToUInt32(hashed, 0);
             bucket %= 1024;
 
-            var dir = $"{cachePath}/{bucket}";
+            var dir = $"{cachePath}{bucket}";
             if (!Directory.Exists(dir))
             {
                 Console.WriteLine("Creating cache dir: " + dir);
