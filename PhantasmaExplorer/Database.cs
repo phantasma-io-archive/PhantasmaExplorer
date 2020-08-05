@@ -480,7 +480,18 @@ namespace Phantasma.Explorer
                     case EventKind.ChainSwap:
                         {
                             var data = evt.GetContent<TransactionSettleEventData>();
-                            sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://neoscan.io/transaction/{data.Hash}\" target=\"_blank\">{data.Hash}</a>");
+                            if (data.Platform == "neo")
+                            {
+                              sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://neoscan.io/transaction/{data.Hash}\" target=\"_blank\">{data.Hash}</a>");
+                            }
+                            else if (data.Platform == "ethereum")
+                            {
+                              sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://etherscan.io/tx/{data.Hash}\" target=\"_blank\">{data.Hash}</a>");
+                            }
+                            else
+                            {
+                              sb.AppendLine($"Settled {data.Platform} transaction <a href=\"/tx/{data.Hash}\">{data.Hash}</a>");
+                            }
                             Nexus.RegisterSearch(data.Hash.ToString(), "Settlement", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
