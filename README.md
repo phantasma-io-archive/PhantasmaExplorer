@@ -42,7 +42,7 @@ dotnet publish
 The files needed to run a node will now be in PhantasmaExplorer\www\netcoreapp2.0\publish
 
 ## Run
-Once you have publisheed the binaries as per above you can run it with the following command:
+Once you have published the binaries as per above you can run it with the following command:
 - Note the first run can take some time as it will build the cache from scratch
 ```
 dotnet /<explorer binaries dir above>/Phantasma.Explorer.dll --port=7074 --env=prod --path=/<explorer root dir>/ -phantasma.rest=http://207.148.17.86:7078/api -cache.path=Cache
