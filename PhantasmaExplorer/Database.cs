@@ -1171,6 +1171,9 @@ namespace Phantasma.Explorer
 
         public readonly string cachePath;
 
+        // Used for hack to make organizations update run not as often as blocks update.
+        private int updateCyclesCounter = 0;
+
         public NexusData(string RESTurl, string cachePath)
         {
             if (!cachePath.EndsWith("/"))
@@ -1193,6 +1196,8 @@ namespace Phantasma.Explorer
 
         public bool Update()
         {
+            updateCyclesCounter++;
+
             this.UpdateStatus = "Connecting to nexus";
             this.UpdateProgress = 0;
 
@@ -1283,23 +1288,6 @@ namespace Phantasma.Explorer
             this.UpdateStatus = "Fetching organizations";
             this.UpdateProgress = 0;
 
-            var orgNode = node.GetNode("organizations");
-            if (orgNode != null)
-            {
-                foreach (var entry in orgNode.Children)
-                {
-                    var name = entry.Value;
-                    if (!CheckOrganization(name))
-                    {
-                        FindOrganization(name);
-                    }
-                    else
-                    {
-                        UpdateOrganization(name);
-                    }
-                }
-            }
-
             Console.WriteLine($"Updating {_chains.Count} chains...");
             foreach (var chain in _chains.Values)
             {
@@ -1307,23 +1295,6 @@ namespace Phantasma.Explorer
                 this.UpdateProgress = 0;
 
                 chain.UpdateBlocks();
-            }
-
-            this.UpdateStatus = "Fetching master accounts";
-            this.UpdateProgress = 0;
-            if (CheckOrganization("masters"))
-            {
-                var masters = _organizations["masters"];
-                masters.UpdateAccounts();
-
-                /*new Thread(() =>
-                {
-                    Console.WriteLine($"Updating {_transactions.Count} transactions...");
-                    foreach (var tx in _transactions.Values)
-                    {
-                        var temp = tx.Description;
-                    }
-                }).Start();*/
             }
 
             if (generateDescriptions)
@@ -1349,11 +1320,50 @@ namespace Phantasma.Explorer
                         var temp = tx.Description;
                         current++;
 
-                        this.UpdateProgress = (current * 100)/total;
+                        this.UpdateProgress = (current * 100) / total;
                     }
 
                     Console.Write($"Finished generating {total} tx descriptions");
                 }).Start();
+            }
+
+            if (updateCyclesCounter >= 10)
+            {
+                var orgNode = node.GetNode("organizations");
+                if (orgNode != null)
+                {
+                    foreach (var entry in orgNode.Children)
+                    {
+                        var name = entry.Value;
+                        if (!CheckOrganization(name))
+                        {
+                            FindOrganization(name);
+                        }
+                        else
+                        {
+                            UpdateOrganization(name);
+                        }
+                    }
+                }
+
+                this.UpdateStatus = "Fetching master accounts";
+                this.UpdateProgress = 0;
+                if (CheckOrganization("masters"))
+                {
+                    var masters = _organizations["masters"];
+                    masters.UpdateAccounts();
+
+                    /*new Thread(() =>
+                    {
+                        Console.WriteLine($"Updating {_transactions.Count} transactions...");
+                        foreach (var tx in _transactions.Values)
+                        {
+                            var temp = tx.Description;
+                        }
+                    }).Start();*/
+                }
+
+                updateCyclesCounter = 0;
             }
 
             return true;
