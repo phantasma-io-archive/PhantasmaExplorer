@@ -808,9 +808,22 @@ namespace Phantasma.Explorer
 
             Nexus.DoParallelRequests($"Fetching new blocks for chain {Name}...", newBlocks,  true, (index) =>
             {
-                var ofs = index + currentHeight;
-                var block = Nexus.FindBlockByHeight(this, ofs + 1);
-                RegisterBlock(ofs, block);
+                while (true)
+                {
+                    try
+                    {
+                        var ofs = index + currentHeight;
+                        var block = Nexus.FindBlockByHeight(this, ofs + 1);
+                        RegisterBlock(ofs, block);
+
+                        break;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("RegisterBlock(): Exception: " + e.Message);
+                        Thread.Sleep(1000);
+                    }
+                }
             });
         }
 
