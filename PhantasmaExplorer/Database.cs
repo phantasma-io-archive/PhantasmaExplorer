@@ -1290,6 +1290,15 @@ namespace Phantasma.Explorer
                 }
             }
 
+            Console.WriteLine($"Updating {_chains.Count} chains...");
+            foreach (var chain in _chains.Values)
+            {
+                this.UpdateStatus = "Fetching blocks for chain " + chain.Name;
+                this.UpdateProgress = 0;
+
+                chain.UpdateBlocks();
+            }
+
             this.UpdateStatus = "Fetching master accounts";
             this.UpdateProgress = 0;
             if (CheckOrganization("masters"))
@@ -1305,15 +1314,6 @@ namespace Phantasma.Explorer
                         var temp = tx.Description;
                     }
                 }).Start();*/
-            }
-
-            Console.WriteLine($"Updating {_chains.Count} chains...");
-            foreach (var chain in _chains.Values)
-            {
-                this.UpdateStatus = "Fetching blocks for chain "+chain.Name;
-                this.UpdateProgress = 0;
-
-                chain.UpdateBlocks();
             }
 
             if (generateDescriptions)
