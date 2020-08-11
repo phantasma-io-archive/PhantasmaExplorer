@@ -42,6 +42,9 @@ namespace Phantasma.Explorer.Utils
                   break;
           }
 
+          if (String.IsNullOrEmpty(baseticker))
+              return 0;
+
           var url = $"https://api.coingecko.com/api/v3/simple/price?ids={baseticker}&vs_currencies={currrency}";
 
           try
