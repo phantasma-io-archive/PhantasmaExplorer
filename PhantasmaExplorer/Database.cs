@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -1524,7 +1525,7 @@ namespace Phantasma.Explorer
                     _transactionQueue.Enqueue(tx);
                 }
 
-                var fileName = GetTransactionCacheFileName(txHash);
+                fileName = GetTransactionCacheFileName(txHash);
                 if (fileName != null && !File.Exists(fileName))
                 {
                     var xml = XMLWriter.WriteToString(node);
