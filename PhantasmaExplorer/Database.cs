@@ -820,7 +820,16 @@ namespace Phantasma.Explorer
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("RegisterBlock(): Exception: " + e.Message);
+                        var logMessage = "RegisterBlock(): Exception caught:\n" + e.Message;
+                        var inner = e.InnerException;
+                        while (inner != null)
+                        {
+                            logMessage += "\n---> " + inner.Message + "\n\n" + inner.StackTrace;
+                            inner = inner.InnerException;
+                        }
+                        logMessage += "\n\n" + e.StackTrace;
+
+                        Console.WriteLine(logMessage);
                         Thread.Sleep(1000);
                     }
                 }
@@ -1359,6 +1368,9 @@ namespace Phantasma.Explorer
             {
                 try
                 {
+                    string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                    Console.WriteLine(timestamp + ": APIRequest: " + url);
+
                     string contents;
                     using (var wc = new System.Net.WebClient())
                     {
