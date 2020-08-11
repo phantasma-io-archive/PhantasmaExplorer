@@ -150,7 +150,10 @@ namespace Phantasma.Explorer
                 {
                     if (TransactionHashes[i] == hash)
                     {
-                        Transactions[i] = tx;
+                        lock (Transactions)
+                        {
+                            Transactions[i] = tx;
+                        }
                         break;
                     }
 
