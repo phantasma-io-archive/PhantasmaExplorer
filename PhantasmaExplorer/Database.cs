@@ -1485,6 +1485,31 @@ namespace Phantasma.Explorer
                 return _transactions[txHash];
             }
 
+            var fileName = GetTransactionCacheFileName(txHash);
+            if (File.Exists(fileName))
+            {
+                var xml = File.ReadAllText(fileName);
+                var temp = XMLReader.ReadFromString(xml);
+                temp = temp.GetNodeByIndex(0);
+                var tx = new TransactionData(this, temp);
+                
+                lock (_transactions)
+                {
+                    _transactions[tx.Hash] = tx;
+                }
+
+                lock (_transactionQueue)
+                {
+                    _transactionQueue.Enqueue(tx);
+                }
+
+                RegisterSearch(txHash.ToString(), null, SearchResultKind.Transaction);
+
+                Console.WriteLine("Loaded transaction from cache (find): " + txHash);
+
+                return tx;
+            }
+
             var node = APIRequest($"getTransaction?hashText={txHash}");
             if (node != null && !String.IsNullOrEmpty(node.GetString("chainAddress")))
             {
