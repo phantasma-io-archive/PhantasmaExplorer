@@ -1675,7 +1675,15 @@ namespace Phantasma.Explorer
             {
                 var prev = account;
 
-                account = new AccountData(this, node);
+                try
+                {
+                    account = new AccountData(this, node);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine($"FindAccount({address}, {canExpire}): Exception occurred: {e}");
+                    return null;
+                }
                 if (account.IsEmpty)
                 {
                     return null;
