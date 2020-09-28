@@ -4,6 +4,7 @@ using Phantasma.Cryptography;
 using Phantasma.Domain;
 using Phantasma.Explorer.Utils;
 using Phantasma.Numerics;
+using Phantasma.Pay.Chains;
 using System;
 using System.Globalization;
 
@@ -343,8 +344,31 @@ namespace Phantasma.Explorer
             {
                 try
                 {
-                    var temp = Pay.Chains.NeoWallet.DecodeAddress(address);
-                    return $"<a href=\"https://neoscan.io/address/{temp}\" target=\"_blank\">{temp}</a>";
+                    string addressText = null;
+                    string url = null;
+
+                    switch (address.PlatformID)
+                    {
+                        case NeoWallet.NeoID:
+                            {
+                                addressText = Pay.Chains.NeoWallet.DecodeAddress(address);
+                                url = "https://neoscan.io/address/";
+                                break;
+                            }
+
+                        case EthereumWallet.EthereumID:
+                            {
+                                addressText = Pay.Chains.EthereumWallet.DecodeAddress(address);
+                                url = "https://etherscan.io/address/";
+                                break;
+                            }
+                    }
+
+                    if (url != null && addressText != null)
+                    {
+                        return $"<a href=\"{url}/{addressText}\" target=\"_blank\">{addressText}</a>";
+                    }
+
                 }
                 catch (Exception e)
                 {
