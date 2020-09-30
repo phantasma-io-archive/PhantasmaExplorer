@@ -628,9 +628,16 @@ namespace PhantasmaExplorer
                 {
                     Thread.Sleep(1000 * 30);
 
-                    if (initialized)
+                    try
                     {
-                        nexus.Update();
+                        if (initialized)
+                        {
+                            nexus.Update();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Update() exception caught: " + e.ToString());
                     }
                 }
             }).Start();
