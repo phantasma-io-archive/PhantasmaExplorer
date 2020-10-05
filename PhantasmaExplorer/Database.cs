@@ -408,7 +408,7 @@ namespace Phantasma.Explorer
                                 break;
                             }
 
-                        case EventKind.TokenReceive:
+                        case EventKind.TokenClaim:
                             {
                                 var data = evt.GetContent<TokenEventData>();
                                 if (data.Symbol == DomainSettings.FuelTokenSymbol)
@@ -1503,7 +1503,7 @@ namespace Phantasma.Explorer
                 var temp = XMLReader.ReadFromString(xml);
                 temp = temp.GetNodeByIndex(0);
                 var tx = new TransactionData(this, temp);
-                
+
                 lock (_transactions)
                 {
                     _transactions[tx.Hash] = tx;
