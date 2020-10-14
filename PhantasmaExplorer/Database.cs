@@ -490,7 +490,7 @@ namespace Phantasma.Explorer
                             }
                             else if (data.Platform == "ethereum")
                             {
-                              sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://etherscan.io/tx/{data.Hash}\" target=\"_blank\">{data.Hash}</a>");
+                              sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://etherscan.io/tx/0x{data.Hash}\" target=\"_blank\">{data.Hash}</a>");
                             }
                             else
                             {
