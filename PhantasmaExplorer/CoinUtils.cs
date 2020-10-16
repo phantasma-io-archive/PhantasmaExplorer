@@ -53,10 +53,11 @@ namespace Phantasma.Explorer.Utils
               {
                 json = httpClient.GetStringAsync(new Uri(url)).Result;
               }
+
               var root = JSONReader.ReadFromString(json);
 
               // hack for goati price .10
-              else if (ticker == "GOATI") {
+              if (ticker == "GOATI") {
                 var price = 0.10m;
                 return price;
               }
