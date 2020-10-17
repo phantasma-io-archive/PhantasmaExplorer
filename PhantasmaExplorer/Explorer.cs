@@ -9,6 +9,7 @@ using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
 using Phantasma.Core.Utils;
 using Phantasma.Cryptography;
+using Phantasma.Domain;
 using Phantasma.Explorer;
 
 namespace PhantasmaExplorer
@@ -274,6 +275,9 @@ namespace PhantasmaExplorer
                 case SearchResultKind.Token:
                     return $"/token/{data}";
 
+                case SearchResultKind.Contract:
+                    return $"/contract/{data}";
+
                 default:
                     return $"error";
             }
@@ -350,6 +354,7 @@ namespace PhantasmaExplorer
             templateEngine.Compiler.RegisterTag("link-address", (doc, val) => new LinkAddressTag(nexus, doc, val));
             templateEngine.Compiler.RegisterTag("link-block", (doc, val) => new LinkBlockTag(doc, val));
             templateEngine.Compiler.RegisterTag("link-org", (doc, val) => new LinkOrganizationTag(doc, val));
+            templateEngine.Compiler.RegisterTag("link-contract", (doc, val) => new LinkContractTag(doc, val));
             templateEngine.Compiler.RegisterTag("description", (doc, val) => new DescriptionTag(doc, val));
             templateEngine.Compiler.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
 
@@ -529,6 +534,28 @@ namespace PhantasmaExplorer
                 }
 
                 return Error(templateEngine, "Could not find organization with id: " + id);
+            });
+
+            server.Get("/contract/{input}", (request) =>
+            {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
+                var id = request.GetVariable("input");
+
+                // TODO support chains other than root
+                var contract = nexus.FindContract(DomainSettings.RootChainName, id);
+                if (contract != null)
+                {
+                    var context = CreateContext();
+                    context["contract"] = contract;
+
+                    return templateEngine.Render(context, "layout", "contract");
+                }
+
+                return Error(templateEngine, "Could not find contract with id: " + id);
             });
 
             server.Get("/token/{input}", (request) =>

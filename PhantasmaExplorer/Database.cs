@@ -15,6 +15,7 @@ using Phantasma.Domain;
 using Phantasma.Explorer.Utils;
 using Phantasma.Numerics;
 using Phantasma.VM;
+using Phantasma.Core;
 
 namespace Phantasma.Explorer
 {
@@ -460,7 +461,7 @@ namespace Phantasma.Explorer
                     case EventKind.ContractDeploy:
                         {
                             var name = evt.GetContent<string>();
-                            sb.AppendLine($"Deployed contract: {name}</a>");
+                            sb.AppendLine($"Deployed contract: <a href=\"/contract/{name}/\">{name}</a>");
                             Nexus.RegisterSearch(name, "Deployment", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -735,17 +736,19 @@ namespace Phantasma.Explorer
             var contractsNodes = node.GetNode("contracts");
             if (contractsNodes != null)
             {
-                Contracts = new Address[contractsNodes.ChildCount];
+                Contracts = new string[contractsNodes.ChildCount];
                 for (int i=0; i<Contracts.Length; i++)
                 {
                     var name = contractsNodes.GetString(i);
-                    Contracts[i] = Address.FromHash(name);
-                    Nexus.RegisterSearch(name, name, SearchResultKind.Address, Contracts[i].Text);
+                    Contracts[i] = name;
+
+                    var address = SmartContract.GetAddressForName(name);
+                    Nexus.RegisterSearch(name, name, SearchResultKind.Address, address.Text);
                 }
             }
             else
             {
-                Contracts = new Address[0];
+                Contracts = new string[0];
             }
         }
 
@@ -821,13 +824,9 @@ namespace Phantasma.Explorer
                     }
                     catch (Exception e)
                     {
+                        e = e.ExpandInnerExceptions();
+
                         var logMessage = "RegisterBlock(): Exception caught:\n" + e.Message;
-                        var inner = e.InnerException;
-                        while (inner != null)
-                        {
-                            logMessage += "\n---> " + inner.Message + "\n\n" + inner.StackTrace;
-                            inner = inner.InnerException;
-                        }
                         logMessage += "\n\n" + e.StackTrace;
 
                         Console.WriteLine(logMessage);
@@ -858,25 +857,13 @@ namespace Phantasma.Explorer
         public ChainData ParentChain { get; private set; }
         public ChainData[] ChildChains { get; private set; }
 
-        public Address[] Contracts { get; private set; }
+        public string[] Contracts { get; private set; }
 
         public List<BlockData> BlockList { get; private set; }
 
         public BlockData LastBlock => BlockList[BlockList.Count - 1];
 
         public IEnumerable<BlockData> Blocks => BlockList.Skip(Math.Max(0, (int)(Height - 100))).Reverse();
-    }
-
-    public class ContractData : ExplorerObject, IContract
-    {
-        public string Name { get; private set; }
-
-        public ContractInterface ABI => throw new NotImplementedException();
-
-        public ContractData(NexusData database, DataNode node): base(database)
-        {
-
-        }
     }
 
     public class TokenData : ExplorerObject, IToken
@@ -1126,6 +1113,44 @@ namespace Phantasma.Explorer
         public int Size => Members.Length;
     }
 
+    public class ContractData : ExplorerObject
+    {
+        public ContractData(NexusData database, DataNode node) : base(database)
+        {
+            ID = node.GetString("name");
+            Script = Base16.Decode(node.GetString("script"));
+
+            this.ABI = null;  // TODO ABI support, decode it from node
+
+            this.Address = Address.FromText(node.GetString("address"));
+
+            var disasm = new Disassembler(this.Script);
+            this.Instructions = disasm.Instructions.ToArray();
+
+            NativeContractKind temp;
+            if (Enum.TryParse<NativeContractKind>(ID, true, out temp))
+            {
+                this.Native = temp.ToString();
+            }
+            else
+            {
+                this.Native = null;
+            }
+        }
+
+        public string ID { get; private set; }
+
+        public byte[] Script { get; private set; }
+
+        public ContractInterface ABI { get; private set; }
+
+        public Address Address { get; private set; }
+
+        public Instruction[] Instructions { get; set; }
+
+        public string Native;
+    }
+
     public struct LeaderboardEntry
     {
         public Address address;
@@ -1144,6 +1169,7 @@ namespace Phantasma.Explorer
         private Dictionary<string, TokenData> _tokens = new Dictionary<string, TokenData>();
         private Dictionary<string, PlatformData> _platforms = new Dictionary<string, PlatformData>();
         public Dictionary<string, OrganizationData> _organizations = new Dictionary<string, OrganizationData>();
+        private Dictionary<string, ContractData> _contracts = new Dictionary<string, ContractData>();
 
         private Dictionary<Hash, BlockData> _blocks = new Dictionary<Hash, BlockData>();
         private Dictionary<Hash, TransactionData> _transactions = new Dictionary<Hash, TransactionData>();
@@ -1487,6 +1513,23 @@ namespace Phantasma.Explorer
             }
 
             return null;
+        }
+
+        public ContractData FindContract(string chain, string id)
+        {
+            if (_contracts.ContainsKey(id))
+            {
+                return _contracts[id];
+            }
+
+            Console.WriteLine("Detected new contract: " + id);
+            var temp = APIRequest($"getContract/{chain}/{id}");
+            var contract = new ContractData(this, temp);
+            _contracts[id] = contract;
+
+            RegisterSearch(id, id, SearchResultKind.Contract, id);
+
+            return contract;
         }
 
         public TransactionData FindTransaction(ChainData chain, Hash txHash)

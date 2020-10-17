@@ -275,6 +275,29 @@ namespace Phantasma.Explorer
         }
     }
 
+    public class LinkContractTag : TemplateNode
+    {
+        private readonly RenderingKey _key;
+
+        public LinkContractTag(Document doc, string key) : base(doc)
+        {
+            _key = RenderingKey.Parse(key, RenderingType.String);
+        }
+
+        public override void Execute(RenderingContext context)
+        {
+            var temp = context.EvaluateObject(_key);
+            if (temp == null)
+            {
+                return;
+            }
+
+            var contractName = (string)temp;
+
+            context.output.Append($"<a href=/contract/{contractName}>{contractName}</a>");
+        }
+    }
+
     public class LinkBlockTag : TemplateNode
     {
         private readonly RenderingKey _chainKey;

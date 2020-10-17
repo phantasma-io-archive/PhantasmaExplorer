@@ -1,0 +1,75 @@
+<div class="row">
+    <div class="col-lg-12 tab-panel-general">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item active">
+                <a class="nav-link" id="overview-tab" data-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="true">Overview</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="script-tab" data-toggle="tab" href="#script" role="tab" aria-controls="events" aria-selected="false">Script</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                <div class="panel panel-single">
+                    <div class="panel-heading">Contract Information</div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table no-border">
+                                <tbody>
+                                    <tr>
+                                        <td>Name</td>
+                                        <td>{{contract.ID}}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Address</td>
+                                        <td><a href="/address/{{contract.Address}}">{{contract.Address}}</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="script" role="tabpanel" aria-labelledby="script-tab">
+                <div class="panel panel-single">
+                    <div class="panel-heading">Contract Script</div>
+                    <div class="panel-body">
+						{{#if contract.Native}}
+						This a built-in chain contract.<br>View source code in <a href="https://github.com/phantasma-io/PhantasmaChain/blob/development/Phantasma.Blockchain/Contracts/{{contract.Native}}Contract.cs">Github</a>.
+						{{#else}}
+							<p>Raw</p>
+							{{#if contract.Script}}
+							<table class="monospace">
+								<tr>
+									<td>{{#hex contract.Script}}</td>
+								</tr>
+							</table>
+							{{#else}}
+							Nothing here...
+							{{/if}}
+
+							<br>
+							<p>Disassembly</p>
+							{{#if contract.Instructions}}
+							<table class="monospace">
+								{{#each contract.Instructions}}
+								<tr>
+									<td>{{this}}</td>
+								</tr>
+								{{/each}}
+							</table>
+							{{#else}}
+							Nothing here...
+							{{/if}}
+						
+						{{/if}}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
