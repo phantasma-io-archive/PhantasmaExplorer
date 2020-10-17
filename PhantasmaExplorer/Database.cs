@@ -1113,6 +1113,19 @@ namespace Phantasma.Explorer
         public int Size => Members.Length;
     }
 
+    public struct ContractMethodParameter
+    {
+        public string name;
+        public string type;
+    }
+
+    public struct ContractMethod
+    {
+        public string name;
+        public string returnType;
+        public ContractMethodParameter[] parameters;
+    }
+
     public class ContractData : ExplorerObject
     {
         public ContractData(NexusData database, DataNode node) : base(database)
@@ -1120,7 +1133,35 @@ namespace Phantasma.Explorer
             ID = node.GetString("name");
             Script = Base16.Decode(node.GetString("script"));
 
-            this.ABI = null;  // TODO ABI support, decode it from node
+            var methods = new List<ContractMethod>();
+            var methodNode = node.GetNode("methods");
+            foreach (var child in methodNode.Children)
+            {
+                var method = new ContractMethod();
+                method.name = child.GetString("name");
+                method.returnType = child.GetString("returnType");
+
+                var parameters = new List<ContractMethodParameter>();
+
+                var parametersNode = child.GetNode("parameters");
+                if (parametersNode != null)
+                {
+                    foreach (var entry in parametersNode.Children)
+                    {
+                        var parameter = new ContractMethodParameter();
+                        parameter.name = entry.GetString("name");
+                        parameter.type = entry.GetString("type");
+
+                        parameters.Add(parameter);
+                    }
+                }
+
+                method.parameters = parameters.ToArray();
+
+                methods.Add(method);
+            }
+
+            this.Methods = methods.ToArray();
 
             this.Address = Address.FromText(node.GetString("address"));
 
@@ -1142,7 +1183,7 @@ namespace Phantasma.Explorer
 
         public byte[] Script { get; private set; }
 
-        public ContractInterface ABI { get; private set; }
+        public ContractMethod[] Methods { get; private set; }
 
         public Address Address { get; private set; }
 

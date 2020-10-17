@@ -7,6 +7,9 @@
             <li class="nav-item">
                 <a class="nav-link" id="script-tab" data-toggle="tab" href="#script" role="tab" aria-controls="events" aria-selected="false">Script</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="abi-tab" data-toggle="tab" href="#abi" role="tab" aria-controls="events" aria-selected="false">ABI</a>
+            </li>
         </ul>
 
         <div class="tab-content" id="myTabContent">
@@ -67,6 +70,25 @@
 						
 						{{/if}}
                     </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="abi" role="tabpanel" aria-labelledby="abi-tab">
+                <div class="panel panel-single">
+                    <div class="panel-heading">Contract ABI</div>
+                    <div class="panel-body">
+						{{#if contract.Methods}}
+						<table class="monospace">
+							{{#each contract.Methods}}
+							<tr>
+								<td>{{this.name}}({{#each this.parameters}}{{#if !@first}}, {{/if}}{{this.name}}:{{this.type}}{{/each}}): {{returnType}}</td>
+							</tr>
+							{{/each}}
+						</table>
+						{{#else}}
+						Nothing here...
+						{{/if}}
+					
                 </div>
             </div>
 
