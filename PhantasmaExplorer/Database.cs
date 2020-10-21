@@ -16,6 +16,7 @@ using Phantasma.Explorer.Utils;
 using Phantasma.Numerics;
 using Phantasma.VM;
 using Phantasma.Core;
+using Phantasma.Blockchain;
 
 namespace Phantasma.Explorer
 {
@@ -665,6 +666,41 @@ namespace Phantasma.Explorer
                             }
                             break;
                         }
+
+                    default:
+                        {
+                            if (evt.Kind >= EventKind.Custom)
+                            {
+                                try
+                                {
+                                    var contract = this.Nexus.FindContract(DomainSettings.RootChainName, evt.Contract);
+                                    var contractEvent = contract.Events.Where(x => x.value == (byte)evt.Kind).First();
+                                    var vm = new DescriptionVM(contractEvent.description, (symbol) =>
+                                    {
+                                        var token = this.Nexus.FindTokenBySymbol(symbol);
+                                        if (token == null)
+                                        {
+                                            throw new Exception("unknown token: " + symbol);
+                                        }
+
+                                        return token; 
+                                    });
+                                    vm.Stack.Push(VMObject.FromObject(evt.Data));
+                                    vm.Stack.Push(VMObject.FromObject(LinkAddress(evt.Address)));
+                                    vm.Execute();
+
+                                    var result = vm.Stack.Pop().AsString();
+                                    sb.AppendLine(result);
+                                }
+                                catch (Exception)
+                                {
+                                    // do nothing for now..
+                                }
+
+
+                            }
+                            break;
+                        }
                 }
             }
 
@@ -1126,6 +1162,14 @@ namespace Phantasma.Explorer
         public ContractMethodParameter[] parameters;
     }
 
+    public struct ContractEvent
+    {
+        public byte value;
+        public string name;
+        public string returnType;
+        public byte[] description;
+    }
+
     public class ContractData : ExplorerObject
     {
         public ContractData(NexusData database, DataNode node) : base(database)
@@ -1135,33 +1179,51 @@ namespace Phantasma.Explorer
 
             var methods = new List<ContractMethod>();
             var methodNode = node.GetNode("methods");
-            foreach (var child in methodNode.Children)
+            if (methodNode != null)
             {
-                var method = new ContractMethod();
-                method.name = child.GetString("name");
-                method.returnType = child.GetString("returnType");
-
-                var parameters = new List<ContractMethodParameter>();
-
-                var parametersNode = child.GetNode("parameters");
-                if (parametersNode != null)
+                foreach (var child in methodNode.Children)
                 {
-                    foreach (var entry in parametersNode.Children)
+                    var method = new ContractMethod();
+                    method.name = child.GetString("name");
+                    method.returnType = child.GetString("returnType");
+
+                    var parameters = new List<ContractMethodParameter>();
+
+                    var parametersNode = child.GetNode("parameters");
+                    if (parametersNode != null)
                     {
-                        var parameter = new ContractMethodParameter();
-                        parameter.name = entry.GetString("name");
-                        parameter.type = entry.GetString("type");
+                        foreach (var entry in parametersNode.Children)
+                        {
+                            var parameter = new ContractMethodParameter();
+                            parameter.name = entry.GetString("name");
+                            parameter.type = entry.GetString("type");
 
-                        parameters.Add(parameter);
+                            parameters.Add(parameter);
+                        }
                     }
+
+                    method.parameters = parameters.ToArray();
+
+                    methods.Add(method);
                 }
-
-                method.parameters = parameters.ToArray();
-
-                methods.Add(method);
             }
-
             this.Methods = methods.ToArray();
+
+            var events = new List<ContractEvent>();
+            var eventNode = node.GetNode("events");
+            if (eventNode != null)
+            {
+                foreach (var child in eventNode.Children)
+                {
+                    var evt = new ContractEvent();
+                    evt.value = child.GetByte("value");
+                    evt.name = child.GetString("name");
+                    evt.description = Base16.Decode(child.GetString("description"));
+                    evt.returnType = child.GetString("returnType");
+                    events.Add(evt);
+                }
+            }
+            this.Events = events.ToArray();
 
             this.Address = Address.FromText(node.GetString("address"));
 
@@ -1184,6 +1246,8 @@ namespace Phantasma.Explorer
         public byte[] Script { get; private set; }
 
         public ContractMethod[] Methods { get; private set; }
+        public ContractEvent[] Events { get; private set; }
+
 
         public Address Address { get; private set; }
 
