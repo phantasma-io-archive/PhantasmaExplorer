@@ -51,6 +51,37 @@ namespace Phantasma.Explorer
         public string Data;
     }
 
+    public class CustomDescriptionVM : DescriptionVM
+    {
+        public NexusData Nexus;
+
+        public CustomDescriptionVM(NexusData nexus, byte[] script) : base(script)
+        {
+            this.Nexus = nexus;
+        }
+
+        public override IToken FetchToken(string symbol)
+        {
+            var token = this.Nexus.FindTokenBySymbol(symbol);
+            if (token == null)
+            {
+                throw new Exception("unknown token: " + symbol);
+            }
+
+            return token;
+        }
+
+        public override string OutputAddress(Address address)
+        {
+            return LinkAddressTag.GenerateLink(this.Nexus, address);
+        }
+
+        public override string OutputSymbol(string symbol)
+        {
+            return $"<a href=\"/token/{symbol}\">{symbol}</a>";
+        }
+    }
+
     public struct OracleData
     {
         public string URL;
@@ -675,26 +706,18 @@ namespace Phantasma.Explorer
                                 {
                                     var contract = this.Nexus.FindContract(DomainSettings.RootChainName, evt.Contract);
                                     var contractEvent = contract.Events.Where(x => x.value == (byte)evt.Kind).First();
-                                    var vm = new DescriptionVM(contractEvent.description, (symbol) =>
-                                    {
-                                        var token = this.Nexus.FindTokenBySymbol(symbol);
-                                        if (token == null)
-                                        {
-                                            throw new Exception("unknown token: " + symbol);
-                                        }
-
-                                        return token; 
-                                    });
+                                    var vm = new CustomDescriptionVM(this.Nexus, contractEvent.description);
                                     vm.Stack.Push(VMObject.FromObject(evt.Data));
-                                    vm.Stack.Push(VMObject.FromObject(LinkAddress(evt.Address)));
+                                    vm.Stack.Push(VMObject.FromObject(evt.Address));
+                                    vm.ThrowOnFault = true;
                                     vm.Execute();
 
                                     var result = vm.Stack.Pop().AsString();
                                     sb.AppendLine(result);
                                 }
-                                catch (Exception)
+                                catch (Exception e)
                                 {
-                                    // do nothing for now..
+                                    Console.WriteLine(e.Message);
                                 }
 
 

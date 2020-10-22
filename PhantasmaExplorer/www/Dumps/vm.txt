@@ -1,0 +1,67 @@
+Exception: VM extcall failed: Format.Account
+*********CURRENT OFFSET*********
+39
+
+*********STACK*********
+[String] => <a href="/address/P2KLX1b6w63BbLbsscCQerqYvitdhByuPKGby1G9kmdAN9q">P2KLX1b6w63BbLbsscCQerqYvitdhByuPKGby1G9kmdAN9q</a>
+
+*********FRAMES*********
+Active = True
+Entry Offset = 0
+Registers:
+	R1 = [Object] => Address
+	R2 = [Bytes] => 01020406616D6F756E74030100040673796D626F6C04044B43414C
+	R3 = [String] => 
+	R4 = [String] => 
+	R5 = [String] => Format.Account
+	R6 = [Object] => Address
+
+*********DISASM*********
+000: POP r1
+002: POP r2
+004: LOAD r4, ""
+008: COPY r4, r3
+011: COPY r3, r4
+014: COPY r1, r6
+017: PUSH r6
+019: LOAD r5, "Format.Account"
+037: EXTCALL r5
+039: POP r5
+041: ADD r4, r5, r6
+045: COPY r6, r3
+048: COPY r3, r4
+051: LOAD r5, " opened a chest containing "
+082: ADD r4, r5, r6
+086: COPY r6, r3
+089: COPY r3, r4
+092: COPY r2, r6
+095: LOAD r7, "symbol"
+105: GET
+109: PUSH r6
+111: COPY r2, r6
+114: LOAD r7, "amount"
+124: GET
+128: PUSH r6
+130: LOAD r5, "Format.Decimals"
+149: EXTCALL r5
+151: POP r5
+153: ADD r4, r5, r6
+157: COPY r6, r3
+160: COPY r3, r4
+163: LOAD r5, " "
+168: ADD r4, r5, r6
+172: COPY r6, r3
+175: COPY r3, r4
+178: COPY r2, r6
+181: LOAD r7, "symbol"
+191: GET
+195: PUSH r6
+197: LOAD r5, "Format.Symbol"
+214: EXTCALL r5
+216: POP r5
+218: ADD r4, r5, r6
+222: COPY r6, r3
+225: COPY r3, r4
+228: PUSH r4
+230: RET
+
