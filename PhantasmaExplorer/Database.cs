@@ -981,8 +981,10 @@ namespace Phantasma.Explorer
         private int decimals;
 
         public string FormattedAmount => (UnitConversion.ToDecimal(Amount, decimals)).ToString("#,##0");
+        public string FormattedAmountDecimals => (UnitConversion.ToDecimal(Amount, decimals)).ToString("#,##0.00");
         public decimal Value => (UnitConversion.ToDecimal(Amount, decimals))*(CoinUtils.GetCoinRate(Symbol, "usd"));
-        public string FormattedValue => Value.ToString("#,##0");
+        public string FormattedValue => Value.ToString("#,##0.00");
+        public bool IsTokenFungible => Nexus.FindTokenBySymbol(Symbol).IsFungible();
 
         public BalanceData(NexusData database, DataNode node) : base(database)
         {
