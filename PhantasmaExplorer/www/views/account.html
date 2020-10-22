@@ -28,7 +28,7 @@
 
                                     <tr>
                                         <td>Name</td>
-                                        <td>{{account.Name}}</td>
+                                        <td>{{#if account.Address.Kind == 'System'}}{{#link-contract account.Name}}{{#else}}{{account.Name}}{{/if}}</td>
                                     </tr>
 
                                     <tr>
