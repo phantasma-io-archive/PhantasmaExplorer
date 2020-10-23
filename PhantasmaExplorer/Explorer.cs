@@ -558,6 +558,27 @@ namespace PhantasmaExplorer
                 return Error(templateEngine, "Could not find contract with id: " + id);
             });
 
+            server.Get("/file/{input}", (request) =>
+            {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
+                var id = request.GetVariable("input");
+
+                var file = nexus.FindFile(id);
+                if (file != null)
+                {
+                    var context = CreateContext();
+                    context["file"] = file;
+
+                    return templateEngine.Render(context, "layout", "file");
+                }
+
+                return Error(templateEngine, "Could not find file with id: " + id);
+            });
+
             server.Get("/token/{input}", (request) =>
             {
                 if (!initialized)

@@ -41,7 +41,7 @@ namespace Phantasma.Explorer
         Contract,
         Platform,
         Chain,
-
+        File,
     }
 
     public struct SearchResult
@@ -410,6 +410,14 @@ namespace Phantasma.Explorer
             return $"<a href=\"/token/{symbol}\">{symbol}</a>";
         }
 
+        private string LinkFile(Hash hash)
+        {
+            var hashText = hash.ToString();
+            var file = this.Nexus.FindFile(hashText);
+            var result = $"<a href=\"/file/{hashText}\">{file.Name}</a>";
+            return result;
+        }
+
         private string GenerateDescription()
         {
             decimal totalFees = 0;
@@ -695,6 +703,20 @@ namespace Phantasma.Explorer
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} received {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
+                            break;
+                        }
+
+                    case EventKind.FileCreate:
+                        {
+                            var hash = evt.GetContent<Hash>();
+                            sb.AppendLine($"{LinkAddress(evt.Address)} created file {LinkFile(hash)}");
+                            break;
+                        }
+
+                    case EventKind.FileDelete:
+                        {
+                            var hash = evt.GetContent<Hash>();
+                            sb.AppendLine($"{LinkAddress(evt.Address)} deleted file {LinkFile(hash)}");
                             break;
                         }
 
@@ -1281,6 +1303,25 @@ namespace Phantasma.Explorer
         public string Native;
     }
 
+    public class FileData : ExplorerObject
+    {
+        public FileData(NexusData database, DataNode node) : base(database)
+        {
+            ID = node.GetString("hash");
+            Name = node.GetString("name");
+            Time = node.GetUInt32("time");
+            Size = node.GetUInt32("size");
+        }
+
+        public string ID { get; private set; }
+
+        public string Name { get; private set; }
+
+        public uint Time { get; private set; }
+
+        public uint Size { get; private set; }
+    }
+
     public struct LeaderboardEntry
     {
         public Address address;
@@ -1300,6 +1341,7 @@ namespace Phantasma.Explorer
         private Dictionary<string, PlatformData> _platforms = new Dictionary<string, PlatformData>();
         public Dictionary<string, OrganizationData> _organizations = new Dictionary<string, OrganizationData>();
         private Dictionary<string, ContractData> _contracts = new Dictionary<string, ContractData>();
+        private Dictionary<string, FileData> _files = new Dictionary<string, FileData>();
 
         private Dictionary<Hash, BlockData> _blocks = new Dictionary<Hash, BlockData>();
         private Dictionary<Hash, TransactionData> _transactions = new Dictionary<Hash, TransactionData>();
@@ -1660,6 +1702,23 @@ namespace Phantasma.Explorer
             RegisterSearch(id, id, SearchResultKind.Contract, id);
 
             return contract;
+        }
+
+        public FileData FindFile(string id)
+        {
+            if (_files.ContainsKey(id))
+            {
+                return _files[id];
+            }
+
+            Console.WriteLine("Detected new file: " + id);
+            var temp = APIRequest($"getArchive/{id}");
+            var file = new FileData(this, temp);
+            _files[id] = file;
+
+            RegisterSearch(id, file.Name, SearchResultKind.File, id);
+
+            return file;
         }
 
         public TransactionData FindTransaction(ChainData chain, Hash txHash)
