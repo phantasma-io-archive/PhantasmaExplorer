@@ -55,7 +55,7 @@ namespace Phantasma.Explorer
     {
         public NexusData Nexus;
 
-        public CustomDescriptionVM(NexusData nexus, byte[] script) : base(script)
+        public CustomDescriptionVM(NexusData nexus, byte[] script) : base(script, 0)
         {
             this.Nexus = nexus;
         }
@@ -967,6 +967,7 @@ namespace Phantasma.Explorer
         public BigInteger CurrentSupply { get; private set; }
         public int Decimals { get; private set; }
         public byte[] Script { get; private set; }
+        public ContractInterface ABI { get; private set; }
 
         public string FormattedMaxSupply => (UnitConversion.ToDecimal(MaxSupply, Decimals)).ToString("#,##0");
         public string FormattedCurrentSupply => (UnitConversion.ToDecimal(CurrentSupply, Decimals)).ToString("#,##0");
