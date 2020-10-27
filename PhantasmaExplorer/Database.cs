@@ -958,6 +958,7 @@ namespace Phantasma.Explorer
             this.Decimals = int.Parse(node.GetString("decimals"));
             this.Flags = node.GetEnum<TokenFlags>("flags");
             this.Script = Base16.Decode(node.GetString("script"));
+            this.ABI = new ContractInterface();
         }
 
         public string Name { get; private set; }
