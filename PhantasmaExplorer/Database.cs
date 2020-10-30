@@ -955,6 +955,7 @@ namespace Phantasma.Explorer
             this.Symbol = node.GetString("symbol");
             this.MaxSupply = BigInteger.Parse(node.GetString("maxSupply"));
             this.CurrentSupply = BigInteger.Parse(node.GetString("currentSupply"));
+            this.Owner = Address.FromText(node.GetString("owner"));
             this.Decimals = int.Parse(node.GetString("decimals"));
             this.Flags = node.GetEnum<TokenFlags>("flags");
             this.Script = Base16.Decode(node.GetString("script"));
@@ -963,6 +964,7 @@ namespace Phantasma.Explorer
 
         public string Name { get; private set; }
         public string Symbol { get; private set; }
+        public Address Owner { get; private set; }
         public TokenFlags Flags { get; private set; }
         public BigInteger MaxSupply { get; private set; }
         public BigInteger CurrentSupply { get; private set; }
