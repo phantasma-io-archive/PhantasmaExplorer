@@ -11,12 +11,13 @@
         <div class="table-responsive">
             <table class="table table-general">
                 <!-- TODO specific css for these tables -->
-                <thead>
-                    <tr>
-                        <th>{{token.Name}}</th>
-                    </tr>
-                </thead>
                 <tbody>
+                    <tr>
+                        <td>
+                            <span>Name</span>
+                        </td>
+                        <td>{{token.Name}}</td>
+                    </tr>
                     <tr>
                         <td>
                             <span>Price</span>
@@ -46,9 +47,6 @@
     <div class="col-md-6">
         <div class="table-responsive">
             <table class="table table-general">
-                <thead>
-                    <tr><th>Summary </th></tr>
-                </thead>
                 <tbody>
 
                     <tr>
@@ -82,28 +80,18 @@
                         <td>Non-Fungible</td>
                         {{/if}}
                     </tr>
+					
+                  <tr>
+                        <td>
+                            <span>Contract</span>
+                        </td>                        
+                        <td>{{#link-contract token.Symbol}}</td>                        
+                  </tr>
+					
                 </tbody>
             </table>
         </div>
     </div>
-    {{#if token.Script}}
-    <div class="col-md-12">
-        <div class="table-responsive">
-            <table class="table table-general layout-fixed">
-              <thead>
-                  <tr><th>Script </th></tr>
-              </thead>
-              <tbody>
-                  <tr>
-                    <td>
-                        <span>{{#hex token.Script}}</span>
-                    </td>
-                  </tr>
-              </tbody>
-            </table>
-        </div>
-    </div>
-    {{/if}}
 
 </div>
 
