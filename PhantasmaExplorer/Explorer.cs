@@ -227,7 +227,7 @@ namespace PhantasmaExplorer
     {
         //public static decimal soulRate { get; private set; }
 
-        public const string ExplorerVersion = "1.1.3";
+        public const string ExplorerVersion = "1.1.4";
 
         public static NexusData nexus { get; private set; }
 
