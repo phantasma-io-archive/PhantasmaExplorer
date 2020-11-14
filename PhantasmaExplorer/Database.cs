@@ -600,11 +600,18 @@ namespace Phantasma.Explorer
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} minted {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             }
-                            else
+                            else if (data.Symbol == "TTRS")
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
-
+                            else if (data.Symbol == "GHOST")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                            }
                             Nexus.RegisterSearch(data.Symbol, "Token Mint", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -618,9 +625,17 @@ namespace Phantasma.Explorer
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} burned {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             }
-                            else
+                            else if (data.Symbol == "TTRS")
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} burned {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
+                            else if (data.Symbol == "GHOST")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} burned {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} burned {LinkToken(data.Symbol)} - NFT #{data.Value}");
                             }
                             Nexus.RegisterSearch(data.Symbol, "Token Burn", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
@@ -635,9 +650,17 @@ namespace Phantasma.Explorer
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             }
-                            else
+                            else if (data.Symbol == "TTRS")
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
+                            else if (data.Symbol == "GHOST")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT #{data.Value}");
                             }
                             break;
                         }
@@ -649,7 +672,7 @@ namespace Phantasma.Explorer
 
                             if (evt.Contract == "entry")
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} staked {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             }
                             else
                             {
@@ -666,9 +689,17 @@ namespace Phantasma.Explorer
                                       sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
                                     }
                                 }
-                                else
+                                else if (data.Symbol == "TTRS")
                                 {
                                     sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                }
+                                else if (data.Symbol == "GHOST")
+                                {
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                }
+                                else
+                                {
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
                                 }
                             }
                             break;
@@ -683,9 +714,17 @@ namespace Phantasma.Explorer
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} sent {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             }
-                            else
+                            else if (data.Symbol == "TTRS")
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
+                            else if (data.Symbol == "GHOST")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT #{data.Value}");
                             }
                             break;
                         }
@@ -699,9 +738,17 @@ namespace Phantasma.Explorer
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} received {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             }
-                            else
+                            else if (data.Symbol == "TTRS")
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} received {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
+                            else if (data.Symbol == "GHOST")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} received {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} received {LinkToken(data.Symbol)} - NFT #{data.Value}");
                             }
                             break;
                         }
