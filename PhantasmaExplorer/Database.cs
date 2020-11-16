@@ -421,6 +421,7 @@ namespace Phantasma.Explorer
         private string GenerateDescription()
         {
             decimal totalFees = 0;
+            decimal burnedFees = 0;
             var fees = new Dictionary<Address, decimal>();
 
             Address feeAddress = Address.Null;
@@ -467,6 +468,20 @@ namespace Phantasma.Explorer
                                 }
                                 break;
                             }
+
+                          case EventKind.TokenBurn:
+                              {
+                                  var data = evt.GetContent<TokenEventData>();
+                                  if (data.Symbol == DomainSettings.FuelTokenSymbol)
+                                  {
+                                      if (evt.Address.IsSystem)
+                                      {
+                                          var amount = UnitConversion.ToDecimal(data.Value, DomainSettings.FuelTokenDecimals);
+                                          burnedFees += amount;
+                                      }
+                                  }
+                                  break;
+                              }
                     }
 
                     continue;
@@ -804,6 +819,11 @@ namespace Phantasma.Explorer
             foreach (var entry in fees)
             {
                 sb.AppendLine($"{LinkAddress(entry.Key)} received {entry.Value} {LinkToken(DomainSettings.FuelTokenSymbol)} in fees.");
+            }
+
+            if (!feeAddress.IsNull)
+            {
+                sb.AppendLine($"{LinkAddress(feeAddress)} burned {burnedFees} {LinkToken(DomainSettings.FuelTokenSymbol)} in fees.");
             }
 
             foreach (var addr in addresses)
