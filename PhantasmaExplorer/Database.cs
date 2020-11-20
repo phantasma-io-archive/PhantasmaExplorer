@@ -245,6 +245,13 @@ namespace Phantasma.Explorer
                         break;
                     }
 
+                case EventKind.ContractUpgrade:
+                        {
+                            var symbol = evnt.GetContent<string>();
+                            Nexus.RegisterSearch(symbol, "Contract Upgrade", SearchResultKind.Transaction, hash.ToString());
+                            break;
+                        }
+
                 case EventKind.AddressRegister:
                     {
                         var name = evnt.GetContent<string>();
@@ -516,6 +523,14 @@ namespace Phantasma.Explorer
                             Nexus.RegisterSearch(symbol, "Token Creation", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
+
+                    case EventKind.ContractUpgrade:
+                            {
+                                var symbol = evt.GetContent<string>();
+                                sb.AppendLine($"Contract upgraded: {LinkToken(symbol)}");
+                                Nexus.RegisterSearch(symbol, "Contract Upgrade", SearchResultKind.Transaction, this.Hash.ToString());
+                                break;
+                            }
 
                     case EventKind.AddressRegister:
                         {
