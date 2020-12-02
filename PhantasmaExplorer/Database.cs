@@ -1411,15 +1411,15 @@ namespace Phantasma.Explorer
         {
             ID = node.GetString("hash");
             Name = node.GetString("name");
-            Time = node.GetUInt32("time");
-            Size = node.GetUInt32("size");
+            Time = new Timestamp(node.GetUInt32("time"));
+            Size = uint.Parse(node.GetUInt32("size").ToString()) / 1024;
         }
 
         public string ID { get; private set; }
 
         public string Name { get; private set; }
 
-        public uint Time { get; private set; }
+        public Timestamp Time { get; private set; }
 
         public uint Size { get; private set; }
     }
