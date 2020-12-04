@@ -687,10 +687,18 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
+                            var contractAddress = Address.FromHash(evt.Contract);
                             bool fungible = token.IsFungible();
                             if (fungible)
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                                if (evt.Contract != "gas" && evt.Contract != "swap" && evt.Contract != "stake")
+                                {
+                                  sb.AppendLine($"{LinkAddress(evt.Address)} claimed infusion of {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}.");
+                                }
+                                else
+                                {
+                                  sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                                }
                             }
                             else if (data.Symbol == "TTRS")
                             {
@@ -726,7 +734,7 @@ namespace Phantasma.Explorer
                                     {
                                       sb.AppendLine($"{LinkAddress(evt.Address)} withdrew {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(contractAddress, evt.Contract)} contract");
                                     }
-                                    else if (evt.Contract != "stake")
+                                    else if (evt.Contract != "gas" && evt.Contract != "swap" && evt.Contract != "stake")
                                     {
                                       sb.AppendLine($"{LinkAddress(evt.Address)} infused {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
                                     }
