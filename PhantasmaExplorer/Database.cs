@@ -733,11 +733,25 @@ namespace Phantasma.Explorer
                                 }
                                 else if (data.Symbol == "TTRS")
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    if (evt.Contract == "market")
+                                    {
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
+                                    else
+                                    {
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                    }
                                 }
                                 else if (data.Symbol == "GHOST")
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    if (evt.Contract == "market")
+                                    {
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
+                                    else
+                                    {
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                    }
                                 }
                                 else
                                 {
