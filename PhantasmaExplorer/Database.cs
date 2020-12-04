@@ -726,6 +726,10 @@ namespace Phantasma.Explorer
                                     {
                                       sb.AppendLine($"{LinkAddress(evt.Address)} withdrew {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(contractAddress, evt.Contract)} contract");
                                     }
+                                    else if (evt.Contract != "stake")
+                                    {
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
                                     else
                                     {
                                       sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
@@ -755,7 +759,14 @@ namespace Phantasma.Explorer
                                 }
                                 else
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    if (evt.Contract == "market")
+                                    {
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
+                                    else
+                                    {
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
                                 }
                             }
                             break;
