@@ -444,6 +444,18 @@ namespace Phantasma.Explorer
                     addresses.Add(evt.Address);
                 }
 
+                if (evt.Contract == "gas" && evt.Kind == EventKind.TokenClaim) // handle tokenclaim on gas contract (ex: crown)
+                {
+                    var data = evt.GetContent<TokenEventData>();
+                    var token = Nexus.FindTokenBySymbol(data.Symbol);
+                    bool fungible = token.IsFungible();
+
+                    if (!fungible)
+                    {
+                        sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                    }
+                }
+
                 if (evt.Contract == "gas")
                 {
                     switch (evt.Kind)
