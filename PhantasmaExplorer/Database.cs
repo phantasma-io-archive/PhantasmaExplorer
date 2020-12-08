@@ -444,15 +444,56 @@ namespace Phantasma.Explorer
                     addresses.Add(evt.Address);
                 }
 
-                if (evt.Contract == "gas" && evt.Kind == EventKind.TokenClaim) // handle tokenclaim on gas contract (ex: crown)
+                if (evt.Contract == "gas") // handle tokenmint & tokenclaim on gas contract (ex: crown)
                 {
-                    var data = evt.GetContent<TokenEventData>();
-                    var token = Nexus.FindTokenBySymbol(data.Symbol);
-                    bool fungible = token.IsFungible();
-
-                    if (!fungible)
+                    switch (evt.Kind)
                     {
-                        sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                        case EventKind.TokenMint:
+                        {
+                            var data = evt.GetContent<TokenEventData>();
+                            var token = Nexus.FindTokenBySymbol(data.Symbol);
+                            bool fungible = token.IsFungible();
+                            if (fungible)
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                            }
+                            break;
+                        }
+
+                        case EventKind.TokenClaim:
+                        {
+                            var data = evt.GetContent<TokenEventData>();
+                            var token = Nexus.FindTokenBySymbol(data.Symbol);
+                            bool fungible = token.IsFungible();
+
+                            if (!fungible)
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                            }
+                            break;
+                        }
+
+                        case EventKind.Infusion:
+                        {
+                            var data = evt.GetContent<InfusionEventData>();
+                            var token = Nexus.FindTokenBySymbol(data.BaseSymbol);
+                            var tokenInfused = Nexus.FindTokenBySymbol(data.InfusedSymbol);
+                            bool fungible = tokenInfused.IsFungible();
+
+                            if (fungible)
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT #{data.TokenID} with {UnitConversion.ToDecimal(data.InfusedValue, tokenInfused != null ? tokenInfused.Decimals : 0)} {LinkToken(data.InfusedSymbol)}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT #{data.TokenID} with {data.InfusedSymbol} NFT #{data.InfusedValue}");
+                            }
+                            break;
+                        }
                     }
                 }
 
