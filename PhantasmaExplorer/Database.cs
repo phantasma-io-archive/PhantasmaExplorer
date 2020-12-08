@@ -660,7 +660,7 @@ namespace Phantasma.Explorer
                             }
                             else if (data.Symbol == "GHOST")
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
                             else
                             {
@@ -685,7 +685,7 @@ namespace Phantasma.Explorer
                             }
                             else if (data.Symbol == "GHOST")
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} burned {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} burned {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
                             else
                             {
@@ -718,7 +718,7 @@ namespace Phantasma.Explorer
                             }
                             else if (data.Symbol == "GHOST")
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
                             else
                             {
@@ -770,11 +770,11 @@ namespace Phantasma.Explorer
                                 {
                                     if (evt.Contract == "market")
                                     {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
                                     }
                                     else
                                     {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
                                     }
                                 }
                                 else
@@ -807,7 +807,7 @@ namespace Phantasma.Explorer
                             }
                             else if (data.Symbol == "GHOST")
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
                             else
                             {
@@ -831,7 +831,7 @@ namespace Phantasma.Explorer
                             }
                             else if (data.Symbol == "GHOST")
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} received {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/S3d8xzyuUC3QChNDdj3KUxT2oqxkVTKFDbbgJ9yLUY7HLas/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} received {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
                             }
                             else
                             {
