@@ -744,14 +744,7 @@ namespace Phantasma.Explorer
                             bool fungible = token.IsFungible();
                             if (fungible)
                             {
-                                if (evt.Contract != "gas" && evt.Contract != "swap" && evt.Contract != "stake")
-                                {
-                                  sb.AppendLine($"{LinkAddress(evt.Address)} claimed infusion of {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}.");
-                                }
-                                else
-                                {
-                                  sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
-                                }
+                                sb.AppendLine($"{LinkAddress(evt.Address)} claimed {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             }
                             else if (data.Symbol == "TTRS")
                             {
@@ -772,63 +765,34 @@ namespace Phantasma.Explorer
                         {
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
-
-                            if (evt.Contract == "entry")
+                            var contractAddress = Address.FromHash(evt.Contract);
+                            bool fungible = token.IsFungible();
+                            if (evt.Contract != "gas" && evt.Contract != "swap" && evt.Contract != "stake") // break if non native contracts, already handled by infusion
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                              break;
                             }
-                            else
+                            if (fungible)
                             {
-                                var contractAddress = Address.FromHash(evt.Contract);
-                                bool fungible = token.IsFungible();
-                                if (fungible)
+                                if ((evt.Address).IsInterop) // used to check if from external chain
                                 {
-                                    if ((evt.Address).IsInterop) // used to check if from external chain
-                                    {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} withdrew {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(contractAddress, evt.Contract)} contract");
-                                    }
-                                    else if (evt.Contract != "gas" && evt.Contract != "swap" && evt.Contract != "stake")
-                                    {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
-                                    }
-                                    else
-                                    {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
-                                    }
-                                }
-                                else if (data.Symbol == "TTRS")
-                                {
-                                    if (evt.Contract == "market")
-                                    {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
-                                    }
-                                    else
-                                    {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
-                                    }
-                                }
-                                else if (data.Symbol == "GHOST")
-                                {
-                                    if (evt.Contract == "market")
-                                    {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
-                                    }
-                                    else
-                                    {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
-                                    }
+                                  sb.AppendLine($"{LinkAddress(evt.Address)} withdrew {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(contractAddress, evt.Contract)} contract");
                                 }
                                 else
                                 {
-                                    if (evt.Contract == "market")
-                                    {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
-                                    }
-                                    else
-                                    {
-                                      sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
-                                    }
+                                  sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
                                 }
+                            }
+                            else if (data.Symbol == "TTRS")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                            }
+                            else if (data.Symbol == "GHOST")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
                             }
                             break;
                         }
@@ -880,6 +844,46 @@ namespace Phantasma.Explorer
                             }
                             break;
                         }
+
+                    case EventKind.Infusion:
+                    {
+                        var data = evt.GetContent<InfusionEventData>();
+                        var token = Nexus.FindTokenBySymbol(data.BaseSymbol);
+                        var tokenInfused = Nexus.FindTokenBySymbol(data.InfusedSymbol);
+                        bool fungible = tokenInfused.IsFungible();
+
+                        if (fungible)
+                        {
+                            if (token.Symbol == "TTRS")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {UnitConversion.ToDecimal(data.InfusedValue, tokenInfused != null ? tokenInfused.Decimals : 0)} {LinkToken(data.InfusedSymbol)}");
+                            }
+                            else if (token.Symbol == "GHOST")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {UnitConversion.ToDecimal(data.InfusedValue, tokenInfused != null ? tokenInfused.Decimals : 0)} {LinkToken(data.InfusedSymbol)}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT #{data.TokenID} with {UnitConversion.ToDecimal(data.InfusedValue, tokenInfused != null ? tokenInfused.Decimals : 0)} {LinkToken(data.InfusedSymbol)}");
+                            }
+                        }
+                        else
+                        {
+                            if (token.Symbol == "TTRS")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {data.InfusedSymbol} NFT #{data.InfusedValue}");
+                            }
+                            else if (token.Symbol == "GHOST")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {data.InfusedSymbol} NFT #{data.InfusedValue}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT #{data.TokenID} with {data.InfusedSymbol} NFT #{data.InfusedValue}");
+                            }
+                        }
+                        break;
+                    }
 
                     case EventKind.FileCreate:
                         {
