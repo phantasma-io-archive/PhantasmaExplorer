@@ -492,11 +492,11 @@ namespace Phantasma.Explorer
                             {
                                 if (data.InfusedSymbol == "TTRS")
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a>");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://www.22series.com/part_info?id={data.TokeInfusedValuenID}\" target=\"_blank\">#{data.InfusedValue}</a>");
                                 }
                                 else if (data.InfusedSymbol == "GHOST")
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://ghostmarket.io/asset/pha/ttrs/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a>");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://ghostmarket.io/asset/pha/ttrs/{data.InfusedValue}\" target=\"_blank\">#{data.InfusedValue}</a>");
                                 }
                                 else
                                 {
@@ -507,11 +507,11 @@ namespace Phantasma.Explorer
                             {
                                 if (data.InfusedSymbol == "TTRS")
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a>");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://www.22series.com/part_info?id={data.InfusedValue}\" target=\"_blank\">#{data.InfusedValue}</a>");
                                 }
                                 else if (data.InfusedSymbol == "GHOST")
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a>");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.InfusedValue}\" target=\"_blank\">#{data.InfusedValue}</a>");
                                 }
                                 else
                                 {
@@ -903,35 +903,35 @@ namespace Phantasma.Explorer
                             {
                                 if (data.InfusedSymbol == "TTRS")
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {data.InfusedSymbol} NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a>");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://www.22series.com/part_info?id={data.InfusedValue}\" target=\"_blank\">#{data.InfusedValue}</a>");
                                 }
                                 else if (data.InfusedSymbol == "GHOST")
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {data.InfusedSymbol} NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a>");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.InfusedValue}\" target=\"_blank\">#{data.InfusedValue}</a>");
                                 }
                                 else
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {data.InfusedSymbol} NFT #{data.InfusedValue}");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT #{data.InfusedValue}");
                                 }
                             }
                             else if (token.Symbol == "GHOST")
                             {
                               if (data.InfusedSymbol == "TTRS")
                               {
-                                  sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {data.InfusedSymbol} NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a>");
+                                  sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://www.22series.com/part_info?id={data.InfusedValue}\" target=\"_blank\">#{data.InfusedValue}</a>");
                               }
                               else if (data.InfusedSymbol == "GHOST")
                               {
-                                  sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {data.InfusedSymbol} NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a>");
+                                  sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.InfusedValue}\" target=\"_blank\">#{data.InfusedValue}</a>");
                               }
                               else
                               {
-                                  sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {data.InfusedSymbol} NFT #{data.InfusedValue}");
+                                  sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT #{data.InfusedValue}");
                               }
                             }
                             else
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT #{data.TokenID} with {data.InfusedSymbol} NFT #{data.InfusedValue}");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT #{data.TokenID} with {LinkToken(data.InfusedSymbol)} NFT #{data.InfusedValue}");
                             }
                         }
                         break;
