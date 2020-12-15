@@ -492,7 +492,7 @@ namespace Phantasma.Explorer
                             {
                                 if (data.InfusedSymbol == "TTRS")
                                 {
-                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://www.22series.com/part_info?id={data.TokeInfusedValuenID}\" target=\"_blank\">#{data.InfusedValue}</a>");
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} infused {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.TokenID}\" target=\"_blank\">#{data.TokenID}</a> with {LinkToken(data.InfusedSymbol)} NFT <a href=\"https://www.22series.com/part_info?id={data.InfusedValue}\" target=\"_blank\">#{data.InfusedValue}</a>");
                                 }
                                 else if (data.InfusedSymbol == "GHOST")
                                 {
