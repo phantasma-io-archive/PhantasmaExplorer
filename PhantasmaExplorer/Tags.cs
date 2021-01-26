@@ -402,7 +402,7 @@ namespace Phantasma.Explorer
             if (name == null)
             {
                 var account = nexus.FindAccount(address, false);
-                if (account != null && account.Name != ValidationUtils.ANONYMOUS)
+                if (account != null && account.Name != ValidationUtils.ANONYMOUS_NAME)
                 {
                     name = account.Name;
                 }

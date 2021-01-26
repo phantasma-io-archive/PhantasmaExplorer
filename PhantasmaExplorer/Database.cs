@@ -1392,7 +1392,7 @@ namespace Phantasma.Explorer
                     return false;
                 }
 
-                return Name==ValidationUtils.ANONYMOUS && Stake == 0 && Balances.Length == 0;
+                return Name==ValidationUtils.ANONYMOUS_NAME && Stake == 0 && Balances.Length == 0;
             }
         }
     }
