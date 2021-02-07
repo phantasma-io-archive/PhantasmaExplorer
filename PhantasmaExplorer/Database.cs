@@ -951,6 +951,27 @@ namespace Phantasma.Explorer
                             break;
                         }
 
+                    case EventKind.OrderBid:
+                        {
+                            var data = evt.GetContent<MarketEventData>();
+                            var token = Nexus.FindTokenBySymbol(data.BaseSymbol);
+                            var tokenQuote = Nexus.FindTokenBySymbol(data.QuoteSymbol);
+
+                            if (token.Symbol == "TTRS")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} bid on {data.Type} Auction for {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.ID}\" target=\"_blank\">#{data.ID}</a> for {UnitConversion.ToDecimal(data.Price, token != null ? token.Decimals : 0)} {LinkToken(data.QuoteSymbol)}");
+                            }
+                            else if (token.Symbol == "GHOST")
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} bid on {data.Type} Auction for {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.ID}\" target=\"_blank\">#{data.ID}</a> for {UnitConversion.ToDecimal(data.Price, token != null ? token.Decimals : 0)} {LinkToken(data.QuoteSymbol)}");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"{LinkAddress(evt.Address)} bid on {data.Type} Auction for {LinkToken(token.Symbol)} - NFT #{data.ID} for {UnitConversion.ToDecimal(data.Price, tokenQuote != null ? tokenQuote.Decimals : 0)} {LinkToken(data.QuoteSymbol)}");
+                            }
+                            break;
+                        }
+
                     default:
                         {
                             if (evt.Kind >= EventKind.Custom)
