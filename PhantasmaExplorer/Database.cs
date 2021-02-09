@@ -959,11 +959,11 @@ namespace Phantasma.Explorer
 
                             if (token.Symbol == "TTRS")
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} bid on {data.Type} Auction for {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.ID}\" target=\"_blank\">#{data.ID}</a> for {UnitConversion.ToDecimal(data.EndPrice, token != null ? token.Decimals : 0)} {LinkToken(data.QuoteSymbol)}");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} bid on {data.Type} Auction for {LinkToken(token.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.ID}\" target=\"_blank\">#{data.ID}</a> for {UnitConversion.ToDecimal(data.EndPrice, tokenQuote != null ? tokenQuote.Decimals : 0)} {LinkToken(data.QuoteSymbol)}");
                             }
                             else if (token.Symbol == "GHOST")
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} bid on {data.Type} Auction for {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.ID}\" target=\"_blank\">#{data.ID}</a> for {UnitConversion.ToDecimal(data.EndPrice, token != null ? token.Decimals : 0)} {LinkToken(data.QuoteSymbol)}");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} bid on {data.Type} Auction for {LinkToken(token.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.ID}\" target=\"_blank\">#{data.ID}</a> for {UnitConversion.ToDecimal(data.EndPrice, tokenQuote != null ? tokenQuote.Decimals : 0)} {LinkToken(data.QuoteSymbol)}");
                             }
                             else
                             {
