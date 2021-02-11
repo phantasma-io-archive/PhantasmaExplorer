@@ -983,7 +983,6 @@ namespace Phantasma.Explorer
                                     var vm = new CustomDescriptionVM(this.Nexus, contractEvent.description);
                                     vm.Stack.Push(VMObject.FromObject(evt.Data));
                                     vm.Stack.Push(VMObject.FromObject(evt.Address));
-                                    vm.ThrowOnFault = true;
                                     vm.Execute();
 
                                     var result = vm.Stack.Pop().AsString();
