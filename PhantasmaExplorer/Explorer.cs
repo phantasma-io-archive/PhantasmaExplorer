@@ -4,9 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+
 using LunarLabs.WebServer.Core;
 using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
+
 using Phantasma.Core.Utils;
 using Phantasma.Cryptography;
 using Phantasma.Domain;
@@ -38,195 +40,8 @@ namespace PhantasmaExplorer
         //public Dictionary<string, uint> Chart;
     }
 
-    /*    public struct EventContext
-        {
-            public EventKind kind;
-            public string content;
-        }
-
-        public struct TransactionContext
-        {
-            public string hash;
-            public IBlock block;
-            public DateTime date;
-            public string chainName;
-            public string chainAddress;
-            public string fromName;
-            public string fromAddress;
-            public IEnumerable<EventContext> events;
-            public IEnumerable<Instruction> instructions;
-
-            // TODO exception and error handling
-            private static string GetEventContent(Database database, BlockData block, Event evt)
-            {
-                switch (evt.Kind)
-                {
-                    case EventKind.ChainCreate:
-                        {
-                            var chainAddress = Serialization.Unserialize<Address>(evt.Data);
-                            var chain = database.FindChainByAddress(chainAddress);
-                            return $"{chain.Name} chain created at address <a href=\"/chain/{chainAddress}\">{chainAddress}</a>.";
-                        }
-
-                    case EventKind.TokenCreate:
-                        {
-                            var symbol = Serialization.Unserialize<string>(evt.Data);
-                            var token = database.FindTokenBySymbol(symbol);
-                            return $"{token.Name} token created with symbol <a href=\"/token/{symbol}\">{symbol}</a>.";
-                        }
-
-                    case EventKind.TokenMint:
-                    case EventKind.TokenBurn:
-                    case EventKind.TokenSend:
-                    case EventKind.TokenReceive:
-                        {
-                            var data = evt.GetContent<TokenEventData>();
-                            var token = database.FindTokenBySymbol(data.Symbol);
-                            string action;
-
-                            switch (evt.Kind)
-                            {
-                                case EventKind.TokenMint: action = "minted"; break;
-                                case EventKind.TokenBurn: action = "burned"; break;
-                                case EventKind.TokenSend: action = "sent"; break;
-                                case EventKind.TokenReceive: action = "received"; break;
-                                default: action = "???"; break;
-                            }
-
-                            string chainText;
-
-                            if (data.ChainName != block.Chain.na)
-                            {
-                                Address srcAddress, dstAddress;
-
-                                if (evt.Kind == EventKind.TokenReceive)
-                                {
-                                    srcAddress = data.chainAddress;
-                                    dstAddress = block.Chain.Address;
-                                }
-                                else
-                                {
-                                    srcAddress = block.Chain.Address;
-                                    dstAddress = data.chainAddress;
-                                }
-
-                                chainText = $"from <a href=\"/chain/{srcAddress}\">{GetChainName(nexus, srcAddress)} chain</a> to <a href=\"/chain/{dstAddress}\">{GetChainName(nexus, dstAddress)} chain";
-                            }
-                            else
-                            {
-                                chainText = $"in <a href=\"/chain/{data.chainAddress}\">{GetChainName(nexus, data.chainAddress)} chain";
-                            }
-
-                            return $"{UnitConversion.ToDecimal(data.amount)} {token.Name} tokens {action} at </a> address <a href=\"/address/{evt.Address}\">{evt.Address}</a> {chainText}.";
-                        }
-
-                    default: return "Nothing.";
-                }
-            }
-
-            public static TransactionContext FromTransaction(Database database, BlockData block, TransactionData tx)
-            {
-                var evts = new List<EventContext>();
-                foreach (var evt in tx.Events)
-                {
-                    evts.Add(new EventContext()
-                    {
-                        kind = evt.Kind,
-                        content = GetEventContent(database, block, evt),
-                    });
-                }
-
-                var disasm = new Disassembler(tx.Script);
-
-                return new TransactionContext()
-                {
-                    block = block,
-                    chainAddress = block.Chain.Address.Text,
-                    chainName = block.Chain.Name,
-                    date = block.Timestamp,
-                    hash = tx.Hash.ToString(),
-                    fromAddress = "????",
-                    fromName = "Anonymous",
-                    events = evts,
-                    instructions = disasm.GetInstructions(),
-                };
-            }
-        }
-
-        public struct TokenContext
-        {
-            public string symbol;
-            public string name;
-            public string logoUrl;
-            public string description;
-            public string contractHash;
-            public int decimals;
-            public decimal maxSupply;
-            public decimal currentSupply;
-        }
-
-        public struct BlockContext
-        {
-            public int height;
-            public DateTime timestamp;
-            public int transactions;
-            public string hash;
-            public string parentHash;
-            public string miningAddress;
-            public string chainName;
-            public string chainAddress;
-
-            public static BlockContext FromBlock(IBlock block)
-            {
-                return new BlockContext
-                {
-                    height = (int)block.Height,
-                    timestamp = block.Timestamp,
-                    transactions = block.Transactions.Count(),
-                    hash = block.Hash.ToString(),
-                    parentHash = block.PreviousHash?.ToString(),
-                    miningAddress = block.MinerAddress.Text,
-                    chainName = block.Chain.Name.ToTitleCase(),
-                    chainAddress = block.Chain.Address.Text
-                };
-            }
-        }
-
-        public struct AddressContext
-        {
-            public string address;//todo change var name
-            public string name;
-            public decimal balance;
-            public decimal value;
-            public List<TransactionContext> transactions;
-
-            public static AddressContext FromAddress(Database database, Address address, List<TransactionContext> txList)
-            {
-                var balance = UnitConversion.ToDecimal(nexus.RootChain.GetTokenBalance(nexus.NativeToken, address));
-                return new AddressContext()
-                {
-                    address = address.Text,
-                    name = "Anonymous",
-                    balance = balance,
-                    value = balance * Explorer.soulRate,
-                    transactions = txList
-                };
-            }
-        }
-
-        public struct ChainContext
-        {
-            public string address;
-            public string name;
-            public int transactions;
-            public int height;
-        }
-            */
-
     public class Explorer
     {
-        //public static decimal soulRate { get; private set; }
-
         public const string ExplorerVersion = "1.1.4";
 
         public static NexusData nexus { get; private set; }
@@ -277,6 +92,9 @@ namespace PhantasmaExplorer
 
                 case SearchResultKind.Contract:
                     return $"/contract/{data}";
+
+                case SearchResultKind.Sale:
+                    return $"/sale/{data}";
 
                 default:
                     return $"error";
@@ -577,6 +395,32 @@ namespace PhantasmaExplorer
                 }
 
                 return Error(templateEngine, "Could not find file with id: " + id);
+            });
+
+            server.Get("/sale/{input}", (request) =>
+            {
+                if (!initialized)
+                {
+                    return HTTPResponse.Redirect("/nexus");
+                }
+
+                var input = request.GetVariable("input");
+
+                Hash saleHash;
+
+                if (Hash.TryParse(input, out saleHash))
+                {
+                    var sale = nexus.FindSaleByHash(saleHash);
+                    if (sale != null)
+                    {
+                        var context = CreateContext();
+                        context["sale"] = sale;
+
+                        return templateEngine.Render(context, "layout", "sale");
+                    }
+                }
+
+                return Error(templateEngine, "Could not find sale with hash: " + input);
             });
 
             server.Get("/token/{input}", (request) =>

@@ -17,6 +17,7 @@ using Phantasma.Numerics;
 using Phantasma.VM;
 using Phantasma.Core;
 using Phantasma.Blockchain;
+using Phantasma.Blockchain.Contracts;
 
 namespace Phantasma.Explorer
 {
@@ -42,6 +43,7 @@ namespace Phantasma.Explorer
         Platform,
         Chain,
         File,
+        Sale,
     }
 
     public struct SearchResult
@@ -317,6 +319,23 @@ namespace Phantasma.Explorer
                         Nexus.RegisterSearch(data.Symbol, "Token Burn", SearchResultKind.Transaction, hash.ToString());
                         break;
                     }
+
+                case EventKind.Crowdsale:
+                    {
+                        var data = evnt.GetContent<SaleEventData>();
+                        var sale = Nexus.FindSaleByHash(data.saleHash);
+                        if (sale != null)
+                        {
+                            switch (data.kind)
+                            {
+                                case SaleEventKind.Creation:
+                                    Nexus.RegisterSearch(sale.Name, "Sale creation", SearchResultKind.Sale, hash.ToString());
+                                    break;
+                            }
+                        }
+                        break;
+                    }
+
             }
         }
     }
@@ -415,6 +434,11 @@ namespace Phantasma.Explorer
             var name = token != null ? token.Name : symbol;
 
             return $"<a href=\"/token/{symbol}\">{symbol}</a>";
+        }
+
+        private string LinkSale(SaleData sale)
+        {
+            return $"<a href=\"/sale/{sale.Hash}\">{sale.Name}</a>";
         }
 
         private string LinkFile(Hash hash)
@@ -647,6 +671,66 @@ namespace Phantasma.Explorer
                             break;
                         }
 
+                    case EventKind.Crowdsale:
+                        {
+                            var data = evt.GetContent<SaleEventData>();
+
+                            var sale = this.Nexus.FindSaleByHash(data.saleHash);
+
+                            if (sale != null)
+                            {
+                                switch (data.kind)
+                                {
+                                    case SaleEventKind.Creation:
+                                        sb.AppendLine($"Created crowdsale: {LinkSale(sale)}");
+                                        break;
+
+                                    case SaleEventKind.AddedToWhitelist:
+                                        sb.AppendLine($"Added {LinkAddress(evt.Address)} to whitelist: {LinkSale(sale)}");
+                                        break;
+
+                                    case SaleEventKind.RemovedFromWhitelist:
+                                        sb.AppendLine($"Removed {LinkAddress(evt.Address)} from whitelist of  {LinkSale(sale)}");
+                                        break;
+
+                                    case SaleEventKind.Participation:
+                                        {
+                                            string extra = "";
+
+                                            var other = Events.FirstOrDefault(x => x.Kind == EventKind.TokenStake && x.Contract == evt.Contract);
+                                            if (other.Kind == EventKind.TokenStake)
+                                            {
+                                                var otherData = other.GetContent<TokenEventData>();
+                                                var token = Nexus.FindTokenBySymbol(otherData.Symbol);
+
+                                                extra = $" with {UnitConversion.ToDecimal(otherData.Value, token != null ? token.Decimals : 0)} {LinkToken(otherData.Symbol)}";    
+                                            }
+
+                                            sb.AppendLine($"{LinkAddress(evt.Address)} participated in {LinkSale(sale)}{{extra}}");
+                                            break;
+                                        }
+
+                                    case SaleEventKind.SoftCap:
+                                        sb.AppendLine($"Soft-cap reached: {LinkSale(sale)}");
+                                        break;
+
+                                    case SaleEventKind.HardCap:
+                                        sb.AppendLine($"Hard-cap reached: {LinkSale(sale)}");
+                                        break;
+
+                                    case SaleEventKind.Distribution:
+                                        sb.AppendLine($"Sale distribution: {LinkSale(sale)}");
+                                        break;
+
+                                    case SaleEventKind.Refund:
+                                        sb.AppendLine($"Sale refund: {LinkSale(sale)}");
+                                        break;
+                                }
+                            }
+                            
+                            break;
+                        }
+
                     case EventKind.ChainSwap:
                         {
                             var data = evt.GetContent<TransactionSettleEventData>();
@@ -797,33 +881,43 @@ namespace Phantasma.Explorer
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
                             var contractAddress = Address.FromHash(evt.Contract);
                             bool fungible = token.IsFungible();
-                            if (evt.Contract != "gas" && evt.Contract != "swap" && evt.Contract != "stake" && evt.Contract != "market") // break if non native contracts, already handled by infusion
+
+                            switch (evt.Contract)
                             {
-                              break;
+                                case "gas":
+                                case "swap":
+                                case "stake":
+                                case "market":
+                                    if (fungible)
+                                    {
+                                        if ((evt.Address).IsInterop) // used to check if from external chain
+                                        {
+                                            sb.AppendLine($"{LinkAddress(evt.Address)} withdrew {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(contractAddress, evt.Contract)} contract");
+                                        }
+                                        else
+                                        {
+                                            sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                        }
+                                    }
+                                    else if (data.Symbol == "TTRS")
+                                    {
+                                        sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
+                                    else if (data.Symbol == "GHOST")
+                                    {
+                                        sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
+                                    else
+                                    {
+                                        sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
+                                    }
+                                    break;
+
+                                default:
+                                    // non native contracts, already handled by infusion
+                                    break;
                             }
-                            if (fungible)
-                            {
-                                if ((evt.Address).IsInterop) // used to check if from external chain
-                                {
-                                  sb.AppendLine($"{LinkAddress(evt.Address)} withdrew {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} from {LinkAddress(contractAddress, evt.Contract)} contract");
-                                }
-                                else
-                                {
-                                  sb.AppendLine($"{LinkAddress(evt.Address)} deposited {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)} into {LinkAddress(contractAddress, evt.Contract)} contract");
-                                }
-                            }
-                            else if (data.Symbol == "TTRS")
-                            {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
-                            }
-                            else if (data.Symbol == "GHOST")
-                            {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a> into {LinkAddress(contractAddress, evt.Contract)} contract");
-                            }
-                            else
-                            {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} deposited {LinkToken(data.Symbol)} - NFT #{data.Value} into {LinkAddress(contractAddress, evt.Contract)} contract");
-                            }
+
                             break;
                         }
 
@@ -1236,6 +1330,43 @@ namespace Phantasma.Explorer
         public PlatformSwapAddress[] InteropAddresses { get; private set; }
     }
 
+    public class SaleData : ExplorerObject
+    {
+        public Hash Hash { get; private set; }
+        public Address Creator { get; private set; }
+        public string Name { get; private set; }
+        public SaleFlags Flags { get; private set; }
+        public Timestamp StartDate { get; private set; }
+        public Timestamp EndDate { get; private set; }
+
+        public string SellSymbol { get; private set; }
+        public string ReceiveSymbol { get; private set; }
+        public BigInteger Price { get; private set; }
+        public BigInteger GlobalSoftCap { get; private set; }
+        public BigInteger GlobalHardCap { get; private set; }
+        public BigInteger UserSoftCap { get; private set; }
+        public BigInteger UserHardCap { get; private set; }
+
+        public SaleData(NexusData database, DataNode node) : base(database)
+        {
+            this.Hash = Hash.Parse(node.GetString("hash"));
+            this.Name = node.GetString("name");
+            this.Creator = Address.FromText(node.GetString("creator"));
+            this.Flags = node.GetEnum<SaleFlags>("flags");
+            this.StartDate = new Timestamp(node.GetUInt32("startDate"));
+            this.EndDate = new Timestamp(node.GetUInt32("endDate"));
+
+            this.ReceiveSymbol = node.GetString("receiveSymbol");
+            this.SellSymbol = node.GetString("sellSymbol");
+
+            this.Price = BigInteger.Parse(node.GetString("price"));
+            this.GlobalHardCap = BigInteger.Parse(node.GetString("globalHardCap"));
+            this.GlobalSoftCap = BigInteger.Parse(node.GetString("globalSoftCap"));
+            this.UserHardCap = BigInteger.Parse(node.GetString("userHardCap"));
+            this.UserSoftCap = BigInteger.Parse(node.GetString("userSoftCap"));
+        }
+    }
+
     public class BalanceData: ExplorerObject
     {
         public ChainData Chain { get; private set; }
@@ -1588,6 +1719,8 @@ namespace Phantasma.Explorer
 
         private Dictionary<Hash, BlockData> _blocks = new Dictionary<Hash, BlockData>();
         private Dictionary<Hash, TransactionData> _transactions = new Dictionary<Hash, TransactionData>();
+        
+        private Dictionary<Hash, SaleData> _sales = new Dictionary<Hash, SaleData>();
 
         private Dictionary<Address, AccountData> _accounts = new Dictionary<Address, AccountData>();
 
@@ -2090,6 +2223,34 @@ namespace Phantasma.Explorer
                 {
                     return _blocks[hash];
                 }
+            }
+
+            return null;
+        }
+
+        internal SaleData FindSaleByHash(Hash hash)
+        {
+            lock (_sales)
+            {
+                if (_sales.ContainsKey(hash))
+                {
+                    return _sales[hash];
+                }
+            }
+
+            var node = this.APIRequest("getSale/" + hash);
+
+            if (node != null)
+            {
+                var sale = new SaleData(this, node);
+
+                lock (_sales)
+                {
+                    _sales[hash] = sale;
+                }
+
+                RegisterSearch(sale.Name, null, SearchResultKind.Sale);
+                return sale;
             }
 
             return null;
