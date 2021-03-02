@@ -23,17 +23,18 @@
                                 <tbody>
                                     <tr>
                                         <td>Address</td>
-										<td>{{account.Address.Text}}</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>Name</td>
-                                        <td>{{#if account.Address.Kind == 'System'}}{{#link-contract account.Name}}{{#else}}{{account.Name}}{{/if}}</td>
+										<td>{{address.Text}}</td>
                                     </tr>
 
                                     <tr>
                                         <td>Type</td>
-                                        <td>{{account.Address.Kind}}</td>
+                                        <td>{{address.Kind}}</td>
+                                    </tr>
+
+									{{#if account}}
+                                    <tr>
+                                        <td>Name</td>
+                                        <td>{{#if account.Address.Kind == 'System'}}{{#link-contract account.Name}}{{#else}}{{account.Name}}{{/if}}</td>
                                     </tr>
 
                                     <tr>
@@ -41,22 +42,25 @@
                                         <td>{{#if account.Stake>0}} {{account.FormattedStake}} SOUL{{#else}}-{{/if}}</td>
                                     </tr>
 
-																		<tr>
-																				<td>Unclaimed</td>
-																				<td>{{#if account.Unclaimed>0}} {{account.FormattedUnclaimed}} KCAL{{#else}}-{{/if}}</td>
-																		</tr>
+									<tr>
+											<td>Unclaimed</td>
+											<td>{{#if account.Unclaimed>0}} {{account.FormattedUnclaimed}} KCAL{{#else}}-{{/if}}</td>
+									</tr>
+									{{/if}}
+																		
+																		
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="tab-pane fade" id="balances" role="tabpanel" aria-labelledby="balances-tab">
                 <div class="panel panel-single">
                     <div class="panel-heading">Balances</div>
                     <div class="panel-body">
+						{{#if account}}
                         {{#if account.Balances}}
                         <table class="table table-responsive table-striped table-general">
                             <thead>
@@ -79,6 +83,9 @@
                         {{#else}}
                         Nothing here...
                         {{/if}}
+						{{#else}}
+                        This address was never used.
+						{{/if}}
                     </div>
                 </div>
             </div>
@@ -87,6 +94,7 @@
                 <div class="panel panel-single">
                     <div class="panel-heading">Transactions</div>
                     <div class="panel-body">
+						{{#if account}}
                         {{#if account.Transactions}}
                         <table class="table table-responsive table-striped table-general">
                             <thead>
@@ -107,6 +115,9 @@
                         {{#else}}
                         Nothing here...
                         {{/if}}
+						{{#else}}
+                        This address was never used.
+						{{/if}}
                     </div>
                 </div>
             </div>

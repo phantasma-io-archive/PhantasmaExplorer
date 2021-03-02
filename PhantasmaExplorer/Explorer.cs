@@ -451,18 +451,26 @@ namespace PhantasmaExplorer
                     return HTTPResponse.Redirect("/nexus");
                 }
 
-                var address = Address.FromText(request.GetVariable("input"));
+                var input = request.GetVariable("input");
+
+                if (!Address.IsValidAddress(input))
+                {
+                    return Error(templateEngine, "Could not find address: " + input);
+                }
+
+                var address = Address.FromText(input);
+
+                var context = CreateContext();
 
                 var account = nexus.FindAccount(address, true);
                 if (account != null)
                 {
-                    var context = CreateContext();
                     context["account"] = account;
-
-                    return templateEngine.Render(context, "layout", "account");
                 }
 
-                return Error(templateEngine, "Could not find address: " + address);
+                context["address"] = address;
+
+                return templateEngine.Render(context, "layout", "account");
             });
 
             server.Get("/leaderboard/{input}", (request) =>
