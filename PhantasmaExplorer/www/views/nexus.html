@@ -69,7 +69,7 @@
 									{{#each nexus.Tokens}}
 									{{#if !IsFiat}}
 									<tr>
-										<td><img src="/img/tokens/{{Symbol}}.png" alt="" style="width: 20px; height: 20px; margin-right:16px;"><a href="/token/{{Symbol}}">{{Name}}</a></td>
+										<td><img src="/img/tokens/{{Symbol}}.png" onerror="this.src='/img/tokens/default.png'" alt="" style="width: 20px; height: 20px; margin-right:16px;"><a href="/token/{{Symbol}}">{{Name}}</a></td>
 										<td>{{Symbol}}</td>
 										{{#if IsFungible}}
 										<td>{{Decimals}}</td>
