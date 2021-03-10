@@ -42,7 +42,7 @@ namespace PhantasmaExplorer
 
     public class Explorer
     {
-        public const string ExplorerVersion = "1.1.4";
+        public const string ExplorerVersion = "1.1.5";
 
         public static NexusData nexus { get; private set; }
 
