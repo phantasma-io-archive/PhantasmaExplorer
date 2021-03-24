@@ -18,6 +18,7 @@ using Phantasma.VM;
 using Phantasma.Core;
 using Phantasma.Blockchain;
 using Phantasma.Blockchain.Contracts;
+using Phantasma.Pay.Chains;
 
 namespace Phantasma.Explorer
 {
@@ -785,6 +786,7 @@ namespace Phantasma.Explorer
                             {
                               sb.AppendLine($"Settled {data.Platform} transaction <a href=\"/tx/{data.Hash}\">{data.Hash}</a>");
                             }
+
                             Nexus.RegisterSearch(data.Hash.ToString(), "Settlement", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -979,6 +981,31 @@ namespace Phantasma.Explorer
                                         destination = " to " + LinkAddress(nextEvt.Address);
                                         skipEvent = true;
                                     }
+                                }
+                            }
+
+                            if (evt.Address.IsInterop)
+                            {
+                                string addressText = null;
+
+                                switch (evt.Address.PlatformID)
+                                {
+                                    case NeoWallet.NeoID:
+                                        {
+                                            addressText = Pay.Chains.NeoWallet.DecodeAddress(evt.Address);
+                                            break;
+                                        }
+
+                                    case EthereumWallet.EthereumID:
+                                        {
+                                            addressText = Pay.Chains.EthereumWallet.DecodeAddress(evt.Address);
+                                            break;
+                                        }
+                                }
+
+                                if (!string.IsNullOrEmpty(addressText))
+                                {
+                                    Nexus.RegisterSearch(addressText, "Chain Swap", SearchResultKind.Transaction, this.Hash.ToString());
                                 }
                             }
 
