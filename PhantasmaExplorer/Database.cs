@@ -522,10 +522,25 @@ namespace Phantasma.Explorer
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
                             bool fungible = token.IsFungible();
 
+                            if (data.Symbol == DomainSettings.FuelTokenSymbol)
+                            {
+                                if (evt.Address.IsSystem)
+                                {
+                                    var amount = UnitConversion.ToDecimal(data.Value, DomainSettings.FuelTokenDecimals);
+                                    totalFees += amount;
+
+                                    decimal fee = fees.ContainsKey(evt.Address) ? fees[evt.Address] : 0;
+                                    fee += amount;
+
+                                    fees[evt.Address] = fee;
+                                }
+                            }
+                            else
                             if (!fungible)
                             {
                                 sb.AppendLine($"{LinkAddress(evt.Address)} claimed {LinkToken(data.Symbol)} - NFT #{data.Value}");
                             }
+
                             break;
                         }
 
@@ -576,38 +591,13 @@ namespace Phantasma.Explorer
                             }
                             break;
                         }
-                    }
-                }
 
-                if (evt.Contract == "gas")
-                {
-                    switch (evt.Kind)
-                    {
                         case EventKind.TokenStake:
                             {
                                 var data = evt.GetContent<TokenEventData>();
                                 if (data.Symbol == DomainSettings.FuelTokenSymbol)
                                 {
                                     feeAddress = evt.Address;
-                                }
-                                break;
-                            }
-
-                        case EventKind.TokenClaim:
-                            {
-                                var data = evt.GetContent<TokenEventData>();
-                                if (data.Symbol == DomainSettings.FuelTokenSymbol)
-                                {
-                                    if (evt.Address.IsSystem)
-                                    {
-                                        var amount = UnitConversion.ToDecimal(data.Value, DomainSettings.FuelTokenDecimals);
-                                        totalFees += amount;
-
-                                        decimal fee = fees.ContainsKey(evt.Address) ? fees[evt.Address] : 0;
-                                        fee += amount;
-
-                                        fees[evt.Address] = fee;
-                                    }
                                 }
                                 break;
                             }
