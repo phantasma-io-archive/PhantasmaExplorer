@@ -408,15 +408,31 @@ namespace Phantasma.Explorer
         public Instruction[] Instructions { get; set; }
 
         private string _description = null;
-        public string Description {
+        private string _fees = null;
+
+        public string Description
+        {
             get
             {
                 if (_description == null)
                 {
-                    _description = GenerateDescription();
+                    GenerateDescription();
                 }
 
                 return _description;
+            }
+        }
+
+        public string Fees
+        {
+            get
+            {
+                if (_fees == null)
+                {
+                    GenerateDescription();
+                }
+
+                return _fees;
             }
         }
 
@@ -449,7 +465,7 @@ namespace Phantasma.Explorer
             return result;
         }
 
-        private string GenerateDescription()
+        private void GenerateDescription()
         {
             decimal totalFees = 0;
             decimal burnedFees = 0;
@@ -1126,24 +1142,6 @@ namespace Phantasma.Explorer
                 }
             }
 
-            if (!feeAddress.IsNull)
-            {
-                sb.AppendLine($"{LinkAddress(feeAddress)} paid {totalFees} {LinkToken(DomainSettings.FuelTokenSymbol)} in fees.");
-            }
-
-            foreach (var entry in fees)
-            {
-                sb.AppendLine($"{LinkAddress(entry.Key)} received {entry.Value} {LinkToken(DomainSettings.FuelTokenSymbol)} in fees.");
-            }
-
-            if (!feeAddress.IsNull)
-            {
-                if (crownFees != 0)
-                {
-                   sb.AppendLine($"{LinkAddress(feeAddress)} paid {crownFees} {LinkToken(DomainSettings.FuelTokenSymbol)} to crown rewards.");
-                }
-                sb.AppendLine($"{LinkAddress(feeAddress)} burned {burnedFees} {LinkToken(DomainSettings.FuelTokenSymbol)}.");
-            }
 
             foreach (var addr in addresses)
             {
@@ -1184,10 +1182,42 @@ namespace Phantasma.Explorer
 
             if (sb.Length > 0)
             {
-                return sb.ToString().Replace("\n","<br>");
+                _description = sb.ToString().Replace("\n", "<br>");
+            }
+            else
+            {
+                _description = "Custom Transaction";
             }
 
-            return "Custom Transaction";
+            sb.Clear();
+
+            if (!feeAddress.IsNull)
+            {
+                sb.AppendLine($"{LinkAddress(feeAddress)} paid {totalFees} {LinkToken(DomainSettings.FuelTokenSymbol)} in fees.");
+            }
+
+            foreach (var entry in fees)
+            {
+                sb.AppendLine($"{LinkAddress(entry.Key)} received {entry.Value} {LinkToken(DomainSettings.FuelTokenSymbol)} in fees.");
+            }
+
+            if (!feeAddress.IsNull)
+            {
+                if (crownFees != 0)
+                {
+                    sb.AppendLine($"{LinkAddress(feeAddress)} paid {crownFees} {LinkToken(DomainSettings.FuelTokenSymbol)} to crown rewards.");
+                }
+                sb.AppendLine($"{LinkAddress(feeAddress)} burned {burnedFees} {LinkToken(DomainSettings.FuelTokenSymbol)}.");
+            }
+
+            if (sb.Length > 0)
+            {
+                _fees = sb.ToString().Replace("\n", "<br>");
+            }
+            else
+            {
+                _fees = "No fees for this transaction.";
+            }
         }
     }
 

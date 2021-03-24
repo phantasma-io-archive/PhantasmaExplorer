@@ -449,44 +449,6 @@ namespace Phantasma.Explorer
         }
     }
 
-    public class DescriptionTag : TemplateNode
-    {
-        private readonly RenderingKey _key;
-
-        public DescriptionTag(Document doc, string key) : base(doc)
-        {
-            _key = RenderingKey.Parse(key, RenderingType.String);
-        }
-
-        public override void Execute(RenderingContext context)
-        {
-            var temp = context.EvaluateObject(_key);
-            if (temp == null)
-            {
-                return;
-            }
-
-            if (temp is TransactionData)
-            {
-                var tx = (TransactionData)temp;
-                context.output.Append(tx.Description);
-            }
-
-            /*
-            //< td >< a href = "/token/{{Symbol}}" >{ { Name} }</ a ></ td >
-            var vm = (TransactionViewModel)temp;
-            if (string.IsNullOrEmpty(vm.TokenSymbol))
-            {
-                context.output.Append($"{vm.Description}");
-                return;
-            }
-            context.output.Append($"{vm.AmountTransfer} <a href=/token/{vm.TokenSymbol}> {vm.TokenSymbol} </a> sent from " +
-                                  $"<a href=/address/{vm.SenderAddress}>{vm.SenderAddress}</a> to " +
-                                  $"<a href=/address/{vm.ReceiverAddress}>{vm.ReceiverAddress}</a>");
-            */
-        }
-    }
-
     public class LinkExternalTag : TemplateNode
     {
         private readonly RenderingKey _key;

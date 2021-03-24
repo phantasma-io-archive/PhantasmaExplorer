@@ -173,7 +173,6 @@ namespace PhantasmaExplorer
             templateEngine.Compiler.RegisterTag("link-block", (doc, val) => new LinkBlockTag(doc, val));
             templateEngine.Compiler.RegisterTag("link-org", (doc, val) => new LinkOrganizationTag(doc, val));
             templateEngine.Compiler.RegisterTag("link-contract", (doc, val) => new LinkContractTag(doc, val));
-            templateEngine.Compiler.RegisterTag("description", (doc, val) => new DescriptionTag(doc, val));
             templateEngine.Compiler.RegisterTag("externalLink", (doc, val) => new LinkExternalTag(doc, val));
 
             server.Get("/", (request) =>
