@@ -460,13 +460,24 @@ namespace Phantasma.Explorer
 
             var addresses = new HashSet<Address>();
 
+            bool skipEvent = false;
+
             var sb = new StringBuilder();
-            foreach (var evt in Events)
+            for (int k=0; k<Events.Length; k++)
             {
+                var evt = Events[k];
+
                 if (evt.Address.IsUser)
                 {
-                    addresses.Add(evt.Address);
+                    addresses.Add(evt.Address);                
                 }
+
+                if (skipEvent)
+                {
+                    skipEvent = false;
+                    continue;
+                }
+
 
                 if (evt.Contract == "gas") // handle tokenmint & tokenclaim on gas contract (ex: crown)
                 {
@@ -926,22 +937,52 @@ namespace Phantasma.Explorer
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
                             bool fungible = token.IsFungible();
+
+                            string destination = "";
+
+                            if (k < Events.Length - 1)
+                            {
+                                var nextEvt = Events[k + 1];
+                                if (nextEvt.Kind == EventKind.TokenReceive)
+                                {
+                                    var nextData = nextEvt.GetContent<TokenEventData>();
+                                    if (nextData.Symbol == data.Symbol && nextData.Value == data.Value)
+                                    {
+                                        destination = " to " + LinkAddress(nextEvt.Address);
+                                        skipEvent = true;
+                                    }
+                                }
+                            }
+
                             if (fungible)
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
-                            }
-                            else if (data.Symbol == "TTRS")
-                            {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT <a href=\"https://www.22series.com/part_info?id={data.Value}\" target=\"_blank\">#{data.Value}</a>");
-                            }
-                            else if (data.Symbol == "GHOST")
-                            {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT <a href=\"https://ghostmarket.io/asset/pha/ghost/{data.Value}\" target=\"_blank\">#{data.Value}</a>");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}{destination}");
                             }
                             else
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT #{data.Value}");
+                                string url = null;
+
+                                switch (data.Symbol)
+                                {
+                                    case "TTRS":
+                                        url = $"https://www.22series.com/part_info?id={data.Value}";
+                                        break;
+
+                                    case "GHOST":
+                                        url = $"https://ghostmarket.io/asset/pha/ghost/{data.Value}";
+                                        break;
+                                }
+
+                                if (url != null)
+                                {
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT <a href=\"{url}\" target=\"_blank\">#{data.Value}</a>{destination}");
+                                }
+                                else
+                                {
+                                    sb.AppendLine($"{LinkAddress(evt.Address)} sent {LinkToken(data.Symbol)} - NFT #{data.Value}{destination}");
+                                }
                             }
+
                             break;
                         }
 
