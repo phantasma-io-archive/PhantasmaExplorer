@@ -629,7 +629,19 @@ namespace Phantasma.Explorer
                     case EventKind.ChainCreate:
                         {
                             var name = evt.GetContent<string>();
-                            sb.AppendLine($"Created chain: <a href=\"/chain/{name}\">{name}</a>");
+
+                            string extra;
+
+                            if (name != DomainSettings.RootChainName)
+                            {
+                                extra = "side-";
+                            }
+                            else
+                            {
+                                extra = "";
+                            }
+
+                            sb.AppendLine($"{LinkAddress(evt.Address)} created {extra}chain: <a href=\"/chain/{name}\">{name}</a>");
                             Nexus.RegisterSearch(name, "Chain Creation", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -637,7 +649,7 @@ namespace Phantasma.Explorer
                     case EventKind.TokenCreate:
                         {
                             var symbol = evt.GetContent<string>();
-                            sb.AppendLine($"Created token: {LinkToken(symbol)}");
+                            sb.AppendLine($"{LinkAddress(evt.Address)} created token: {LinkToken(symbol)}");
                             Nexus.RegisterSearch(symbol, "Token Creation", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -645,7 +657,7 @@ namespace Phantasma.Explorer
                     case EventKind.ContractUpgrade:
                             {
                                 var symbol = evt.GetContent<string>();
-                                sb.AppendLine($"Contract upgraded: {LinkToken(symbol)}");
+                                sb.AppendLine($"{LinkAddress(evt.Address)} upgraded contract: {LinkToken(symbol)}");
                                 Nexus.RegisterSearch(symbol, "Contract Upgrade", SearchResultKind.Transaction, this.Hash.ToString());
                                 break;
                             }
@@ -653,7 +665,7 @@ namespace Phantasma.Explorer
                     case EventKind.AddressRegister:
                         {
                             var name = evt.GetContent<string>();
-                            sb.AppendLine($"Registered name: {name} for {LinkAddress(evt.Address, null)}");
+                            sb.AppendLine($"{LinkAddress(evt.Address, null)} registered name: {name}");
                             Nexus.RegisterSearch(name, "Name Registration", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -661,7 +673,7 @@ namespace Phantasma.Explorer
                     case EventKind.ContractDeploy:
                         {
                             var name = evt.GetContent<string>();
-                            sb.AppendLine($"Deployed contract: <a href=\"/contract/{name}/\">{name}</a>");
+                            sb.AppendLine($"{LinkAddress(evt.Address)} deployed contract: <a href=\"/contract/{name}/\">{name}</a>");
                             Nexus.RegisterSearch(name, "Deployment", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -669,7 +681,7 @@ namespace Phantasma.Explorer
                     case EventKind.PlatformCreate:
                         {
                             var name = evt.GetContent<string>();
-                            sb.AppendLine($"Created platform: {name}");
+                            sb.AppendLine($"{LinkAddress(evt.Address)} created platform: {name}");
                             Nexus.RegisterSearch(name, "Platform Creation", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -677,7 +689,7 @@ namespace Phantasma.Explorer
                     case EventKind.OrganizationCreate:
                         {
                             var name = evt.GetContent<string>();
-                            sb.AppendLine($"Created organization: {name}");
+                            sb.AppendLine($"{LinkAddress(evt.Address)} created organization: {name}");
                             Nexus.RegisterSearch(name, "Organization Creation", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -693,7 +705,7 @@ namespace Phantasma.Explorer
                                 switch (data.kind)
                                 {
                                     case SaleEventKind.Creation:
-                                        sb.AppendLine($"Created crowdsale: {LinkSale(sale)}");
+                                        sb.AppendLine($"{LinkAddress(evt.Address, null)} created crowdsale: {LinkSale(sale)}");
                                         break;
 
                                     case SaleEventKind.AddedToWhitelist:
@@ -764,27 +776,27 @@ namespace Phantasma.Explorer
                     case EventKind.ValidatorElect:
                         {
                             var address = evt.GetContent<Address>();
-                            sb.AppendLine($"Elected validator: {LinkAddress(address)}");
+                            sb.AppendLine($"{LinkAddress(address)} was elected validator");
                             break;
                         }
 
                     case EventKind.ValidatorPropose:
                         {
                             var address = evt.GetContent<Address>();
-                            sb.AppendLine($"Proposed validator: {LinkAddress(address)}");
+                            sb.AppendLine($"{LinkAddress(address)} was proposed as validator");
                             break;
                         }
 
                     case EventKind.ValidatorSwitch:
                         {
-                            sb.AppendLine($"Switched validator: {LinkAddress(evt.Address)}");
+                            sb.AppendLine($"Switched current validator to {LinkAddress(evt.Address)}");
                             break;
                         }
 
                     case EventKind.ValueCreate:
                         {
                             var data = evt.GetContent<ChainValueEventData>();
-                            sb.AppendLine($"Created governance value: {data.Name}");
+                            sb.AppendLine($"{LinkAddress(evt.Address)} created governance value: {data.Name}");
                             Nexus.RegisterSearch(data.Name, "Value Creation", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
@@ -792,7 +804,7 @@ namespace Phantasma.Explorer
                     case EventKind.ValueUpdate:
                         {
                             var data = evt.GetContent<ChainValueEventData>();
-                            sb.AppendLine($"Updated governance value: {data.Name}");
+                            sb.AppendLine($"{LinkAddress(evt.Address)} updated governance value: {data.Name}");
                             Nexus.RegisterSearch(data.Name, "Value Update", SearchResultKind.Transaction, this.Hash.ToString());
                             break;
                         }
