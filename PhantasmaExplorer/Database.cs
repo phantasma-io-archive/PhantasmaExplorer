@@ -836,9 +836,11 @@ namespace Phantasma.Explorer
                             var data = evt.GetContent<TokenEventData>();
                             var token = Nexus.FindTokenBySymbol(data.Symbol);
                             bool fungible = token.IsFungible();
+
                             if (fungible)
                             {
-                                sb.AppendLine($"{LinkAddress(evt.Address)} minted {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
+                                var operation = (evt.Contract == "stake" && data.Symbol == DomainSettings.FuelTokenSymbol) ? "claimed" : "minted";
+                                sb.AppendLine($"{LinkAddress(evt.Address)} {operation} {UnitConversion.ToDecimal(data.Value, token != null ? token.Decimals : 0)} {LinkToken(data.Symbol)}");
                             }
                             else if (data.Symbol == "TTRS")
                             {
