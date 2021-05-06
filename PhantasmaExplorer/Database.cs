@@ -772,6 +772,10 @@ namespace Phantasma.Explorer
                             {
                               sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://etherscan.io/tx/0x{data.Hash}\" target=\"_blank\">{data.Hash}</a>");
                             }
+                            else if (data.Platform == "bsc")
+                            {
+                              sb.AppendLine($"Settled {data.Platform} transaction <a href=\"https://bscscan.com/tx/0x{data.Hash}\" target=\"_blank\">{data.Hash}</a>");
+                            }
                             else
                             {
                               sb.AppendLine($"Settled {data.Platform} transaction <a href=\"/tx/{data.Hash}\">{data.Hash}</a>");
@@ -993,6 +997,12 @@ namespace Phantasma.Explorer
                                             addressText = Pay.Chains.EthereumWallet.DecodeAddress(evt.Address);
                                             break;
                                         }
+
+                                    /* case BscWallet.BscID:
+                                        {
+                                            addressText = Pay.Chains.BscWallet.DecodeAddress(evt.Address);
+                                            break;
+                                        } */
                                 }
 
                                 if (!string.IsNullOrEmpty(addressText))

@@ -385,6 +385,13 @@ namespace Phantasma.Explorer
                                 url = "https://etherscan.io/address/";
                                 break;
                             }
+
+                        /* case BscWallet.BscID:
+                            {
+                                addressText = Pay.Chains.BscWallet.DecodeAddress(address);
+                                url = "https://bscscan.com/address/";
+                                break;
+                            } */
                     }
 
                     if (url != null && addressText != null)

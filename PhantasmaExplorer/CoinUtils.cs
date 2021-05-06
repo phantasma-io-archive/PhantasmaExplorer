@@ -37,6 +37,24 @@ namespace Phantasma.Explorer.Utils
               case "DAI":
                   baseticker = "dai";
                   break;
+              case "DYT":
+                  baseticker = "dynamite";
+                  break;
+              case "DANK":
+                  baseticker = "mu-dank";
+                  break;
+              case "GOATI":
+                  baseticker = "GOATI";
+                  break;
+              case "USDC":
+                  baseticker = "usd-coin";
+                  break;
+              case "BNB":
+                  baseticker = "binancecoin";
+                  break;
+              case "BUSD":
+                  baseticker = "binance-usd";
+                  break;
               default:
                   baseticker = "";
                   break;
