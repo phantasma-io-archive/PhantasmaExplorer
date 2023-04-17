@@ -7,18 +7,23 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using LunarLabs.Parser;
 using LunarLabs.Parser.XML;
-using Phantasma.Core.Types;
-using Phantasma.Cryptography;
-using Phantasma.Domain;
+
 using Phantasma.Explorer.Utils;
-using Phantasma.Numerics;
-using Phantasma.VM;
+using Phantasma.Core.Types;
+using Phantasma.Core.Cryptography;
+using Phantasma.Core.Domain;
+using Phantasma.Core.Numerics;
 using Phantasma.Core;
-using Phantasma.Blockchain;
-using Phantasma.Blockchain.Contracts;
-using Phantasma.Pay.Chains;
+using Phantasma.Business.Blockchain;
+using Phantasma.Business.Blockchain.Contracts;
+using Phantasma.Business.Blockchain.VM;
+using System.Numerics;
+using Phantasma.Business.VM;
+using Phantasma.Business.Blockchain.Contracts.Native;
+//using Phantasma.Pay.Chains;
 
 namespace Phantasma.Explorer
 {
@@ -341,7 +346,7 @@ namespace Phantasma.Explorer
         }
     }
 
-    public class TransactionData : ExplorerObject, ITransaction
+    public class TransactionData : ExplorerObject//, ITransaction
     {
         public TransactionData(NexusData database, DataNode node) : base(database)
         {
@@ -986,6 +991,7 @@ namespace Phantasma.Explorer
 
                                 switch (evt.Address.PlatformID)
                                 {
+                                    /*
                                     case NeoWallet.NeoID:
                                         {
                                             addressText = Pay.Chains.NeoWallet.DecodeAddress(evt.Address);
@@ -996,7 +1002,7 @@ namespace Phantasma.Explorer
                                         {
                                             addressText = Pay.Chains.EthereumWallet.DecodeAddress(evt.Address);
                                             break;
-                                        }
+                                        }*/
 
                                     /* case BscWallet.BscID:
                                         {
@@ -1250,7 +1256,7 @@ namespace Phantasma.Explorer
         }
     }
 
-    public class ChainData : ExplorerObject, IChain
+    public class ChainData : ExplorerObject//, IChain
     {
         public ChainData(NexusData Database, DataNode node) : base(Database)
         {
@@ -1268,7 +1274,7 @@ namespace Phantasma.Explorer
                     var name = contractsNodes.GetString(i);
                     Contracts[i] = name;
 
-                    var address = SmartContract.GetAddressForName(name);
+                    var address = SmartContract.GetAddressFromContractName(name);
                     Nexus.RegisterSearch(name, name, SearchResultKind.Address, address.Text);
                 }
             }
@@ -1564,7 +1570,7 @@ namespace Phantasma.Explorer
         public AccountData(NexusData database, DataNode node) : base(database)
         {
             Name = node.GetString("name");
-            Address = Cryptography.Address.FromText(node.GetString("address"));
+            Address = Address.FromText(node.GetString("address"));
 
             var stakeNode = node.GetNode("stakes");
             Stake = BigInteger.Parse(stakeNode.GetString("amount"));

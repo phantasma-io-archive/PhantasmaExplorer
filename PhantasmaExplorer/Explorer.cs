@@ -1,4 +1,6 @@
-﻿using System;
+﻿// USAGE: --path=. -phantasma.rest=http://207.148.17.86:7078/api
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,11 +12,10 @@ using LunarLabs.WebServer.HTTP;
 using LunarLabs.WebServer.Templates;
 
 using Phantasma.Core.Utils;
-using Phantasma.Cryptography;
-using Phantasma.Domain;
-using Phantasma.Explorer;
+using Phantasma.Core.Cryptography;
+using Phantasma.Core.Domain;
 
-namespace PhantasmaExplorer
+namespace Phantasma.Explorer
 {
     public struct MenuContext
     {

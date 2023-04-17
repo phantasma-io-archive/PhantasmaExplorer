@@ -1,10 +1,9 @@
 ﻿using LunarLabs.Templates;
 using Phantasma.Core.Types;
-using Phantasma.Cryptography;
-using Phantasma.Domain;
+using Phantasma.Core.Cryptography;
+using Phantasma.Core.Domain;
 using Phantasma.Explorer.Utils;
-using Phantasma.Numerics;
-using Phantasma.Pay.Chains;
+using Phantasma.Core.Numerics;
 using System;
 using System.Globalization;
 
@@ -372,6 +371,7 @@ namespace Phantasma.Explorer
 
                     switch (address.PlatformID)
                     {
+                        /*
                         case NeoWallet.NeoID:
                             {
                                 addressText = Pay.Chains.NeoWallet.DecodeAddress(address);
@@ -384,7 +384,7 @@ namespace Phantasma.Explorer
                                 addressText = Pay.Chains.EthereumWallet.DecodeAddress(address);
                                 url = "https://etherscan.io/address/";
                                 break;
-                            }
+                            }*/
 
                         /* case BscWallet.BscID:
                             {

@@ -1,5 +1,11 @@
 # Phantasma Explorer 2.0
-Block explorer for Phantasma Chain
+
+A block explorer for Phantasma Chain.
+
+NOTE - This block explorer is the old block explorer Phantasma in the first years, and was updated with compability with Phantasma 3.0. 
+For the latest explorer code which was rebuilt from scratch, check the following repositories.
+- [Explorer 3.0 Frontend](https://github.com/phantasma-io/ExplorerFrontend)
+- [Explorer 3.0 Backvend](https://github.com/phantasma-io/ExplorerBackend)
 
 ## Contents
 

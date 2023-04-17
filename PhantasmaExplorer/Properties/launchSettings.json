@@ -2,7 +2,7 @@
   "profiles": {
     "Phantasma.Explorer": {
       "commandName": "Project",
-      "commandLineArgs": "--path=. -phantasma.rest=http://207.148.17.86:7078/api",
+      "commandLineArgs": "--path=. -phantasma.rest=http://localhost:7078/api",
       "workingDirectory": "www"
     }
   }
