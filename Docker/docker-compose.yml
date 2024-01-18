@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  explorer:
+    image: "pha-explorer-legacy"
+    container_name: pha-explorer-legacy
+    volumes:
+      - ./Cache:/app/Cache
+    entrypoint: dotnet
+    command: Phantasma.Explorer.dll
+    ports:
+      - "8666:80"
+    networks:
+      - pha-explorer-legacy
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "20m"
+
+networks:
+   pha-explorer-legacy:
+      name: pha-explorer-legacy-network
