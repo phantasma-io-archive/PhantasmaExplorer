@@ -119,7 +119,7 @@ namespace PhantasmaExplorer
             var defaultCachePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/Cache";
 
             var explorerArgs = new Arguments(args);
-            var restURL = explorerArgs.GetString("phantasma.rest", "https://spook-legacy.phantasma.io:7078/api");
+            var restURL = explorerArgs.GetString("phantasma.rest", "https://spook-legacy.phantasma.io/api");
             var cachePath = explorerArgs.GetString("cache.path", defaultCachePath);
             nexus = new NexusData(restURL, cachePath);
 
